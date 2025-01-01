@@ -1,5 +1,7 @@
 # Meta-Wars: Meta-MMO on Sui blockchain
 
+(in development)
+
 Why we?
 
 - Own you assets (character and items stay on your Sui account)
