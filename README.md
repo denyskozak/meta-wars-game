@@ -1,7 +1,10 @@
-# Multiplayer 3D Game
+# Meta-Wars: Meta-MMO on Sui blockchain
 
-A multiplayer 3D game built with **React**, **Three.js**, and WebSockets, featuring real-time player movement, character animations, health and mana management, and interactive fireball mechanics.
+Why we?
 
+- Own you assets (character and items stay on your Sui account)
+- Infinity games in one place
+- Freedom economic model based on $MetaWarsCoin
 
 ## ✨ [**Link to Demo**](http://meta-wars.s3-website-us-west-2.amazonaws.com) ✨
 #### Available for single run, for multiplayer need to turn on server, let me know
