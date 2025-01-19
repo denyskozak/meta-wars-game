@@ -17,17 +17,20 @@ const networks = {
 };
 
 export function App() {
-    const [character, setCharacter] = useState({ name: '', class: '' })
-    return (<ZKLoginProvider client={suiClient}>
-            <QueryClientProvider client={queryClient}>
-                <SuiClientProvider networks={networks} defaultNetwork="devnet">
-                    <Auth>
-                        {!character && <CharacterManager onCharacterSelect={setCharacter}/>}
-                        {character && character.name && <Content />}
-                    </Auth>
-                </SuiClientProvider>
-            </QueryClientProvider>
-        </ZKLoginProvider>
+    const [character, setCharacter] = useState({name: '', class: ''})
+    return (
+        <div className="container">
+            <ZKLoginProvider client={suiClient}>
+                <QueryClientProvider client={queryClient}>
+                    <SuiClientProvider networks={networks} defaultNetwork="devnet">
+                        <Auth>
+                            {!character.name && <CharacterManager onCharacterSelect={setCharacter}/>}
+                            {character.name && <Content/>}
+                        </Auth>
+                    </SuiClientProvider>
+                </QueryClientProvider>
+            </ZKLoginProvider>
+        </div>
     );
 }
 

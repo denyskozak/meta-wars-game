@@ -3,6 +3,7 @@ import {Loading} from "./components/Loading";
 import {useLayoutEffect, useState} from "react";
 import * as THREE from "three";
 import {GLTFLoader} from "three/addons";
+import {useCoins} from "./hooks/useCoins.js";
 
 THREE.Cache.enabled = true;
 
@@ -13,6 +14,7 @@ export const Content = () => {
         models: {},
         sounds: {}
     });
+    useCoins();
 
     useLayoutEffect(() => {
         function preloadModels(modelPaths) {

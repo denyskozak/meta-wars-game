@@ -2,9 +2,8 @@ import {useState} from 'react';
 import {useZKLogin} from "react-sui-zk-login-kit";
 import {useSuiClientQuery} from '@mysten/dapp-kit';
 import {useTransaction} from "../hooks/useTransaction.js";
+import {PACKAGE_ID} from "../consts.js";
 
-
-const PACKAGE_ID = '0x79288216db99425043ee2b4caae337a16f4c6f8ac73454806fd52b2fc861cd88';
 export const CharacterManager = ({onCharacterSelect}) => {
     const {address, executeTransaction} = useZKLogin();
 

@@ -40,8 +40,8 @@ export function Game({models, sounds}) {
     const { address } = useZKLogin();
 
     useLayoutEffect(() => {
-        const socket = new WebSocket('ws://35.160.49.180:8080');
-        // const socket = new WebSocket('ws://localhost:8080');
+        // const socket = new WebSocket('ws://35.160.49.180:8080');
+        const socket = new WebSocket('ws://localhost:8080');
 
         // Store other players
         const players = {};
@@ -76,11 +76,11 @@ export function Game({models, sounds}) {
 
             hp = Math.max(0, hp - amount); // Уменьшаем HP, но не ниже 0
             updateHPBar();
-            sendToSocket({ type: 'damage', userSourceId: userIdTouched})
+            sendToSocket({ type: 'damage', damagerId: userIdTouched})
 
             if (hp <= 0) {
                 console.log("Player is dead!");
-                sendToSocket({ type: 'kill', userSourceId: userIdTouched})
+                sendToSocket({ type: 'kill', killerId: userIdTouched})
                 document.getElementById('respawnButton').style.display = 'block'; // Показываем кнопку
             }
         }
@@ -399,7 +399,7 @@ export function Game({models, sounds}) {
             document.body.requestPointerLock();
             mouseTime = performance.now();
 
-            sounds.background.volume = 0.2;
+            sounds.background.volume = 0.1;
             sounds.background.play();
         });
 
@@ -549,6 +549,7 @@ export function Game({models, sounds}) {
                         fireball: {
                             position: {x: fireball.position.x, y: fireball.position.y, z: fireball.position.z},
                             velocity: {x: velocity.x, y: velocity.y, z: velocity.z},
+                            ownerId: address,
                         }
                     });
                 }
@@ -649,7 +650,7 @@ export function Game({models, sounds}) {
                 if (d2 < r2) {
 
                     scene.remove(sphere.mesh); // Remove the fireball from the scene
-                    userIdTouched = spheres[index]['userId'];
+                    userIdTouched = spheres[index]['ownerId'];
                     spheres.splice(index, 1); // Remove it from the array
 
                     touchedPlayer = true;
@@ -1221,7 +1222,7 @@ export function Game({models, sounds}) {
             }
         }
 
-        function addFireballToScene(fireballData, userId) {
+        function addFireballToScene(fireballData) {
             const fireball = SkeletonUtils.clone(fireballModel); // Clone the model
             fireball.position.set(fireballData.position.x, fireballData.position.y, fireballData.position.z);
 
@@ -1236,7 +1237,6 @@ export function Game({models, sounds}) {
                     fireballData.velocity.z
                 ),
                 ownerId: fireballData.ownerId,
-                userId
             });
         }
 
@@ -1246,11 +1246,8 @@ export function Game({models, sounds}) {
 
             switch (message.type) {
                 case 'newFireball':
-                    addFireballToScene(message.fireball, message.id);
+                    addFireballToScene(message.fireball);
                     break;
-                // case 'castPlayerFireball':
-                //     addFireballToScene(message.fireball);
-                //     break;
                 case 'newPlayer':
                     createPlayer(message.fromId, 'other');
                     break;
