@@ -4,6 +4,8 @@ import {useLayoutEffect, useState} from "react";
 import * as THREE from "three";
 import {GLTFLoader} from "three/addons";
 import {useCoins} from "./hooks/useCoins.js";
+import {useInterface} from "./context/inteface.jsx";
+import CharacterManager from "./components/Character.jsx";
 
 THREE.Cache.enabled = true;
 
@@ -14,6 +16,7 @@ export const Content = () => {
         models: {},
         sounds: {}
     });
+    const {state: {character}} = useInterface();
 
     useLayoutEffect(() => {
         function preloadModels(modelPaths) {
@@ -55,5 +58,7 @@ export const Content = () => {
             .then((loadedModels) => setPreloadedData({models: loadedModels, sounds}));
     }, []);
 
-    return Object.keys(preloadedData.models).length > 5 ? <Game models={preloadedData.models} sounds={preloadedData.sounds}/> : <Loading/>
+    if (!character) return <CharacterManager/>;
+    return Object.keys(preloadedData.models).length > 5 ?
+        <Game character={character} models={preloadedData.models} sounds={preloadedData.sounds}/> : <Loading/>
 };

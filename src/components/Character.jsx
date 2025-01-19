@@ -4,9 +4,11 @@ import {useSuiClientQuery} from '@mysten/dapp-kit';
 import {useTransaction} from "../hooks/useTransaction.js";
 import {PACKAGE_ID} from "../consts.js";
 import {useCoins} from "../hooks/useCoins.js";
+import {useInterface} from "../context/inteface.jsx";
 
 export const CharacterManager = ({onCharacterSelect}) => {
     const {address, executeTransaction} = useZKLogin();
+    const {dispatch} = useInterface();
 
     console.log('address ', address)
     const { coins } = useCoins();
@@ -47,6 +49,7 @@ export const CharacterManager = ({onCharacterSelect}) => {
     return (
         <div style={{padding: '20px', maxWidth: '600px', margin: '0 auto'}}>
             <h2>Characters</h2>
+            <h4>Address: {address}</h4>
             <button onClick={() => {
                 refetch()
             }}>refetch
@@ -61,7 +64,7 @@ export const CharacterManager = ({onCharacterSelect}) => {
                         }}>delete
                         </button>
                         <button onClick={() => {
-                            onCharacterSelect(fields)
+                            dispatch({ type: 'SET_CHARACTER', payload: fields })
                         }}>login
                         </button>
                     </div>

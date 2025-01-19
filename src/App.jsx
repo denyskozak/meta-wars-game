@@ -7,8 +7,9 @@ import CharacterManager from "./components/Character.jsx";
 import {SuiClientProvider} from "@mysten/dapp-kit";
 import {getFullnodeUrl} from "@mysten/sui/client";
 import {useState} from "react";
+import {InterfaceProvider} from "./context/inteface.jsx";
 
-const queryClient = new QueryClient()
+const queryClient = new QueryClient();
 
 const suiClient = new SuiClient({url: getFullnodeUrl('devnet')});
 
@@ -17,15 +18,15 @@ const networks = {
 };
 
 export function App() {
-    const [character, setCharacter] = useState({name: '', class: ''})
     return (
         <div className="container">
             <ZKLoginProvider client={suiClient}>
                 <QueryClientProvider client={queryClient}>
                     <SuiClientProvider networks={networks} defaultNetwork="devnet">
                         <Auth>
-                            {!character.name && <CharacterManager onCharacterSelect={setCharacter}/>}
-                            {character.name && <Content/>}
+                            <InterfaceProvider>
+                                <Content/>
+                            </InterfaceProvider>
                         </Auth>
                     </SuiClientProvider>
                 </QueryClientProvider>

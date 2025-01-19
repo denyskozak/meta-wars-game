@@ -2,7 +2,6 @@ import {SkillBar} from "./parts/SkillBar.jsx";
 import {CastBar} from "./parts/CastBar.jsx";
 import {Chat} from "./parts/Chat.jsx";
 import {Coins} from "./parts/Coins.jsx";
-import {Damage} from "./parts/Damage.jsx";
 
 import './Interface.css';
 
@@ -54,7 +53,6 @@ export const Interface = () => {
             <CastBar/>
             <Chat />
             <Coins />
-            <Damage />
         </div>
     )
 }

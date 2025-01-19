@@ -12,6 +12,7 @@ import {startCast} from "../layout/parts/CastBar.jsx";
 import {CSS2DRenderer, CSS2DObject} from 'three/addons/renderers/CSS2DRenderer.js';
 import {useZKLogin} from "react-sui-zk-login-kit";
 import {useCoins} from "../hooks/useCoins.js";
+import {useInterface} from "../context/inteface.jsx";
 
 const USER_DEFAULT_POSITION = [
     20.0172907530491608,
@@ -36,10 +37,11 @@ function getRandomElement(array) {
 }
 
 
-export function Game({models, sounds}) {
+export function Game({models, sounds }) {
     const containerRef = useRef(null);
     const { address } = useZKLogin();
     const { refetch: refetchCoins } = useCoins();
+    const { state: { character }, dispatch } = useInterface();
 
     useLayoutEffect(() => {
         // const socket = new WebSocket('ws://35.160.49.180:8080');
@@ -79,10 +81,12 @@ export function Game({models, sounds}) {
 
             hp = Math.max(0, hp - amount); // Уменьшаем HP, но не ниже 0
             updateHPBar();
+            dispatch({ type: "SEND_CHAT_MESSAGE", payload: `You got ${amount} damage!` });
+
             sendToSocket({ type: 'damage', damagerId: userIdTouched})
 
             if (hp <= 0) {
-                console.log("Player is dead!");
+                dispatch({ type: "SEND_CHAT_MESSAGE", payload: "You are dead :(" });
                 sendToSocket({ type: 'kill', killerId: userIdTouched})
                 document.getElementById('respawnButton').style.display = 'block'; // Показываем кнопку
             }
@@ -91,11 +95,10 @@ export function Game({models, sounds}) {
 
         const isSocketOpen = () => socket.readyState === WebSocket.OPEN;
         const sendToSocket = (data) => (
-            socket.send(JSON.stringify({ id: address, ...data }))
+            socket.send(JSON.stringify({ id: address, character, ...data }))
         );
 
         let fireballModel; // Store the fireball model for reuse
-
 
         const labelRenderer = new CSS2DRenderer();
         labelRenderer.setSize(window.innerWidth, window.innerHeight);
@@ -495,6 +498,10 @@ export function Game({models, sounds}) {
 
             const onCastEnd = () => {
                 isCasting = false;
+                movementSpeedModifier = 1;
+
+                dispatch({ type: "SEND_CHAT_MESSAGE", payload: `Got ${HEAL_AMOUNT} heal!` });
+
                 // Deduct mana and restore health
                 mana = Math.max(0, mana - HEAL_MANA_COST);
                 hp = Math.min(100, hp + HEAL_AMOUNT);
@@ -506,6 +513,7 @@ export function Game({models, sounds}) {
             };
 
             isCasting = true;
+            movementSpeedModifier = 0.3;
             startCast(2000, onCastEnd); // Start the cast bar animation for 1.5 seconds
 
         }
@@ -663,46 +671,47 @@ export function Game({models, sounds}) {
             }
 
             if (touchedPlayer) {
+                sendToSocket({ type: 'fireballDamagedUser', damageDealerId: userIdTouched, damage: 40 })
                 takeDamage(40, userIdTouched)
             }
 
         }
 
-        function spheresCollisions() {
-
-            for (let i = 0, length = spheres.length; i < length; i++) {
-
-                const s1 = spheres[i];
-
-                for (let j = i + 1; j < length; j++) {
-
-                    const s2 = spheres[j];
-
-                    const d2 = s1.collider.center.distanceToSquared(s2.collider.center);
-                    const r = s1.collider.radius + s2.collider.radius;
-                    const r2 = r * r;
-
-                    if (d2 < r2) {
-
-                        const normal = vector1.subVectors(s1.collider.center, s2.collider.center).normalize();
-                        const v1 = vector2.copy(normal).multiplyScalar(normal.dot(s1.velocity));
-                        const v2 = vector3.copy(normal).multiplyScalar(normal.dot(s2.velocity));
-
-                        s1.velocity.add(v2).sub(v1);
-                        s2.velocity.add(v1).sub(v2);
-
-                        const d = (r - Math.sqrt(d2)) / 2;
-
-                        s1.collider.center.addScaledVector(normal, d);
-                        s2.collider.center.addScaledVector(normal, -d);
-
-                    }
-
-                }
-
-            }
-
-        }
+        // function spheresCollisions() {
+        //
+        //     for (let i = 0, length = spheres.length; i < length; i++) {
+        //
+        //         const s1 = spheres[i];
+        //
+        //         for (let j = i + 1; j < length; j++) {
+        //
+        //             const s2 = spheres[j];
+        //
+        //             const d2 = s1.collider.center.distanceToSquared(s2.collider.center);
+        //             const r = s1.collider.radius + s2.collider.radius;
+        //             const r2 = r * r;
+        //
+        //             if (d2 < r2) {
+        //
+        //                 const normal = vector1.subVectors(s1.collider.center, s2.collider.center).normalize();
+        //                 const v1 = vector2.copy(normal).multiplyScalar(normal.dot(s1.velocity));
+        //                 const v2 = vector3.copy(normal).multiplyScalar(normal.dot(s2.velocity));
+        //
+        //                 s1.velocity.add(v2).sub(v1);
+        //                 s2.velocity.add(v1).sub(v2);
+        //
+        //                 const d = (r - Math.sqrt(d2)) / 2;
+        //
+        //                 s1.collider.center.addScaledVector(normal, d);
+        //                 s2.collider.center.addScaledVector(normal, -d);
+        //
+        //             }
+        //
+        //         }
+        //
+        //     }
+        //
+        // }
 
         function updateSpheres(deltaTime) {
             spheres.forEach((sphere, index) => {
@@ -746,15 +755,15 @@ export function Game({models, sounds}) {
             }
         }
 
-        function getForwardVector() {
-
-            camera.getWorldDirection(playerDirection);
-            playerDirection.y = 0;
-            playerDirection.normalize();
-
-            return playerDirection;
-
-        }
+        // function getForwardVector() {
+        //
+        //     camera.getWorldDirection(playerDirection);
+        //     playerDirection.y = 0;
+        //     playerDirection.normalize();
+        //
+        //     return playerDirection;
+        //
+        // }
 
         function getSideVector() {
 
@@ -810,9 +819,9 @@ export function Game({models, sounds}) {
         }
 
         // Play or pause animations
-        function playPause() {
-            actions.forEach(action => settings.play ? action.play() : action.stop());
-        }
+        // function playPause() {
+        //     actions.forEach(action => settings.play ? action.play() : action.stop());
+        // }
 
         // Show or hide model
         function showModel(visibility) {
@@ -1248,8 +1257,16 @@ export function Game({models, sounds}) {
             let message = JSON.parse(event.data);
 
             switch (message.type) {
+                case 'fireballDamagedUser':
+                    if (message.damageDealerId === address) {
+                        dispatch({ type: "SEND_CHAT_MESSAGE", payload: `You deal ${message.damage} to ${message?.character?.name}` });
+                    }
+                    break;
                 case 'kill':
-                    refetchCoins();
+                    if (message.killerId === address) {
+                        dispatch({ type: "SEND_CHAT_MESSAGE", payload: `You killed ${message?.character?.name}!` });
+                        setTimeout(() => {refetchCoins()}, 500)
+                    }
                     break;
                 case 'newFireball':
                     addFireballToScene(message.fireball);

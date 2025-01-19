@@ -2,7 +2,7 @@ import {useZKLogin, ZKLogin} from "react-sui-zk-login-kit";
 import {Box} from "@mui/material";
 import {useEffect} from "react";
 import {generateRandomness} from "@mysten/sui/zklogin";
-
+import "react-sui-zk-login-kit"
 // Example configuration
 const SUI_PROVER_ENDPOINT = 'https://prover-dev.mystenlabs.com/v1';
 

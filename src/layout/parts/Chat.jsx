@@ -1,14 +1,15 @@
 // Chat.js
 import React, { useState } from 'react';
 import './Chat.css';
+import {useInterface} from "../../context/inteface.jsx";
 
 export const Chat = () => {
-    const [messages, setMessages] = useState([]);
     const [input, setInput] = useState("");
+    const { state: { chatMessages: messages }, dispatch}  = useInterface();
 
     const handleSend = () => {
         if (input.trim() !== "") {
-            setMessages([...messages, input]);
+            dispatch({ type: "SEND_CHAT_MESSAGE", payload: input });
             setInput("");
         }
     };
@@ -22,8 +23,8 @@ export const Chat = () => {
     return (
         <div id="chat-container">
             <div id="chat-messages">
-                {messages.map((message, index) => (
-                    <div key={index} className="chat-message">
+                {messages.map((message) => (
+                    <div key={message} className="chat-message">
                         {message}
                     </div>
                 ))}
