@@ -10,6 +10,7 @@ import {GUI} from 'three/examples/jsm/libs/lil-gui.module.min.js';
 import {Interface} from "../layout/Interface.jsx";
 import {startCast} from "../layout/parts/CastBar.jsx";
 import {CSS2DRenderer, CSS2DObject} from 'three/addons/renderers/CSS2DRenderer.js';
+import {useZKLogin} from "react-sui-zk-login-kit";
 
 const USER_DEFAULT_POSITION = [
     20.0172907530491608,
@@ -36,6 +37,7 @@ function getRandomElement(array) {
 
 export function Game({models, sounds}) {
     const containerRef = useRef(null);
+    const { address } = useZKLogin();
 
     useLayoutEffect(() => {
         const socket = new WebSocket('ws://35.160.49.180:8080');
@@ -67,23 +69,30 @@ export function Game({models, sounds}) {
         }
 
         // Function to handle damage and update health
-        let takeDamage = (amount) => {
+        let takeDamage = (amount, userIdTouched) => {
             if (isShieldActive) {
                 amount *= DAMAGE_REDUCTION; // Apply damage reduction
             }
 
             hp = Math.max(0, hp - amount); // Уменьшаем HP, но не ниже 0
             updateHPBar();
+            sendToSocket({ type: 'damage', userSourceId: userIdTouched})
 
             if (hp <= 0) {
                 console.log("Player is dead!");
+                sendToSocket({ type: 'kill', userSourceId: userIdTouched})
                 document.getElementById('respawnButton').style.display = 'block'; // Показываем кнопку
             }
         }
 
 
         const isSocketOpen = () => socket.readyState === WebSocket.OPEN;
+        const sendToSocket = (data) => (
+            socket.send(JSON.stringify({ id: address, ...data }))
+        );
+
         let fireballModel; // Store the fireball model for reuse
+
 
         const labelRenderer = new CSS2DRenderer();
         labelRenderer.setSize(window.innerWidth, window.innerHeight);
@@ -159,21 +168,21 @@ export function Game({models, sounds}) {
         const spheres = [];
         let sphereIdx = 0;
 
-        for (let i = 0; i < NUM_SPHERES; i++) {
-
-            const sphere = new THREE.Mesh(sphereGeometry, sphereMaterial);
-            sphere.castShadow = true;
-            sphere.receiveShadow = true;
-
-            scene.add(sphere);
-
-            spheres.push({
-                mesh: sphere,
-                collider: new THREE.Sphere(new THREE.Vector3(0, -100, 0), SPHERE_RADIUS),
-                velocity: new THREE.Vector3()
-            });
-
-        }
+        // for (let i = 0; i < NUM_SPHERES; i++) {
+        //
+        //     const sphere = new THREE.Mesh(sphereGeometry, sphereMaterial);
+        //     sphere.castShadow = true;
+        //     sphere.receiveShadow = true;
+        //
+        //     scene.add(sphere);
+        //
+        //     spheres.push({
+        //         mesh: sphere,
+        //         collider: new THREE.Sphere(new THREE.Vector3(0, -100, 0), SPHERE_RADIUS),
+        //         velocity: new THREE.Vector3()
+        //     });
+        //
+        // }
 
         const worldOctree = new Octree();
 
@@ -494,7 +503,7 @@ export function Game({models, sounds}) {
             };
 
             isCasting = true;
-            startCast(500, onCastEnd); // Start the cast bar animation for 1.5 seconds
+            startCast(2000, onCastEnd); // Start the cast bar animation for 1.5 seconds
 
         }
 
@@ -509,7 +518,6 @@ export function Game({models, sounds}) {
             if (!fireballModel || mana < CAST_MANA_PRICE || isCasting) return; // Ensure the fireball model is loaded
 
             const onCastEnd = () => {
-                movementSpeedModifier = 0.9;
                 // Play fireball sound
                 sounds.fireball.volume = 0.5; // Adjust volume if needed
                 sounds.fireball.play();
@@ -536,13 +544,13 @@ export function Game({models, sounds}) {
 
                 // Send the fireball data to the server
                 if (isSocketOpen()) {
-                    socket.send(JSON.stringify({
+                    sendToSocket({
                         type: 'throwFireball',
                         fireball: {
                             position: {x: fireball.position.x, y: fireball.position.y, z: fireball.position.z},
                             velocity: {x: velocity.x, y: velocity.y, z: velocity.z},
                         }
-                    }));
+                    });
                 }
 
 
@@ -560,7 +568,6 @@ export function Game({models, sounds}) {
             };
 
             isCasting = true;
-            movementSpeedModifier = 0.3; // Slow down to 50% speed
 
             controlAction({
                 action: castAction,
@@ -634,6 +641,7 @@ export function Game({models, sounds}) {
             // approximation: player = 3 spheres
 
             let touchedPlayer = false;
+            let userIdTouched;
             for (const point of [playerCollider.start, playerCollider.end, center]) {
 
                 const d2 = point.distanceToSquared(sphere_center);
@@ -641,6 +649,7 @@ export function Game({models, sounds}) {
                 if (d2 < r2) {
 
                     scene.remove(sphere.mesh); // Remove the fireball from the scene
+                    userIdTouched = spheres[index]['userId'];
                     spheres.splice(index, 1); // Remove it from the array
 
                     touchedPlayer = true;
@@ -650,7 +659,7 @@ export function Game({models, sounds}) {
             }
 
             if (touchedPlayer) {
-                takeDamage(40)
+                takeDamage(40, userIdTouched)
             }
 
         }
@@ -1120,7 +1129,7 @@ export function Game({models, sounds}) {
             };
 
             if (isSocketOpen()) {
-                socket.send(JSON.stringify({type: 'updatePosition', position, rotation}));
+                sendToSocket({type: 'updatePosition', position, rotation});
             }
         }
 
@@ -1212,7 +1221,7 @@ export function Game({models, sounds}) {
             }
         }
 
-        function addFireballToScene(fireballData) {
+        function addFireballToScene(fireballData, userId) {
             const fireball = SkeletonUtils.clone(fireballModel); // Clone the model
             fireball.position.set(fireballData.position.x, fireballData.position.y, fireballData.position.z);
 
@@ -1226,7 +1235,8 @@ export function Game({models, sounds}) {
                     fireballData.velocity.y,
                     fireballData.velocity.z
                 ),
-                ownerId: fireballData.ownerId
+                ownerId: fireballData.ownerId,
+                userId
             });
         }
 
@@ -1234,14 +1244,13 @@ export function Game({models, sounds}) {
         socket.onmessage = async (event) => {
             let message = JSON.parse(event.data);
 
-
             switch (message.type) {
                 case 'newFireball':
-                    addFireballToScene(message.fireball);
+                    addFireballToScene(message.fireball, message.id);
                     break;
-                case 'castPlayerFireball':
-                    addFireballToScene(message.fireball);
-                    break;
+                // case 'castPlayerFireball':
+                //     addFireballToScene(message.fireball);
+                //     break;
                 case 'newPlayer':
                     createPlayer(message.fromId, 'other');
                     break;
@@ -1255,7 +1264,7 @@ export function Game({models, sounds}) {
         };
 
         const manaInterval =
-            setInterval(() => mana = mana < 100 ? mana + 10 : mana, 1000);
+            setInterval(() => mana = mana < 100 ? mana + 5 : mana, 1000);
 
         return () => {
             clearInterval(manaInterval)

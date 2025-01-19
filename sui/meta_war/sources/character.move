@@ -1,4 +1,4 @@
-module metawars::character {
+module meta_war::character {
     use std::string::{String};
 
     public struct Character has key, store {

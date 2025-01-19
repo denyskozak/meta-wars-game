@@ -3,6 +3,7 @@ const WebSocket = require('ws');
 const server = new WebSocket.Server({port: 8080});
 const clients = new Map();
 const fireballs  = [];
+
 server.on('connection', (socket) => {
     console.log('New client connected.');
     // Assign a unique ID to the new client
@@ -26,9 +27,6 @@ server.on('connection', (socket) => {
         const message = data ? JSON.parse(data) : {};
         // Broadcast the message to all other clients
 
-        if (message.type !== 'updatePosition') {
-            console.log('message ', message)
-        }
         switch (message.type) {
             case 'throwFireball':
                 const fireball = message.fireball;
