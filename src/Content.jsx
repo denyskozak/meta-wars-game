@@ -14,7 +14,6 @@ export const Content = () => {
         models: {},
         sounds: {}
     });
-    useCoins();
 
     useLayoutEffect(() => {
         function preloadModels(modelPaths) {

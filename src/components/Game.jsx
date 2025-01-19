@@ -11,6 +11,7 @@ import {Interface} from "../layout/Interface.jsx";
 import {startCast} from "../layout/parts/CastBar.jsx";
 import {CSS2DRenderer, CSS2DObject} from 'three/addons/renderers/CSS2DRenderer.js';
 import {useZKLogin} from "react-sui-zk-login-kit";
+import {useCoins} from "../hooks/useCoins.js";
 
 const USER_DEFAULT_POSITION = [
     20.0172907530491608,
@@ -38,6 +39,7 @@ function getRandomElement(array) {
 export function Game({models, sounds}) {
     const containerRef = useRef(null);
     const { address } = useZKLogin();
+    const { refetch: refetchCoins } = useCoins();
 
     useLayoutEffect(() => {
         // const socket = new WebSocket('ws://35.160.49.180:8080');
@@ -56,6 +58,7 @@ export function Game({models, sounds}) {
         let movementSpeedModifier = 1; // Normal speed
 
         const hpBar = document.getElementById('hpBar');
+        const damageBar = document.getElementById('damage');
         const manaBar = document.getElementById('manaBar');
 
         // Function to update the HP bar width
@@ -934,13 +937,13 @@ export function Game({models, sounds}) {
         helper.visible = false;
         scene.add(helper);
 
-        const gui = new GUI({width: 200});
-        gui.add({debug: false}, 'debug')
-            .onChange(function (value) {
-
-                helper.visible = value;
-
-            });
+        // const gui = new GUI({width: 200});
+        // gui.add({debug: false}, 'debug')
+        //     .onChange(function (value) {
+        //
+        //         helper.visible = value;
+        //
+        //     });
 
 
         //3
@@ -992,13 +995,13 @@ export function Game({models, sounds}) {
             );
         }
 
-        settings = {
-            'show model': true,
-            'play': true,
-            'deactivate all': deactivateAllActions,
-            'activate all': activateAllActions,
-            'modify time scale': 2.0
-        };
+        // settings = {
+        //     'show model': true,
+        //     'play': true,
+        //     'deactivate all': deactivateAllActions,
+        //     'activate all': activateAllActions,
+        //     'modify time scale': 2.0
+        // };
         //
         // const panel = new GUI({width: 310});
         // panel.add(settings, 'show model').onChange(showModel);
@@ -1245,8 +1248,13 @@ export function Game({models, sounds}) {
             let message = JSON.parse(event.data);
 
             switch (message.type) {
+                case 'kill':
+                    refetchCoins();
+                    break;
                 case 'newFireball':
                     addFireballToScene(message.fireball);
+                    break;
+                case 'damage':
                     break;
                 case 'newPlayer':
                     createPlayer(message.fromId, 'other');

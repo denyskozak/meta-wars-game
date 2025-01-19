@@ -1,23 +1,21 @@
 import {PACKAGE_ID} from "../consts.js";
-import {useLayoutEffect, useState} from "react";
 import {useZKLogin} from "react-sui-zk-login-kit";
+import {useSuiClientQuery} from "@mysten/dapp-kit";
 
 export const useCoins = () => {
-    const [coins, setCoins] = useState(0);
-    const { address, client} = useZKLogin();
+    const {address} = useZKLogin();
 
-    useLayoutEffect(() => {
-        client.getCoins({
-            owner: address,
-            coinType: `${PACKAGE_ID}::coin::COIN`
-        })
-            .then(response => {
-                if (response?.data?.[0]?.balance) {
-                    const numberCoins = Number(response?.data?.[0]?.balance);
-                    setCoins(numberCoins / 1000000);
-                }
-            });
-    }, [address]);
+    const {data, refetch} = useSuiClientQuery(
+        'getCoins',
+        {owner: address, coinType: `${PACKAGE_ID}::coin::COIN`},
+        {
+            gcTime: 10000,
+        },
+    );
 
-    return coins;
+    const coins = Array.isArray(data?.data)
+        ? (data?.data.reduce((acc, item) => acc + Number(item.balance), 0)) / 1000000
+        : 0;
+
+    return {coins, refetch};
 }

@@ -1,0 +1,11 @@
+.damage {
+    position: absolute;
+    bottom: 50px;
+    right: 100px;
+    width: 60px;
+    height: 20px;
+    background: #000;
+    padding: 5px;
+    border-radius: 10px;
+    color: white;
+}
