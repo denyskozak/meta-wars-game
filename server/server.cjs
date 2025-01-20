@@ -3,7 +3,6 @@ const { mintCoins } = require('./sui.cjs');
 
 const server = new WebSocket.Server({port: 8080});
 const clients = new Map();
-const fireballs  = [];
 
 server.on('connection', (socket) => {
     console.log('New client connected.');
@@ -33,15 +32,6 @@ server.on('connection', (socket) => {
         // Broadcast the message to all other clients
 
         switch (message.type) {
-            case 'throwFireball':
-                const fireball = message.fireball;
-                fireballs.push(fireball);
-
-                broadcastIt({
-                    type: 'newFireball',
-                    fireball
-                });
-                break;
             case 'kill':
                 const { killerId, id: victimId } = message;
                 console.log('message ', message)

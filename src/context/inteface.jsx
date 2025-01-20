@@ -10,11 +10,10 @@ export const initInterfaceState = {
 export const interfaceReducer = (state, action) => {
     switch (action.type) {
         case 'SEND_CHAT_MESSAGE': {
-            const chatMessages = [...state.chatMessages, action.payload];
+            const chatMessages = [...state.chatMessages, { text: action.payload, id: Date.now()}];
             if (chatMessages.length > 4) {
                 chatMessages.shift();
             }
-            console.log('chatMessages ', chatMessages)
             return {...state, chatMessages};
         }
         case 'SET_CHARACTER': {

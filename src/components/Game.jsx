@@ -8,18 +8,19 @@ import {OctreeHelper} from 'three/addons/helpers/OctreeHelper.js';
 import {Capsule} from 'three/addons/math/Capsule.js';
 import {GUI} from 'three/examples/jsm/libs/lil-gui.module.min.js';
 import {Interface} from "../layout/Interface.jsx";
-import {startCast} from "../layout/parts/CastBar.jsx";
+import {startCast} from "./parts/CastBar.jsx";
 import {CSS2DRenderer, CSS2DObject} from 'three/addons/renderers/CSS2DRenderer.js';
 import {useZKLogin} from "react-sui-zk-login-kit";
 import {useCoins} from "../hooks/useCoins.js";
 import {useInterface} from "../context/inteface.jsx";
+import {useWS} from "../hooks/useWS.js";
+import {world} from "../worlds/main/data.js";
 
 const USER_DEFAULT_POSITION = [
-    20.0172907530491608,
-    6.170949774360151,
-    -27.06491839634351
+    -36.198117096583466,
+    0.22499999997500564,
+    -11.704829764915257
 ];
-
 const spawns = [
     {x: -17.12683322968667, y: 0.34999999995822706, z: -12.781498582746165},
     {x: -28.60683425667782, y: 0.3499999999897787, z: 9.049836139148344},
@@ -37,15 +38,14 @@ function getRandomElement(array) {
 }
 
 
-export function Game({models, sounds }) {
+export function Game({models, sounds}) {
     const containerRef = useRef(null);
-    const { address } = useZKLogin();
-    const { refetch: refetchCoins } = useCoins();
-    const { state: { character }, dispatch } = useInterface();
+    const {address} = useZKLogin();
+    const {refetch: refetchCoins} = useCoins();
+    const {dispatch} = useInterface();
+    const {socket, sendToSocket} = useWS();
 
     useLayoutEffect(() => {
-        // const socket = new WebSocket('ws://35.160.49.180:8080');
-        const socket = new WebSocket('ws://localhost:8080');
 
         // Store other players
         const players = {};
@@ -81,22 +81,21 @@ export function Game({models, sounds }) {
 
             hp = Math.max(0, hp - amount); // Уменьшаем HP, но не ниже 0
             updateHPBar();
-            dispatch({ type: "SEND_CHAT_MESSAGE", payload: `You got ${amount} damage!` });
+            dispatch({type: "SEND_CHAT_MESSAGE", payload: `You got ${amount} damage!`});
 
-            sendToSocket({ type: 'damage', damagerId: userIdTouched})
+            sendToSocket({type: 'DAMAGED_ME', damageDealerId: userIdTouched, damage: 40, currentHP: hp})
 
             if (hp <= 0) {
-                dispatch({ type: "SEND_CHAT_MESSAGE", payload: "You are dead :(" });
-                sendToSocket({ type: 'kill', killerId: userIdTouched})
+                dispatch({type: "SEND_CHAT_MESSAGE", payload: "You are dead :("});
+                sendToSocket({type: 'KILL', killerId: userIdTouched})
                 document.getElementById('respawnButton').style.display = 'block'; // Показываем кнопку
+            } else {
+                // slow a bit after damage
+                movementSpeedModifier = 0.7;
+                setTimeout(() => movementSpeedModifier = 1, 500);
             }
         }
 
-
-        const isSocketOpen = () => socket.readyState === WebSocket.OPEN;
-        const sendToSocket = (data) => (
-            socket.send(JSON.stringify({ id: address, character, ...data }))
-        );
 
         let fireballModel; // Store the fireball model for reuse
 
@@ -211,7 +210,7 @@ export function Game({models, sounds }) {
 
         // Shield skill vars
         const SHIELD_MANA_COST = 40; // Mana cost for the shield
-        const SHIELD_DURATION = 2; // Shield duration in seconds
+        const SHIELD_DURATION = 3; // Shield duration in seconds
         const DAMAGE_REDUCTION = 0.8; // Reduces damage by 50%
         // Activate shield
         let isShieldActive = false;
@@ -264,7 +263,7 @@ export function Game({models, sounds }) {
                 Math.sin(yaw) * Math.cos(pitch),
                 Math.sin(pitch),
                 Math.cos(yaw) * Math.cos(pitch)
-            ).multiplyScalar(1); // `distance` is the desired distance from the player
+            ).multiplyScalar(1.2); // `distance` is the desired distance from the player
 
             // Set the camera's position relative to the player
             camera.position.copy(playerPosition).add(offset);
@@ -300,6 +299,9 @@ export function Game({models, sounds }) {
             keyStates[event.code] = true;
 
             switch (event.code) {
+                case 'KeyR': // Blink Skill
+                    castBlink();
+                    break;
                 case 'KeyW':
                     // Start the walk animation immediately
                     !isCasting && setAnimation('Walk');
@@ -368,7 +370,7 @@ export function Game({models, sounds }) {
                 case 'Space': // Press "Q" to cast shield
                     setTimeout(() => {
                         jumpBlocked = false;
-                    }, 200);
+                    }, 2000);
                     break;
             }
 
@@ -463,7 +465,7 @@ export function Game({models, sounds }) {
             }
 
             // Check if enough mana is available
-            if (mana < SHIELD_MANA_COST) {
+            if (mana < SHIELD_MANA_COST || isCasting) {
                 return;
             }
 
@@ -471,14 +473,83 @@ export function Game({models, sounds }) {
             mana = Math.max(0, mana - SHIELD_MANA_COST);
             updateManaBar();
 
-            isShieldActive = true;
+            isCasting = true;
+
+            const onCastEnd = () => {
+                isCasting = false;
+                isShieldActive = true;
+                sounds.spellCast.pause();
+                // Send the fireball data to the server
+                sendToSocket({
+                    type: 'CAST_SPELL',
+                    payload: {
+                        type: 'shield'
+                    }
+                });
+
+                setTimeout(() => {
+                    isShieldActive = false; // Deactivate shield
+                }, SHIELD_DURATION * 1000);
+
+                activateGlobalCooldown(); // Activate global cooldown
+            }
+
+            sounds.spellCast.volume = 0.3;
+            sounds.spellCast.play();
+            startCast(2000, onCastEnd)
+        }
+
+        let skillsCDs = {
+            blink: false
+        }
+
+        function castBlink() {
+            const BLINK_DISTANCE = 5; // Distance to teleport forward
+            const BLINK_MANA_COST = 20; // Mana cost for blink
+            const BLINK_COOLDOWN = 10000; // Cooldown in milliseconds
+
+            if (globalSkillCooldown || isCasting || skillsCDs.blink) {
+                return;
+            }
+
+            if (mana < BLINK_MANA_COST) {
+                console.log("Not enough mana to blink!");
+                return;
+            }
+
+            // Deduct mana
+            mana = Math.max(0, mana - BLINK_MANA_COST);
+            updateManaBar();
+
+            sounds.blink.volume = 0.5;
+            sounds.blink.play();
+
+            skillsCDs.blink = true;
+            setTimeout(() => skillsCDs.blink = false, BLINK_COOLDOWN);
+
+            const playerPosition = new THREE.Vector3();
+            playerCollider.getCenter(playerPosition);
 
 
-            setTimeout(() => {
-                isShieldActive = false; // Deactivate shield
-            }, SHIELD_DURATION * 1000);
+            // Teleport the player forward
+            const forwardDirection = new THREE.Vector3();
+            camera.getWorldDirection(forwardDirection);
+            forwardDirection.y = 0; // Keep movement in the horizontal plane
+            forwardDirection.normalize();
 
-            activateGlobalCooldown(); // Activate global cooldown
+            const blinkTarget = playerPosition.addScaledVector(forwardDirection, BLINK_DISTANCE);
+
+            // Ensure no collisions at the blink target
+            const result = worldOctree.capsuleIntersect(new Capsule(blinkTarget, blinkTarget.clone().add(new THREE.Vector3(0, 0.75, 0)), 0.35));
+            if (!result) {
+                // If the target position is valid, teleport the player
+                teleportTo(blinkTarget);
+            } else {
+                console.log("Blink target is obstructed!");
+            }
+
+            // Activate cooldown
+            activateGlobalCooldown();
         }
 
 
@@ -499,8 +570,11 @@ export function Game({models, sounds }) {
             const onCastEnd = () => {
                 isCasting = false;
                 movementSpeedModifier = 1;
+                sounds.spellCast.pause();
+                sounds.heal.volume = 0.5;
+                sounds.heal.play()
 
-                dispatch({ type: "SEND_CHAT_MESSAGE", payload: `Got ${HEAL_AMOUNT} heal!` });
+                dispatch({type: "SEND_CHAT_MESSAGE", payload: `Got ${HEAL_AMOUNT} heal!`});
 
                 // Deduct mana and restore health
                 mana = Math.max(0, mana - HEAL_MANA_COST);
@@ -514,11 +588,13 @@ export function Game({models, sounds }) {
 
             isCasting = true;
             movementSpeedModifier = 0.3;
+            sounds.spellCast.volume = 0.3;
+            sounds.spellCast.play();
             startCast(2000, onCastEnd); // Start the cast bar animation for 1.5 seconds
 
         }
 
-        const CAST_MANA_PRICE = 40;
+        const CAST_MANA_PRICE = 25;
 
 
         function castFireball() {
@@ -529,13 +605,18 @@ export function Game({models, sounds }) {
             if (!fireballModel || mana < CAST_MANA_PRICE || isCasting) return; // Ensure the fireball model is loaded
 
             const onCastEnd = () => {
+                sounds.fireballCast.pause();
                 // Play fireball sound
                 sounds.fireball.volume = 0.5; // Adjust volume if needed
                 sounds.fireball.play();
 
                 isCasting = false;
                 const fireball = SkeletonUtils.clone(fireballModel); // Clone the fireball model for reuse
-                fireball.scale.set(0.015, 0.015, 0.015);
+                // fireball.scale.set(0.015, 0.015, 0.015);
+                // Rotate the fireball 45 degrees to the right on the X-axis
+                fireball.rotation.copy(model.rotation);
+                // fireball.rotation.x += THREE.MathUtils.degToRad(90);
+
                 scene.add(fireball); // Add the fireball to the scene
 
                 // Set the initial position of the fireball
@@ -554,16 +635,15 @@ export function Game({models, sounds }) {
                 const velocity = playerDirection.clone().multiplyScalar(impulse);
 
                 // Send the fireball data to the server
-                if (isSocketOpen()) {
-                    sendToSocket({
-                        type: 'throwFireball',
-                        fireball: {
-                            position: {x: fireball.position.x, y: fireball.position.y, z: fireball.position.z},
-                            velocity: {x: velocity.x, y: velocity.y, z: velocity.z},
-                            ownerId: address,
-                        }
-                    });
-                }
+                sendToSocket({
+                    type: 'CAST_SPELL',
+                    payload: {
+                        type: 'fireball',
+                        position: {x: fireball.position.x, y: fireball.position.y, z: fireball.position.z},
+                        rotation: {x: fireball.rotation.x, y: fireball.rotation.y, z: fireball.rotation.z},
+                        velocity: {x: velocity.x, y: velocity.y, z: velocity.z},
+                    }
+                });
 
 
                 // Store velocity and collider information for the fireball
@@ -589,6 +669,8 @@ export function Game({models, sounds }) {
                 reset: true,
                 clampWhenFinished: true,
             });
+            sounds.fireballCast.volume = 0.5; // Adjust volume if needed
+            sounds.fireballCast.play();
             startCast(1000, onCastEnd); // Start the cast bar animation for 1.5 seconds
         }
 
@@ -671,8 +753,7 @@ export function Game({models, sounds }) {
             }
 
             if (touchedPlayer) {
-                sendToSocket({ type: 'fireballDamagedUser', damageDealerId: userIdTouched, damage: 40 })
-                takeDamage(40, userIdTouched)
+                takeDamage(25, userIdTouched)
             }
 
         }
@@ -957,7 +1038,7 @@ export function Game({models, sounds }) {
 
         //3
         fireballModel = models['fireball'];
-        fireballModel.scale.set(0.03, 0.03, 0.03); // Adjust size if needed
+        fireballModel.scale.set(0.001, 0.001, 0.001); // Adjust size if needed
 
         model.traverse((object) => {
             if (object.isMesh) object.castShadow = true;
@@ -1046,7 +1127,7 @@ export function Game({models, sounds }) {
 
         function teleportPlayerIfOob() {
             if (camera.position.y <= -25) {
-                teleportTo(USER_DEFAULT_POSITION);
+                teleportTo(getRandomElement(spawns));
                 camera.position.copy(playerCollider.end);
                 camera.rotation.set(0, 0, 0);
             }
@@ -1054,6 +1135,18 @@ export function Game({models, sounds }) {
 
         let healEffectModel;
         let shieldEffectModel;
+
+        // Create a bubble-like shield
+        const bubbleGeometry = new THREE.SphereGeometry(1.5, 32, 32); // Reduced segments for better performance
+        const bubbleMaterial = new THREE.MeshPhysicalMaterial({
+            color: 0x88ccff, // Light blue
+            opacity: 0.7,
+            transparent: true,
+        });
+
+        const bubbleShield = new THREE.Mesh(bubbleGeometry, bubbleMaterial);
+        bubbleShield.scale.set(0.4, 0.4, 0.4);
+        scene.add(bubbleShield);
 
         function updateModel() {
             if (model) {
@@ -1102,19 +1195,14 @@ export function Game({models, sounds }) {
                 if (isShieldActive) {
                     if (!shieldEffectModel) {
                         // If the shield model isn't already in the scene, add it
-                        shieldEffectModel = SkeletonUtils.clone(models['shield-effect']);
-                        shieldEffectModel.scale.set(0.003, 0.003, 0.003); // Adjust size of shield
+                        shieldEffectModel = bubbleShield;
                         scene.add(shieldEffectModel);
                     }
 
-                    // Update shield position to be in front of the player
-                    const shieldOffset = new THREE.Vector3(0, 0, -1); // Offset in local space
-                    const playerForward = new THREE.Vector3();
-                    model.getWorldDirection(playerForward); // Get the direction the player is facing
-                    playerForward.multiplyScalar(0.5); // Adjust distance from player
                     const playerPosition = new THREE.Vector3();
                     model.getWorldPosition(playerPosition); // Get the player's position
-                    shieldEffectModel.position.copy(playerPosition).add(shieldOffset)
+                    playerPosition.y += 0.2;
+                    shieldEffectModel.position.copy(playerPosition)
 
 
                 } else if (shieldEffectModel) {
@@ -1141,16 +1229,53 @@ export function Game({models, sounds }) {
                 y: model?.rotation?.y || 0 // Send only the Y-axis rotation
             };
 
-            if (isSocketOpen()) {
-                sendToSocket({type: 'updatePosition', position, rotation});
-            }
+            sendToSocket({type: 'updatePosition', position, rotation});
         }
 
         setInterval(() => console.log('position ', {
-            x: playerCollider.start.x,
-            y: playerCollider.start.y,
-            z: playerCollider.start.z,
+            x: model.position.x,
+            y: model.position.y,
+            z: model.position.z,
         }), 5000);
+
+        function initWordObjects() {
+
+            for (const object of world.stuff) {
+                const objectAnimations = models[`${object.id}_animations`];
+
+                // console.log('objectAnimations ', objectAnimations)
+                for (const position of object.positions) {
+                    const objectModel = SkeletonUtils.clone(models[object.id]);
+
+                    objectModel.scale.set(object.scale, object.scale, object.scale);
+                    objectModel.position.set(position.x, position.y, position.z);
+
+                    if (object.animated) {
+                        const objectMixer = new THREE.AnimationMixer(objectModel);
+                        objectMixer.timeScale = 40;
+
+                        scene.add(objectModel);
+
+                        if (objectAnimations[0]) {
+                            const action = objectMixer.clipAction(objectAnimations[0]);
+
+                            controlAction({
+                                action,
+                                loop: THREE.LoopRepeat,
+                                mixer: objectMixer
+                            })
+                        }
+
+
+                    } else {
+                        scene.add(objectModel);
+                    }
+
+                }
+            }
+        }
+
+        initWordObjects();
 
         function animate() {
             // Если игрок мёртв, отключаем управление
@@ -1234,9 +1359,11 @@ export function Game({models, sounds }) {
             }
         }
 
-        function addFireballToScene(fireballData) {
+        function castFireballOtherUser(fireballData, ownerId) {
             const fireball = SkeletonUtils.clone(fireballModel); // Clone the model
+
             fireball.position.set(fireballData.position.x, fireballData.position.y, fireballData.position.z);
+            fireball.rotation.set(fireballData.rotation.x, fireballData.rotation.y, fireballData.rotation.z);
 
             scene.add(fireball);
 
@@ -1248,8 +1375,12 @@ export function Game({models, sounds }) {
                     fireballData.velocity.y,
                     fireballData.velocity.z
                 ),
-                ownerId: fireballData.ownerId,
+                ownerId,
             });
+        }
+
+        function castShieldOtherUser() {
+
         }
 
         // Handle incoming messages from the server
@@ -1257,19 +1388,42 @@ export function Game({models, sounds }) {
             let message = JSON.parse(event.data);
 
             switch (message.type) {
-                case 'fireballDamagedUser':
+                case 'CAST_SPELL':
+
+                    switch (message?.payload?.type) {
+                        case 'fireball':
+                            castFireballOtherUser(message.payload, message.id);
+                            break;
+                        case 'shield':
+                            castShieldOtherUser(message.payload);
+                            break;
+                    }
+
+                    break;
+                case 'SEND_CHAT_MESSAGE':
+                    dispatch({
+                        type: "SEND_CHAT_MESSAGE",
+                        payload: `${message?.character?.name} say: ${message.payload}`
+                    });
+                    break;
+                case 'DAMAGED_ME':
                     if (message.damageDealerId === address) {
-                        dispatch({ type: "SEND_CHAT_MESSAGE", payload: `You deal ${message.damage} to ${message?.character?.name}` });
+                        dispatch({
+                            type: "SEND_CHAT_MESSAGE",
+                            payload: `You deal ${message.damage} to ${message?.character?.name} (current hp: ${message.currentHP})`
+                        });
                     }
                     break;
-                case 'kill':
+                case 'KILL':
                     if (message.killerId === address) {
-                        dispatch({ type: "SEND_CHAT_MESSAGE", payload: `You killed ${message?.character?.name}!` });
-                        setTimeout(() => {refetchCoins()}, 500)
+                        dispatch({
+                            type: "SEND_CHAT_MESSAGE",
+                            payload: `+1 $MetaWars$ Gold for kill ${message?.character?.name}!`
+                        });
+                        setTimeout(() => {
+                            refetchCoins()
+                        }, 500)
                     }
-                    break;
-                case 'newFireball':
-                    addFireballToScene(message.fireball);
                     break;
                 case 'damage':
                     break;

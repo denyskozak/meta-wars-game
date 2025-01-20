@@ -3,7 +3,6 @@ import {Loading} from "./components/Loading";
 import {useLayoutEffect, useState} from "react";
 import * as THREE from "three";
 import {GLTFLoader} from "three/addons";
-import {useCoins} from "./hooks/useCoins.js";
 import {useInterface} from "./context/inteface.jsx";
 import CharacterManager from "./components/Character.jsx";
 
@@ -44,16 +43,22 @@ export const Content = () => {
 
         // init
         const sounds = {
-            fireball: new Audio('/sounds/fireball.MP3'),
+            fireball: new Audio('/sounds/fireball.ogg'),
+            fireballCast: new Audio('/sounds/fireball-cast.ogg'),
+            heal: new Audio('/sounds/heal.ogg'),
+            spellCast: new Audio('/sounds/spell-cast.ogg'),
             background: new Audio('/sounds/Elwynn.mp3'),
+            blink: new Audio('/sounds/blink.ogg'),
         }
         preloadModels([
             {id: 'murloc', path: 'murloc_creature.glb'},
             {id: 'zone', path: 'zone2.glb'},
-            {id: 'fireball', path: 'fireball.glb'},
+            {id: 'fireball', path: 'fireball2.glb'},
             {id: 'character', path: 'skins/mad.glb'},
             {id: 'heal-effect', path: 'heal-effect.glb'},
-            {id: 'shield-effect', path: 'shield-effect.glb'},
+            {id: 'fire', path: 'stuff/fire.glb'},
+            {id: 'arthas', path: 'arthas.glb'},
+            {id: 'stormwind_guard', path: 'stormwind_guard.glb'},
         ])
             .then((loadedModels) => setPreloadedData({models: loadedModels, sounds}));
     }, []);
