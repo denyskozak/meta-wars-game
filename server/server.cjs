@@ -1,8 +1,9 @@
 const WebSocket = require('ws');
+const { mintCoins } = require('./sui.cjs');
 
 const server = new WebSocket.Server({port: 8080});
 const clients = new Map();
-const fireballs  = [];
+
 server.on('connection', (socket) => {
     console.log('New client connected.');
     // Assign a unique ID to the new client
@@ -23,21 +24,35 @@ server.on('connection', (socket) => {
 
     // Handle incoming messages from a client
     socket.on('message', (data) => {
-        const message = data ? JSON.parse(data) : {};
+        let message = {};
+
+        try {
+            message = JSON.parse(data);
+        } catch (e) {}
         // Broadcast the message to all other clients
 
-        if (message.type !== 'updatePosition') {
-            console.log('message ', message)
-        }
         switch (message.type) {
-            case 'throwFireball':
-                const fireball = message.fireball;
-                fireballs.push(fireball);
+            case 'kill':
+                const { killerId, id: victimId } = message;
+                console.log('message ', message)
 
-                broadcastIt({
-                    type: 'newFireball',
-                    fireball
-                });
+                // Mint coins for the killer using a Move smart contract
+                mintCoins(killerId, 1) // Example: Award 10 coins to the killer
+                    .then((txHash) => {
+                        console.log(`Minted coins for Player ${killerId}. Transaction Hash: ${txHash}`);
+
+                        // Broadcast the kill event and reward info
+                        broadcastIt({
+                            type: 'kill',
+                            killerId,
+                            victimId,
+                            reward: 10, // Example reward
+                            txHash,
+                        });
+                    })
+                    .catch((err) => {
+                        console.error(`Failed to mint coins for Player ${killerId}:`, err);
+                    });
                 break;
             default:
                 broadcastIt(message);

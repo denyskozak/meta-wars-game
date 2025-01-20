@@ -8,15 +8,19 @@ import {OctreeHelper} from 'three/addons/helpers/OctreeHelper.js';
 import {Capsule} from 'three/addons/math/Capsule.js';
 import {GUI} from 'three/examples/jsm/libs/lil-gui.module.min.js';
 import {Interface} from "../layout/Interface.jsx";
-import {startCast} from "../layout/parts/CastBar.jsx";
+import {startCast} from "./parts/CastBar.jsx";
 import {CSS2DRenderer, CSS2DObject} from 'three/addons/renderers/CSS2DRenderer.js';
+import {useZKLogin} from "react-sui-zk-login-kit";
+import {useCoins} from "../hooks/useCoins.js";
+import {useInterface} from "../context/inteface.jsx";
+import {useWS} from "../hooks/useWS.js";
+import {world} from "../worlds/main/data.js";
 
 const USER_DEFAULT_POSITION = [
-    20.0172907530491608,
-    6.170949774360151,
-    -27.06491839634351
+    -36.198117096583466,
+    0.22499999997500564,
+    -11.704829764915257
 ];
-
 const spawns = [
     {x: -17.12683322968667, y: 0.34999999995822706, z: -12.781498582746165},
     {x: -28.60683425667782, y: 0.3499999999897787, z: 9.049836139148344},
@@ -36,10 +40,12 @@ function getRandomElement(array) {
 
 export function Game({models, sounds}) {
     const containerRef = useRef(null);
+    const {address} = useZKLogin();
+    const {refetch: refetchCoins} = useCoins();
+    const {dispatch} = useInterface();
+    const {socket, sendToSocket} = useWS();
 
     useLayoutEffect(() => {
-        const socket = new WebSocket('ws://35.160.49.180:8080');
-        // const socket = new WebSocket('ws://localhost:8080');
 
         // Store other players
         const players = {};
@@ -54,6 +60,7 @@ export function Game({models, sounds}) {
         let movementSpeedModifier = 1; // Normal speed
 
         const hpBar = document.getElementById('hpBar');
+        const damageBar = document.getElementById('damage');
         const manaBar = document.getElementById('manaBar');
 
         // Function to update the HP bar width
@@ -67,22 +74,29 @@ export function Game({models, sounds}) {
         }
 
         // Function to handle damage and update health
-        let takeDamage = (amount) => {
+        let takeDamage = (amount, userIdTouched) => {
             if (isShieldActive) {
                 amount *= DAMAGE_REDUCTION; // Apply damage reduction
             }
 
             hp = Math.max(0, hp - amount); // Уменьшаем HP, но не ниже 0
             updateHPBar();
+            dispatch({type: "SEND_CHAT_MESSAGE", payload: `You got ${amount} damage!`});
+
+            sendToSocket({type: 'DAMAGED_ME', damageDealerId: userIdTouched, damage: 40, currentHP: hp})
 
             if (hp <= 0) {
-                console.log("Player is dead!");
+                dispatch({type: "SEND_CHAT_MESSAGE", payload: "You are dead :("});
+                sendToSocket({type: 'KILL', killerId: userIdTouched})
                 document.getElementById('respawnButton').style.display = 'block'; // Показываем кнопку
+            } else {
+                // slow a bit after damage
+                movementSpeedModifier = 0.7;
+                setTimeout(() => movementSpeedModifier = 1, 500);
             }
         }
 
 
-        const isSocketOpen = () => socket.readyState === WebSocket.OPEN;
         let fireballModel; // Store the fireball model for reuse
 
         const labelRenderer = new CSS2DRenderer();
@@ -159,21 +173,21 @@ export function Game({models, sounds}) {
         const spheres = [];
         let sphereIdx = 0;
 
-        for (let i = 0; i < NUM_SPHERES; i++) {
-
-            const sphere = new THREE.Mesh(sphereGeometry, sphereMaterial);
-            sphere.castShadow = true;
-            sphere.receiveShadow = true;
-
-            scene.add(sphere);
-
-            spheres.push({
-                mesh: sphere,
-                collider: new THREE.Sphere(new THREE.Vector3(0, -100, 0), SPHERE_RADIUS),
-                velocity: new THREE.Vector3()
-            });
-
-        }
+        // for (let i = 0; i < NUM_SPHERES; i++) {
+        //
+        //     const sphere = new THREE.Mesh(sphereGeometry, sphereMaterial);
+        //     sphere.castShadow = true;
+        //     sphere.receiveShadow = true;
+        //
+        //     scene.add(sphere);
+        //
+        //     spheres.push({
+        //         mesh: sphere,
+        //         collider: new THREE.Sphere(new THREE.Vector3(0, -100, 0), SPHERE_RADIUS),
+        //         velocity: new THREE.Vector3()
+        //     });
+        //
+        // }
 
         const worldOctree = new Octree();
 
@@ -196,7 +210,7 @@ export function Game({models, sounds}) {
 
         // Shield skill vars
         const SHIELD_MANA_COST = 40; // Mana cost for the shield
-        const SHIELD_DURATION = 2; // Shield duration in seconds
+        const SHIELD_DURATION = 3; // Shield duration in seconds
         const DAMAGE_REDUCTION = 0.8; // Reduces damage by 50%
         // Activate shield
         let isShieldActive = false;
@@ -249,7 +263,7 @@ export function Game({models, sounds}) {
                 Math.sin(yaw) * Math.cos(pitch),
                 Math.sin(pitch),
                 Math.cos(yaw) * Math.cos(pitch)
-            ).multiplyScalar(1); // `distance` is the desired distance from the player
+            ).multiplyScalar(1.2); // `distance` is the desired distance from the player
 
             // Set the camera's position relative to the player
             camera.position.copy(playerPosition).add(offset);
@@ -285,6 +299,9 @@ export function Game({models, sounds}) {
             keyStates[event.code] = true;
 
             switch (event.code) {
+                case 'KeyR': // Blink Skill
+                    castBlink();
+                    break;
                 case 'KeyW':
                     // Start the walk animation immediately
                     !isCasting && setAnimation('Walk');
@@ -353,7 +370,7 @@ export function Game({models, sounds}) {
                 case 'Space': // Press "Q" to cast shield
                     setTimeout(() => {
                         jumpBlocked = false;
-                    }, 200);
+                    }, 2000);
                     break;
             }
 
@@ -390,7 +407,7 @@ export function Game({models, sounds}) {
             document.body.requestPointerLock();
             mouseTime = performance.now();
 
-            sounds.background.volume = 0.2;
+            sounds.background.volume = 0.1;
             sounds.background.play();
         });
 
@@ -448,7 +465,7 @@ export function Game({models, sounds}) {
             }
 
             // Check if enough mana is available
-            if (mana < SHIELD_MANA_COST) {
+            if (mana < SHIELD_MANA_COST || isCasting) {
                 return;
             }
 
@@ -456,14 +473,83 @@ export function Game({models, sounds}) {
             mana = Math.max(0, mana - SHIELD_MANA_COST);
             updateManaBar();
 
-            isShieldActive = true;
+            isCasting = true;
+
+            const onCastEnd = () => {
+                isCasting = false;
+                isShieldActive = true;
+                sounds.spellCast.pause();
+                // Send the fireball data to the server
+                sendToSocket({
+                    type: 'CAST_SPELL',
+                    payload: {
+                        type: 'shield'
+                    }
+                });
+
+                setTimeout(() => {
+                    isShieldActive = false; // Deactivate shield
+                }, SHIELD_DURATION * 1000);
+
+                activateGlobalCooldown(); // Activate global cooldown
+            }
+
+            sounds.spellCast.volume = 0.3;
+            sounds.spellCast.play();
+            startCast(2000, onCastEnd)
+        }
+
+        let skillsCDs = {
+            blink: false
+        }
+
+        function castBlink() {
+            const BLINK_DISTANCE = 5; // Distance to teleport forward
+            const BLINK_MANA_COST = 20; // Mana cost for blink
+            const BLINK_COOLDOWN = 10000; // Cooldown in milliseconds
+
+            if (globalSkillCooldown || isCasting || skillsCDs.blink) {
+                return;
+            }
+
+            if (mana < BLINK_MANA_COST) {
+                console.log("Not enough mana to blink!");
+                return;
+            }
+
+            // Deduct mana
+            mana = Math.max(0, mana - BLINK_MANA_COST);
+            updateManaBar();
+
+            sounds.blink.volume = 0.5;
+            sounds.blink.play();
+
+            skillsCDs.blink = true;
+            setTimeout(() => skillsCDs.blink = false, BLINK_COOLDOWN);
+
+            const playerPosition = new THREE.Vector3();
+            playerCollider.getCenter(playerPosition);
 
 
-            setTimeout(() => {
-                isShieldActive = false; // Deactivate shield
-            }, SHIELD_DURATION * 1000);
+            // Teleport the player forward
+            const forwardDirection = new THREE.Vector3();
+            camera.getWorldDirection(forwardDirection);
+            forwardDirection.y = 0; // Keep movement in the horizontal plane
+            forwardDirection.normalize();
 
-            activateGlobalCooldown(); // Activate global cooldown
+            const blinkTarget = playerPosition.addScaledVector(forwardDirection, BLINK_DISTANCE);
+
+            // Ensure no collisions at the blink target
+            const result = worldOctree.capsuleIntersect(new Capsule(blinkTarget, blinkTarget.clone().add(new THREE.Vector3(0, 0.75, 0)), 0.35));
+            if (!result) {
+                // If the target position is valid, teleport the player
+                teleportTo(blinkTarget);
+            } else {
+                console.log("Blink target is obstructed!");
+            }
+
+            // Activate cooldown
+            activateGlobalCooldown();
         }
 
 
@@ -483,6 +569,13 @@ export function Game({models, sounds}) {
 
             const onCastEnd = () => {
                 isCasting = false;
+                movementSpeedModifier = 1;
+                sounds.spellCast.pause();
+                sounds.heal.volume = 0.5;
+                sounds.heal.play()
+
+                dispatch({type: "SEND_CHAT_MESSAGE", payload: `Got ${HEAL_AMOUNT} heal!`});
+
                 // Deduct mana and restore health
                 mana = Math.max(0, mana - HEAL_MANA_COST);
                 hp = Math.min(100, hp + HEAL_AMOUNT);
@@ -494,11 +587,14 @@ export function Game({models, sounds}) {
             };
 
             isCasting = true;
-            startCast(500, onCastEnd); // Start the cast bar animation for 1.5 seconds
+            movementSpeedModifier = 0.3;
+            sounds.spellCast.volume = 0.3;
+            sounds.spellCast.play();
+            startCast(2000, onCastEnd); // Start the cast bar animation for 1.5 seconds
 
         }
 
-        const CAST_MANA_PRICE = 40;
+        const CAST_MANA_PRICE = 25;
 
 
         function castFireball() {
@@ -509,14 +605,18 @@ export function Game({models, sounds}) {
             if (!fireballModel || mana < CAST_MANA_PRICE || isCasting) return; // Ensure the fireball model is loaded
 
             const onCastEnd = () => {
-                movementSpeedModifier = 0.9;
+                sounds.fireballCast.pause();
                 // Play fireball sound
                 sounds.fireball.volume = 0.5; // Adjust volume if needed
                 sounds.fireball.play();
 
                 isCasting = false;
                 const fireball = SkeletonUtils.clone(fireballModel); // Clone the fireball model for reuse
-                fireball.scale.set(0.015, 0.015, 0.015);
+                // fireball.scale.set(0.015, 0.015, 0.015);
+                // Rotate the fireball 45 degrees to the right on the X-axis
+                fireball.rotation.copy(model.rotation);
+                // fireball.rotation.x += THREE.MathUtils.degToRad(90);
+
                 scene.add(fireball); // Add the fireball to the scene
 
                 // Set the initial position of the fireball
@@ -535,15 +635,15 @@ export function Game({models, sounds}) {
                 const velocity = playerDirection.clone().multiplyScalar(impulse);
 
                 // Send the fireball data to the server
-                if (isSocketOpen()) {
-                    socket.send(JSON.stringify({
-                        type: 'throwFireball',
-                        fireball: {
-                            position: {x: fireball.position.x, y: fireball.position.y, z: fireball.position.z},
-                            velocity: {x: velocity.x, y: velocity.y, z: velocity.z},
-                        }
-                    }));
-                }
+                sendToSocket({
+                    type: 'CAST_SPELL',
+                    payload: {
+                        type: 'fireball',
+                        position: {x: fireball.position.x, y: fireball.position.y, z: fireball.position.z},
+                        rotation: {x: fireball.rotation.x, y: fireball.rotation.y, z: fireball.rotation.z},
+                        velocity: {x: velocity.x, y: velocity.y, z: velocity.z},
+                    }
+                });
 
 
                 // Store velocity and collider information for the fireball
@@ -560,7 +660,6 @@ export function Game({models, sounds}) {
             };
 
             isCasting = true;
-            movementSpeedModifier = 0.3; // Slow down to 50% speed
 
             controlAction({
                 action: castAction,
@@ -570,6 +669,8 @@ export function Game({models, sounds}) {
                 reset: true,
                 clampWhenFinished: true,
             });
+            sounds.fireballCast.volume = 0.5; // Adjust volume if needed
+            sounds.fireballCast.play();
             startCast(1000, onCastEnd); // Start the cast bar animation for 1.5 seconds
         }
 
@@ -634,6 +735,7 @@ export function Game({models, sounds}) {
             // approximation: player = 3 spheres
 
             let touchedPlayer = false;
+            let userIdTouched;
             for (const point of [playerCollider.start, playerCollider.end, center]) {
 
                 const d2 = point.distanceToSquared(sphere_center);
@@ -641,6 +743,7 @@ export function Game({models, sounds}) {
                 if (d2 < r2) {
 
                     scene.remove(sphere.mesh); // Remove the fireball from the scene
+                    userIdTouched = spheres[index]['ownerId'];
                     spheres.splice(index, 1); // Remove it from the array
 
                     touchedPlayer = true;
@@ -650,46 +753,46 @@ export function Game({models, sounds}) {
             }
 
             if (touchedPlayer) {
-                takeDamage(40)
+                takeDamage(25, userIdTouched)
             }
 
         }
 
-        function spheresCollisions() {
-
-            for (let i = 0, length = spheres.length; i < length; i++) {
-
-                const s1 = spheres[i];
-
-                for (let j = i + 1; j < length; j++) {
-
-                    const s2 = spheres[j];
-
-                    const d2 = s1.collider.center.distanceToSquared(s2.collider.center);
-                    const r = s1.collider.radius + s2.collider.radius;
-                    const r2 = r * r;
-
-                    if (d2 < r2) {
-
-                        const normal = vector1.subVectors(s1.collider.center, s2.collider.center).normalize();
-                        const v1 = vector2.copy(normal).multiplyScalar(normal.dot(s1.velocity));
-                        const v2 = vector3.copy(normal).multiplyScalar(normal.dot(s2.velocity));
-
-                        s1.velocity.add(v2).sub(v1);
-                        s2.velocity.add(v1).sub(v2);
-
-                        const d = (r - Math.sqrt(d2)) / 2;
-
-                        s1.collider.center.addScaledVector(normal, d);
-                        s2.collider.center.addScaledVector(normal, -d);
-
-                    }
-
-                }
-
-            }
-
-        }
+        // function spheresCollisions() {
+        //
+        //     for (let i = 0, length = spheres.length; i < length; i++) {
+        //
+        //         const s1 = spheres[i];
+        //
+        //         for (let j = i + 1; j < length; j++) {
+        //
+        //             const s2 = spheres[j];
+        //
+        //             const d2 = s1.collider.center.distanceToSquared(s2.collider.center);
+        //             const r = s1.collider.radius + s2.collider.radius;
+        //             const r2 = r * r;
+        //
+        //             if (d2 < r2) {
+        //
+        //                 const normal = vector1.subVectors(s1.collider.center, s2.collider.center).normalize();
+        //                 const v1 = vector2.copy(normal).multiplyScalar(normal.dot(s1.velocity));
+        //                 const v2 = vector3.copy(normal).multiplyScalar(normal.dot(s2.velocity));
+        //
+        //                 s1.velocity.add(v2).sub(v1);
+        //                 s2.velocity.add(v1).sub(v2);
+        //
+        //                 const d = (r - Math.sqrt(d2)) / 2;
+        //
+        //                 s1.collider.center.addScaledVector(normal, d);
+        //                 s2.collider.center.addScaledVector(normal, -d);
+        //
+        //             }
+        //
+        //         }
+        //
+        //     }
+        //
+        // }
 
         function updateSpheres(deltaTime) {
             spheres.forEach((sphere, index) => {
@@ -733,15 +836,15 @@ export function Game({models, sounds}) {
             }
         }
 
-        function getForwardVector() {
-
-            camera.getWorldDirection(playerDirection);
-            playerDirection.y = 0;
-            playerDirection.normalize();
-
-            return playerDirection;
-
-        }
+        // function getForwardVector() {
+        //
+        //     camera.getWorldDirection(playerDirection);
+        //     playerDirection.y = 0;
+        //     playerDirection.normalize();
+        //
+        //     return playerDirection;
+        //
+        // }
 
         function getSideVector() {
 
@@ -797,9 +900,9 @@ export function Game({models, sounds}) {
         }
 
         // Play or pause animations
-        function playPause() {
-            actions.forEach(action => settings.play ? action.play() : action.stop());
-        }
+        // function playPause() {
+        //     actions.forEach(action => settings.play ? action.play() : action.stop());
+        // }
 
         // Show or hide model
         function showModel(visibility) {
@@ -924,18 +1027,18 @@ export function Game({models, sounds}) {
         helper.visible = false;
         scene.add(helper);
 
-        const gui = new GUI({width: 200});
-        gui.add({debug: false}, 'debug')
-            .onChange(function (value) {
-
-                helper.visible = value;
-
-            });
+        // const gui = new GUI({width: 200});
+        // gui.add({debug: false}, 'debug')
+        //     .onChange(function (value) {
+        //
+        //         helper.visible = value;
+        //
+        //     });
 
 
         //3
         fireballModel = models['fireball'];
-        fireballModel.scale.set(0.03, 0.03, 0.03); // Adjust size if needed
+        fireballModel.scale.set(0.001, 0.001, 0.001); // Adjust size if needed
 
         model.traverse((object) => {
             if (object.isMesh) object.castShadow = true;
@@ -982,13 +1085,13 @@ export function Game({models, sounds}) {
             );
         }
 
-        settings = {
-            'show model': true,
-            'play': true,
-            'deactivate all': deactivateAllActions,
-            'activate all': activateAllActions,
-            'modify time scale': 2.0
-        };
+        // settings = {
+        //     'show model': true,
+        //     'play': true,
+        //     'deactivate all': deactivateAllActions,
+        //     'activate all': activateAllActions,
+        //     'modify time scale': 2.0
+        // };
         //
         // const panel = new GUI({width: 310});
         // panel.add(settings, 'show model').onChange(showModel);
@@ -1024,7 +1127,7 @@ export function Game({models, sounds}) {
 
         function teleportPlayerIfOob() {
             if (camera.position.y <= -25) {
-                teleportTo(USER_DEFAULT_POSITION);
+                teleportTo(getRandomElement(spawns));
                 camera.position.copy(playerCollider.end);
                 camera.rotation.set(0, 0, 0);
             }
@@ -1032,6 +1135,18 @@ export function Game({models, sounds}) {
 
         let healEffectModel;
         let shieldEffectModel;
+
+        // Create a bubble-like shield
+        const bubbleGeometry = new THREE.SphereGeometry(1.5, 32, 32); // Reduced segments for better performance
+        const bubbleMaterial = new THREE.MeshPhysicalMaterial({
+            color: 0x88ccff, // Light blue
+            opacity: 0.7,
+            transparent: true,
+        });
+
+        const bubbleShield = new THREE.Mesh(bubbleGeometry, bubbleMaterial);
+        bubbleShield.scale.set(0.4, 0.4, 0.4);
+        scene.add(bubbleShield);
 
         function updateModel() {
             if (model) {
@@ -1080,19 +1195,14 @@ export function Game({models, sounds}) {
                 if (isShieldActive) {
                     if (!shieldEffectModel) {
                         // If the shield model isn't already in the scene, add it
-                        shieldEffectModel = SkeletonUtils.clone(models['shield-effect']);
-                        shieldEffectModel.scale.set(0.003, 0.003, 0.003); // Adjust size of shield
+                        shieldEffectModel = bubbleShield;
                         scene.add(shieldEffectModel);
                     }
 
-                    // Update shield position to be in front of the player
-                    const shieldOffset = new THREE.Vector3(0, 0, -1); // Offset in local space
-                    const playerForward = new THREE.Vector3();
-                    model.getWorldDirection(playerForward); // Get the direction the player is facing
-                    playerForward.multiplyScalar(0.5); // Adjust distance from player
                     const playerPosition = new THREE.Vector3();
                     model.getWorldPosition(playerPosition); // Get the player's position
-                    shieldEffectModel.position.copy(playerPosition).add(shieldOffset)
+                    playerPosition.y += 0.2;
+                    shieldEffectModel.position.copy(playerPosition)
 
 
                 } else if (shieldEffectModel) {
@@ -1119,16 +1229,53 @@ export function Game({models, sounds}) {
                 y: model?.rotation?.y || 0 // Send only the Y-axis rotation
             };
 
-            if (isSocketOpen()) {
-                socket.send(JSON.stringify({type: 'updatePosition', position, rotation}));
-            }
+            sendToSocket({type: 'updatePosition', position, rotation});
         }
 
         setInterval(() => console.log('position ', {
-            x: playerCollider.start.x,
-            y: playerCollider.start.y,
-            z: playerCollider.start.z,
+            x: model.position.x,
+            y: model.position.y,
+            z: model.position.z,
         }), 5000);
+
+        function initWordObjects() {
+
+            for (const object of world.stuff) {
+                const objectAnimations = models[`${object.id}_animations`];
+
+                // console.log('objectAnimations ', objectAnimations)
+                for (const position of object.positions) {
+                    const objectModel = SkeletonUtils.clone(models[object.id]);
+
+                    objectModel.scale.set(object.scale, object.scale, object.scale);
+                    objectModel.position.set(position.x, position.y, position.z);
+
+                    if (object.animated) {
+                        const objectMixer = new THREE.AnimationMixer(objectModel);
+                        objectMixer.timeScale = 40;
+
+                        scene.add(objectModel);
+
+                        if (objectAnimations[0]) {
+                            const action = objectMixer.clipAction(objectAnimations[0]);
+
+                            controlAction({
+                                action,
+                                loop: THREE.LoopRepeat,
+                                mixer: objectMixer
+                            })
+                        }
+
+
+                    } else {
+                        scene.add(objectModel);
+                    }
+
+                }
+            }
+        }
+
+        initWordObjects();
 
         function animate() {
             // Если игрок мёртв, отключаем управление
@@ -1212,9 +1359,11 @@ export function Game({models, sounds}) {
             }
         }
 
-        function addFireballToScene(fireballData) {
+        function castFireballOtherUser(fireballData, ownerId) {
             const fireball = SkeletonUtils.clone(fireballModel); // Clone the model
+
             fireball.position.set(fireballData.position.x, fireballData.position.y, fireballData.position.z);
+            fireball.rotation.set(fireballData.rotation.x, fireballData.rotation.y, fireballData.rotation.z);
 
             scene.add(fireball);
 
@@ -1226,21 +1375,57 @@ export function Game({models, sounds}) {
                     fireballData.velocity.y,
                     fireballData.velocity.z
                 ),
-                ownerId: fireballData.ownerId
+                ownerId,
             });
+        }
+
+        function castShieldOtherUser() {
+
         }
 
         // Handle incoming messages from the server
         socket.onmessage = async (event) => {
             let message = JSON.parse(event.data);
 
-
             switch (message.type) {
-                case 'newFireball':
-                    addFireballToScene(message.fireball);
+                case 'CAST_SPELL':
+
+                    switch (message?.payload?.type) {
+                        case 'fireball':
+                            castFireballOtherUser(message.payload, message.id);
+                            break;
+                        case 'shield':
+                            castShieldOtherUser(message.payload);
+                            break;
+                    }
+
                     break;
-                case 'castPlayerFireball':
-                    addFireballToScene(message.fireball);
+                case 'SEND_CHAT_MESSAGE':
+                    dispatch({
+                        type: "SEND_CHAT_MESSAGE",
+                        payload: `${message?.character?.name} say: ${message.payload}`
+                    });
+                    break;
+                case 'DAMAGED_ME':
+                    if (message.damageDealerId === address) {
+                        dispatch({
+                            type: "SEND_CHAT_MESSAGE",
+                            payload: `You deal ${message.damage} to ${message?.character?.name} (current hp: ${message.currentHP})`
+                        });
+                    }
+                    break;
+                case 'KILL':
+                    if (message.killerId === address) {
+                        dispatch({
+                            type: "SEND_CHAT_MESSAGE",
+                            payload: `+1 $MetaWars$ Gold for kill ${message?.character?.name}!`
+                        });
+                        setTimeout(() => {
+                            refetchCoins()
+                        }, 500)
+                    }
+                    break;
+                case 'damage':
                     break;
                 case 'newPlayer':
                     createPlayer(message.fromId, 'other');
@@ -1255,7 +1440,7 @@ export function Game({models, sounds}) {
         };
 
         const manaInterval =
-            setInterval(() => mana = mana < 100 ? mana + 10 : mana, 1000);
+            setInterval(() => mana = mana < 100 ? mana + 5 : mana, 1000);
 
         return () => {
             clearInterval(manaInterval)

@@ -1,0 +1,52 @@
+/* Chat.css */
+
+#chat-container {
+    width: 300px;
+    max-height: 150px;
+    background-color: rgba(0, 0, 0, 0.7);
+    border: 2px solid #222;
+    border-radius: 5px;
+    position: absolute;
+    bottom: 120px; /* Place above the cast bar */
+    left: 20px; /* Align it to the left */
+    padding: 10px;
+    display: flex;
+    flex-direction: column; /* Show the latest messages at the bottom */
+    overflow-y: hidden;
+    font-family: Arial, sans-serif;
+    font-size: 14px;
+    color: #fff;
+}
+
+.chat-message {
+    margin: 5px 0;
+    word-wrap: break-word;
+    line-height: 1.2;
+}
+
+#chat-input-container {
+    display: flex;
+    margin-top: 10px;
+}
+
+#chat-input {
+    flex-grow: 1;
+    height: 25px;
+    border: none;
+    border-radius: 5px;
+    padding: 5px;
+    font-size: 14px;
+}
+
+#chat-submit {
+    width: 60px;
+    height: 35px;
+    margin-left: 5px;
+    border: none;
+    border-radius: 5px;
+    background-color: #FFFFFF;
+    color: black;
+    font-size: 14px;
+    cursor: pointer;
+}
+

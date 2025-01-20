@@ -2,18 +2,20 @@ import {useZKLogin, ZKLogin} from "react-sui-zk-login-kit";
 import {Box} from "@mui/material";
 import {useEffect} from "react";
 import {generateRandomness} from "@mysten/sui/zklogin";
-
+import "react-sui-zk-login-kit"
 // Example configuration
 const SUI_PROVER_ENDPOINT = 'https://prover-dev.mystenlabs.com/v1';
 
 const providers = {
     google: {
         clientId: "648851101099-uit5tqa2gf0nr1vvpjorc87k2u4minip.apps.googleusercontent.com",
+        // redirectURI: "https://meta-wars.react-sui-zk-login.com",
         redirectURI: "http://localhost:5173",
     },
     twitch: {
         clientId: "ltu7mhvfj4l04maulcjcqx1wm5e5zh",
-        redirectURI: "https://demo.react-sui-zk-login.com",
+        // redirectURI: "https://meta-wars.react-sui-zk-login.com",
+        redirectURI: "http://localhost:5173",
     }
 }
 

@@ -1,37 +1,26 @@
-import React, { useState } from 'react';
-import {
-    useCurrentAccount,
-    useSignAndExecuteTransaction,
-    useSignTransaction,
-    useSuiClient,
-    useSuiClientQuery
-} from "@mysten/dapp-kit";
-import {Transaction} from "@mysten/sui/transactions";
-import {useTransactions} from "../hooks/useTransaction";
-import {useExecutor} from "../hooks/useExcecute";
+import {useState} from 'react';
+import {useZKLogin} from "react-sui-zk-login-kit";
+import {useSuiClientQuery} from '@mysten/dapp-kit';
+import {useTransaction} from "../hooks/useTransaction.js";
+import {PACKAGE_ID} from "../consts.js";
+import {useCoins} from "../hooks/useCoins.js";
+import {useInterface} from "../context/inteface.jsx";
 
-const PACKAGE_ID = '0x830e3f14e79dc0526d44da929937beb799d74bcc91c03852a6168f3f00384a19'
-export const CharacterManager = ({ onCharacterSelect }) => {
-    const [signature, setSignature] = useState('');
-    const client = useSuiClient();
-    const account = useCurrentAccount();
+export const CharacterManager = ({onCharacterSelect}) => {
+    const {address, executeTransaction} = useZKLogin();
+    const {dispatch} = useInterface();
 
-    console.log('account ', account)
-    const { mutate: signAndExecuteTransaction } = useSignAndExecuteTransaction();
-
-    const [characterId, setCharacterId] = useState('');
-    const [characterDetails, setCharacterDetails] = useState(null);
+    console.log('address ', address)
+    const { coins } = useCoins();
+    console.log('coins ', coins)
     const [name, setName] = useState('');
     const [charClass, setCharClass] = useState('');
-    const [race, setRace] = useState('');
-    const [positionX, setPositionX] = useState(0);
-    const [positionY, setPositionY] = useState(0);
-    const tx = useTransactions();
-    const executor = useExecutor();
-    const { data, isLoading, isError, error, refetch } = useSuiClientQuery(
+    const {createNewCharacter, removeCharacter} = useTransaction(PACKAGE_ID);
+
+    const {data, refetch} = useSuiClientQuery(
         'getOwnedObjects',
         {
-            owner: account.address,
+            owner: address,
             limit: 10,
             filter: {
                 MatchAll: [
@@ -41,44 +30,47 @@ export const CharacterManager = ({ onCharacterSelect }) => {
                 ],
             },
             options: {
-                // showOwner: true,
-                // showType: true,
                 showContent: true,
             },
         },
-        { queryKey: ['Object'] },
+        {queryKey: ['Object']},
     );
 
-    const handleCreateCharacter = () => {
-        executor.mutate({ tx: tx.newChar(name, charClass, race, account.address) }, () => refetch());
+    const handleCreateCharacter = async () => {
+        await executeTransaction(createNewCharacter(name, charClass));
+        await refetch();
     };
 
-    const handleRemoveCharacter = (id) => {
-        executor.mutate({
-            tx: tx.removeCharacter(id)
-        }, () => refetch());
+    const handleRemoveCharacter = async (id) => {
+        await executeTransaction(removeCharacter(id));
+        await refetch()
     };
-
-    const handleLogin = (id) => {
-        onCharacterSelect(id);
-    }
 
     return (
         <div style={{padding: '20px', maxWidth: '600px', margin: '0 auto'}}>
             <h2>Characters</h2>
-            <button onClick={() => { refetch() }}>refetch</button>
+            <h4>Address: {address}</h4>
+            <button onClick={() => {
+                refetch()
+            }}>refetch
+            </button>
             <div>
-                {((data && data.data) || []).map(({ data: { objectId, content: { fields } } }, index) => (
+                {((data && data.data) || []).map(({data: {objectId, content: {fields}}}, index) => (
                     <div key={objectId}>
                         name: {fields.name},
                         class: {fields.class},
-                        race: {fields.race}
-                        <button onClick={() => { handleRemoveCharacter(objectId) }}>delete</button>
-                        <button onClick={() => { handleLogin(objectId) }}>login</button>
+                        <button onClick={() => {
+                            handleRemoveCharacter(objectId)
+                        }}>delete
+                        </button>
+                        <button onClick={() => {
+                            dispatch({ type: 'SET_CHARACTER', payload: fields })
+                        }}>login
+                        </button>
                     </div>
                 ))}
             </div>
-            <br />
+            <br/>
             <h2>Character Manager</h2>
 
             <div>
@@ -90,24 +82,21 @@ export const CharacterManager = ({ onCharacterSelect }) => {
                     onChange={(e) => setName(e.target.value)}
                     style={{marginBottom: '10px', display: 'block'}}
                 />
-                <input
-                    type="text"
-                    placeholder="Class"
+                <select
                     value={charClass}
                     onChange={(e) => setCharClass(e.target.value)}
                     style={{marginBottom: '10px', display: 'block'}}
-                />
-                <input
-                    type="text"
-                    placeholder="Race"
-                    value={race}
-                    onChange={(e) => setRace(e.target.value)}
-                    style={{marginBottom: '10px', display: 'block'}}
-                />
+                >
+                    <option value="" disabled>
+                        Select Class
+                    </option>
+                    <option value="warrior">Warrior</option>
+                    <option value="mage">Mage</option>
+                    <option value="archer">Archer</option>
+                    <option value="rogue">Rogue</option>
+                </select>
                 <button onClick={handleCreateCharacter}>Create Character</button>
             </div>
-
-
         </div>
     );
 };

@@ -1,22 +1,37 @@
 import {QueryClient, QueryClientProvider} from '@tanstack/react-query'
 import {ZKLoginProvider} from "react-sui-zk-login-kit";
 import {SuiClient} from "@mysten/sui/client";
-// import {Auth} from "./Auth.jsx";
+import {Auth} from "./Auth.jsx";
 import {Content} from "./Content.jsx";
-const queryClient = new QueryClient()
+import CharacterManager from "./components/Character.jsx";
+import {SuiClientProvider} from "@mysten/dapp-kit";
+import {getFullnodeUrl} from "@mysten/sui/client";
+import {useState} from "react";
+import {InterfaceProvider} from "./context/inteface.jsx";
 
-const FULLNODE_URL = "https://fullnode.devnet.sui.io/";
-const suiClient = new SuiClient({url: FULLNODE_URL});
+const queryClient = new QueryClient();
+
+const suiClient = new SuiClient({url: getFullnodeUrl('devnet')});
+
+const networks = {
+    devnet: {url: getFullnodeUrl('devnet')},
+};
 
 export function App() {
     return (
-        <QueryClientProvider client={queryClient}>
+        <div className="container">
             <ZKLoginProvider client={suiClient}>
-                {/*<Auth>*/}
-                    <Content />
-                {/*</Auth>*/}
+                <QueryClientProvider client={queryClient}>
+                    <SuiClientProvider networks={networks} defaultNetwork="devnet">
+                        <Auth>
+                            <InterfaceProvider>
+                                <Content/>
+                            </InterfaceProvider>
+                        </Auth>
+                    </SuiClientProvider>
+                </QueryClientProvider>
             </ZKLoginProvider>
-        </QueryClientProvider>
+        </div>
     );
 }
 

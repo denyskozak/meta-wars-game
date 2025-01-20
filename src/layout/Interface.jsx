@@ -1,8 +1,9 @@
+import {SkillBar} from "../components/parts/SkillBar.jsx";
+import {CastBar} from "../components/parts/CastBar.jsx";
+import {Chat} from "../components/parts/Chat.jsx";
+import {Coins} from "../components/parts/Coins.jsx";
+
 import './Interface.css';
-import {SkillBar} from "./parts/SkillBar.jsx";
-import {CastBar} from "./parts/CastBar.jsx";
-import React from "react";
-import {Chat} from "./parts/Chat.jsx";
 
 export const Interface = () => {
     return (
@@ -51,6 +52,7 @@ export const Interface = () => {
             <SkillBar/>
             <CastBar/>
             <Chat />
+            <Coins />
         </div>
     )
 }
