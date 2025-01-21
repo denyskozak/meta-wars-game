@@ -1,8 +1,8 @@
 import {useZKLogin} from "react-sui-zk-login-kit";
 import {useInterface} from "../context/inteface.jsx";
 
-// const socket = new WebSocket('ws://35.160.49.180:8080');
-const socket = new WebSocket('ws://localhost:8080');
+const socket = new WebSocket('wss://100.26.98.220');
+// const socket = new WebSocket('ws://localhost:8080');
 export const useWS = () => {
     const {address} = useZKLogin();
     const {state: {character}} = useInterface();

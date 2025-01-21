@@ -37,7 +37,7 @@ export const saveStateToSession = (state) => {
 
 export const borrowInitState = () => {
     const sessionState = loadStateFromSession(initInterfaceState);
-    return {...sessionState, userSalt: localStorage.getItem("userSalt")};
+    return {...sessionState, userSalt: localStorage.getItem("userSalt"), chatMessages: []};
 }
 
 export const InterfaceProvider = ({children}) => {

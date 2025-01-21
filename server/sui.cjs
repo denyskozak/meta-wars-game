@@ -9,8 +9,8 @@ const client = new SuiClient({
     url: 'https://fullnode.devnet.sui.io', // Change to the appropriate endpoint
 });
 
-const PACKAGE_ID = '0x79288216db99425043ee2b4caae337a16f4c6f8ac73454806fd52b2fc861cd88';
-const TREASURY_CAP_OBJECT_ID = '0x8a4f2625ec8e480b63822218de5ebf0a9e519d8e691b1f6a34e88a3d90ad6497';
+const PACKAGE_ID = '0x9747359e604b83d72dbaaa05ec39558a390138f656085d7abf6604e1805c3546';
+const TREASURY_CAP_OBJECT_ID = '0xa39d534ad0acc77b4d83f099a556d88ac11745c4d4d395b00d99217d9d22ff13';
 
 // Function to send a mint transaction
 async function mintCoins(recipientAddress, amount) {

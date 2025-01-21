@@ -1,10 +1,32 @@
 const WebSocket = require('ws');
+const https = require('https');
+const fs = require('fs');
+const path = require('path');
 const { mintCoins } = require('./sui.cjs');
 
-const server = new WebSocket.Server({port: 8080});
 const clients = new Map();
 
-server.on('connection', (socket) => {
+// Prod
+const server = https.createServer({
+    cert: fs.readFileSync(path.join(__dirname, 'keys', 'certificate.crt')),
+    key: fs.readFileSync(path.join(__dirname, 'keys', 'private.key')),
+}, (req, res) => {
+    // Handle HTTP requests
+    if (req.method === 'GET' && req.url === '/.well-known/pki-validation/A12D3D4919593ED2A4703AB4BA1FE0CE.txt') {
+        res.writeHead(200, { 'Content-Type': 'text/plain' });
+        res.end(JSON.stringify({ error: 'Not Found !!' }));
+    } else {
+        res.writeHead(404, { 'Content-Type': 'application/json' });
+        res.end(JSON.stringify({ error: 'Not Found' }));
+    }
+});
+const ws = new WebSocket.Server({ server });
+
+
+// Dev
+// const ws = new WebSocket.Server({port: 8080});
+
+ws.on('connection', (socket) => {
     console.log('New client connected.');
     // Assign a unique ID to the new client
     const id = Date.now();
@@ -32,9 +54,8 @@ server.on('connection', (socket) => {
         // Broadcast the message to all other clients
 
         switch (message.type) {
-            case 'kill':
-                const { killerId, id: victimId } = message;
-                console.log('message ', message)
+            case 'KILL':
+                const { killerId } = message;
 
                 // Mint coins for the killer using a Move smart contract
                 mintCoins(killerId, 1) // Example: Award 10 coins to the killer
@@ -43,10 +64,8 @@ server.on('connection', (socket) => {
 
                         // Broadcast the kill event and reward info
                         broadcastIt({
-                            type: 'kill',
+                            ...message,
                             killerId,
-                            victimId,
-                            reward: 10, // Example reward
                             txHash,
                         });
                     })
@@ -72,4 +91,7 @@ server.on('connection', (socket) => {
     });
 });
 
-console.log('WebSocket server is running on ws://localhost:8080');
+
+server.listen(443, () => {
+    console.log('Secure WebSocket server is running on wss://your-domain.com:8080');
+});

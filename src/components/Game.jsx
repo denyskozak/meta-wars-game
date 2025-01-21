@@ -83,7 +83,7 @@ export function Game({models, sounds}) {
             updateHPBar();
             dispatch({type: "SEND_CHAT_MESSAGE", payload: `You got ${amount} damage!`});
 
-            sendToSocket({type: 'DAMAGED_ME', damageDealerId: userIdTouched, damage: 40, currentHP: hp})
+            sendToSocket({type: 'DAMAGED_ME', damageDealerId: userIdTouched, damage: amount, currentHP: hp})
 
             if (hp <= 0) {
                 dispatch({type: "SEND_CHAT_MESSAGE", payload: "You are dead :("});
@@ -1303,6 +1303,7 @@ export function Game({models, sounds}) {
                 updateCameraPosition();
 
             }
+
             teleportPlayerIfOob();
 
             updateHPBar();
@@ -1428,7 +1429,7 @@ export function Game({models, sounds}) {
                 case 'damage':
                     break;
                 case 'newPlayer':
-                    createPlayer(message.fromId, 'other');
+                    createPlayer(message.fromId, String(message?.character?.name));
                     break;
                 case 'updatePosition':
                     updatePlayerPosition(message.fromId, message.position, message.rotation);
