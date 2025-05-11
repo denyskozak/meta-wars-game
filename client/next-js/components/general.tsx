@@ -8,7 +8,7 @@ import { Link } from "@heroui/link";
 import { useRouter } from "next/navigation";
 
 import { title as getTitle, subtitle } from "@/components/primitives";
-import { useAnimation } from "@/app/hooks/useAnimation";
+import { useAnimation } from "@/hooks/useAnimation";
 import { siteConfig } from "@/config/site";
 import { DiscordIcon } from "@/components/icons";
 
@@ -80,13 +80,13 @@ export default function General() {
             <span
               className={`${getTitle({ color: "cyan" })} fade-in-animation`}
             >
-              Win&nbsp;
+              Play&nbsp;
             </span>
 
             <span
               className={`${getTitle({ color: "yellow" })} fade-in-animation`}
             >
-              Tournaments&nbsp;
+              Win&nbsp;
             </span>
             <br />
             <span
@@ -126,7 +126,7 @@ export default function General() {
               color: "foreground",
             })}
           >
-            Next-gen Platform Rewards For Skills
+            New Multiplayer Online Battle Arena
           </div>
         </div>
       </div>
@@ -140,7 +140,7 @@ export default function General() {
         <Button
           className=" shadow-lg overflow-hidden group "
           size="lg"
-          onPress={() => router.push("/championships")}
+          onPress={() => router.push("/game")}
         >
           <span className="absolute inset-0 bg-gradient-to-r from-pink-500 via-red-500 to-yellow-500 animate-pulse opacity-100 group-hover:opacity-100 blur-md" />
           <span className="relative z-10">PLAY</span>
