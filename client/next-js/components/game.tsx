@@ -1,3 +1,4 @@
+"use client";
 import React, {useState, useLayoutEffect, useRef} from 'react';
 import * as THREE from 'three';
 import * as SkeletonUtils from 'three/addons/utils/SkeletonUtils.js';

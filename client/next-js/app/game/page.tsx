@@ -12,7 +12,16 @@ THREE.Cache.enabled = true;
 
 const loader = new GLTFLoader().setPath('./models/');
 
-
+const models = [
+    {id: 'murloc', path: 'murloc_creature.glb'},
+    {id: 'zone', path: 'zone2.glb'},
+    {id: 'fireball', path: 'fireball2.glb'},
+    {id: 'character', path: 'skins/mad.glb'},
+    {id: 'heal-effect', path: 'heal-effect.glb'},
+    {id: 'fire', path: 'stuff/fire.glb'},
+    {id: 'arthas', path: 'arthas.glb'},
+    {id: 'stormwind_guard', path: 'stormwind_guard.glb'},
+];
 export default function GamePage() {
     const account = useCurrentAccount();
     const [preloadedData, setPreloadedData] = useState({
@@ -21,16 +30,7 @@ export default function GamePage() {
     });
     const {state: {character}} = useInterface();
 
-    const models = [
-        {id: 'murloc', path: 'murloc_creature.glb'},
-        {id: 'zone', path: 'zone2.glb'},
-        {id: 'fireball', path: 'fireball2.glb'},
-        {id: 'character', path: 'skins/mad.glb'},
-        {id: 'heal-effect', path: 'heal-effect.glb'},
-        {id: 'fire', path: 'stuff/fire.glb'},
-        {id: 'arthas', path: 'arthas.glb'},
-        {id: 'stormwind_guard', path: 'stormwind_guard.glb'},
-    ];
+
     useLayoutEffect(() => {
         function preloadModels(modelPaths) {
             const loadedModels = {};
@@ -74,11 +74,16 @@ export default function GamePage() {
 
     console.log('Object.keys(preloadedData.models).length ', Object.keys(preloadedData.models).length)
     console.log('models.length ', models.length)
-    if (Object.keys(preloadedData.models).length < models.length) {
+    if (Object.keys(preloadedData.models).length < 16) {
         return (<span>Loading</span>)
     }
 
+    console.log('INIT!~ ')
     return (
-        <Game character={character} models={preloadedData.models} sounds={preloadedData.sounds} />
+    <Game
+      character={character}
+      models={preloadedData.models}
+      sounds={preloadedData.sounds}
+    />
     );
 }
