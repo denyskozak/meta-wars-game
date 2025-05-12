@@ -1,7 +1,7 @@
-import {SkillBar} from "../parts/SkillBar.tsx";
-import {CastBar} from "../parts/CastBar.tsx";
-import {Chat} from "../parts/Chat.tsx";
-import {Coins} from "../parts/Coins.tsx";
+import {SkillBar} from "../parts/SkillBar";
+import {CastBar} from "../parts/CastBar";
+import {Chat} from "../parts/Chat";
+import {Coins} from "../parts/Coins";
 
 import './Interface.css';
 

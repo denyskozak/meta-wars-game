@@ -6,7 +6,7 @@ import {Game} from "@/components/game";
 import {useCurrentAccount} from "@mysten/dapp-kit";
 import {useInterface} from "@/context/inteface";
 import * as THREE from "three";
-import {GLTFLoader} from "three/addons";
+import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader';
 
 THREE.Cache.enabled = true;
 
@@ -32,11 +32,11 @@ export default function GamePage() {
         {id: 'stormwind_guard', path: 'stormwind_guard.glb'},
     ];
     useLayoutEffect(() => {
-        function preloadModels(modelPaths) {
-            const loadedModels = {};
+        function preloadModels(modelPaths: any[]) {
+            const loadedModels: any = {};
 
             const promises = modelPaths.map((model) =>
-                new Promise((resolve, reject) => {
+                new Promise<void>((resolve, reject) => {
                     loader.load(
                         model.path,
                         (gltf) => {
