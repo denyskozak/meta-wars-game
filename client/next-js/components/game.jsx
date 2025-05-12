@@ -20,6 +20,7 @@ import { Interface } from "@/components/layout/Interface";
 const USER_DEFAULT_POSITION = [
   -36.198117096583466, 0.22499999997500564, -11.704829764915257,
 ];
+
 const spawns = [
   { x: -17.12683322968667, y: 0.34999999995822706, z: -12.781498582746165 },
   { x: -28.60683425667782, y: 0.3499999999897787, z: 9.049836139148344 },
@@ -277,7 +278,11 @@ export function Game({ models, sounds, character }) {
     function respawnPlayer() {
       hp = 100; // Восстанавливаем HP
       updateHPBar(); // Обновляем отображение HP
-      teleportTo(getRandomElement(spawns));
+      teleportTo({
+        x: USER_DEFAULT_POSITION[0],
+        y: USER_DEFAULT_POSITION[1] + 0.75,
+        z: USER_DEFAULT_POSITION[2],
+      });
       document.getElementById("respawnButton").style.display = "none"; // Скрываем кнопку воскрешения
     }
 

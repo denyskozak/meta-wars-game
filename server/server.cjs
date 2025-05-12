@@ -2,7 +2,7 @@ const WebSocket = require('ws');
 const http = require('http');
 const fs = require('fs');
 const path = require('path');
-const { mintCoins } = require('./sui.cjs');
+// const { // const { mintCoins } = require('./sui.cjs');mintCoins } = require('./sui.cjs');
 
 const clients = new Map();
 
@@ -46,20 +46,20 @@ ws.on('connection', (socket) => {
                 const { killerId } = message;
 
                 // Mint coins for the killer using a Move smart contract
-                mintCoins(killerId, 1) // Example: Award 10 coins to the killer
-                    .then((txHash) => {
-                        console.log(`Minted coins for Player ${killerId}. Transaction Hash: ${txHash}`);
-
-                        // Broadcast the kill event and reward info
-                        broadcastIt({
-                            ...message,
-                            killerId,
-                            txHash,
-                        });
-                    })
-                    .catch((err) => {
-                        console.error(`Failed to mint coins for Player ${killerId}:`, err);
-                    });
+                // mintCoins(killerId, 1) // Example: Award 10 coins to the killer
+                //     .then((txHash) => {
+                //         console.log(`Minted coins for Player ${killerId}. Transaction Hash: ${txHash}`);
+                //
+                //         // Broadcast the kill event and reward info
+                //         broadcastIt({
+                //             ...message,
+                //             killerId,
+                //             txHash,
+                //         });
+                //     })
+                //     .catch((err) => {
+                //         console.error(`Failed to mint coins for Player ${killerId}:`, err);
+                //     });
                 break;
             default:
                 broadcastIt(message);
