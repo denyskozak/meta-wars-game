@@ -230,8 +230,6 @@ export function Game({ models, sounds, character }) {
     const keyStates = {};
 
     const vector1 = new THREE.Vector3();
-    const vector2 = new THREE.Vector3();
-    const vector3 = new THREE.Vector3();
 
     // Set limits for the FOV
     const minFOV = 10;
@@ -249,6 +247,17 @@ export function Game({ models, sounds, character }) {
     // Function to adjust the FOV (zoom)
     const target = document.getElementById("target");
     let isFocused = false;
+
+    const trailMaterial = new THREE.MeshBasicMaterial({
+      color: 0xff0000,
+      transparent: true,
+      opacity: 0.3,
+      depthWrite: false,
+    });
+
+    const trailGeometry = new THREE.SphereGeometry(0.05, 8, 8); // Маленький шар
+    const TRAIL_INTERVAL = 10; // В мс, как часто добавлять точки
+    const TRAIL_LIFETIME = 100; // Сколько живет одна точка
 
     function adjustFOV(delta) {
       camera.fov = THREE.MathUtils.clamp(camera.fov + delta, minFOV, maxFOV);
@@ -351,7 +360,7 @@ export function Game({ models, sounds, character }) {
           !isCasting && setAnimation("Idle");
           break;
         case "KeyE":
-          castFireball();
+          castSphere();
           break;
         case "KeyG":
           leftMouseButtonClicked = true;
@@ -651,7 +660,7 @@ export function Game({ models, sounds, character }) {
 
     const CAST_MANA_PRICE = 25;
 
-    function castFireball() {
+    function castSphere() {
       if (globalSkillCooldown) {
         return;
       }
@@ -724,6 +733,10 @@ export function Game({ models, sounds, character }) {
           ),
           velocity: velocity,
           initialPosition: initialPosition,
+
+
+          trail: [], // массив точек следа
+          lastTrailTime: performance.now(),
         };
 
         sphereIdx = (sphereIdx + 1) % spheres.length;
@@ -856,7 +869,14 @@ export function Game({ models, sounds, character }) {
     //
     // }
 
+    const removeSphere = (sphere, index) => {
+      scene.remove(sphere.mesh); // Remove the fireball from the scene
+      spheres.splice(index, 1); // Remove it from the array
+    };
+
     function updateSpheres(deltaTime) {
+      const now = performance.now();
+
       spheres.forEach((sphere, index) => {
         if (!sphere.mesh) return;
 
@@ -866,8 +886,7 @@ export function Game({ models, sounds, character }) {
 
         if (result) {
           // Handle collision logic (e.g., explode fireball or bounce)
-          scene.remove(sphere.mesh); // Remove the fireball from the scene
-          spheres.splice(index, 1); // Remove it from the array
+          removeSphere(sphere, index);
 
           // sphere.velocity.addScaledVector(result.normal, -result.normal.dot(sphere.velocity) * 1.5);
           // sphere.collider.center.add(result.normal.multiplyScalar(result.depth));
@@ -891,6 +910,29 @@ export function Game({ models, sounds, character }) {
 
         // Update the fireball position
         playerSphereCollision(sphere, index);
+
+        if (now - sphere.lastTrailTime > TRAIL_INTERVAL) {
+          const ghost = new THREE.Mesh(trailGeometry, trailMaterial.clone());
+          ghost.position.copy(sphere.mesh.position);
+          scene.add(ghost);
+
+          sphere.trail.push({ mesh: ghost, birth: now });
+          sphere.lastTrailTime = now;
+        }
+
+        // Удаляем старые точки следа
+        for (let i = sphere.trail.length - 1; i >= 0; i--) {
+          const age = now - sphere.trail[i].birth;
+          const fade = 1 - age / TRAIL_LIFETIME;
+          sphere.trail[i].mesh.material.opacity = 0.3 * fade;
+
+          if (age > TRAIL_LIFETIME) {
+            scene.remove(sphere.trail[i].mesh);
+            sphere.trail[i].mesh.geometry.dispose();
+            sphere.trail[i].mesh.material.dispose();
+            sphere.trail.splice(i, 1);
+          }
+        }
       });
 
       // spheresCollisions(); // Handle collisions between spheres
@@ -1440,7 +1482,7 @@ export function Game({ models, sounds, character }) {
       }
     }
 
-    function castFireballOtherUser(fireballData, ownerId) {
+    function castSphereOtherUser(fireballData, ownerId) {
       const fireball = SkeletonUtils.clone(fireballModel); // Clone the model
 
       fireball.position.set(
@@ -1481,7 +1523,7 @@ export function Game({ models, sounds, character }) {
         case "CAST_SPELL":
           switch (message?.payload?.type) {
             case "fireball":
-              castFireballOtherUser(message.payload, message.id);
+              castSphereOtherUser(message.payload, message.id);
               break;
             case "shield":
               castShieldOtherUser(message.payload);

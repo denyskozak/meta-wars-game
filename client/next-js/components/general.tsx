@@ -140,7 +140,7 @@ export default function General() {
         <Button
           className=" shadow-lg overflow-hidden group "
           size="lg"
-          onPress={() => router.push("/game")}
+          onPress={() => router.push("/matches")}
         >
           <span className="absolute inset-0 bg-gradient-to-r from-pink-500 via-red-500 to-yellow-500 animate-pulse opacity-100 group-hover:opacity-100 blur-md" />
           <span className="relative z-10">PLAY</span>

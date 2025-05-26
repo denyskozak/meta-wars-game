@@ -8,7 +8,7 @@ import {Navbar} from "@/components/navbar";
 
 export default function Home() {
   return (
-    <div>
+    <div className="h-full">
         <Navbar />
         <div className="relative justify-center flex flex-col w-full h-[calc(100%-64px)]">
             <video
