@@ -7,14 +7,19 @@ import {useCurrentAccount} from "@mysten/dapp-kit";
 import {useInterface} from "@/context/inteface";
 import * as THREE from "three";
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader';
+import {useParams} from "next/navigation";
+import {useWS} from "@/hooks/useWS";
 
 THREE.Cache.enabled = true;
 
-const loader = new GLTFLoader().setPath('./models/');
+const loader = new GLTFLoader().setPath('/models/');
 
 
 export default function GamePage() {
     const account = useCurrentAccount();
+    const params = useParams();
+    const {socket, sendToSocket} = useWS(params.id);
+
     const [preloadedData, setPreloadedData] = useState({
         models: {},
         sounds: {}
@@ -65,20 +70,18 @@ export default function GamePage() {
             blink: new Audio('/sounds/blink.ogg'),
         }
         preloadModels(models)
-            .then((loadedModels) => setPreloadedData({models: loadedModels, sounds}));
+            .then((loadedModels) => {
+
+                setPreloadedData({models: loadedModels, sounds});
+            });
     }, []);
 
-    // if (!account) return <Landing />
-    console.log('character ', character)
-    // if (!character) return <CharacterManager/>;
 
-    console.log('Object.keys(preloadedData.models).length ', Object.keys(preloadedData.models).length)
-    console.log('models.length ', models.length)
     if (Object.keys(preloadedData.models).length < models.length) {
         return (<span>Loading</span>)
     }
 
     return (
-        <Game character={character} models={preloadedData.models} sounds={preloadedData.sounds} />
+        <Game matchId={params.id} character={character} models={preloadedData.models} sounds={preloadedData.sounds} />
     );
 }

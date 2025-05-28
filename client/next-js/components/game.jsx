@@ -1,4 +1,4 @@
-import React, {useLayoutEffect, useRef} from "react";
+import React, {useLayoutEffect, useRef, useState} from "react";
 import * as THREE from "three";
 import * as SkeletonUtils from "three/examples/jsm/utils/SkeletonUtils";
 import Stats from "three/examples/jsm/libs/stats.module";
@@ -37,13 +37,15 @@ function getRandomElement(array) {
     return array[randomIndex];
 }
 
-export function Game({models, sounds, character}) {
+export function Game({models, sounds, matchId, character}) {
     const containerRef = useRef(null);
-    const account = useCurrentAccount();
-    const address = account?.address;
     const {refetch: refetchCoins} = useCoins();
     const {dispatch} = useInterface();
-    const {socket, sendToSocket} = useWS();
+    const {socket, sendToSocket} = useWS(matchId);
+    const [isReadyToPlay, setIsReadyToPlay] = useState(false);
+
+    const account = useCurrentAccount();
+    const address = account?.address;
 
     useLayoutEffect(() => {
         // Store other players
@@ -207,7 +209,7 @@ export function Game({models, sounds, character}) {
         labelRenderer.setSize(window.innerWidth, window.innerHeight);
         labelRenderer.domElement.style.position = "absolute";
         labelRenderer.domElement.style.top = "0px";
-        containerRef.current.appendChild(labelRenderer.domElement);
+
 
         const clock = new THREE.Clock();
 
@@ -265,13 +267,12 @@ export function Game({models, sounds, character}) {
         renderer.shadowMap.enabled = true;
         renderer.shadowMap.type = THREE.VSMShadowMap;
         renderer.toneMapping = THREE.ACESFilmicToneMapping;
-        containerRef.current.appendChild(renderer.domElement);
 
         const stats = new Stats();
 
         stats.domElement.style.position = "absolute";
         stats.domElement.style.top = "0px";
-        containerRef.current.appendChild(stats.domElement);
+
 
         const GRAVITY = 30;
 
@@ -374,6 +375,12 @@ export function Game({models, sounds, character}) {
         //     scene.add(cursor);
         // }
 
+        function appendRenderer() {
+            containerRef.current.appendChild(labelRenderer.domElement);
+            containerRef.current.appendChild(renderer.domElement);
+            containerRef.current.appendChild(stats.domElement);
+        };
+
         function respawnPlayer() {
             hp = 100; // Восстанавливаем HP
             updateHPBar(); // Обновляем отображение HP
@@ -450,7 +457,7 @@ export function Game({models, sounds, character}) {
                     !isCasting && setAnimation("Idle");
                     break;
                 case "KeyE":
-                    castSphere(iceballMesh);
+                    castSpell('fireball');
                     break;
                 case "KeyG":
                     leftMouseButtonClicked = true;
@@ -754,7 +761,18 @@ export function Game({models, sounds, character}) {
 
         const CAST_MANA_PRICE = 25;
 
-        function castSphere(sphereMesh) {
+        function castSpell(spellType) {
+            switch (spellType) {
+                case "fireball":
+                    castSphere(spellType, fireballMesh);
+                    break;
+                case "iceball":
+                    castSphere(spellType, iceballMesh);
+                    break;
+            }
+        }
+
+        function castSphere(type, sphereMesh) {
             if (globalSkillCooldown) {
                 return;
             }
@@ -803,7 +821,7 @@ export function Game({models, sounds, character}) {
                 sendToSocket({
                     type: "CAST_SPELL",
                     payload: {
-                        type: "fireball",
+                        type,
                         position: {
                             x: sphereMesh.position.x,
                             y: sphereMesh.position.y,
@@ -915,10 +933,8 @@ export function Game({models, sounds, character}) {
                 const d2 = point.distanceToSquared(sphere_center);
 
                 if (d2 < r2) {
-                    scene.remove(sphere.mesh); // Remove the fireball from the scene
                     userIdTouched = spheres[index]["ownerId"];
-                    spheres.splice(index, 1); // Remove it from the array
-
+                    removeSphere(sphere, index)
                     touchedPlayer = true;
                     break;
                 }
@@ -1606,6 +1622,8 @@ export function Game({models, sounds, character}) {
                     new THREE.Vector3().copy(fireball.position),
                     SPHERE_RADIUS,
                 ),
+                trail: [], // массив точек следа
+                lastTrailTime: performance.now(),
                 velocity: new THREE.Vector3(
                     fireballData.velocity.x,
                     fireballData.velocity.y,
@@ -1622,6 +1640,7 @@ export function Game({models, sounds, character}) {
         socket.onmessage = async (event) => {
             let message = JSON.parse(event.data);
 
+            console.log("message: ", message);
             switch (message.type) {
                 case "CAST_SPELL":
                     switch (message?.payload?.type) {
@@ -1674,6 +1693,13 @@ export function Game({models, sounds, character}) {
                 case "removePlayer":
                     removePlayer(message.id);
                     break;
+                case "MATCH_READY":
+                    setIsReadyToPlay(true);
+                    appendRenderer();
+                    message.players.forEach((player) => {
+                        createPlayer(player.id, String(player.id));
+                    })
+                    break;
             }
         };
 
@@ -1682,6 +1708,9 @@ export function Game({models, sounds, character}) {
             1000,
         );
 
+        sendToSocket({
+            type: 'READY_FOR_MATCH'
+        });
         return () => {
             clearInterval(manaInterval);
         };
@@ -1690,6 +1719,7 @@ export function Game({models, sounds, character}) {
     return (
         <div ref={containerRef} id="game-container">
             <Interface/>
+            {!isReadyToPlay && (<span>Wait Players</span>)}
         </div>
     );
 }

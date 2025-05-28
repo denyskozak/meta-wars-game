@@ -3,16 +3,8 @@
 
 import {useWS} from "@/hooks/useWS";
 import {useEffect, useState} from "react";
-import {Table, TableHeader, TableColumn, TableBody, TableRow, TableCell, Button, useDisclosure} from "@heroui/react";
-import {
-    Modal,
-    ModalContent,
-    ModalHeader,
-    ModalBody,
-    ModalFooter
-} from "@heroui/modal";
-import {Input} from "@heroui/input";
-import {useParams} from "next/navigation";
+import {Button} from "@heroui/react";
+import {useParams, useRouter} from "next/navigation";
 
 
 interface Match {
@@ -24,9 +16,10 @@ interface Match {
 }
 
 export default function MatchesPage() {
-    const {socket, sendToSocket} = useWS();
     const params = useParams();
+    const {socket, sendToSocket} = useWS(params.id);
     const [match, setMatch] = useState<Match | null>(null);
+    const router = useRouter();
 
     useEffect(() => {
         socket.onmessage = async (event) => {
@@ -39,15 +32,24 @@ export default function MatchesPage() {
         };
 
         sendToSocket({
+            type: 'JOIN_MATCH',
+        })
+
+        sendToSocket({
             type: 'GET_MATCH',
-            id: params?.id
         })
     }, []);
 
+    const goToGame = () => {
+        router.push(`/matches/${params.id}/game`);
+    };
+
     return (
         <>
-           <span>Lobby: {params?.id}</span>
-           <span>{JSON.stringify(match)}</span>
+            <span>Lobby: {params?.id}</span>
+            <span>{JSON.stringify(match)}</span>
+            <Button color="primary" onPress={() => goToGame()}>Join</Button>
+
         </>
     );
 }

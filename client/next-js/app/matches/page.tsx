@@ -89,7 +89,7 @@ export default function MatchesPage() {
                             <TableCell>{matche.name}</TableCell>
                             <TableCell>{matche.players.length} / {matche.maxPlayers}</TableCell>
                             <TableCell>
-                                <Button color="primary" onPress={() => goToLobby(matche.id)}>Join</Button>
+                                <><Button color="primary" onPress={() => goToLobby(matche.id)}>Join</Button></>
                             </TableCell>
                         </TableRow>
                     ))}

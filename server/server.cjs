@@ -1,106 +1,117 @@
 const WebSocket = require('ws');
 const http = require('http');
-const fs = require('fs');
-const path = require('path');
-// const { // const { mintCoins } = require('./sui.cjs');mintCoins } = require('./sui.cjs');
 
 const clients = new Map();
+const playerMatchMap = new Map(); // playerId => matchId
 
-// Prod
 const server = http.createServer();
 const ws = new WebSocket.Server({ server });
 
-
-// Matches
 const matches = new Map(); // matchId => { id, players: Set, maxPlayers, isFull }
 let matchCounter = 1;
+
 function createMatch({ name, maxPlayers = 4, ownerId }) {
     const matchId = `match_${matchCounter++}`;
     const match = {
         id: matchId,
         name,
-        players: new Set([ownerId]),
-        maxPlayers,
+        players: new Set([]),
+        playersReady: 0,
+        maxPlayers: Number(maxPlayers),
         isFull: false,
     };
-    console.log("match: ", match);
     matches.set(matchId, match);
+    playerMatchMap.set(ownerId, matchId);
     return match;
 }
 
+function broadcastToMatch(matchId, message, excludeId = null) {
+    const match = matches.get(matchId);
+    if (!match) return;
+
+    match.players.forEach((playerId) => {
+        if (playerId !== excludeId) {
+            const client = clients.get(playerId);
+            if (client) {
+                client.send(JSON.stringify(message));
+            }
+        }
+    });
+}
 
 ws.on('connection', (socket) => {
     console.log('New client connected.');
-    // Assign a unique ID to the new client
     const id = Date.now();
     clients.set(id, socket);
 
-    const broadcastIt = (message = {}) => {
-        clients.forEach((client, clientId) => {
-            if (clientId !== id) {
-                client.send( JSON.stringify({...message, fromId: id, toId: clientId}));
-            }
-        });
-    }
+    const joinMessage = { type: 'newPlayer', id };
+    clients.forEach((client, clientId) => {
+        if (clientId !== id) {
+            client.send(JSON.stringify(joinMessage));
+        }
+    });
 
-    // Broadcast new player info to all clients
-    const joinMessage = {type: 'newPlayer', id};
-    broadcastIt(joinMessage);
-
-    // Handle incoming messages from a client
     socket.on('message', (data) => {
         let message = {};
-
         try {
             message = JSON.parse(data);
         } catch (e) {}
-        // Broadcast the message to all other clients
 
+        console.log("matches: ", matches);
+        const match = matches.get(message.matchId);
+        if (message.type !== 'updatePosition') {
+            console.log("message: ", message);
+            console.log("match: ", match);
+        }
         switch (message.type) {
-            case 'KILL':
-                const { killerId } = message;
+            case 'READY_FOR_MATCH':
+                if (match) {
+                    const matchId = playerMatchMap.get(id);
 
-                // Mint coins for the killer using a Move smart contract
-                // mintCoins(killerId, 1) // Example: Award 10 coins to the killer
-                //     .then((txHash) => {
-                //         console.log(`Minted coins for Player ${killerId}. Transaction Hash: ${txHash}`);
-                //
-                //         // Broadcast the kill event and reward info
-                //         broadcastIt({
-                //             ...message,
-                //             killerId,
-                //             txHash,
-                //         });
-                //     })
-                //     .catch((err) => {
-                //         console.error(`Failed to mint coins for Player ${killerId}:`, err);
-                //     });
+                    match.playersReady++;
+                    if (match.playersReady === match.maxPlayers) {
+                        const matchReadyMessage = {
+                            type: 'MATCH_READY',
+                            id: match.id,
+                            players: Array.from(match.players),
+                        };
+                        broadcastToMatch(matchId, matchReadyMessage);
+                    }
+                }
                 break;
+            case 'KILL':
+                break;
+
             case 'GET_MATCHES':
-                const allMatches = Array.from(matches.values()).map((match) => ({
+                const allMatches = Array.from(matches.values()).map(match => ({
                     ...match,
                     players: Array.from(match.players),
                 }));
-
                 socket.send(JSON.stringify({
                     type: 'MATCH_LIST',
                     matches: allMatches,
                 }));
                 break;
-            case 'GET_MATCH':
-                const match = Array.from(matches.values()).find((match) => match.id === message.id);
-                console.log("GET_MATCH match: ",  match);
-                socket.send(JSON.stringify({
-                    type: 'GET_MATCH',
-                    match: {
-                        ...match,
-                        players: Array.from(match.players),
-                    },
-                }));
-                break;
-            case 'CREATE_MATCH':
-                 createMatch({ maxPlayers: message.maxPlayers, name: message.name, ownerId: id });
 
+            case 'GET_MATCH':
+
+                if (match) {
+                    socket.send(JSON.stringify({
+                        type: 'GET_MATCH',
+                        match: {
+                            ...match,
+                            players: Array.from(match.players),
+                        },
+                    }));
+                }
+                break;
+
+            case 'CREATE_MATCH':
+                createMatch({
+                    maxPlayers: message.maxPlayers,
+                    name: message.name,
+                    ownerId: id,
+                });
                 break;
 
             case 'JOIN_MATCH':
@@ -111,12 +122,12 @@ ws.on('connection', (socket) => {
                 }
 
                 matchToJoin.players.add(id);
+                playerMatchMap.set(id, message.matchId);
                 if (matchToJoin.players.size >= matchToJoin.maxPlayers) {
                     matchToJoin.isFull = true;
                 }
 
-                // Notify everyone in match
-                matchToJoin.players.forEach((playerId) => {
+                matchToJoin.players.forEach(playerId => {
                     const client = clients.get(playerId);
                     if (client) {
                         client.send(JSON.stringify({
@@ -133,12 +144,14 @@ ws.on('connection', (socket) => {
                 const matchToLeave = matches.get(message.matchId);
                 if (matchToLeave) {
                     matchToLeave.players.delete(id);
+                    matchToLeave.playersReady--;
+                    playerMatchMap.delete(id);
 
                     if (matchToLeave.players.size === 0) {
-                        matches.delete(message.matchId); // delete empty match
+                        matches.delete(message.matchId);
                     } else {
                         matchToLeave.isFull = false;
-                        matchToLeave.players.forEach((playerId) => {
+                        matchToLeave.players.forEach(playerId => {
                             const client = clients.get(playerId);
                             if (client) {
                                 client.send(JSON.stringify({
@@ -151,31 +164,61 @@ ws.on('connection', (socket) => {
                     }
                 }
                 break;
+
+            case 'updatePosition':
+                const posMatchId = playerMatchMap.get(id);
+                if (posMatchId) {
+                    broadcastToMatch(posMatchId, {
+                        type: 'updatePosition',
+                        position: message.position,
+                        rotation: message.rotation,
+                        fromId: id,
+                    }, id);
+                }
+                break;
+
+            case 'CAST_SPELL':
+                const spellMatchId = playerMatchMap.get(id);
+                if (spellMatchId) {
+                    broadcastToMatch(spellMatchId, {
+                        type: 'CAST_SPELL',
+                        payload: message.payload,
+                        id,
+                    }, id);
+                }
+                break;
+
             default:
-                broadcastIt(message);
+                const defaultMatchId = playerMatchMap.get(id);
+                if (defaultMatchId) {
+                    broadcastToMatch(defaultMatchId, { ...message, fromId: id }, id);
+                }
+                break;
         }
     });
 
-    // Handle client disconnect
     socket.on('close', () => {
         console.log(`Client ${id} disconnected.`);
         clients.delete(id);
 
-        // Notify all clients about the disconnection
-        const disconnectMessage = JSON.stringify({type: 'removePlayer', id});
-        clients.forEach((client) => {
-            client.send(disconnectMessage);
+        clients.forEach(client => {
+            client.send(JSON.stringify({ type: 'removePlayer', id }));
         });
 
-        for (const [matchId, match] of matches) {
-            if (match.players.has(id)) {
+        const matchId = playerMatchMap.get(id);
+        playerMatchMap.delete(id);
+
+        if (matchId) {
+            const match = matches.get(matchId);
+            if (match) {
                 match.players.delete(id);
+                match.playersReady--;
                 match.isFull = false;
 
                 if (match.players.size === 0) {
                     matches.delete(matchId);
                 } else {
-                    match.players.forEach((playerId) => {
+                    match.players.forEach(playerId => {
                         const client = clients.get(playerId);
                         if (client) {
                             client.send(JSON.stringify({
@@ -190,7 +233,6 @@ ws.on('connection', (socket) => {
         }
     });
 });
-
 
 server.listen(4000, () => {
     console.log('Secure WebSocket server is running');
