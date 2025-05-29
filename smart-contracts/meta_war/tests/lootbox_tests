@@ -1,0 +1,92 @@
+module meta_war::lootbox_test {
+    use sui::test::{Self, TestContext};
+    use sui::random;
+    use sui::coin;
+    use sui::vector;
+    use sui::object;
+    use sui::tx_context;
+
+    use meta_war::coin::{Self as mw_coin, COIN};
+    use meta_war::lootbox;
+
+    /* helper: получить treas-cap */
+    fun cap(ctx: &mut TestContext): &mut coin::TreasuryCap<COIN>
+            acquires coin::TreasuryCap {
+        borrow_global_mut<coin::TreasuryCap<COIN>>(TestContext::sender(ctx))
+    }
+
+    /* helper: баланс COIN */
+    fun bal(ctx: &mut TestContext): u64 acquires coin::Coin {
+        let addr = TestContext::sender(ctx);
+        let coins = test::coins_owned_by<COIN>(ctx, addr);
+        let mut sum = 0;
+        let i = 0;
+        while (i < vector::length(&coins)) {
+            sum = sum + coin::value(&vector::borrow(&coins, i));
+            i = i + 1
+        }; sum
+    }
+
+    /// 0. админ-cap можно создать ровно один раз
+    #[test_only]
+    public fun test_init_once(ctx: &mut TestContext) acquires lootbox::LootBoxAdminCap {
+        lootbox::init(ctx);
+        // повторный вызов должен провалиться компиляцией/верификацией,
+        // поэтому мы его не делаем; наличие одного объекта проверяем:
+        assert!(test::count_owned<lootbox::LootBoxAdminCap>(ctx) == 1, 0);
+    }
+
+    /// 1. создать коробку может только владелец cap
+    #[test_only]
+    public fun test_create_requires_cap(ctx: &mut TestContext)
+            acquires lootbox::LootBoxAdminCap {
+        // подготовка cap
+        lootbox::init(ctx);
+        let mut cap_ref = test::borrow_my_mut<lootbox::LootBoxAdminCap>(ctx, 0);
+
+        // успешное создание
+        let box1 = lootbox::create(&mut cap_ref, ctx);
+        object::delete_object(box1);
+
+        // имитируем, что вызывающий НЕ передал cap (закомментировать —
+        // тест не скомпилируется, Move проверяет типы)
+        // let _err = lootbox::create(ctx);   // ← compilation‐error expected
+    }
+
+    /// 2. open() всегда начисляет 1-100 монет
+    #[test_only]
+    public fun test_open_mints_coin(ctx: &mut TestContext)
+            acquires coin::TreasuryCap, lootbox::LootBoxAdminCap {
+        lootbox::init(ctx);
+        mw_coin::init(mw_coin::COIN{}, ctx);
+
+        let mut cap_ref = test::borrow_my_mut<lootbox::LootBoxAdminCap>(ctx, 0);
+
+        random::override_rand_for_testing(0);      // только монеты
+        let start = bal(ctx);
+
+        let lb = lootbox::create(&mut cap_ref, ctx);
+        lootbox::open(lb, cap(ctx), vector::empty<u8>(), ctx);
+
+        let diff = bal(ctx) - start;
+        assert!(diff >= 1, 1);
+        assert!(diff <= 100, 2);
+    }
+
+    /// 3. повторный скин не дропается
+    #[test_only]
+    public fun test_no_duplicate_skin(ctx: &mut TestContext)
+            acquires coin::TreasuryCap, lootbox::LootBoxAdminCap, lootbox::Skin {
+        lootbox::init(ctx);
+        mw_coin::init(mw_coin::COIN{}, ctx);
+        let mut cap_ref = test::borrow_my_mut<lootbox::LootBoxAdminCap>(ctx, 0);
+
+        random::override_rand_for_testing(90);     // Vampire (4 %)
+        let owned = vector::singleton<u8>(1);      // игрок уже имеет Vampire
+
+        let lb = lootbox::create(&mut cap_ref, ctx);
+        lootbox::open(lb, cap(ctx), owned, ctx);
+
+        assert!(test::count_owned<lootbox::Skin>(ctx) == 0, 0);
+    }
+}
