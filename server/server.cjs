@@ -33,7 +33,7 @@ function broadcastToMatch(matchId, message, excludeId = null) {
         if (playerId !== excludeId) {
             const client = clients.get(playerId);
             if (client) {
-                client.send(JSON.stringify(message));
+                client.send(JSON.stringify({...message, myPlayerId: playerId }));
             }
         }
     });
@@ -44,20 +44,12 @@ ws.on('connection', (socket) => {
     const id = Date.now();
     clients.set(id, socket);
 
-    const joinMessage = { type: 'newPlayer', id };
-    clients.forEach((client, clientId) => {
-        if (clientId !== id) {
-            client.send(JSON.stringify(joinMessage));
-        }
-    });
-
     socket.on('message', (data) => {
         let message = {};
         try {
             message = JSON.parse(data);
         } catch (e) {}
 
-        console.log("matches: ", matches);
         const match = matches.get(message.matchId);
         if (message.type !== 'updatePosition') {
             console.log("message: ", message);
@@ -75,6 +67,7 @@ ws.on('connection', (socket) => {
                             id: match.id,
                             players: Array.from(match.players),
                         };
+                        console.log("matchReadyMessage: ", matchReadyMessage);
                         broadcastToMatch(matchId, matchReadyMessage);
                     }
                 }

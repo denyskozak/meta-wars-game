@@ -29,7 +29,7 @@ export default function MatchesPage() {
 
     const [matches, setMatches] = useState<Match[]>([]);
     const [name, setName] = useState("");
-    const [maxPlayers, setMaxPlayers] = useState("5");
+    const [maxPlayers, setMaxPlayers] = useState("2");
     const {isOpen, onOpen, onOpenChange} = useDisclosure();
 
     useEffect(() => {

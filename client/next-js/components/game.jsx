@@ -63,6 +63,7 @@ export function Game({models, sounds, matchId, character}) {
         let hp = 100,
             mana = 100;
         let actions = [];
+        let remoteMixers = [];
         let settings;
         let leftMouseButtonClicked = false;
 
@@ -106,56 +107,71 @@ export function Game({models, sounds, matchId, character}) {
                 dispatch({type: "SEND_CHAT_MESSAGE", payload: "You are dead :("});
                 sendToSocket({type: "KILL", killerId: userIdTouched});
                 document.getElementById("respawnButton").style.display = "block"; // Показываем кнопку
-            } else {
-                // slow a bit after damage
-                movementSpeedModifier = 0.7;
-                setTimeout(() => (movementSpeedModifier = 1), 500);
             }
         };
 
-        const fireballGeometry = new THREE.SphereGeometry(0.1, 16, 16); // Низкополигональный огненный шар
+        const fireballGeometry = new THREE.CapsuleGeometry(
+            0.15,   // radius  (0.12 → 0.15)
+            0.32,   // length  (0.25 → 0.32)
+            8,      // cap-seg (больше сегментов → плавнее)
+            16      // radial-seg
+        );
         const fireballMaterial = new THREE.ShaderMaterial({
-            uniforms: {
-                time: {value: 0.0},
-                color: {value: new THREE.Color(0xff5500)},
-                glowColor: {value: new THREE.Color(0xffaa33)},
-            },
-            vertexShader: `
-    varying vec2 vUv;
-    void main() {
-      vUv = uv;
-      gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
-    }
-  `,
-            fragmentShader: `
-    uniform float time;
-    uniform vec3 color;
-    uniform vec3 glowColor;
-    varying vec2 vUv;
-
-    void main() {
-      float dist = distance(vUv, vec2(0.5));
-
-      // Основной центр шара — стабильное ядро
-      float core = smoothstep(0.4, 0.0, dist); 
-      
-      // Мягкое пульсирующее свечение (не мерцающее)
-      float glow = smoothstep(0.6, 0.2, dist) * (0.6 + 0.4 * sin(time * 3.0));
-
-      // Слияние основного цвета и свечения
-      vec3 finalColor = color * core + glowColor * glow;
-
-      // Альфа насыщенная, но мягкая по краям
-      float alpha = clamp(core + glow * 0.8, 0.0, 1.0);
-
-      gl_FragColor = vec4(finalColor, alpha);
-    }
-  `,
             transparent: true,
-            blending: THREE.AdditiveBlending,
             depthWrite: false,
+            blending: THREE.AdditiveBlending,
+            uniforms: {
+                time: {value: 0},
+                coreCol: {value: new THREE.Color(0xfff2ad)},
+                flameCol: {value: new THREE.Color(0xff4400)},
+            },
+            vertexShader: /* glsl */`
+                uniform float time;          // ←  добавили
+                varying vec3 vPos;
+            
+                void main() {
+                  vPos = position;
+            
+                  // «дыхание» поверхности
+                  vec3 displaced = position + normal * 0.02 * sin((position.z + time) * 10.0);
+            
+                  gl_Position = projectionMatrix * modelViewMatrix * vec4(displaced, 1.0);
+                }`,
+            fragmentShader: /* glsl */`
+                float hash(vec2 p)  { return fract(sin(dot(p,vec2(41,289))) * 1e4); }
+                float noise(vec2 p) {
+                  vec2 i = floor(p); p -= i;
+                  vec2 u = p * p * (3.0 - 2.0 * p);
+                  return mix( mix(hash(i),             hash(i + vec2(1.0,0.0)), u.x),
+                              mix(hash(i + vec2(0.0,1.0)), hash(i + vec2(1.0,1.0)), u.x),
+                              u.y );
+                }
+            
+                uniform float time;
+                uniform vec3  coreCol;
+                uniform vec3  flameCol;
+                varying vec3  vPos;
+            
+                void main() {
+                  float r = length(vPos.xy) / 0.15;            // 0..1
+                  float core  = smoothstep(0.3, 0.0,  r);
+                  float flame = smoothstep(0.7, 0.25, r);
+            
+                  float flow = fract(vPos.z * 3.0 - time * 5.0);
+                  float n    = noise(vPos.xy * 5.0 + time * 2.0);
+            
+                  core  *= 0.9 + 0.1 * n;
+                  flame *= (0.7 + 0.3 * n) * flow;
+            
+                  vec3  col   = coreCol * core + flameCol * flame;
+                  float alpha = core + flame * 0.9;
+            
+                  if (alpha < 0.03) discard;
+                  gl_FragColor = vec4(col, alpha);
+                }`
         });
         const fireballMesh = new THREE.Mesh(fireballGeometry, fireballMaterial);
+
 
         const iceballGeometry = new THREE.SphereGeometry(0.1, 16, 16); // Ледяной шар
 
@@ -166,36 +182,36 @@ export function Game({models, sounds, matchId, character}) {
                 glowColor: {value: new THREE.Color(0xccffff)}, // Голубовато-белое свечение
             },
             vertexShader: `
-    varying vec2 vUv;
-    void main() {
-      vUv = uv;
-      gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
-    }
-  `,
+        varying vec2 vUv;
+        void main() {
+          vUv = uv;
+          gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
+        }
+      `,
             fragmentShader: `
-    uniform float time;
-    uniform vec3 color;
-    uniform vec3 glowColor;
-    varying vec2 vUv;
-
-    void main() {
-      float dist = distance(vUv, vec2(0.5));
-
-      // Центральное ядро
-      float core = smoothstep(0.4, 0.0, dist);
-
-      // Пульсация похожа на кристаллизацию или мороз
-      float glow = smoothstep(0.6, 0.2, dist) * (0.4 + 0.6 * abs(sin(time * 4.0)));
-
-      // Холодное смешение
-      vec3 finalColor = color * core + glowColor * glow;
-
-      // Альфа прозрачность
-      float alpha = clamp(core + glow * 0.7, 0.0, 1.0);
-
-      gl_FragColor = vec4(finalColor, alpha);
-    }
-  `,
+        uniform float time;
+        uniform vec3 color;
+        uniform vec3 glowColor;
+        varying vec2 vUv;
+    
+        void main() {
+          float dist = distance(vUv, vec2(0.5));
+    
+          // Центральное ядро
+          float core = smoothstep(0.4, 0.0, dist);
+    
+          // Пульсация похожа на кристаллизацию или мороз
+          float glow = smoothstep(0.6, 0.2, dist) * (0.4 + 0.6 * abs(sin(time * 4.0)));
+    
+          // Холодное смешение
+          vec3 finalColor = color * core + glowColor * glow;
+    
+          // Альфа прозрачность
+          float alpha = clamp(core + glow * 0.7, 0.0, 1.0);
+    
+          gl_FragColor = vec4(finalColor, alpha);
+        }
+      `,
             transparent: true,
             blending: THREE.AdditiveBlending,
             depthWrite: false,
@@ -337,17 +353,23 @@ export function Game({models, sounds, matchId, character}) {
         const target = document.getElementById("target");
         let isFocused = false;
 
-        const getTrailMaterial = (color) =>
-            new THREE.MeshBasicMaterial({
-                color,
+        const getTrailMaterial = (sphereType) => {
+            const colors = {
+                'fireball': 0xff0000,
+                'iceball': 0x66ccff,
+            }
+
+           return new THREE.MeshBasicMaterial({
+                color: colors[sphereType],
                 transparent: true,
                 opacity: 0.3,
                 depthWrite: false,
             })
+        }
 
 
         const trailGeometry = new THREE.SphereGeometry(0.05, 8, 8); // Маленький шар
-        const TRAIL_INTERVAL = 10; // В мс, как часто добавлять точки
+        const TRAIL_INTERVAL = 5; // В мс, как часто добавлять точки
         const TRAIL_LIFETIME = 100; // Сколько живет одна точка
 
         function adjustFOV(delta) {
@@ -440,9 +462,9 @@ export function Game({models, sounds, matchId, character}) {
             keyStates[event.code] = true;
 
             switch (event.code) {
-                case "KeyR": // Blink Skill
-                    castBlink();
-                    break;
+                // case "KeyR": // Blink Skill
+                //     castBlink();
+                //     break;
                 case "KeyW":
                     // Start the walk animation immediately
                     !isCasting && setAnimation("Walk");
@@ -458,6 +480,9 @@ export function Game({models, sounds, matchId, character}) {
                     break;
                 case "KeyE":
                     castSpell('fireball');
+                    break;
+                case "KeyR":
+                    castSpell('iceball');
                     break;
                 case "KeyG":
                     leftMouseButtonClicked = true;
@@ -764,15 +789,20 @@ export function Game({models, sounds, matchId, character}) {
         function castSpell(spellType) {
             switch (spellType) {
                 case "fireball":
-                    castSphere(spellType, fireballMesh);
+                    const fireball = new THREE.Mesh(
+                        fireballGeometry,
+                        fireballMaterial.clone()      // свой экземпляр
+                    );
+
+                    castSphere(spellType, fireball, sounds.fireballCast, sounds.fireball);
                     break;
                 case "iceball":
-                    castSphere(spellType, iceballMesh);
+                    castSphere(spellType, iceballMesh, sounds.iceballCast, sounds.iceball);
                     break;
             }
         }
 
-        function castSphere(type, sphereMesh) {
+        function castSphere(type, sphereMesh, soundCast, soundCastEnd) {
             if (globalSkillCooldown) {
                 return;
             }
@@ -780,10 +810,10 @@ export function Game({models, sounds, matchId, character}) {
             if (mana < CAST_MANA_PRICE || isCasting) return; // Ensure the fireball model is loaded
 
             const onCastEnd = () => {
-                sounds.fireballCast.pause();
+                soundCast.pause();
                 // Play fireball sound
-                sounds.fireball.volume = 0.5; // Adjust volume if needed
-                sounds.fireball.play();
+                soundCastEnd.volume = 0.5; // Adjust volume if needed
+                soundCastEnd.play();
 
                 isCasting = false;
 
@@ -845,7 +875,7 @@ export function Game({models, sounds, matchId, character}) {
                     ),
                     velocity: velocity,
                     initialPosition: initialPosition,
-
+                    type,
 
                     trail: [], // массив точек следа
                     lastTrailTime: performance.now(),
@@ -866,8 +896,8 @@ export function Game({models, sounds, matchId, character}) {
                 reset: true,
                 clampWhenFinished: true,
             });
-            sounds.fireballCast.volume = 0.5; // Adjust volume if needed
-            sounds.fireballCast.play();
+            soundCast.volume = 0.5; // Adjust volume if needed
+            soundCast.play();
             window.dispatchEvent(new CustomEvent('start-cast', {
                 detail: {duration: 1000, onEnd: onCastEnd}
             }));
@@ -917,11 +947,13 @@ export function Game({models, sounds, matchId, character}) {
         function playerSphereCollision(sphere, index) {
             const center = vector1
                 .addVectors(playerCollider.start, playerCollider.end)
-                .multiplyScalar(0.5);
+            ;
 
             const sphere_center = sphere.collider.center;
 
-            const r = playerCollider.radius + sphere.collider.radius;
+            const SHRINK = 0.6;
+            // const r = playerCollider.radius + sphere.collider.radius;
+            const r = (playerCollider.radius + sphere.collider.radius) * SHRINK;
             const r2 = r * r;
 
             // approximation: player = 3 spheres
@@ -931,6 +963,7 @@ export function Game({models, sounds, matchId, character}) {
 
             for (const point of [playerCollider.start, playerCollider.end, center]) {
                 const d2 = point.distanceToSquared(sphere_center);
+
 
                 if (d2 < r2) {
                     userIdTouched = spheres[index]["ownerId"];
@@ -942,6 +975,10 @@ export function Game({models, sounds, matchId, character}) {
 
             if (touchedPlayer) {
                 takeDamage(25, userIdTouched);
+                if (sphere.type === 'iceball') {
+                    movementSpeedModifier = 0.5;
+                    setTimeout(() => (movementSpeedModifier = 1), 1000);
+                }
             }
         }
 
@@ -1029,11 +1066,10 @@ export function Game({models, sounds, matchId, character}) {
                     }
                 }
 
-                // Update the fireball position
                 playerSphereCollision(sphere, index);
 
                 if (now - sphere.lastTrailTime > TRAIL_INTERVAL) {
-                    const ghost = new THREE.Mesh(trailGeometry, getTrailMaterial(0xff0000).clone());
+                    const ghost = new THREE.Mesh(trailGeometry, getTrailMaterial(sphere.type).clone());
                     ghost.position.copy(sphere.mesh.position);
                     scene.add(ghost);
 
@@ -1472,15 +1508,15 @@ export function Game({models, sounds, matchId, character}) {
             sendToSocket({type: "updatePosition", position, rotation});
         }
 
-        setInterval(
-            () =>
-                console.log("position ", {
-                    x: model.position.x,
-                    y: model.position.y,
-                    z: model.position.z,
-                }),
-            5000,
-        );
+        // setInterval(
+        //     () =>
+        //         console.log("position ", {
+        //             x: model.position.x,
+        //             y: model.position.y,
+        //             z: model.position.z,
+        //         }),
+        //     5000,
+        // );
 
         function initWordObjects() {
             for (const object of world.stuff) {
@@ -1519,6 +1555,13 @@ export function Game({models, sounds, matchId, character}) {
         initWordObjects();
 
         function animate() {
+            const delta = clock.getDelta();
+            fireballMaterial.uniforms.time.value += delta;
+            spheres.forEach(s => {
+                if (s.mesh?.material?.uniforms?.time) {
+                    s.mesh.material.uniforms.time.value += delta;
+                }
+            });
             // Если игрок мёртв, отключаем управление
             if (hp <= 0) {
                 document.getElementById("respawnButton").style.display = "block"; // Показываем кнопку
@@ -1527,10 +1570,11 @@ export function Game({models, sounds, matchId, character}) {
                 return; // Пропускаем обновления
             }
 
-            const deltaTime = Math.min(0.04, clock.getDelta()) / STEPS_PER_FRAME;
+            const deltaTime = Math.min(0.04, delta) / STEPS_PER_FRAME;
 
             // Update the character model and animations
             if (mixer) mixer.update(deltaTime);
+            remoteMixers.forEach(m => m.update(deltaTime));
             // we look for collisions in substeps to mitigate the risk of
             // an object traversing another too quickly for detection.
 
@@ -1560,9 +1604,12 @@ export function Game({models, sounds, matchId, character}) {
         // Function to create a new player in the scene
         function createPlayer(id, name = "") {
             if (model) {
+
                 const player = SkeletonUtils.clone(model);
 
-                player.position.set(0, 1, 0);
+                player.position.set(...USER_DEFAULT_POSITION);
+
+
                 player.rotation.set(0, 0, 0);
                 // Create a DOM element for the player's name
                 // const nameDiv = document.createElement('div');
@@ -1577,19 +1624,48 @@ export function Game({models, sounds, matchId, character}) {
                 // nameLabel.position.set(0, 2, 0); // Adjust position above the player model
                 // player.add(nameLabel);
 
+                const mixer = new THREE.AnimationMixer(player)
+                const idle = mixer.clipAction(animations[2]).play();
+                const walk = mixer.clipAction(animations[6]);
+
+
                 scene.add(player);
-                players[id] = {model: player};
+                players[id] = {
+                    model: player,
+                    mixer: mixer,
+                    idle: idle,
+                    walk: walk,
+                    prevPos: new THREE.Vector3().copy(player.position)
+                }
+                console.log("model: ", model);
+                remoteMixers.push(mixer);   // массив всех чужих миксеров
             }
         }
 
         // Function to update a player's position
         function updatePlayerPosition(id, position, rotation) {
-            if (players[id]) {
-                players[id].model.position.set(position.x, position.y, position.z);
-                players[id].model.rotation.y = rotation?.y;
+            const p = players[id];
+            console.log("players: ", players, id);
+            if (!p) return;
+            console.log("p: ", p);
+            p.model.position.set(position.x, position.y, position.z);
+            p.model.rotation.y = rotation?.y;
+            const moved = p.prevPos.distanceToSquared(p.model.position) > 0.0001;
+            console.log("moved: ", moved);
+            if (moved) {
+                if (!p.walk.isRunning()) {      // включаем Walk
+                    p.idle.fadeOut(0.1);
+                    p.walk.reset().fadeIn(0.1).play();
+                }
             } else {
-                createPlayer(id, "Other");
+                if (!p.idle.isRunning()) {      // включаем Idle
+                    p.walk.fadeOut(0.2);
+                    p.idle.reset().fadeIn(0.2).play();
+                }
             }
+
+            p.prevPos.copy(p.model.position);
+
         }
 
         // Function to remove a player from the scene
@@ -1600,18 +1676,19 @@ export function Game({models, sounds, matchId, character}) {
             }
         }
 
-        function castSphereOtherUser(fireballData, ownerId) {
-            const fireball = new THREE.Mesh(fireballGeometry, fireballMaterial);
+        function castSphereOtherUser(data, ownerId) {
+            const material = data.type === "fireball" ? fireballMaterial : iceballMaterial;
+            const fireball = new THREE.Mesh(fireballGeometry, material.clone());
 
             fireball.position.set(
-                fireballData.position.x,
-                fireballData.position.y,
-                fireballData.position.z,
+                data.position.x,
+                data.position.y,
+                data.position.z,
             );
             fireball.rotation.set(
-                fireballData.rotation.x,
-                fireballData.rotation.y,
-                fireballData.rotation.z,
+                data.rotation.x,
+                data.rotation.y,
+                data.rotation.z,
             );
 
             scene.add(fireball);
@@ -1625,10 +1702,11 @@ export function Game({models, sounds, matchId, character}) {
                 trail: [], // массив точек следа
                 lastTrailTime: performance.now(),
                 velocity: new THREE.Vector3(
-                    fireballData.velocity.x,
-                    fireballData.velocity.y,
-                    fireballData.velocity.z,
+                    data.velocity.x,
+                    data.velocity.y,
+                    data.velocity.z,
                 ),
+                type: data.type,
                 ownerId,
             });
         }
@@ -1640,11 +1718,13 @@ export function Game({models, sounds, matchId, character}) {
         socket.onmessage = async (event) => {
             let message = JSON.parse(event.data);
 
-            console.log("message: ", message);
             switch (message.type) {
                 case "CAST_SPELL":
                     switch (message?.payload?.type) {
                         case "fireball":
+                            castSphereOtherUser(message.payload, message.id);
+                            break;
+                        case "iceball":
                             castSphereOtherUser(message.payload, message.id);
                             break;
                         case "shield":
@@ -1680,9 +1760,6 @@ export function Game({models, sounds, matchId, character}) {
                     break;
                 case "damage":
                     break;
-                case "newPlayer":
-                    createPlayer(message.fromId, String(message?.character?.name));
-                    break;
                 case "updatePosition":
                     updatePlayerPosition(
                         message.fromId,
@@ -1696,8 +1773,16 @@ export function Game({models, sounds, matchId, character}) {
                 case "MATCH_READY":
                     setIsReadyToPlay(true);
                     appendRenderer();
-                    message.players.forEach((player) => {
-                        createPlayer(player.id, String(player.id));
+
+                    Object.keys(players).forEach((id) => {
+                        removePlayer(id);
+                    });
+
+                    console.log("MATCH_READY: ",  message);
+                    message.players.forEach((playerId) => {
+                        if (playerId !== message.myPlayerId) {
+                            createPlayer(playerId, String(playerId));
+                        }
                     })
                     break;
             }

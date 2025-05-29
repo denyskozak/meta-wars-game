@@ -64,6 +64,8 @@ export default function GamePage() {
         const sounds = {
             fireball: new Audio('/sounds/fireball.ogg'),
             fireballCast: new Audio('/sounds/fireball-cast.ogg'),
+            iceball: new Audio('/sounds/iceball.ogg'),
+            iceballCast: new Audio('/sounds/iceball-cast.ogg'),
             heal: new Audio('/sounds/heal.ogg'),
             spellCast: new Audio('/sounds/spell-cast.ogg'),
             background: new Audio('/sounds/Elwynn.mp3'),
