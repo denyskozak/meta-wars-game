@@ -15,6 +15,7 @@ import {world} from "../worlds/main/data";
 
 
 import {Interface} from "@/components/layout/Interface";
+import * as iceShieldMesh from "three/examples/jsm/utils/SkeletonUtils";
 
 const USER_DEFAULT_POSITION = [
     -36.198117096583466, 0.22499999997500564, -11.704829764915257,
@@ -49,21 +50,17 @@ export function Game({models, sounds, matchId, character}) {
 
     useLayoutEffect(() => {
         // Store other players
-        const players = {};
+        const players = new Map();
+        let myPlayerId = null;
 
         // Character Model and Animation Variables
-        let model = models["character"],
-            mixer,
-            idleAction,
-            walkAction,
-            castAction,
-            jumpAction,
-            runAction,
-            camera;
+        let camera;
+        const animations = models["character_animations"];
+
         let hp = 100,
             mana = 100;
         let actions = [];
-        let remoteMixers = [];
+        let playerMixers = [];
         let settings;
         let leftMouseButtonClicked = false;
 
@@ -72,6 +69,8 @@ export function Game({models, sounds, matchId, character}) {
         const hpBar = document.getElementById("hpBar");
         const damageBar = document.getElementById("damage");
         const manaBar = document.getElementById("manaBar");
+
+        const activeShields = new Map(); // key = playerId
 
         // Function to update the HP bar width
         function updateHPBar() {
@@ -170,8 +169,10 @@ export function Game({models, sounds, matchId, character}) {
                   gl_FragColor = vec4(col, alpha);
                 }`
         });
-        const fireballMesh = new THREE.Mesh(fireballGeometry, fireballMaterial);
-
+        const fireballMesh = new THREE.Mesh(
+            fireballGeometry,
+            fireballMaterial     // свой экземпляр
+        );
 
         const iceballGeometry = new THREE.SphereGeometry(0.1, 16, 16); // Ледяной шар
 
@@ -343,7 +344,7 @@ export function Game({models, sounds, matchId, character}) {
         // Shield skill vars
         const SHIELD_MANA_COST = 40; // Mana cost for the shield
         const SHIELD_DURATION = 3; // Shield duration in seconds
-        const DAMAGE_REDUCTION = 0.8; // Reduces damage by 50%
+        const DAMAGE_REDUCTION = 0.5; // Reduces damage by 50%
         // Activate shield
         let isShieldActive = false;
         let isChatActive = false;
@@ -359,7 +360,7 @@ export function Game({models, sounds, matchId, character}) {
                 'iceball': 0x66ccff,
             }
 
-           return new THREE.MeshBasicMaterial({
+            return new THREE.MeshBasicMaterial({
                 color: colors[sphereType],
                 transparent: true,
                 opacity: 0.3,
@@ -467,16 +468,16 @@ export function Game({models, sounds, matchId, character}) {
                 //     break;
                 case "KeyW":
                     // Start the walk animation immediately
-                    !isCasting && setAnimation("Walk");
+                    !isCasting && setAnimation("walk");
                     break;
                 case "KeyA":
                 case "KeyD":
                     // Optional: Handle strafing or side movement animations
-                    !isCasting && setAnimation("Walk");
+                    !isCasting && setAnimation("walk");
                     break;
                 case "KeyS":
                     // Optional: Set a backward movement animation
-                    !isCasting && setAnimation("Idle");
+                    !isCasting && setAnimation("idle");
                     break;
                 case "KeyE":
                     castSpell('fireball');
@@ -487,16 +488,13 @@ export function Game({models, sounds, matchId, character}) {
                 case "KeyG":
                     leftMouseButtonClicked = true;
                     break;
-                case "KeyF": // Press "H" to heal
-                    castHeal();
-                    break;
                 case "Space": // Press "Q" to cast shield
                     // Space for jumping
                     if (playerOnFloor && !jumpBlocked) {
                         jumpBlocked = true;
-
+                        const {mixer, actions: {jump}} = players.get(myPlayerId)
                         controlAction({
-                            action: jumpAction,
+                            action: jump,
                             mixer: mixer,
                             loop: THREE.LoopOnce,
                             fadeIn: 0.1,
@@ -513,7 +511,7 @@ export function Game({models, sounds, matchId, character}) {
                     }
                     break;
                 case "KeyQ": // Press "Q" to cast shield
-                    castShield();
+                    castSpell('ice-shield');
                     break;
                 case "Enter":
                     if (hp === 0) {
@@ -547,7 +545,7 @@ export function Game({models, sounds, matchId, character}) {
                 !keyStates["KeyD"] &&
                 !keyStates["KeyS"]
             ) {
-                setAnimation("Idle"); // Return to idle animation
+                setAnimation("idle"); // Return to idle animation
             }
         });
 
@@ -631,47 +629,6 @@ export function Game({models, sounds, matchId, character}) {
             renderer.setSize(window.innerWidth, window.innerHeight);
         }
 
-        function castShield() {
-            if (globalSkillCooldown) {
-                return;
-            }
-
-            // Check if enough mana is available
-            if (mana < SHIELD_MANA_COST || isCasting) {
-                return;
-            }
-
-            // Deduct mana
-            mana = Math.max(0, mana - SHIELD_MANA_COST);
-            updateManaBar();
-
-            isCasting = true;
-
-            const onCastEnd = () => {
-                isCasting = false;
-                isShieldActive = true;
-                sounds.spellCast.pause();
-                // Send the fireball data to the server
-                sendToSocket({
-                    type: "CAST_SPELL",
-                    payload: {
-                        type: "shield",
-                    },
-                });
-
-                setTimeout(() => {
-                    isShieldActive = false; // Deactivate shield
-                }, SHIELD_DURATION * 1000);
-
-                activateGlobalCooldown(); // Activate global cooldown
-            };
-
-            sounds.spellCast.volume = 0.3;
-            sounds.spellCast.play();
-            window.dispatchEvent(new CustomEvent('start-cast', {
-                detail: {duration: 2000, onEnd: onCastEnd}
-            }));
-        }
 
         let skillsCDs = {
             blink: false,
@@ -786,28 +743,127 @@ export function Game({models, sounds, matchId, character}) {
 
         const CAST_MANA_PRICE = 25;
 
-        function castSpell(spellType) {
+        function castSpell(spellType, playerId = myPlayerId) {
             switch (spellType) {
+                case 'ice-shield':
+                    castSpellImpl(
+                        playerId,
+                        80,
+                        2000,
+                        () => castShield(),
+                        sounds.spellCast,
+                        sounds.spellCast,
+                    )
+                    break;
                 case "fireball":
-                    const fireball = new THREE.Mesh(
-                        fireballGeometry,
-                        fireballMaterial.clone()      // свой экземпляр
-                    );
-
-                    castSphere(spellType, fireball, sounds.fireballCast, sounds.fireball);
+                    castSpellImpl(
+                        playerId,
+                        30,
+                        1000,
+                        (model) => castSphere(model, fireballMesh.clone(), spellType),
+                        sounds.fireballCast,
+                        sounds.fireball
+                        )
                     break;
                 case "iceball":
-                    castSphere(spellType, iceballMesh, sounds.iceballCast, sounds.iceball);
+                    castSpellImpl(
+                        playerId,
+                        50,
+                        1500,
+                        (model) => castSphere(model, iceballMesh.clone(), spellType),
+                        sounds.iceballCast,
+                        sounds.iceball
+                    )
                     break;
             }
         }
 
-        function castSphere(type, sphereMesh, soundCast, soundCastEnd) {
+        function castShield() {
+            isShieldActive = true;
+
+            sendToSocket({
+                type: "CAST_SPELL",
+                payload: {
+                    type: "shield",
+                },
+            });
+
+            setTimeout(() => {
+                isShieldActive = false; // Deactivate shield
+            }, SHIELD_DURATION * 1000);
+        }
+
+        function castSphere(model, sphereMesh, type) {
+            sphereMesh.rotation.copy(model.rotation);
+            // fireball.rotation.x += THREE.MathUtils.degToRad(90);
+
+            scene.add(sphereMesh); // Add the sphereMesh to the scene
+
+            // Set the initial position of the sphereMesh
+            camera.getWorldDirection(playerDirection);
+            // todo return if need
+            // const initialPosition = playerCollider.end.clone().addScaledVector(playerDirection, playerCollider.radius * 1.5);
+            const initialPosition = playerCollider.end
+                .clone()
+                .addScaledVector(playerDirection, playerCollider.radius * 2);
+
+            sphereMesh.position.copy(initialPosition);
+
+            // Set the velocity for the sphereMesh
+            // Calculate smoother impulse using cubic easing
+            const chargeTime = Math.min(performance.now() - mouseTime, 1000); // Cap charge time to 1 second
+            const chargeFactor = chargeTime / 1000; // Normalize to range [0, 1]
+            const impulse = THREE.MathUtils.lerp(
+                30,
+                60,
+                chargeFactor * chargeFactor * (3 - 2 * chargeFactor),
+            ); // Smoothstep with more power
+
+            const velocity = playerDirection.clone().multiplyScalar(impulse);
+
+            // Send the fireball data to the server
+            sendToSocket({
+                type: "CAST_SPELL",
+                payload: {
+                    type,
+                    position: {
+                        x: sphereMesh.position.x,
+                        y: sphereMesh.position.y,
+                        z: sphereMesh.position.z,
+                    },
+                    rotation: {
+                        x: sphereMesh.rotation.x,
+                        y: sphereMesh.rotation.y,
+                        z: sphereMesh.rotation.z,
+                    },
+                    velocity: {x: velocity.x, y: velocity.y, z: velocity.z},
+                },
+            });
+
+            // Store velocity and collider information for the fireball
+            spheres[sphereIdx] = {
+                mesh: sphereMesh,
+                collider: new THREE.Sphere(
+                    new THREE.Vector3().copy(sphereMesh.position),
+                    SPHERE_RADIUS,
+                ),
+                velocity: velocity,
+                initialPosition: initialPosition,
+                type,
+
+                trail: [], // массив точек следа
+                lastTrailTime: performance.now(),
+            };
+
+            sphereIdx = (sphereIdx + 1) % spheres.length;
+        }
+
+        function castSpellImpl(playerId, manaCost, duration, onUsage = () => {}, soundCast, soundCastEnd) {
             if (globalSkillCooldown) {
                 return;
             }
 
-            if (mana < CAST_MANA_PRICE || isCasting) return; // Ensure the fireball model is loaded
+            if (mana < manaCost || isCasting) return; // Ensure the fireball model is loaded
 
             const onCastEnd = () => {
                 soundCast.pause();
@@ -817,79 +873,22 @@ export function Game({models, sounds, matchId, character}) {
 
                 isCasting = false;
 
+                if (players.has(playerId)) {
+                    const {model} = players.get(playerId);
 
-                // fireball.scale.set(0.015, 0.015, 0.015);
-                // Rotate the fireball 45 degrees to the right on the X-axis
-                sphereMesh.rotation.copy(model.rotation);
-                // fireball.rotation.x += THREE.MathUtils.degToRad(90);
+                    onUsage(model);
+                }
 
-                scene.add(sphereMesh); // Add the sphereMesh to the scene
-
-                // Set the initial position of the sphereMesh
-                camera.getWorldDirection(playerDirection);
-                // todo return if need
-                // const initialPosition = playerCollider.end.clone().addScaledVector(playerDirection, playerCollider.radius * 1.5);
-                const initialPosition = playerCollider.end
-                    .clone()
-                    .addScaledVector(playerDirection, playerCollider.radius * 2);
-
-                sphereMesh.position.copy(initialPosition);
-
-                // Set the velocity for the sphereMesh
-                // Calculate smoother impulse using cubic easing
-                const chargeTime = Math.min(performance.now() - mouseTime, 1000); // Cap charge time to 1 second
-                const chargeFactor = chargeTime / 1000; // Normalize to range [0, 1]
-                const impulse = THREE.MathUtils.lerp(
-                    30,
-                    60,
-                    chargeFactor * chargeFactor * (3 - 2 * chargeFactor),
-                ); // Smoothstep with more power
-
-                const velocity = playerDirection.clone().multiplyScalar(impulse);
-
-                // Send the fireball data to the server
-                sendToSocket({
-                    type: "CAST_SPELL",
-                    payload: {
-                        type,
-                        position: {
-                            x: sphereMesh.position.x,
-                            y: sphereMesh.position.y,
-                            z: sphereMesh.position.z,
-                        },
-                        rotation: {
-                            x: sphereMesh.rotation.x,
-                            y: sphereMesh.rotation.y,
-                            z: sphereMesh.rotation.z,
-                        },
-                        velocity: {x: velocity.x, y: velocity.y, z: velocity.z},
-                    },
-                });
-
-                // Store velocity and collider information for the fireball
-                spheres[sphereIdx] = {
-                    mesh: sphereMesh,
-                    collider: new THREE.Sphere(
-                        new THREE.Vector3().copy(sphereMesh.position),
-                        SPHERE_RADIUS,
-                    ),
-                    velocity: velocity,
-                    initialPosition: initialPosition,
-                    type,
-
-                    trail: [], // массив точек следа
-                    lastTrailTime: performance.now(),
-                };
-
-                sphereIdx = (sphereIdx + 1) % spheres.length;
                 mana = mana - CAST_MANA_PRICE;
                 activateGlobalCooldown(); // Activate global cooldown
             };
 
             isCasting = true;
 
+            const {mixer, actions: {cast}} = players.get(myPlayerId)
+
             controlAction({
-                action: castAction,
+                action: cast,
                 mixer: mixer,
                 loop: THREE.LoopOnce,
                 fadeIn: 0.1,
@@ -898,8 +897,9 @@ export function Game({models, sounds, matchId, character}) {
             });
             soundCast.volume = 0.5; // Adjust volume if needed
             soundCast.play();
+
             window.dispatchEvent(new CustomEvent('start-cast', {
-                detail: {duration: 1000, onEnd: onCastEnd}
+                detail: {duration , onEnd: onCastEnd}
             }));
         }
 
@@ -924,7 +924,7 @@ export function Game({models, sounds, matchId, character}) {
             }
         }
 
-        function updatePlayer(deltaTime) {
+        function updateMyPlayer(deltaTime) {
             let damping = Math.exp(-4 * deltaTime) - 1;
 
             if (!playerOnFloor) {
@@ -1120,7 +1120,7 @@ export function Game({models, sounds, matchId, character}) {
 
         function controls(deltaTime) {
             if (isChatActive) return;
-
+            const model = players.get(myPlayerId).model;
             // Adjust walking and running speed
             const baseWalkSpeed = 8; // Base walking speed
             const speedDelta =
@@ -1129,12 +1129,12 @@ export function Game({models, sounds, matchId, character}) {
             // Rotate playerVelocity when pressing A or D
             if (keyStates["KeyA"]) {
                 playerVelocity.add(getSideVector().multiplyScalar(-speedDelta));
-                if (!isAnyActionRunning()) setAnimation("Walk");
+                if (!isAnyActionRunning()) setAnimation("walk");
             }
 
             if (keyStates["KeyD"]) {
                 playerVelocity.add(getSideVector().multiplyScalar(speedDelta));
-                if (!isAnyActionRunning()) setAnimation("Walk");
+                if (!isAnyActionRunning()) setAnimation("walk");
             }
 
             if (keyStates["KeyW"]) {
@@ -1145,7 +1145,7 @@ export function Game({models, sounds, matchId, character}) {
                 );
 
                 playerVelocity.add(forwardVector.multiplyScalar(speedDelta));
-                if (!isAnyActionRunning()) setAnimation("Walk");
+                if (!isAnyActionRunning()) setAnimation("walk");
             }
 
             if (keyStates["KeyS"]) {
@@ -1156,7 +1156,7 @@ export function Game({models, sounds, matchId, character}) {
                 );
 
                 playerVelocity.add(backwardVector.multiplyScalar(speedDelta));
-                if (!isAnyActionRunning()) setAnimation("Walk");
+                if (!isAnyActionRunning()) setAnimation("walk");
             }
         }
 
@@ -1167,25 +1167,11 @@ export function Game({models, sounds, matchId, character}) {
 
         // Show or hide model
         function showModel(visibility) {
-            model.visible = visibility;
+           if ( players.has(myPlayerId)) {
+               players.get(myPlayerId).model.visible = visibility;
+           }
         }
 
-        // Deactivate all actions
-        function deactivateAllActions() {
-            actions.forEach((action) => action.stop());
-        }
-
-        // Activate all actions
-        function activateAllActions() {
-            actions.forEach((action) => action.play());
-        }
-
-        // Modify time scale for animations
-        function modifyTimeScale(speed) {
-            mixer.timeScale = speed;
-        }
-
-        let isSomeActionRunning = false;
 
         function controlAction({
                                    action, // THREE.AnimationAction to control
@@ -1197,12 +1183,14 @@ export function Game({models, sounds, matchId, character}) {
                                    clampWhenFinished = false, // Stop at the last frame if loop is THREE.LoopOnce
                                    onEnd = null, // Callback when the animation finishes (only for LoopOnce)
                                }) {
+
             if (!action || !mixer) {
                 console.warn("Invalid action or mixer provided.");
 
                 return;
             }
 
+            console.log("action.isRunning(): ", action.isRunning());
             // Check if the action is already playing
             if (action.isRunning()) {
                 return; // Prevent double triggering
@@ -1221,14 +1209,12 @@ export function Game({models, sounds, matchId, character}) {
 
             // Fade in the new action
             action.fadeIn(fadeIn).play();
-            isSomeActionRunning = true;
 
             // Attach an event listener for when the animation ends
             if (loop === THREE.LoopOnce && onEnd) {
                 const onAnimationEnd = (event) => {
                     if (event.action === action) {
                         mixer.removeEventListener("finished", onAnimationEnd); // Clean up listener
-                        isSomeActionRunning = false;
                         onEnd(event);
                     }
                 };
@@ -1238,40 +1224,29 @@ export function Game({models, sounds, matchId, character}) {
         }
 
         function setAnimation(actionName) {
+            if (!players.get(myPlayerId)) return;
+            const {mixer, actions: {idle, walk, run}} = players.get(myPlayerId);
             switch (actionName) {
-                case "Idle":
-                    controlAction({action: idleAction, mixer: mixer, fadeIn: 0.5});
+                case "idle":
+                    controlAction({action: idle, mixer, fadeIn: 0.5});
                     break;
-                case "Walk":
-                    controlAction({action: walkAction, mixer: mixer, fadeIn: 0.2});
+                case "walk":
+                    controlAction({action: walk, mixer, fadeIn: 0.2});
                     break;
-                case "Run":
-                    controlAction({action: runAction, mixer: mixer, fadeIn: 0.2});
+                case "run":
+                    controlAction({action: run, mixer, fadeIn: 0.2});
                     break;
             }
+
+            sendToSocket({type: "UPDATE_ANIMATION", actionName });
         }
-
-        // init models
-        // 1
-        const modelMurloc = models["murloc"];
-
-        modelMurloc.scale.set(0.2, 0.2, 0.2);
-        modelMurloc.position.set(
-            -0.35729391097157387,
-            3.48741981278374,
-            33.25421090119351,
-        );
-
-        scene.add(modelMurloc);
-        worldOctree.fromGraphNode(modelMurloc);
-        // camera.lookAt( modelMurloc.position )
-        // playerCollider.lookAt(modelMurloc.position);
 
         // 2
         const zone = models["zone"];
 
         scene.add(zone);
         worldOctree.fromGraphNode(zone);
+
         zone.traverse((child) => {
             if (child.isMesh) {
                 child.castShadow = true;
@@ -1296,28 +1271,6 @@ export function Game({models, sounds, matchId, character}) {
         //
         //     });
 
-
-        model.traverse((object) => {
-            if (object.isMesh) object.castShadow = true;
-        });
-        model.scale.set(0.4, 0.4, 0.4);
-
-        // 4
-        scene.add(model);
-
-        // Create a DOM element for the player's name
-        // const nameDiv = document.createElement('div');
-        // nameDiv.className = 'name-label';
-        // nameDiv.textContent = 'Me';
-        // nameDiv.style.color = 'white';
-        // nameDiv.style.fontSize = '12px';
-        // nameDiv.style.textAlign = 'center';
-        //
-        // // Attach the name label to the player
-        // const nameLabel = new CSS2DObject(nameDiv);
-        // nameLabel.position.set(0, 1.6, 0); // Adjust position above the player model
-        // model.add(nameLabel);
-
         playerCollider.start.set(...USER_DEFAULT_POSITION);
         playerCollider.end.set(
             USER_DEFAULT_POSITION[0],
@@ -1325,25 +1278,14 @@ export function Game({models, sounds, matchId, character}) {
             USER_DEFAULT_POSITION[2],
         );
         playerCollider.radius = 0.35;
-        mixer = new THREE.AnimationMixer(model);
-        mixer.timeScale = 40;
 
-        const animations = models["character_animations"];
-
-        idleAction = mixer.clipAction(animations[2]);
-        walkAction = mixer.clipAction(animations[6]);
-        runAction = mixer.clipAction(animations[6]);
-        jumpAction = mixer.clipAction(animations[3]);
-        castAction = mixer.clipAction(animations[0]);
-
-        setAnimation("Idle");
-
-        actions = [idleAction, walkAction, runAction, castAction, jumpAction];
 
         function isAnyActionRunning(excludeActions = []) {
+            const {mixer, actions} = players.get(myPlayerId)
+
             if (!mixer) return false; // Ensure mixer exists
 
-            return actions.some(
+            return Object.values(actions).some(
                 (action) => action.isRunning() && !excludeActions.includes(action),
             );
         }
@@ -1384,7 +1326,7 @@ export function Game({models, sounds, matchId, character}) {
 
             // Update camera position to follow the player
             camera.position.set(position.x, position.y + 1.6, position.z); // Adjust for camera height
-
+            const model = players.get(myPlayerId).model;
             // Update the model's position
             if (model) {
                 model.position.set(position.x, position.y - 0.5, position.z); // Adjust for model offset
@@ -1404,22 +1346,70 @@ export function Game({models, sounds, matchId, character}) {
         }
 
         let healEffectModel;
-        let shieldEffectModel;
 
         // Create a bubble-like shield
         const bubbleGeometry = new THREE.SphereGeometry(1.5, 32, 32); // Reduced segments for better performance
+        const frostNormal = new THREE.TextureLoader().load('/textures/ice.jpg');
+        frostNormal.wrapS = frostNormal.wrapT = THREE.RepeatWrapping;
+        frostNormal.repeat.set(4, 4);                 // мелкий узор
+
+
         const bubbleMaterial = new THREE.MeshPhysicalMaterial({
-            color: 0x88ccff, // Light blue
-            opacity: 0.7,
+            // базовый тон ­— чуть холоднее
+            color: 0x62b8ff,      // ледяной голубой
+            // прозрачность/преломление
             transparent: true,
+            transmission: 1.0,           // «стекло» вместо простого alpha
+            ior: 1.25,          // показатель преломления (вода ≈ 1.33)
+            thickness: 0.35,          // толщина «стекла»
+            attenuationColor: 0x62b8ff,      // цвет поглощения
+            attenuationDistance: 1.5,
+            opacity: 0.8,
+            // глянец и блики
+            roughness: 0.05,
+            metalness: 0.0,
+            clearcoat: 1.0,
+            clearcoatRoughness: 0.03,
+            // тонкая радужная плёнка по краю (WebGPU + r156+, но работает и на r155+)
+            iridescence: 0.5,
+            iridescenceIOR: 1.1,
+            sheen: 0.3,
+            sheenColor: 0xc8f6ff,
+            // нормали «иней»
+            normalMap: frostNormal,
+            normalScale: new THREE.Vector2(0.2, 0.2),
         });
+        const bubbleMesh = new THREE.Mesh(bubbleGeometry, bubbleMaterial);
+        bubbleMesh.scale.set(0.3, 0.3, 0.3);
+        scene.add(bubbleMesh);
+        bubbleMesh.visible = false;
 
-        const bubbleShield = new THREE.Mesh(bubbleGeometry, bubbleMaterial);
+        function makeShieldMesh() {
+            const mesh = new THREE.Mesh(bubbleGeometry, bubbleMaterial);
+            mesh.scale.set(0.3, 0.3, 0.3);
+            mesh.renderOrder = 999;          // чтобы просвечивал сквозь персонажа
+            return mesh;
+        }
 
-        bubbleShield.scale.set(0.4, 0.4, 0.4);
-        scene.add(bubbleShield);
+
+
+        function toggleShieldOnPlayer(id, visible) {
+            let shield = activeShields.get(id);
+
+            if (visible) {
+                if (!shield) {
+                    shield = makeShieldMesh();
+                    scene.add(shield);
+                    activeShields.set(id, shield);
+                }
+            } else if (shield) {
+                scene.remove(shield);
+                activeShields.delete(id);
+            }
+        }
 
         function updateModel() {
+            const model = players.get(myPlayerId).model;
             if (model) {
                 const playerPosition = new THREE.Vector3();
 
@@ -1449,6 +1439,14 @@ export function Game({models, sounds, matchId, character}) {
                     0.1,
                 );
 
+                if (isShieldActive) {
+                    bubbleMesh.visible = true;
+                    bubbleMesh.position.copy(playerPosition);
+                    bubbleMesh.position.y -= 0.4; // Move the effect closer to the player's feet
+                } else {
+                    bubbleMesh.visible = false;
+                }
+
                 if (isHealActive) {
                     if (!healEffectModel) {
                         // If the shield model isn't already in the scene, add it
@@ -1471,29 +1469,13 @@ export function Game({models, sounds, matchId, character}) {
                     healEffectModel = null;
                 }
 
-                if (isShieldActive) {
-                    if (!shieldEffectModel) {
-                        // If the shield model isn't already in the scene, add it
-                        shieldEffectModel = bubbleShield;
-                        scene.add(shieldEffectModel);
-                    }
-
-                    const playerPosition = new THREE.Vector3();
-
-                    model.getWorldPosition(playerPosition); // Get the player's position
-                    playerPosition.y += 0.2;
-                    shieldEffectModel.position.copy(playerPosition);
-                } else if (shieldEffectModel) {
-                    // Remove the shield model if shield is no longer active
-                    scene.remove(shieldEffectModel);
-                    shieldEffectModel = null;
-                }
             }
         }
 
         // Example function to send player position updates to the server
         function sendPositionUpdate() {
-            if (!playerCollider.start) return;
+            if (!playerCollider.start || !players.has(myPlayerId)) return;
+            const model = players.get(myPlayerId).model;
 
             const position = {
                 x: playerCollider.start.x,
@@ -1505,7 +1487,7 @@ export function Game({models, sounds, matchId, character}) {
                 y: model?.rotation?.y || 0, // Send only the Y-axis rotation
             };
 
-            sendToSocket({type: "updatePosition", position, rotation});
+            sendToSocket({type: "UPDATE_POSITION", position, rotation});
         }
 
         // setInterval(
@@ -1573,44 +1555,67 @@ export function Game({models, sounds, matchId, character}) {
             const deltaTime = Math.min(0.04, delta) / STEPS_PER_FRAME;
 
             // Update the character model and animations
-            if (mixer) mixer.update(deltaTime);
-            remoteMixers.forEach(m => m.update(deltaTime));
+            // if (mixer) mixer.update(deltaTime);
+            playerMixers.forEach(m => m.update(deltaTime));
             // we look for collisions in substeps to mitigate the risk of
             // an object traversing another too quickly for detection.
 
-            for (let i = 0; i < STEPS_PER_FRAME; i++) {
-                controls(deltaTime);
+            if (players.has(myPlayerId)) {
 
-                updatePlayer(deltaTime);
-                updateSpheres(deltaTime);
 
-                updateModel();
-                // renderCursor();
-                updateCameraPosition();
+
+                for (let i = 0; i < STEPS_PER_FRAME; i++) {
+                    controls(deltaTime);
+
+                    updateMyPlayer(deltaTime);
+
+                    for (const [playerId] of players) {
+                        if (playerId !== myPlayerId) {
+                            updatePlayerPosition(playerId);
+                        }
+                    }
+
+                    updateModel();
+                    updateSpheres(deltaTime);
+
+                    activeShields.forEach((mesh, id) => {
+                        const target = players.get(id)?.model;
+                        if (!target) return;
+
+                        target.getWorldPosition(mesh.position);
+                        mesh.position.y += 0.2;
+                    });
+
+                    // renderCursor();
+                    updateCameraPosition();
+                }
+
+                teleportPlayerIfOob();
+
+                updateHPBar();
+                updateManaBar();
+                sendPositionUpdate();
+
+                renderer.render(scene, camera);
+                labelRenderer.render(scene, camera); // Render labels
+
+                stats.update();
             }
-
-            teleportPlayerIfOob();
-
-            updateHPBar();
-            updateManaBar();
-            sendPositionUpdate();
-
-            renderer.render(scene, camera);
-            labelRenderer.render(scene, camera); // Render labels
-
-            stats.update();
         }
 
         // Function to create a new player in the scene
         function createPlayer(id, name = "") {
-            if (model) {
-
-                const player = SkeletonUtils.clone(model);
-
+            if (models['character']) {
+                const player = SkeletonUtils.clone(models['character']);
+                console.log("player: ", player);
                 player.position.set(...USER_DEFAULT_POSITION);
-
-
+              
+                player.scale.set(0.4, 0.4, 0.4);
                 player.rotation.set(0, 0, 0);
+
+                player.traverse((object) => {
+                    if (object.isMesh) object.castShadow = true;
+                });
                 // Create a DOM element for the player's name
                 // const nameDiv = document.createElement('div');
                 // nameDiv.className = 'name-label';
@@ -1624,55 +1629,77 @@ export function Game({models, sounds, matchId, character}) {
                 // nameLabel.position.set(0, 2, 0); // Adjust position above the player model
                 // player.add(nameLabel);
 
-                const mixer = new THREE.AnimationMixer(player)
-                const idle = mixer.clipAction(animations[2]).play();
-                const walk = mixer.clipAction(animations[6]);
+                const mixer = new THREE.AnimationMixer(player);
+                mixer.timeScale = 40;
+                // const idle = mixer.clipAction(animations[2]).play();
+                // const walk = mixer.clipAction(animations[6]);
 
+                const idleAction = mixer.clipAction(animations[2]);
+                const walkAction = mixer.clipAction(animations[6]);
+                const runAction = mixer.clipAction(animations[6]);
+                const jumpAction = mixer.clipAction(animations[3]);
+                const castAction = mixer.clipAction(animations[0]);
 
                 scene.add(player);
-                players[id] = {
+                players.set(id, {
                     model: player,
                     mixer: mixer,
-                    idle: idle,
-                    walk: walk,
-                    prevPos: new THREE.Vector3().copy(player.position)
-                }
-                console.log("model: ", model);
-                remoteMixers.push(mixer);   // массив всех чужих миксеров
+                    position: { x: 0, y: 0, z: 0 },
+                    rotation: {  y: 0 },
+                    action: '',
+                    currentAction: '',
+                    actions: {
+                        idle: idleAction,
+                        walk: walkAction,
+                        run: runAction,
+                        jump: jumpAction,
+                        cast: castAction,
+                    },
+                    prevPos: new THREE.Vector3().copy(player.position),
+                    buffs: [],
+                });
+                playerMixers.push(mixer);   // массив всех чужих миксеров
             }
         }
 
+
         // Function to update a player's position
-        function updatePlayerPosition(id, position, rotation) {
-            const p = players[id];
-            console.log("players: ", players, id);
-            if (!p) return;
-            console.log("p: ", p);
-            p.model.position.set(position.x, position.y, position.z);
-            p.model.rotation.y = rotation?.y;
-            const moved = p.prevPos.distanceToSquared(p.model.position) > 0.0001;
-            console.log("moved: ", moved);
-            if (moved) {
-                if (!p.walk.isRunning()) {      // включаем Walk
-                    p.idle.fadeOut(0.1);
-                    p.walk.reset().fadeIn(0.1).play();
+        function updatePlayer(id, message) {
+            if (players.has(id)) {
+                const playerData = players.get(id);
+                const {mixer, actions} = playerData;
+
+                playerData.position = message.position;
+                playerData.rotation = message.rotation;
+                playerData.buffs = message.buffs;
+
+                console.log("message: ", message);
+                const action = actions?.[message.animationAction];
+                if (action && message.animationAction !== playerData.currentAction) {
+                    controlAction({
+                        action,
+                        mixer,
+                        fadeIn: 0.2
+                    });
+                    playerData.currentAction = message.animationAction;
                 }
-            } else {
-                if (!p.idle.isRunning()) {      // включаем Idle
-                    p.walk.fadeOut(0.2);
-                    p.idle.reset().fadeIn(0.2).play();
-                }
+
             }
 
-            p.prevPos.copy(p.model.position);
-
+        }
+        function updatePlayerPosition(id) {
+            const p = players.get(id);
+            if (!p) return;
+            const {model, position, rotation} = p;
+            model.position.set(position.x, position.y, position.z);
+            model.rotation.y = rotation?.y;
         }
 
         // Function to remove a player from the scene
         function removePlayer(id) {
-            if (players[id]) {
-                scene.remove(players[id]);
-                delete players[id];
+            if (players.has(id)) {
+                scene.remove(players.get(id));
+                delete players.get(id);
             }
         }
 
@@ -1728,7 +1755,7 @@ export function Game({models, sounds, matchId, character}) {
                             castSphereOtherUser(message.payload, message.id);
                             break;
                         case "shield":
-                            castShieldOtherUser(message.payload);
+                            castShieldOtherUser(message.payload, message.id)
                             break;
                     }
 
@@ -1760,12 +1787,16 @@ export function Game({models, sounds, matchId, character}) {
                     break;
                 case "damage":
                     break;
-                case "updatePosition":
-                    updatePlayerPosition(
-                        message.fromId,
-                        message.position,
-                        message.rotation,
-                    );
+                case "UPDATE_MATCH":
+                    // const match = message.payload;
+                    for( const [id, player] of Object.entries(message.players)) {
+                        const numId = Number(id);
+                        if (numId !== myPlayerId) {
+                            updatePlayer(numId, player);
+                        }
+
+                    }
+
                     break;
                 case "removePlayer":
                     removePlayer(message.id);
@@ -1774,15 +1805,15 @@ export function Game({models, sounds, matchId, character}) {
                     setIsReadyToPlay(true);
                     appendRenderer();
 
-                    Object.keys(players).forEach((id) => {
+                    for (const [id] of players) {
                         removePlayer(id);
-                    });
+                    }
 
-                    console.log("MATCH_READY: ",  message);
+                    console.log("MATCH_READY: ", message);
+                    myPlayerId = message.myPlayerId;
                     message.players.forEach((playerId) => {
-                        if (playerId !== message.myPlayerId) {
-                            createPlayer(playerId, String(playerId));
-                        }
+                        console.log("playerId: ", playerId);
+                        createPlayer(Number(playerId), String(playerId));
                     })
                     break;
             }

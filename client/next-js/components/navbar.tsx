@@ -45,8 +45,7 @@ export const Navbar = () => {
   const account = useCurrentAccount();
   const { currentWallet, connectionStatus } = useCurrentWallet();
 
-  console.log("currentWallet ", currentWallet);
-  console.log("account ", account);
+
   const router = useRouter();
 
   const { data, refetch } = useSuiClientQuery(

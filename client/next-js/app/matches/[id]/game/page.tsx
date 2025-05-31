@@ -36,6 +36,7 @@ export default function GamePage() {
         {id: 'arthas', path: 'arthas.glb'},
         {id: 'stormwind_guard', path: 'stormwind_guard.glb'},
     ];
+
     useLayoutEffect(() => {
         function preloadModels(modelPaths: any[]) {
             const loadedModels: any = {};
@@ -84,6 +85,11 @@ export default function GamePage() {
     }
 
     return (
-        <Game matchId={params.id} character={character} models={preloadedData.models} sounds={preloadedData.sounds} />
+        <Game
+            matchId={params.id}
+            character={character}
+            models={preloadedData.models}
+            sounds={preloadedData.sounds}
+        />
     );
 }

@@ -38,6 +38,7 @@ export default function MatchesPage() {
         sendToSocket({
             type: 'GET_MATCH',
         })
+        console.log("111: ", 111);
     }, []);
 
     const goToGame = () => {

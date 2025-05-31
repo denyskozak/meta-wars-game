@@ -5,17 +5,17 @@ const clients = new Map();
 const playerMatchMap = new Map(); // playerId => matchId
 
 const server = http.createServer();
-const ws = new WebSocket.Server({ server });
+const ws = new WebSocket.Server({server});
 
 const matches = new Map(); // matchId => { id, players: Set, maxPlayers, isFull }
 let matchCounter = 1;
 
-function createMatch({ name, maxPlayers = 4, ownerId }) {
+function createMatch({name, maxPlayers = 4, ownerId}) {
     const matchId = `match_${matchCounter++}`;
     const match = {
         id: matchId,
         name,
-        players: new Set([]),
+        players: new Map(),
         playersReady: 0,
         maxPlayers: Number(maxPlayers),
         isFull: false,
@@ -29,14 +29,14 @@ function broadcastToMatch(matchId, message, excludeId = null) {
     const match = matches.get(matchId);
     if (!match) return;
 
-    match.players.forEach((playerId) => {
-        if (playerId !== excludeId) {
-            const client = clients.get(playerId);
+    for (const [id] of match.players) {
+        if (id !== excludeId) {
+            const client = clients.get(id);
             if (client) {
-                client.send(JSON.stringify({...message, myPlayerId: playerId }));
+                client.send(JSON.stringify({...message, myPlayerId: id}));
             }
         }
-    });
+    }
 }
 
 ws.on('connection', (socket) => {
@@ -44,31 +44,46 @@ ws.on('connection', (socket) => {
     const id = Date.now();
     clients.set(id, socket);
 
+    setInterval(() => {
+        for (const [id, match] of matches) {
+            broadcastToMatch(id, {
+                type: 'UPDATE_MATCH',
+                ...match,
+                players: Object.fromEntries(match.players)
+            });
+
+        }
+    }, 33);
+
     socket.on('message', (data) => {
         let message = {};
         try {
             message = JSON.parse(data);
-        } catch (e) {}
+        } catch (e) {
+        }
 
-        const match = matches.get(message.matchId);
-        if (message.type !== 'updatePosition') {
+        const matchId = playerMatchMap.get(id);
+        const match = matches.get(matchId);
+
+        if (message.type !== 'UPDATE_POSITION') {
             console.log("message: ", message);
             console.log("match: ", match);
         }
+
+
         switch (message.type) {
             case 'READY_FOR_MATCH':
                 if (match) {
-                    const matchId = playerMatchMap.get(id);
-
                     match.playersReady++;
                     if (match.playersReady === match.maxPlayers) {
                         const matchReadyMessage = {
                             type: 'MATCH_READY',
                             id: match.id,
-                            players: Array.from(match.players),
+                            players: Array.from(match.players).map(([id]) => {
+                                return id;
+                            }),
                         };
-                        console.log("matchReadyMessage: ", matchReadyMessage);
-                        broadcastToMatch(matchId, matchReadyMessage);
+                        broadcastToMatch(match.id, matchReadyMessage);
                     }
                 }
                 break;
@@ -78,7 +93,7 @@ ws.on('connection', (socket) => {
             case 'GET_MATCHES':
                 const allMatches = Array.from(matches.values()).map(match => ({
                     ...match,
-                    players: Array.from(match.players),
+                    players: Array.from(match.players).map(([playerId]) => playerId),
                 }));
                 socket.send(JSON.stringify({
                     type: 'MATCH_LIST',
@@ -110,11 +125,20 @@ ws.on('connection', (socket) => {
             case 'JOIN_MATCH':
                 const matchToJoin = matches.get(message.matchId);
                 if (!matchToJoin || matchToJoin.isFull) {
-                    socket.send(JSON.stringify({ type: 'MATCH_JOIN_FAILED', reason: 'Match not found or full' }));
+                    socket.send(JSON.stringify({type: 'MATCH_JOIN_FAILED', reason: 'Match not found or full'}));
                     break;
                 }
 
-                matchToJoin.players.add(id);
+                matchToJoin.players.set(id, {
+                    position: {
+                        x: 0,
+                        y: 0,
+                        z: 0
+                    },
+                    animationAction: '',
+                    rotation: {y: 0},
+                    buffs: []
+                });
                 playerMatchMap.set(id, message.matchId);
                 if (matchToJoin.players.size >= matchToJoin.maxPlayers) {
                     matchToJoin.isFull = true;
@@ -158,15 +182,17 @@ ws.on('connection', (socket) => {
                 }
                 break;
 
-            case 'updatePosition':
-                const posMatchId = playerMatchMap.get(id);
-                if (posMatchId) {
-                    broadcastToMatch(posMatchId, {
-                        type: 'updatePosition',
-                        position: message.position,
-                        rotation: message.rotation,
-                        fromId: id,
-                    }, id);
+            case "UPDATE_ANIMATION":
+                if (match) {
+                    const player = match.players.get(id);
+                    player.animationAction = message.actionName;
+                }
+                break;
+            case 'UPDATE_POSITION':
+                if (match) {
+                    const player = match.players.get(id);
+                    player.position = message.position;
+                    player.rotation = message.rotation;
                 }
                 break;
 
@@ -182,9 +208,8 @@ ws.on('connection', (socket) => {
                 break;
 
             default:
-                const defaultMatchId = playerMatchMap.get(id);
-                if (defaultMatchId) {
-                    broadcastToMatch(defaultMatchId, { ...message, fromId: id }, id);
+                if (matchId) {
+                    broadcastToMatch(matchId, {...message, fromId: id}, id);
                 }
                 break;
         }
@@ -195,7 +220,7 @@ ws.on('connection', (socket) => {
         clients.delete(id);
 
         clients.forEach(client => {
-            client.send(JSON.stringify({ type: 'removePlayer', id }));
+            client.send(JSON.stringify({type: 'removePlayer', id}));
         });
 
         const matchId = playerMatchMap.get(id);
