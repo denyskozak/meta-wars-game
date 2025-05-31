@@ -492,9 +492,11 @@ export function Game({models, sounds, matchId, character}) {
                     // Space for jumping
                     if (playerOnFloor && !jumpBlocked) {
                         jumpBlocked = true;
-                        const {mixer, actions: {jump}} = players.get(myPlayerId)
+                        const {mixer, actions} = players.get(myPlayerId);
+                        const actionName = 'jump';
                         controlAction({
-                            action: jump,
+                            action: actions[actionName],
+                            actionName,
                             mixer: mixer,
                             loop: THREE.LoopOnce,
                             fadeIn: 0.1,
@@ -885,10 +887,11 @@ export function Game({models, sounds, matchId, character}) {
 
             isCasting = true;
 
-            const {mixer, actions: {cast}} = players.get(myPlayerId)
-
+            const {mixer, actions} = players.get(myPlayerId)
+            const actionName  = 'cast';
             controlAction({
-                action: cast,
+                action: actions[actionName],
+                actionName,
                 mixer: mixer,
                 loop: THREE.LoopOnce,
                 fadeIn: 0.1,
@@ -1175,6 +1178,7 @@ export function Game({models, sounds, matchId, character}) {
 
         function controlAction({
                                    action, // THREE.AnimationAction to control
+                                   actionName = '', // THREE.AnimationAction to control
                                    mixer, // THREE.AnimationMixer for blending animations
                                    loop = THREE.LoopRepeat, // Loop mode: THREE.LoopOnce, THREE.LoopRepeat, etc.
                                    reset = true, // Whether to reset the action to the beginning
@@ -1209,6 +1213,9 @@ export function Game({models, sounds, matchId, character}) {
 
             // Fade in the new action
             action.fadeIn(fadeIn).play();
+            if (actionName) {
+                sendToSocket({type: "UPDATE_ANIMATION", actionName, fadeIn });
+            }
 
             // Attach an event listener for when the animation ends
             if (loop === THREE.LoopOnce && onEnd) {
@@ -1225,20 +1232,19 @@ export function Game({models, sounds, matchId, character}) {
 
         function setAnimation(actionName) {
             if (!players.get(myPlayerId)) return;
-            const {mixer, actions: {idle, walk, run}} = players.get(myPlayerId);
+            const {mixer, actions} = players.get(myPlayerId);
+            const action = actions[actionName];
             switch (actionName) {
                 case "idle":
-                    controlAction({action: idle, mixer, fadeIn: 0.5});
+                    controlAction({action, actionName,  mixer, fadeIn: 0.5});
                     break;
                 case "walk":
-                    controlAction({action: walk, mixer, fadeIn: 0.2});
+                    controlAction({action, actionName, mixer, fadeIn: 0.2});
                     break;
                 case "run":
-                    controlAction({action: run, mixer, fadeIn: 0.2});
+                    controlAction({action, actionName, mixer, fadeIn: 0.2});
                     break;
             }
-
-            sendToSocket({type: "UPDATE_ANIMATION", actionName });
         }
 
         // 2
