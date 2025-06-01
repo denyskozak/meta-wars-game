@@ -38,6 +38,12 @@ function getRandomElement(array) {
     return array[randomIndex];
 }
 
+function dispatchEvent(name = '', detail = {}) {
+    window.dispatchEvent(new CustomEvent(name, {
+        detail
+    }))
+}
+
 export function Game({models, sounds, matchId, character}) {
     const containerRef = useRef(null);
     const {refetch: refetchCoins} = useCoins();
@@ -738,9 +744,7 @@ export function Game({models, sounds, matchId, character}) {
             movementSpeedModifier = 0.3;
             sounds.spellCast.volume = 0.3;
             sounds.spellCast.play();
-            window.dispatchEvent(new CustomEvent('start-cast', {
-                detail: {duration: 2000, onEnd: onCastEnd}
-            }));
+            dispatchEvent('start-cast', {duration: 2000, onEnd: onCastEnd})
         }
 
         const CAST_MANA_PRICE = 25;
@@ -765,7 +769,7 @@ export function Game({models, sounds, matchId, character}) {
                         (model) => castSphere(model, fireballMesh.clone(), spellType),
                         sounds.fireballCast,
                         sounds.fireball
-                        )
+                    )
                     break;
                 case "iceball":
                     castSpellImpl(
@@ -860,7 +864,8 @@ export function Game({models, sounds, matchId, character}) {
             sphereIdx = (sphereIdx + 1) % spheres.length;
         }
 
-        function castSpellImpl(playerId, manaCost, duration, onUsage = () => {}, soundCast, soundCastEnd) {
+        function castSpellImpl(playerId, manaCost, duration, onUsage = () => {
+        }, soundCast, soundCastEnd) {
             if (globalSkillCooldown) {
                 return;
             }
@@ -888,7 +893,7 @@ export function Game({models, sounds, matchId, character}) {
             isCasting = true;
 
             const {mixer, actions} = players.get(myPlayerId)
-            const actionName  = 'cast';
+            const actionName = 'cast';
             controlAction({
                 action: actions[actionName],
                 actionName,
@@ -900,10 +905,7 @@ export function Game({models, sounds, matchId, character}) {
             });
             soundCast.volume = 0.5; // Adjust volume if needed
             soundCast.play();
-
-            window.dispatchEvent(new CustomEvent('start-cast', {
-                detail: {duration , onEnd: onCastEnd}
-            }));
+            dispatchEvent('start-cast', {duration, onEnd: onCastEnd})
         }
 
         function playerCollisions() {
@@ -1170,9 +1172,9 @@ export function Game({models, sounds, matchId, character}) {
 
         // Show or hide model
         function showModel(visibility) {
-           if ( players.has(myPlayerId)) {
-               players.get(myPlayerId).model.visible = visibility;
-           }
+            if (players.has(myPlayerId)) {
+                players.get(myPlayerId).model.visible = visibility;
+            }
         }
 
 
@@ -1214,7 +1216,7 @@ export function Game({models, sounds, matchId, character}) {
             // Fade in the new action
             action.fadeIn(fadeIn).play();
             if (actionName) {
-                sendToSocket({type: "UPDATE_ANIMATION", actionName, fadeIn });
+                sendToSocket({type: "UPDATE_ANIMATION", actionName, fadeIn});
             }
 
             // Attach an event listener for when the animation ends
@@ -1236,7 +1238,7 @@ export function Game({models, sounds, matchId, character}) {
             const action = actions[actionName];
             switch (actionName) {
                 case "idle":
-                    controlAction({action, actionName,  mixer, fadeIn: 0.5});
+                    controlAction({action, actionName, mixer, fadeIn: 0.5});
                     break;
                 case "walk":
                     controlAction({action, actionName, mixer, fadeIn: 0.2});
@@ -1396,7 +1398,6 @@ export function Game({models, sounds, matchId, character}) {
             mesh.renderOrder = 999;          // чтобы просвечивал сквозь персонажа
             return mesh;
         }
-
 
 
         function toggleShieldOnPlayer(id, visible) {
@@ -1569,7 +1570,6 @@ export function Game({models, sounds, matchId, character}) {
             if (players.has(myPlayerId)) {
 
 
-
                 for (let i = 0; i < STEPS_PER_FRAME; i++) {
                     controls(deltaTime);
 
@@ -1615,7 +1615,7 @@ export function Game({models, sounds, matchId, character}) {
                 const player = SkeletonUtils.clone(models['character']);
                 console.log("player: ", player);
                 player.position.set(...USER_DEFAULT_POSITION);
-              
+
                 player.scale.set(0.4, 0.4, 0.4);
                 player.rotation.set(0, 0, 0);
 
@@ -1650,10 +1650,14 @@ export function Game({models, sounds, matchId, character}) {
                 players.set(id, {
                     model: player,
                     mixer: mixer,
-                    position: { x: 0, y: 0, z: 0 },
-                    rotation: {  y: 0 },
+                    position: {x: 0, y: 0, z: 0},
+                    rotation: {y: 0},
                     action: '',
                     currentAction: '',
+                    kills: 0,
+                    deaths: 0,
+                    assists: 0,
+                    points: 0,
                     actions: {
                         idle: idleAction,
                         walk: walkAction,
@@ -1677,6 +1681,10 @@ export function Game({models, sounds, matchId, character}) {
 
                 playerData.position = message.position;
                 playerData.rotation = message.rotation;
+                playerData.kills = message.kills;
+                playerData.deaths = message.deaths;
+                playerData.assists = message.assists;
+                playerData.points = message.points;
                 playerData.buffs = message.buffs;
 
                 console.log("message: ", message);
@@ -1693,6 +1701,7 @@ export function Game({models, sounds, matchId, character}) {
             }
 
         }
+
         function updatePlayerPosition(id) {
             const p = players.get(id);
             if (!p) return;
@@ -1795,7 +1804,7 @@ export function Game({models, sounds, matchId, character}) {
                     break;
                 case "UPDATE_MATCH":
                     // const match = message.payload;
-                    for( const [id, player] of Object.entries(message.players)) {
+                    for (const [id, player] of Object.entries(message.players)) {
                         const numId = Number(id);
                         if (numId !== myPlayerId) {
                             updatePlayer(numId, player);

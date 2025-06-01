@@ -1,6 +1,8 @@
 const WebSocket = require('ws');
 const http = require('http');
 
+const UPDATE_MATCH_INTERVAL = 33;
+
 const clients = new Map();
 const playerMatchMap = new Map(); // playerId => matchId
 
@@ -39,6 +41,23 @@ function broadcastToMatch(matchId, message, excludeId = null) {
     }
 }
 
+function createPlayer() {
+    return {
+        position: {
+            x: 0,
+            y: 0,
+            z: 0
+        },
+        animationAction: '',
+        rotation: {y: 0},
+        buffs: [],
+        kills: 0,
+        deaths: 0,
+        assists: 0,
+        points: 0
+    };
+}
+
 ws.on('connection', (socket) => {
     console.log('New client connected.');
     const id = Date.now();
@@ -53,7 +72,7 @@ ws.on('connection', (socket) => {
             });
 
         }
-    }, 33);
+    }, UPDATE_MATCH_INTERVAL);
 
     socket.on('message', (data) => {
         let message = {};
@@ -88,6 +107,16 @@ ws.on('connection', (socket) => {
                 }
                 break;
             case 'KILL':
+                const player = match.players.get(id);
+                const killerPlayer = match.players.get(message.killerId);
+                if (player) {
+                    player.deaths++;
+                }
+
+                if (killerPlayer) {
+                    killerPlayer.kills++;
+                    player.points += 100;
+                }
                 break;
 
             case 'GET_MATCHES':
@@ -129,16 +158,7 @@ ws.on('connection', (socket) => {
                     break;
                 }
 
-                matchToJoin.players.set(id, {
-                    position: {
-                        x: 0,
-                        y: 0,
-                        z: 0
-                    },
-                    animationAction: '',
-                    rotation: {y: 0},
-                    buffs: []
-                });
+                matchToJoin.players.set(id, createPlayer());
                 playerMatchMap.set(id, message.matchId);
                 if (matchToJoin.players.size >= matchToJoin.maxPlayers) {
                     matchToJoin.isFull = true;
