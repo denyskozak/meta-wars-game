@@ -38,6 +38,9 @@ npm install
 npm run dev
 ```
 
+This will also spin up the WebSocket server exposed under `pages/api/websocket`,
+so your frontend and WebSocket API run together.
+
 ### Setup pnpm (optional)
 
 If you are using `pnpm`, you need to add the following code to your `.npmrc` file:
