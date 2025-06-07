@@ -97,25 +97,16 @@ export function Game({models, sounds, matchId, character}) {
                 amount *= DAMAGE_REDUCTION; // Apply damage reduction
             }
 
-            hp = Math.max(0, hp - amount); // Уменьшаем HP, но не ниже 0
-            updateHPBar();
             dispatch({
                 type: "SEND_CHAT_MESSAGE",
                 payload: `You got ${amount} damage!`,
             });
 
             sendToSocket({
-                type: "DAMAGED_ME",
+                type: "TAKE_DAMAGE",
                 damageDealerId: userIdTouched,
                 damage: amount,
-                currentHP: hp,
             });
-
-            if (hp <= 0) {
-                dispatch({type: "SEND_CHAT_MESSAGE", payload: "You are dead :("});
-                sendToSocket({type: "KILL", killerId: userIdTouched});
-                document.getElementById("respawnButton").style.display = "block"; // Показываем кнопку
-            }
         };
 
         const fireballGeometry = new THREE.CapsuleGeometry(
@@ -416,6 +407,7 @@ export function Game({models, sounds, matchId, character}) {
         function respawnPlayer() {
             hp = 100; // Восстанавливаем HP
             updateHPBar(); // Обновляем отображение HP
+            sendToSocket({ type: 'RESPAWN' });
             teleportTo({
                 x: USER_DEFAULT_POSITION[0],
                 y: USER_DEFAULT_POSITION[1] + 0.75,
@@ -666,9 +658,10 @@ export function Game({models, sounds, matchId, character}) {
                 return;
             }
 
-            // Deduct mana
-            mana = Math.max(0, mana - BLINK_MANA_COST);
-            updateManaBar();
+            sendToSocket({
+                type: 'CAST_SPELL',
+                payload: { type: 'blink' }
+            });
 
             sounds.blink.volume = 0.5;
             sounds.blink.play();
@@ -739,11 +732,10 @@ export function Game({models, sounds, matchId, character}) {
                     payload: `Got ${HEAL_AMOUNT} heal!`,
                 });
 
-                // Deduct mana and restore health
-                mana = Math.max(0, mana - HEAL_MANA_COST);
-                hp = Math.min(100, hp + HEAL_AMOUNT);
-                updateHPBar();
-                updateManaBar();
+                sendToSocket({
+                    type: 'CAST_SPELL',
+                    payload: { type: 'heal' }
+                });
                 isHealActive = true;
                 setTimeout(() => (isHealActive = false), 700);
                 activateGlobalCooldown(); // Activate global cooldown
@@ -756,8 +748,6 @@ export function Game({models, sounds, matchId, character}) {
             dispatchEvent('start-cast', {duration: 2000, onEnd: onCastEnd})
         }
 
-        const CAST_MANA_PRICE = 25;
-
         function castSpell(spellType, playerId = myPlayerId) {
             switch (spellType) {
                 case 'ice-shield':
@@ -768,6 +758,7 @@ export function Game({models, sounds, matchId, character}) {
                         () => castShield(),
                         sounds.spellCast,
                         sounds.spellCast,
+                        'ice-shield'
                     )
                     break;
                 case "fireball":
@@ -777,7 +768,8 @@ export function Game({models, sounds, matchId, character}) {
                         1000,
                         (model) => castSphere(model, fireballMesh.clone(), spellType),
                         sounds.fireballCast,
-                        sounds.fireball
+                        sounds.fireball,
+                        'fireball'
                     )
                     break;
                 case "iceball":
@@ -787,7 +779,8 @@ export function Game({models, sounds, matchId, character}) {
                         1500,
                         (model) => castSphere(model, iceballMesh.clone(), spellType),
                         sounds.iceballCast,
-                        sounds.iceball
+                        sounds.iceball,
+                        'iceball'
                     )
                     break;
             }
@@ -874,7 +867,7 @@ export function Game({models, sounds, matchId, character}) {
         }
 
         function castSpellImpl(playerId, manaCost, duration, onUsage = () => {
-        }, soundCast, soundCastEnd) {
+        }, soundCast, soundCastEnd, spellType) {
             if (globalSkillCooldown) {
                 return;
             }
@@ -895,7 +888,6 @@ export function Game({models, sounds, matchId, character}) {
                     onUsage(model);
                 }
 
-                mana = mana - CAST_MANA_PRICE;
                 activateGlobalCooldown(); // Activate global cooldown
             };
 
@@ -1790,12 +1782,19 @@ export function Game({models, sounds, matchId, character}) {
                         payload: `${message?.character?.name} say: ${message.payload}`,
                     });
                     break;
-                case "DAMAGED_ME":
-                    if (message.damageDealerId === address) {
-                        dispatch({
-                            type: "SEND_CHAT_MESSAGE",
-                            payload: `You deal ${message.damage} to ${message?.character?.name} (current hp: ${message.currentHP})`,
-                        });
+                case "UPDATE_STATS":
+                    if (message.playerId === myPlayerId) {
+                        hp = message.hp;
+                        mana = message.mana;
+                        updateHPBar();
+                        updateManaBar();
+                        if (hp <= 0) {
+                            document.getElementById("respawnButton").style.display = "block";
+                        }
+                    } else if (players.has(message.playerId)) {
+                        const p = players.get(message.playerId);
+                        p.hp = message.hp;
+                        p.mana = message.mana;
                     }
                     break;
                 case "KILL":
@@ -1817,6 +1816,11 @@ export function Game({models, sounds, matchId, character}) {
                         const numId = Number(id);
                         if (numId !== myPlayerId) {
                             updatePlayer(numId, player);
+                        } else {
+                            hp = player.hp;
+                            mana = player.mana;
+                            updateHPBar();
+                            updateManaBar();
                         }
 
                     }
@@ -1853,17 +1857,10 @@ export function Game({models, sounds, matchId, character}) {
             }
         };
 
-        const manaInterval = setInterval(
-            () => (mana = mana < 100 ? mana + 5 : mana),
-            1000,
-        );
-
         sendToSocket({
             type: 'READY_FOR_MATCH'
         });
-        return () => {
-            clearInterval(manaInterval);
-        };
+        return () => {};
     }, []);
 
     return (
