@@ -1653,6 +1653,10 @@ export function Game({models, sounds, matchId, character}) {
                         mesh.position.y += 0.2;
                     });
 
+                    runes.forEach(r => {
+                        r.rotation.y += delta * 0.3;
+                    });
+
                     // renderCursor();
                     updateCameraPosition();
                 }
@@ -1775,6 +1779,13 @@ export function Game({models, sounds, matchId, character}) {
             if (!base) return;
             const rune = SkeletonUtils.clone(base);
             rune.position.set(data.position.x, data.position.y, data.position.z);
+            rune.scale.multiplyScalar(0.2);
+
+            rune.traverse((child) => {
+                if (child.isMesh) {
+                    child.material = child.material.clone();
+                }
+            });
             scene.add(rune);
             runes.set(data.id, rune);
         }
