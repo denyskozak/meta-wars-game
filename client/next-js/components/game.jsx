@@ -1654,10 +1654,7 @@ export function Game({models, sounds, matchId, character}) {
                     });
 
                     runes.forEach(r => {
-                        r.rotation.y += delta;
-                        if (r.userData.baseY !== undefined) {
-                            r.position.y = r.userData.baseY + Math.sin(clock.elapsedTime * 2) * 0.5;
-                        }
+                        r.rotation.y += delta * 0.3;
                     });
 
                     // renderCursor();
@@ -1784,22 +1781,12 @@ export function Game({models, sounds, matchId, character}) {
             rune.position.set(data.position.x, data.position.y, data.position.z);
             rune.scale.multiplyScalar(0.2);
 
-            const colors = {
-                damage: 0xff0000,
-                heal: 0x00ff00,
-                mana: 0x0000ff,
-            };
-
             rune.traverse((child) => {
                 if (child.isMesh) {
                     child.material = child.material.clone();
-                    if (child.material.color) {
-                        child.material.color.setHex(colors[data.type] || 0xffffff);
-                    }
                 }
             });
 
-            rune.userData.baseY = rune.position.y;
             scene.add(rune);
             runes.set(data.id, rune);
         }
