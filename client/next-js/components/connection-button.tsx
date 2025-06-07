@@ -3,15 +3,15 @@ import React, { useState } from "react";
 import { Button } from "@heroui/react";
 import { useRouter } from "next/navigation";
 
-export function ConnectionButton({ text = "Connect" }) {
+export function ConnectionButton({ className, text = "Connect" }) {
   const currentAccount = useCurrentAccount();
   const [open, setOpen] = useState(false);
   const router = useRouter();
 
   if (currentAccount) {
     return (
-      <Button color="secondary" onPress={() => router.push("/profile")}>
-        Profile
+      <Button color="secondary" onPress={() => router.push("/bag")}>
+        Bag
       </Button>
     );
   }
@@ -20,7 +20,7 @@ export function ConnectionButton({ text = "Connect" }) {
     <ConnectModal
       open={open}
       trigger={
-        <Button>
+        <Button size="lg" className={className}>
           <span className="absolute inset-0 bg-gradient-to-r from-pink-500 via-red-500 to-yellow-500 animate-pulse opacity-100 group-hover:opacity-100 blur-md" />
           <span className="relative z-10">{text}</span>
         </Button>

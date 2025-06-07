@@ -10,19 +10,26 @@ export default function Home() {
   return (
     <div className="h-full">
         <Navbar />
-        <div className="relative justify-center flex flex-col w-full h-[calc(100%-64px)]">
-            <video
-                autoPlay
-                loop
-                muted
-                playsInline
-                className="blur-sm absolute top-0 left-0 w-full h-full object-cover z-[0]"
-            >
-                <source src="/bg.mp4" type="video/mp4" />
-                Your browser does not support the video tag.
-            </video>
+        <div className="relative justify-center flex flex-col w-full h-[calc(100%-98px)]">
+            {/*<video*/}
+            {/*    autoPlay*/}
+            {/*    loop*/}
+            {/*    muted*/}
+            {/*    playsInline*/}
 
-            <main className="z-[1] flex justify-center items-center w-full h-full overflow-y-auto">
+            {/*>*/}
+            {/*    <source src="/bg.mp4" type="video/mp4" />*/}
+            {/*    Your browser does not support the video tag.*/}
+            {/*</video>*/}
+            <Image
+                className="absolute top-0 left-0 w-full h-full object-cover z-[0]"
+                alt="Turtle Art"
+                width={3840}
+                height={1961}
+                src="/background.webp"
+            />
+
+            <main className="z-[1] flex justify-center w-full h-full overflow-y-auto">
                 <General />
             </main>
         </div>

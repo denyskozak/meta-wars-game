@@ -1,6 +1,5 @@
 "use client";
-import React, {useRef} from "react";
-import Image from "next/image";
+import React, {useRef, useEffect} from "react";
 import gsap from "gsap";
 import {useGSAP} from "@gsap/react";
 import {Button} from "@heroui/react";
@@ -12,48 +11,28 @@ import {useAnimation} from "@/hooks/useAnimation";
 import {siteConfig} from "@/config/site";
 import {DiscordIcon} from "@/components/icons";
 import {useCurrentAccount} from "@mysten/dapp-kit";
-import { ConnectionButton } from "./connection-button";
+import {ConnectionButton} from "./connection-button";
 
 // Sui JS SDK
 
 // EXAMPLE: Connect to Sui testnet
 
 // Replace with your actual deployed addresses!
-const PACKAGE_ID = process.env.NEXT_PUBLIC_CHAMPIONSHIPS_PACKAGE_ID;
-
+let firstRun = true;
 gsap.registerPlugin(useGSAP);
 
 export default function General() {
     const container = useRef(null);
-    const logoRef = useRef(null);
     const router = useRouter();
-    const [fadeInClass] = useAnimation();
     const account = useCurrentAccount();
     const address = account?.address;
 
-    useGSAP(
-        () => {
-            // gsap.registerPlugin(window.TextPlugin);
-            // const titles = gsap.utils.toArray('.title-text');
-            // const subtexts = gsap.utils.toArray('.sub-text');
-            // console.log('titles ', titles)
-            // console.log('subtexts ', subtexts)
-            const anim = fadeInClass(".fade-in-animation");
-
-            anim.eventCallback("onComplete", () => {
-                const tl2 = gsap.timeline({repeatDelay: 2, yoyo: true});
-
-                tl2.to(logoRef.current, {
-                    duration: 6,
-                    rotate: 360,
-                    repeat: 0,
-                    reversed: true,
-                });
-            });
-        },
-        {scope: container},
-    );
-
+    useEffect(() => {
+        if (address && firstRun) {
+            firstRun = false;
+            router.push('/matches')
+        }
+    }, [address]);
     // useLayoutEffect(() => {
     //   if (window.TextPlugin) {
     //     gsap.registerPlugin(TextPlugin);
@@ -76,7 +55,7 @@ export default function General() {
     // }, []);
 
     return (
-        <div ref={container}>
+        <div className="pt-24 flex justify-center flex-col" ref={container}>
             {/* HeroUI-like header */}
             <div style={{textAlign: "center"}}>
                 <div className="inline-block max-w-xl text-center justify-center items-center">
@@ -90,34 +69,24 @@ export default function General() {
                         <span
                             className={`${getTitle({color: "yellow"})} fade-in-animation`}
                         >
-              PVP&nbsp;
+              PVP
             </span>
                         <br/>
                         <span
                             className={`${getTitle({color: "cyan"})} fade-in-animation`}
                         >
-              Earn&nbsp;
+              Play&nbsp;
             </span>
                         <span
                             className={`${getTitle({color: "yellow"})} fade-in-animation`}
                         >
-              Crypto
+              to Earn
             </span>
 
                         {/*<br />*/}
                         {/*<span className={`${getTitle()} fade-in-animation`}>*/}
                         {/*  with&nbsp;*/}
                         {/*</span>*/}
-                    </div>
-                    <div>
-                        <Image
-                            ref={logoRef}
-                            alt="Logo"
-                            className="m-auto mt-4 fade-in-animation"
-                            height={280}
-                            src="/logo_big.png"
-                            width={180}
-                        />
                     </div>
                     {/*<span className={getTitle()}>Path&nbsp;</span>*/}
                     {/*<br/>*/}
@@ -130,17 +99,18 @@ export default function General() {
                             color: "foreground",
                         })}
                     >
-                        New Multiplayer Online Battle Arena
+                        Platform Agnostic MOBA
                     </div>
+                    <Link isExternal aria-label="Discord" href={siteConfig.links.discord}>
+                        <DiscordIcon className="text-[#FFB457]" size={36}/>
+                    </Link>
                 </div>
             </div>
-            <section className="mt-2 flex justify-center items-center flex-col gap-2  fade-in-animation">
+            <section className="m-auto flex justify-center items-center flex-col gap-2  fade-in-animation">
                 {/*<div>*/}
                 {/*    <span className={`${getTitle()} fade-in-animation`}>Championships&nbsp;</span>*/}
                 {/*</div>*/}
-                <Link isExternal aria-label="Discord" href={siteConfig.links.discord}>
-                    <DiscordIcon className="text-[#FFB457]" size={36}/>
-                </Link>
+
                 {
                     address
                         ? (
@@ -155,7 +125,7 @@ export default function General() {
                             </Button>
                         )
                         : (
-                            <ConnectionButton text="Connect to Play"/>
+                            <ConnectionButton className="border-2 border-black" text="Connect to Play"/>
                         )
                 }
 

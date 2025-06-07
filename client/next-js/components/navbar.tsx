@@ -86,12 +86,14 @@ export const Navbar = () => {
   );
 
   return (
-    <HeroUINavbar maxWidth="xl" position="sticky">
+    <HeroUINavbar height="98px" maxWidth="xl" position="sticky">
       <NavbarContent className="basis-1/5 sm:basis-full" justify="start">
         <NavbarBrand as="li" className="gap-3 max-w-fit">
-          <NextLink className="flex justify-start items-center gap-2" href="/">
-            <Image alt="Logo" height={32} src="/logo_big.png" width={32} />
-            <p className="font-bold text-inherit">Meta Wars</p>
+          <NextLink className="flex justify-start items-center gap-4" href="/">
+            <Image alt="Logo" height={56} src="/logo_big.png" width={56} />
+            <p className="font-bold text-inherit text-center">Meta Wars<br/><span className="text-small font-light">
+               Online since 2025
+            </span></p>
           </NextLink>
         </NavbarBrand>
         <ul className="hidden lg:flex gap-4 justify-start ml-2">

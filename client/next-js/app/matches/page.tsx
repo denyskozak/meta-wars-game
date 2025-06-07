@@ -76,53 +76,55 @@ export default function MatchesPage() {
         <div className="h-full">
             <Navbar/>
 
-            <>
-                <Button onPress={onOpen}>Open Modal</Button>
-                <Button color="primary" onPress={fetchMatches}>Fetch Matches</Button>
-                <Table aria-label="Example static collection table">
-                    <TableHeader>
-                        <TableColumn>ID</TableColumn>
-                        <TableColumn>NAME</TableColumn>
-                        <TableColumn>PLAYERS</TableColumn>
-                        <TableColumn>ACTION</TableColumn>
-                    </TableHeader>
-                    <TableBody>
-                        {matches.map(matche => (
-                            <TableRow key={matche.id}>
-                                <TableCell>{matche.id}</TableCell>
-                                <TableCell>{matche.name}</TableCell>
-                                <TableCell>{matche.players.length} / {matche.maxPlayers}</TableCell>
-                                <TableCell>
-                                    <><Button color="primary" onPress={() => goToLobby(matche.id)}>Join</Button></>
-                                </TableCell>
-                            </TableRow>
-                        ))}
-                    </TableBody>
-                </Table>
-                {/*Create Match*/}
-                <Modal isOpen={isOpen} onOpenChange={onOpenChange}>
-                    <ModalContent>
-                        {(onClose) => (
-                            <>
-                                <ModalHeader className="flex flex-col gap-1">Modal Title</ModalHeader>
-                                <ModalBody>
-                                    <Input label="Name" type="text" value={name} onValueChange={setName}/>
-                                    <Input label="Max players" type="number" value={maxPlayers}
-                                           onValueChange={setMaxPlayers}/>
-                                </ModalBody>
-                                <ModalFooter>
-                                    <Button color="danger" variant="light" onPress={onClose}>
-                                        Close
-                                    </Button>
-                                    <Button color="primary" onPress={handleAddMatch}>
-                                        Create
-                                    </Button>
-                                </ModalFooter>
-                            </>
-                        )}
-                    </ModalContent>
-                </Modal>
-            </>
+            <div className="flex justify-center items-center">
+               <div className="max-w-[640px] min-w-[480px] flex gap-8 flex-col">
+                   <Button size='lg' onPress={onOpen}>Create Match</Button>
+                   <Button size='lg' color="primary" onPress={fetchMatches}>Fetch Matches</Button>
+                   <Table aria-label="Example static collection table">
+                       <TableHeader>
+                           <TableColumn>ID</TableColumn>
+                           <TableColumn>NAME</TableColumn>
+                           <TableColumn>PLAYERS</TableColumn>
+                           <TableColumn>ACTION</TableColumn>
+                       </TableHeader>
+                       <TableBody>
+                           {matches.map(matche => (
+                               <TableRow key={matche.id}>
+                                   <TableCell>{matche.id}</TableCell>
+                                   <TableCell>{matche.name}</TableCell>
+                                   <TableCell>{matche.players.length} / {matche.maxPlayers}</TableCell>
+                                   <TableCell>
+                                       <><Button color="primary" onPress={() => goToLobby(matche.id)}>Join</Button></>
+                                   </TableCell>
+                               </TableRow>
+                           ))}
+                       </TableBody>
+                   </Table>
+                   {/*Create Match*/}
+                   <Modal isOpen={isOpen} onOpenChange={onOpenChange}>
+                       <ModalContent>
+                           {(onClose) => (
+                               <>
+                                   <ModalHeader className="flex flex-col gap-1">Modal Title</ModalHeader>
+                                   <ModalBody>
+                                       <Input label="Name" type="text" value={name} onValueChange={setName}/>
+                                       <Input label="Max players" type="number" value={maxPlayers}
+                                              onValueChange={setMaxPlayers}/>
+                                   </ModalBody>
+                                   <ModalFooter>
+                                       <Button color="danger" variant="light" onPress={onClose}>
+                                           Close
+                                       </Button>
+                                       <Button color="primary" onPress={handleAddMatch}>
+                                           Create
+                                       </Button>
+                                   </ModalFooter>
+                               </>
+                           )}
+                       </ModalContent>
+                   </Modal>
+               </div>
+            </div>
         </div>
     );
 }
