@@ -10,6 +10,20 @@ const SPELL_COST = {
     'heal': 30,
 };
 
+const RUNE_POSITIONS = [
+    {x: -38.48709130964472, y: -0.23544278151646073, z: -12.245971700152356},
+    {x: -29.946360662245386, y: -0.23544278151647133, z: -28.323764907977612},
+    {x: -18.22565348371349, y: -0.2354427815116833, z: -19.057257365313095},
+    {x: -16.390257065866678, y: -0.23544278154610798, z: -7.5338405970709985},
+    {x: -36.73032129087861, y: -0.23544278144836425, z: 0.13186301070007891},
+];
+
+const RUNE_TYPES = ['damage', 'heal', 'mana'];
+
+function randomRuneType() {
+    return RUNE_TYPES[Math.floor(Math.random() * RUNE_TYPES.length)];
+}
+
 const clients = new Map();
 const playerMatchMap = new Map(); // playerId => matchId
 
@@ -31,6 +45,11 @@ function createMatch({name, maxPlayers = 4, ownerId}) {
         isFull: false,
         finished: false,
         summary: null,
+        runes: RUNE_POSITIONS.map((pos, idx) => ({
+            id: `rune_${matchId}_${idx}`,
+            type: randomRuneType(),
+            position: pos,
+        })),
     };
     matches.set(matchId, match);
     playerMatchMap.set(ownerId, matchId);
@@ -70,6 +89,48 @@ function createPlayer() {
     };
 }
 
+function checkRunePickup(match, playerId) {
+    const player = match.players.get(playerId);
+    if (!player) return;
+
+    for (let i = 0; i < match.runes.length; i++) {
+        const rune = match.runes[i];
+        const dx = player.position.x - rune.position.x;
+        const dy = player.position.y - rune.position.y;
+        const dz = player.position.z - rune.position.z;
+        const dist = Math.sqrt(dx * dx + dy * dy + dz * dz);
+        if (dist < 1.5) {
+            match.runes.splice(i, 1);
+            switch (rune.type) {
+                case 'heal':
+                    player.hp = Math.min(100, player.hp + 20);
+                    break;
+                case 'mana':
+                    player.mana = Math.min(100, player.mana + 20);
+                    break;
+                case 'damage':
+                    player.buffs.push({type: 'damage', bonus: 10, expires: Date.now() + 60000});
+                    break;
+            }
+
+            broadcastToMatch(match.id, {
+                type: 'UPDATE_STATS',
+                playerId,
+                hp: player.hp,
+                mana: player.mana,
+            });
+
+            broadcastToMatch(match.id, {
+                type: 'RUNE_PICKED',
+                playerId,
+                runeId: rune.id,
+                runeType: rune.type,
+            });
+            break;
+        }
+    }
+}
+
 ws.on('connection', (socket) => {
     console.log('New client connected.');
     const id = Date.now();
@@ -87,10 +148,14 @@ ws.on('connection', (socket) => {
     }, UPDATE_MATCH_INTERVAL);
 
     setInterval(() => {
+        const now = Date.now();
         for (const match of matches.values()) {
             match.players.forEach(player => {
                 if (player.mana < 100) {
                     player.mana = Math.min(100, player.mana + 5);
+                }
+                if (player.buffs.length) {
+                    player.buffs = player.buffs.filter(b => b.expires > now);
                 }
             });
         }
@@ -220,6 +285,7 @@ ws.on('connection', (socket) => {
                             matchId: matchToJoin.id,
                             players: Array.from(matchToJoin.players),
                             isFull: matchToJoin.isFull,
+                            runes: matchToJoin.runes,
                         }));
                     }
                 });
@@ -264,6 +330,7 @@ ws.on('connection', (socket) => {
                     const player = match.players.get(id);
                     player.position = message.position;
                     player.rotation = message.rotation;
+                    checkRunePickup(match, id);
                 }
                 break;
 
@@ -299,7 +366,18 @@ ws.on('connection', (socket) => {
                 if (match) {
                     const victim = match.players.get(id);
                     if (victim) {
-                        victim.hp = Math.max(0, victim.hp - Number(message.damage));
+                        const attacker = match.players.get(message.damageDealerId);
+                        let totalDamage = Number(message.damage);
+                        if (attacker && attacker.buffs.length) {
+                            const now = Date.now();
+                            attacker.buffs.forEach(buff => {
+                                if (buff.type === 'damage' && buff.expires > now) {
+                                    totalDamage += buff.bonus;
+                                }
+                            });
+                        }
+
+                        victim.hp = Math.max(0, victim.hp - totalDamage);
                         if (victim.hp <= 0) {
                         victim.deaths++;
                         const killer = match.players.get(message.damageDealerId);

@@ -60,6 +60,7 @@ export function Game({models, sounds, matchId, character}) {
     useLayoutEffect(() => {
         // Store other players
         const players = new Map();
+        const runes = new Map();
         let myPlayerId = null;
 
         // Character Model and Animation Variables
@@ -1768,6 +1769,24 @@ export function Game({models, sounds, matchId, character}) {
             model.rotation.y = rotation?.y;
         }
 
+        function createRune(data) {
+            const modelId = `${data.type}_rune`;
+            const base = models[modelId];
+            if (!base) return;
+            const rune = SkeletonUtils.clone(base);
+            rune.position.set(data.position.x, data.position.y, data.position.z);
+            scene.add(rune);
+            runes.set(data.id, rune);
+        }
+
+        function removeRune(id) {
+            const rune = runes.get(id);
+            if (rune) {
+                scene.remove(rune);
+                runes.delete(id);
+            }
+        }
+
         // Function to remove a player from the scene
         function removePlayer(id) {
             if (players.has(id)) {
@@ -1869,6 +1888,26 @@ export function Game({models, sounds, matchId, character}) {
                     break;
                 case "damage":
                     break;
+                case "RUNE_PICKED":
+                    removeRune(message.runeId);
+                    if (message.playerId === myPlayerId) {
+                        let text = '';
+                        switch (message.runeType) {
+                            case 'heal':
+                                text = 'Picked heal rune!';
+                                break;
+                            case 'mana':
+                                text = 'Picked mana rune!';
+                                break;
+                            case 'damage':
+                                text = 'Damage buff for 60s!';
+                                break;
+                        }
+                        if (text) {
+                            dispatch({type: 'SEND_CHAT_MESSAGE', payload: text});
+                        }
+                    }
+                    break;
                 case "UPDATE_MATCH":
                     // const match = message.payload;
                     for (const [id, player] of Object.entries(message.players)) {
@@ -1890,6 +1929,24 @@ export function Game({models, sounds, matchId, character}) {
                         deaths: p.deaths,
                     }));
                     dispatch({type: 'SET_SCOREBOARD_DATA', payload: boardData});
+
+                    const runeIds = new Set();
+                    if (Array.isArray(message.runes)) {
+                        message.runes.forEach(r => {
+                            runeIds.add(r.id);
+                            if (!runes.has(r.id)) {
+                                createRune(r);
+                            } else {
+                                const obj = runes.get(r.id);
+                                obj.position.set(r.position.x, r.position.y, r.position.z);
+                            }
+                        });
+                    }
+                    Array.from(runes.keys()).forEach(id => {
+                        if (!runeIds.has(id)) {
+                            removeRune(id);
+                        }
+                    });
 
                     break;
                 case "removePlayer":
