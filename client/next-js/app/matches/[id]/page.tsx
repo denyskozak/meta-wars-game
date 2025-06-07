@@ -28,7 +28,7 @@ export default function MatchesPage() {
     const [players, setPlayers] = useState<number[]>([]);
     const [classType, setClassType] = useState('mage');
     const [skin, setSkin] = useState('mad');
-
+    console.log("players: ", players);
     useEffect(() => {
         socket.onmessage = (event) => {
             const message = JSON.parse(event.data);
@@ -40,7 +40,6 @@ export default function MatchesPage() {
                     }
                     break;
                 case 'MATCH_JOINED':
-                case 'UPDATE_MATCH':
                     if (message.players) {
                         setPlayers(Array.from(message.players).map(([id]) => Number(id)));
                     }
@@ -60,7 +59,7 @@ export default function MatchesPage() {
 
     const handleReady = () => {
         dispatch({type: 'SET_CHARACTER', payload: {name: classType, skin}});
-        sendToSocket({type: 'READY_FOR_MATCH'});
+        router.push(`/matches/${params.id}/game`);
     };
 
     return (

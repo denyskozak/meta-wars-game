@@ -1860,9 +1860,8 @@ export function Game({models, sounds, matchId, character}) {
         });
         return () => {};
     }, []);
-
     return (
-        <div ref={containerRef} id="game-container">
+        <div ref={containerRef} id="game-container" className="w-full h-full">
             <Interface/>
             {!isReadyToPlay && (<Loading text="Loading Players ..." />)}
         </div>

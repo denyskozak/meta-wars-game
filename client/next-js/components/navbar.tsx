@@ -91,7 +91,7 @@ export const Navbar = () => {
         <NavbarBrand as="li" className="gap-3 max-w-fit">
           <NextLink className="flex justify-start items-center gap-4" href="/">
             <Image alt="Logo" height={56} src="/logo_big.png" width={56} />
-            <p className="font-bold text-inherit text-center">Meta Wars<br/><span className="text-small font-light">
+            <p className="font-bold text-inherit text-center">Meta Wars<br/><span className="text-s font-light">
                Online since 2025
             </span></p>
           </NextLink>

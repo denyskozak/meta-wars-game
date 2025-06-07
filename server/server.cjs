@@ -106,12 +106,6 @@ ws.on('connection', (socket) => {
         const matchId = playerMatchMap.get(id);
         const match = matches.get(matchId);
 
-        if (message.type !== 'UPDATE_POSITION') {
-            console.log("message: ", message);
-            console.log("match: ", match);
-        }
-
-
         switch (message.type) {
             case 'READY_FOR_MATCH':
                 if (match) {
