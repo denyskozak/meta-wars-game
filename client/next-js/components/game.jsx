@@ -80,6 +80,7 @@ export function Game({models, sounds, matchId, character}) {
         const manaBar = document.getElementById("manaBar");
 
         const activeShields = new Map(); // key = playerId
+        const activeHandEffects = new Map(); // key = playerId -> { effectKey: {left, right} }
 
         // Function to update the HP bar width
         function updateHPBar() {
@@ -762,6 +763,7 @@ export function Game({models, sounds, matchId, character}) {
                     )
                     break;
                 case "fireball":
+                    igniteHands(playerId, 1000);
                     castSpellImpl(
                         playerId,
                         30,
@@ -773,6 +775,7 @@ export function Game({models, sounds, matchId, character}) {
                     )
                     break;
                 case "iceball":
+                    freezeHands(playerId, 1000);
                     castSpellImpl(
                         playerId,
                         50,
@@ -1400,6 +1403,61 @@ export function Game({models, sounds, matchId, character}) {
             return mesh;
         }
 
+        function applyHandEffect(playerId, effectKey, createMeshes, duration = 1000) {
+            const effects = activeHandEffects.get(playerId) || {};
+            const existing = effects[effectKey];
+            if (existing) {
+                existing.left.parent?.remove(existing.left);
+                existing.right.parent?.remove(existing.right);
+            }
+
+            const player = players.get(playerId)?.model;
+            if (!player) return;
+
+            const leftHand = player.getObjectByName('mixamorig:LeftHand');
+            const rightHand = player.getObjectByName('mixamorig:RightHand');
+            if (!leftHand || !rightHand) return;
+
+            const {left, right} = createMeshes();
+            if (!left || !right) return;
+
+            leftHand.add(left);
+            rightHand.add(right);
+
+            effects[effectKey] = {left, right};
+            activeHandEffects.set(playerId, effects);
+
+            setTimeout(() => {
+                leftHand.remove(left);
+                rightHand.remove(right);
+                delete effects[effectKey];
+                if (Object.keys(effects).length === 0) {
+                    activeHandEffects.delete(playerId);
+                }
+            }, duration);
+        }
+
+        function igniteHands(playerId, duration = 1000) {
+            applyHandEffect(playerId, 'fire', () => {
+                if (!models['fire']) return {};
+                const left = SkeletonUtils.clone(models['fire']);
+                const right = SkeletonUtils.clone(models['fire']);
+                left.scale.set(0.4, 0.4, 0.4);
+                right.scale.set(0.4, 0.4, 0.4);
+                return {left, right};
+            }, duration);
+        }
+
+        function freezeHands(playerId, duration = 1000) {
+            applyHandEffect(playerId, 'ice', () => {
+                const left = new THREE.Mesh(iceballGeometry, iceballMaterial.clone());
+                const right = new THREE.Mesh(iceballGeometry, iceballMaterial.clone());
+                left.scale.set(0.3, 0.3, 0.3);
+                right.scale.set(0.3, 0.3, 0.3);
+                return {left, right};
+            }, duration);
+        }
+
 
         function toggleShieldOnPlayer(id, visible) {
             let shield = activeShields.get(id);
@@ -1763,9 +1821,11 @@ export function Game({models, sounds, matchId, character}) {
                 case "CAST_SPELL":
                     switch (message?.payload?.type) {
                         case "fireball":
+                            igniteHands(message.id, 1000);
                             castSphereOtherUser(message.payload, message.id);
                             break;
                         case "iceball":
+                            freezeHands(message.id, 1000);
                             castSphereOtherUser(message.payload, message.id);
                             break;
                         case "shield":
