@@ -18,7 +18,7 @@ const loader = new GLTFLoader().setPath('/models/');
 export default function GamePage() {
     const account = useCurrentAccount();
     const params = useParams();
-    const {socket, sendToSocket} = useWS(params.id);
+    const {socket, sendToSocket} = useWS(params?.id);
 
     const [preloadedData, setPreloadedData] = useState({
         models: {},

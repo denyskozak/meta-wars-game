@@ -17,7 +17,7 @@ interface Match {
 
 export default function MatchesPage() {
     const params = useParams();
-    const {socket, sendToSocket} = useWS(params.id);
+    const {socket, sendToSocket} = useWS(params?.id);
     const [match, setMatch] = useState<Match | null>(null);
     const router = useRouter();
 

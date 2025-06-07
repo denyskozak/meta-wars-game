@@ -3,7 +3,7 @@ import {useCurrentAccount} from "@mysten/dapp-kit";
 
 const socket = new WebSocket(`ws://${process.env.NEXT_PUBLIC_SOCKET_URL}`);
 // const socket = new WebSocket('ws://localhost:8080');
-export const useWS = (matchId = null) => {
+export const useWS = (matchId: string | string[] | null = null) => {
     const account = useCurrentAccount();
     const address = account?.address;
     const {state: {character}} = useInterface();
