@@ -11,7 +11,7 @@ module meta_war::coin {
             6,
             b"METAWAR",
             b"Meta War",
-            b"Unlimeneted open-source MMO RPG",
+            b"Unlimeneted play-to-earn MOBA, browser agnostic",
             option::some(new_unsafe_from_bytes(b"https://meta-wars.s3.us-west-2.amazonaws.com/vite.svg")),
             ctx);
         transfer::public_freeze_object(metadata);

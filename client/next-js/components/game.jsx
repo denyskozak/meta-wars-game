@@ -1553,6 +1553,7 @@ export function Game({models, sounds, matchId, character}) {
                 y: model?.rotation?.y || 0, // Send only the Y-axis rotation
             };
 
+            console.log("position: ", position);
             sendToSocket({type: "UPDATE_POSITION", position, rotation});
         }
 

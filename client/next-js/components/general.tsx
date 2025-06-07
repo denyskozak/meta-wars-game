@@ -115,7 +115,7 @@ export default function General() {
                     address
                         ? (
                             <Button
-                                className=" shadow-lg overflow-hidden group "
+                                className="border-2 border-black shadow-lg overflow-hidden group "
                                 size="lg"
                                 onPress={() => router.push("/matches")}
                             >

@@ -36,7 +36,10 @@ export default function GamePage() {
         {id: 'heal-effect', path: 'heal-effect.glb'},
         {id: 'fire', path: 'stuff/fire.glb'},
         {id: 'arthas', path: 'arthas.glb'},
-        {id: 'stormwind_guard', path: 'stormwind_guard.glb'},
+        {id: 'bottle_magic', path: 'bottle_magic.glb'},
+        {id: 'damage_rune', path: 'damage_rune.glb'},
+        {id: 'heal_rune', path: 'heal_rune.glb'},
+        {id: 'mana_rune', path: 'mana_rune.glb'},
     ];
 
     useLayoutEffect(() => {
