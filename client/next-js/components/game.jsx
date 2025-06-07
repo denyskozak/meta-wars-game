@@ -7,6 +7,7 @@ import {OctreeHelper} from "three/examples/jsm/helpers/OctreeHelper";
 import {Capsule} from "three/examples/jsm/math/Capsule";
 import {CSS2DRenderer} from "three/examples/jsm/renderers/CSS2DRenderer";
 import {useCurrentAccount} from "@mysten/dapp-kit";
+import { useRouter } from "next/navigation";
 
 import {useCoins} from "../hooks/useCoins";
 import {useInterface} from "../context/inteface";
@@ -49,6 +50,7 @@ export function Game({models, sounds, matchId, character}) {
     const {refetch: refetchCoins} = useCoins();
     const {dispatch} = useInterface();
     const {socket, sendToSocket} = useWS(matchId);
+    const router = useRouter();
     const [isReadyToPlay, setIsReadyToPlay] = useState(false);
     // scoreboard visibility and data managed via interface context
 
@@ -1829,6 +1831,9 @@ export function Game({models, sounds, matchId, character}) {
                     break;
                 case "removePlayer":
                     removePlayer(message.id);
+                    break;
+                case "MATCH_FINISHED":
+                    router.push(`/matches/${matchId}/summary`);
                     break;
                 case "MATCH_READY":
                     setIsReadyToPlay(true);

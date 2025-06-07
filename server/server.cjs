@@ -9,7 +9,8 @@ const playerMatchMap = new Map(); // playerId => matchId
 const server = http.createServer();
 const ws = new WebSocket.Server({server});
 
-const matches = new Map(); // matchId => { id, players: Set, maxPlayers, isFull }
+const matches = new Map(); // matchId => { id, players: Map, maxPlayers, isFull, finished, summary }
+const finishedMatches = new Map(); // store summary of finished matches
 let matchCounter = 1;
 
 function createMatch({name, maxPlayers = 4, ownerId}) {
@@ -21,6 +22,8 @@ function createMatch({name, maxPlayers = 4, ownerId}) {
         playersReady: 0,
         maxPlayers: Number(maxPlayers),
         isFull: false,
+        finished: false,
+        summary: null,
     };
     matches.set(matchId, match);
     playerMatchMap.set(ownerId, matchId);
@@ -116,6 +119,21 @@ ws.on('connection', (socket) => {
                 if (killerPlayer) {
                     killerPlayer.kills++;
                     killerPlayer.points += 100;
+
+                    if (killerPlayer.kills >= 15 && !match.finished) {
+                        match.finished = true;
+                        match.summary = Array.from(match.players.entries()).map(([pid, p]) => ({
+                            id: pid,
+                            kills: p.kills,
+                            deaths: p.deaths
+                        }));
+                        finishedMatches.set(match.id, match.summary);
+
+                        broadcastToMatch(match.id, {
+                            type: 'MATCH_FINISHED',
+                            matchId: match.id,
+                        });
+                    }
                 }
                 break;
 
@@ -139,6 +157,23 @@ ws.on('connection', (socket) => {
                             ...match,
                             players: Array.from(match.players),
                         },
+                    }));
+                }
+                break;
+
+            case 'GET_MATCH_SUMMARY':
+                const summaryId = message.matchId || matchId;
+                let summary = null;
+                if (matches.get(summaryId)?.summary) {
+                    summary = matches.get(summaryId).summary;
+                } else if (finishedMatches.get(summaryId)) {
+                    summary = finishedMatches.get(summaryId);
+                }
+                if (summary) {
+                    socket.send(JSON.stringify({
+                        type: 'MATCH_SUMMARY',
+                        matchId: summaryId,
+                        summary,
                     }));
                 }
                 break;
@@ -185,6 +220,9 @@ ws.on('connection', (socket) => {
                     playerMatchMap.delete(id);
 
                     if (matchToLeave.players.size === 0) {
+                        if (matchToLeave.finished && matchToLeave.summary) {
+                            finishedMatches.set(matchToLeave.id, matchToLeave.summary);
+                        }
                         matches.delete(message.matchId);
                     } else {
                         matchToLeave.isFull = false;
@@ -254,6 +292,9 @@ ws.on('connection', (socket) => {
                 match.isFull = false;
 
                 if (match.players.size === 0) {
+                    if (match.finished && match.summary) {
+                        finishedMatches.set(match.id, match.summary);
+                    }
                     matches.delete(matchId);
                 } else {
                     match.players.forEach(playerId => {
