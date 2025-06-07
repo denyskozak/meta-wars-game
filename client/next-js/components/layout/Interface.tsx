@@ -5,6 +5,8 @@ import {Coins} from "../parts/Coins";
 import {Scoreboard} from "../parts/Scoreboard";
 
 import './Interface.css';
+import Image from "next/image";
+import React from "react";
 
 export const Interface = () => {
     return (
@@ -21,17 +23,21 @@ export const Interface = () => {
                 position: 'absolute',
                 top: '50%',
                 left: '50%',
-                width: '10px',
-                height: '10px',
-                background: 'radial-gradient(circle, rgba(255,0,0,1) 0%, rgba(255,0,0,0.5) 70%, rgba(255,0,0,0) 100%)',
-                borderRadius: '50%',
-                boxShadow: '0 0 15px rgba(255, 0, 0, 0.8)',
-                transform: 'translate(-50%, -50%) scale(1)',
-                animation: 'pulse 1.5s infinite',
+                width: '25px',
+                height: '25px',
+                transform: 'translate(-50%, -50%)',
                 display: 'none', // Hidden by default
                 pointerEvents: 'none',
                 zIndex: 1000
-            }}></div>
+            }}>
+
+                <Image
+                    alt="Turtle Art"
+                    width={25}
+                    height={25}
+                    src="/icons/target.svg"
+                />
+            </div>
 
             <button
                 id="respawnButton"

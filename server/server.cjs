@@ -115,7 +115,7 @@ ws.on('connection', (socket) => {
 
                 if (killerPlayer) {
                     killerPlayer.kills++;
-                    player.points += 100;
+                    killerPlayer.points += 100;
                 }
                 break;
 
