@@ -1786,6 +1786,7 @@ export function Game({models, sounds, matchId, character}) {
                     child.material = child.material.clone();
                 }
             });
+
             scene.add(rune);
             runes.set(data.id, rune);
         }
