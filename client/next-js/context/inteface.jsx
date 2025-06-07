@@ -5,6 +5,8 @@ export const InterfaceContext = createContext(undefined);
 export const initInterfaceState = {
     chatMessages: [],
     character: null,
+    scoreboardData: [],
+    scoreboardVisible: false,
 };
 
 export const interfaceReducer = (state, action) => {
@@ -18,6 +20,12 @@ export const interfaceReducer = (state, action) => {
         }
         case 'SET_CHARACTER': {
             return {...state, character: action.payload};
+        }
+        case 'SET_SCOREBOARD_DATA': {
+            return {...state, scoreboardData: action.payload};
+        }
+        case 'SET_SCOREBOARD_VISIBLE': {
+            return {...state, scoreboardVisible: action.payload};
         }
         default:
             return {...state};

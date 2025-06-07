@@ -2,6 +2,7 @@ import {SkillBar} from "../parts/SkillBar";
 import {CastBar} from "../parts/CastBar";
 import {Chat} from "../parts/Chat";
 import {Coins} from "../parts/Coins";
+import {Scoreboard} from "../parts/Scoreboard";
 
 import './Interface.css';
 
@@ -49,6 +50,7 @@ export const Interface = () => {
                 Enter for Respawn
             </button>
 
+            <Scoreboard />
             <SkillBar/>
             <CastBar/>
             <Chat />

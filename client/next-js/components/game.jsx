@@ -50,6 +50,7 @@ export function Game({models, sounds, matchId, character}) {
     const {dispatch} = useInterface();
     const {socket, sendToSocket} = useWS(matchId);
     const [isReadyToPlay, setIsReadyToPlay] = useState(false);
+    // scoreboard visibility and data managed via interface context
 
     const account = useCurrentAccount();
     const address = account?.address;
@@ -494,6 +495,9 @@ export function Game({models, sounds, matchId, character}) {
                 case "KeyG":
                     leftMouseButtonClicked = true;
                     break;
+                case "KeyT":
+                    dispatch({type: 'SET_SCOREBOARD_VISIBLE', payload: true});
+                    break;
                 case "Space": // Press "Q" to cast shield
                     // Space for jumping
                     if (playerOnFloor && !jumpBlocked) {
@@ -537,6 +541,9 @@ export function Game({models, sounds, matchId, character}) {
             switch (event.code) {
                 case "KeyG":
                     leftMouseButtonClicked = false;
+                    break;
+                case "KeyT":
+                    dispatch({type: 'SET_SCOREBOARD_VISIBLE', payload: false});
                     break;
                 case "Space": // Press "Q" to cast shield
                     setTimeout(() => {
@@ -1811,6 +1818,13 @@ export function Game({models, sounds, matchId, character}) {
                         }
 
                     }
+
+                    const boardData = Object.entries(message.players).map(([id, p]) => ({
+                        id: Number(id),
+                        kills: p.kills,
+                        deaths: p.deaths,
+                    }));
+                    dispatch({type: 'SET_SCOREBOARD_DATA', payload: boardData});
 
                     break;
                 case "removePlayer":

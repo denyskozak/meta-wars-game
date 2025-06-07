@@ -1,0 +1,27 @@
+.scoreboard-overlay {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background-color: rgba(0, 0, 0, 0.8);
+    color: #fff;
+    padding: 20px;
+    border-radius: 10px;
+    z-index: 1000;
+}
+
+.scoreboard-table {
+    width: 300px;
+    border-collapse: collapse;
+}
+
+.scoreboard-table th,
+.scoreboard-table td {
+    border: 1px solid #555;
+    padding: 5px 10px;
+    text-align: left;
+}
+
+.scoreboard-table th {
+    background-color: #222;
+}
