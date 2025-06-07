@@ -69,7 +69,7 @@ export default function Home() {
       {/*  </div>*/}
       <Image
         alt="Sui logo"
-        className="absolute bottom-4 left-1/2 transform -translate-x-1/2 z-[2]"
+        className="absolute bottom-8 left-1/2 transform -translate-x-1/2 z-[2]"
         height={200}
         src="/Sui_Logo_White.svg"
         width={120}
