@@ -9,6 +9,8 @@ import * as THREE from "three";
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader';
 import {useParams} from "next/navigation";
 import {useWS} from "@/hooks/useWS";
+import Image from "next/image";
+import {Loading} from "@/components/loading";
 
 THREE.Cache.enabled = true;
 
@@ -81,7 +83,7 @@ export default function GamePage() {
 
 
     if (Object.keys(preloadedData.models).length < models.length) {
-        return (<span>Loading</span>)
+        return (<Loading text="Loading models..."/>)
     }
 
     return (

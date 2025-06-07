@@ -17,6 +17,7 @@ import {world} from "../worlds/main/data";
 
 import {Interface} from "@/components/layout/Interface";
 import * as iceShieldMesh from "three/examples/jsm/utils/SkeletonUtils";
+import {Loading} from "@/components/loading";
 
 const USER_DEFAULT_POSITION = [
     -36.198117096583466, 0.22499999997500564, -11.704829764915257,
@@ -53,7 +54,6 @@ export function Game({models, sounds, matchId, character}) {
     const router = useRouter();
     const [isReadyToPlay, setIsReadyToPlay] = useState(false);
     // scoreboard visibility and data managed via interface context
-
     const account = useCurrentAccount();
     const address = account?.address;
 
@@ -1599,8 +1599,6 @@ export function Game({models, sounds, matchId, character}) {
 
                 teleportPlayerIfOob();
 
-                updateHPBar();
-                updateManaBar();
                 sendPositionUpdate();
 
                 renderer.render(scene, camera);
@@ -1866,7 +1864,7 @@ export function Game({models, sounds, matchId, character}) {
     return (
         <div ref={containerRef} id="game-container">
             <Interface/>
-            {!isReadyToPlay && (<span>Wait Players</span>)}
+            {!isReadyToPlay && (<Loading text="Loading Players ..." />)}
         </div>
     );
 }
