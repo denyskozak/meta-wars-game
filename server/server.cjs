@@ -2,6 +2,13 @@ const WebSocket = require('ws');
 const http = require('http');
 
 const UPDATE_MATCH_INTERVAL = 33;
+const SPELL_COST = {
+    'fireball': 25,
+    'iceball': 25,
+    'shield': 80,
+    'blink': 20,
+    'heal': 30,
+};
 
 const clients = new Map();
 const playerMatchMap = new Map(); // playerId => matchId
@@ -57,7 +64,9 @@ function createPlayer() {
         kills: 0,
         deaths: 0,
         assists: 0,
-        points: 0
+        points: 0,
+        hp: 100,
+        mana: 100
     };
 }
 
@@ -76,6 +85,16 @@ ws.on('connection', (socket) => {
 
         }
     }, UPDATE_MATCH_INTERVAL);
+
+    setInterval(() => {
+        for (const match of matches.values()) {
+            match.players.forEach(player => {
+                if (player.mana < 100) {
+                    player.mana = Math.min(100, player.mana + 5);
+                }
+            });
+        }
+    }, 1000);
 
     socket.on('message', (data) => {
         let message = {};
@@ -255,13 +274,87 @@ ws.on('connection', (socket) => {
                 break;
 
             case 'CAST_SPELL':
-                const spellMatchId = playerMatchMap.get(id);
-                if (spellMatchId) {
-                    broadcastToMatch(spellMatchId, {
-                        type: 'CAST_SPELL',
-                        payload: message.payload,
-                        id,
-                    }, id);
+                if (match) {
+                    const player = match.players.get(id);
+                    const cost = SPELL_COST[message.payload?.type] || 0;
+                    if (player && player.mana >= cost) {
+                        player.mana -= cost;
+                        if (message.payload.type === 'heal') {
+                            player.hp = Math.min(100, player.hp + 20);
+                        }
+
+                        if (['fireball', 'iceball', 'shield'].includes(message.payload.type)) {
+                            broadcastToMatch(match.id, {
+                                type: 'CAST_SPELL',
+                                payload: message.payload,
+                                id,
+                            }, id);
+                        }
+
+                        broadcastToMatch(match.id, {
+                            type: 'UPDATE_STATS',
+                            playerId: id,
+                            hp: player.hp,
+                            mana: player.mana,
+                        });
+                    }
+                }
+                break;
+
+            case 'TAKE_DAMAGE':
+                if (match) {
+                    const victim = match.players.get(id);
+                    if (victim) {
+                        victim.hp = Math.max(0, victim.hp - Number(message.damage));
+                        if (victim.hp <= 0) {
+                        victim.deaths++;
+                        const killer = match.players.get(message.damageDealerId);
+                        if (killer) {
+                            killer.kills++;
+                            killer.points += 100;
+                            broadcastToMatch(match.id, {
+                                type: 'KILL',
+                                killerId: message.damageDealerId,
+                            });
+                            if (killer.kills >= 15 && !match.finished) {
+                                    match.finished = true;
+                                    match.summary = Array.from(match.players.entries()).map(([pid, p]) => ({
+                                        id: pid,
+                                        kills: p.kills,
+                                        deaths: p.deaths,
+                                    }));
+                                    finishedMatches.set(match.id, match.summary);
+                                    broadcastToMatch(match.id, {
+                                        type: 'MATCH_FINISHED',
+                                        matchId: match.id,
+                                    });
+                                }
+                            }
+                        }
+
+                        broadcastToMatch(match.id, {
+                            type: 'UPDATE_STATS',
+                            playerId: id,
+                            hp: victim.hp,
+                            mana: victim.mana,
+                        });
+                    }
+                }
+                break;
+
+            case 'RESPAWN':
+                if (match) {
+                    const p = match.players.get(id);
+                    if (p) {
+                        p.hp = 100;
+                        p.mana = 100;
+                        broadcastToMatch(match.id, {
+                            type: 'UPDATE_STATS',
+                            playerId: id,
+                            hp: p.hp,
+                            mana: p.mana,
+                        });
+                    }
                 }
                 break;
 
