@@ -1440,11 +1440,10 @@ export function Game({models, sounds, matchId, character}) {
 
         function igniteHands(playerId, duration = 1000) {
             applyHandEffect(playerId, 'fire', () => {
-                if (!models['fire']) return {};
-                const left = SkeletonUtils.clone(models['fire']);
-                const right = SkeletonUtils.clone(models['fire']);
-                left.scale.set(0.4, 0.4, 0.4);
-                right.scale.set(0.4, 0.4, 0.4);
+                const left = new THREE.Mesh(fireballGeometry, fireballMaterial.clone());
+                const right = new THREE.Mesh(fireballGeometry, fireballMaterial.clone());
+                left.scale.set(100, 100, 100);
+                right.scale.set(100, 100, 100);
                 return {left, right};
             }, duration);
         }
@@ -1453,8 +1452,8 @@ export function Game({models, sounds, matchId, character}) {
             applyHandEffect(playerId, 'ice', () => {
                 const left = new THREE.Mesh(iceballGeometry, iceballMaterial.clone());
                 const right = new THREE.Mesh(iceballGeometry, iceballMaterial.clone());
-                left.scale.set(0.3, 0.3, 0.3);
-                right.scale.set(0.3, 0.3, 0.3);
+                left.scale.set(100, 100, 100);
+                right.scale.set(100, 100, 100);
                 return {left, right};
             }, duration);
         }
