@@ -127,47 +127,47 @@ export function Game({models, sounds, matchId, character}) {
                 flameCol: {value: new THREE.Color(0xff4400)},
             },
             vertexShader: /* glsl */`
-                uniform float time;          // ←  добавили
+                uniform float time;
                 varying vec3 vPos;
-            
-                void main() {
-                  vPos = position;
-            
-                  // «дыхание» поверхности
-                  vec3 displaced = position + normal * 0.02 * sin((position.z + time) * 10.0);
-            
-                  gl_Position = projectionMatrix * modelViewMatrix * vec4(displaced, 1.0);
-                }`,
-            fragmentShader: /* glsl */`
-                float hash(vec2 p)  { return fract(sin(dot(p,vec2(41,289))) * 1e4); }
-                float noise(vec2 p) {
+                varying float vNoise;
+
+                float hash(vec2 p){ return fract(sin(dot(p, vec2(41.0,289.0))) * 1e4); }
+                float noise(vec2 p){
                   vec2 i = floor(p); p -= i;
                   vec2 u = p * p * (3.0 - 2.0 * p);
-                  return mix( mix(hash(i),             hash(i + vec2(1.0,0.0)), u.x),
-                              mix(hash(i + vec2(0.0,1.0)), hash(i + vec2(1.0,1.0)), u.x),
+                  return mix( mix(hash(i), hash(i+vec2(1.0,0.0)), u.x),
+                              mix(hash(i+vec2(0.0,1.0)), hash(i+vec2(1.0,1.0)), u.x),
                               u.y );
                 }
-            
+
+                void main(){
+                  vPos = position;
+                  float n = noise(position.xy * 4.0 + time*2.0);
+                  vNoise = n;
+                  vec3 displaced = position + normal * (0.1 + 0.05 * n) * sin((position.z + time) * 8.0);
+                  gl_Position = projectionMatrix * modelViewMatrix * vec4(displaced,1.0);
+                }`,
+            fragmentShader: /* glsl */`
                 uniform float time;
                 uniform vec3  coreCol;
                 uniform vec3  flameCol;
                 varying vec3  vPos;
-            
-                void main() {
-                  float r = length(vPos.xy) / 0.15;            // 0..1
-                  float core  = smoothstep(0.3, 0.0,  r);
-                  float flame = smoothstep(0.7, 0.25, r);
-            
-                  float flow = fract(vPos.z * 3.0 - time * 5.0);
-                  float n    = noise(vPos.xy * 5.0 + time * 2.0);
-            
-                  core  *= 0.9 + 0.1 * n;
-                  flame *= (0.7 + 0.3 * n) * flow;
-            
+                varying float vNoise;
+
+                void main(){
+                  float r = length(vPos.xy) / 0.15;
+                  float core  = smoothstep(0.35, 0.0, r);
+                  float flame = smoothstep(0.8, 0.2, r);
+
+                  float flow = fract(vPos.z * 4.0 - time * 5.0);
+                  float flicker = 0.5 + 0.5 * sin(time * 20.0 + vNoise * 6.283);
+                  core  *= 0.9 + 0.1 * vNoise;
+                  flame *= flow * flicker;
+
                   vec3  col   = coreCol * core + flameCol * flame;
-                  float alpha = core + flame * 0.9;
-            
-                  if (alpha < 0.03) discard;
+                  float alpha = core + flame;
+
+                  if (alpha < 0.05) discard;
                   gl_FragColor = vec4(col, alpha);
                 }`
         });
@@ -185,36 +185,41 @@ export function Game({models, sounds, matchId, character}) {
                 glowColor: {value: new THREE.Color(0xccffff)}, // Голубовато-белое свечение
             },
             vertexShader: `
-        varying vec2 vUv;
-        void main() {
-          vUv = uv;
-          gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
-        }
-      `,
+    uniform float time;
+    varying vec2 vUv;
+    varying float vNoise;
+    float noise3(vec3 p){
+      return sin(p.x)*sin(p.y)*sin(p.z);
+    }
+    void main(){
+      vUv = uv;
+      float n = noise3(position*10.0 + time*2.0);
+      vNoise = n;
+      vec3 displaced = position + normal * 0.05 * n;
+      gl_Position = projectionMatrix * modelViewMatrix * vec4(displaced,1.0);
+    }
+  `,
             fragmentShader: `
-        uniform float time;
-        uniform vec3 color;
-        uniform vec3 glowColor;
-        varying vec2 vUv;
-    
-        void main() {
-          float dist = distance(vUv, vec2(0.5));
-    
-          // Центральное ядро
-          float core = smoothstep(0.4, 0.0, dist);
-    
-          // Пульсация похожа на кристаллизацию или мороз
-          float glow = smoothstep(0.6, 0.2, dist) * (0.4 + 0.6 * abs(sin(time * 4.0)));
-    
-          // Холодное смешение
-          vec3 finalColor = color * core + glowColor * glow;
-    
-          // Альфа прозрачность
-          float alpha = clamp(core + glow * 0.7, 0.0, 1.0);
-    
-          gl_FragColor = vec4(finalColor, alpha);
-        }
-      `,
+    uniform float time;
+    uniform vec3 color;
+    uniform vec3 glowColor;
+    varying vec2 vUv;
+    varying float vNoise;
+
+    void main(){
+      float dist = distance(vUv, vec2(0.5));
+
+      float core = smoothstep(0.45, 0.0, dist);
+      float glow = smoothstep(0.75, 0.25, dist) *
+                   (0.5 + 0.5 * abs(sin(time * 4.0 + vNoise * 3.1415)));
+
+      vec3 finalColor = color * core + glowColor * glow;
+
+      float alpha = clamp(core + glow * 0.8, 0.0, 1.0);
+
+      gl_FragColor = vec4(finalColor, alpha);
+    }
+  `,
             transparent: true,
             blending: THREE.AdditiveBlending,
             depthWrite: false,
