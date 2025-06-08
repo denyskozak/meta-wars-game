@@ -303,6 +303,10 @@ export function Game({models, sounds, matchId, character}) {
         const NUM_SPHERES = 100;
         const SPHERE_RADIUS = 0.2;
 
+        // Reduced projectile speed so spells are easier to see and dodge
+        const MIN_SPHERE_IMPULSE = 15;
+        const MAX_SPHERE_IMPULSE = 30;
+
         const STEPS_PER_FRAME = 30;
 
         const sphereGeometry = new THREE.IcosahedronGeometry(SPHERE_RADIUS, 5);
@@ -831,8 +835,8 @@ export function Game({models, sounds, matchId, character}) {
             const chargeTime = Math.min(performance.now() - mouseTime, 1000); // Cap charge time to 1 second
             const chargeFactor = chargeTime / 1000; // Normalize to range [0, 1]
             const impulse = THREE.MathUtils.lerp(
-                30,
-                60,
+                MIN_SPHERE_IMPULSE,
+                MAX_SPHERE_IMPULSE,
                 chargeFactor * chargeFactor * (3 - 2 * chargeFactor),
             ); // Smoothstep with more power
 
