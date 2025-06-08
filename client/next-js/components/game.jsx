@@ -225,7 +225,7 @@ export function Game({models, sounds, matchId, character}) {
             depthWrite: false,
         });
 
-        const iceballMesh = new THREE.Mesh(iceballGeometry, iceballMaterial);
+        const iceballMesh = new THREE.Mesh(iceballGeometry, iceballMaterial.clone());
 
 
         const labelRenderer = new CSS2DRenderer();
@@ -1420,8 +1420,8 @@ export function Game({models, sounds, matchId, character}) {
             const player = players.get(playerId)?.model;
             if (!player) return;
 
-            const leftHand = player.getObjectByName('mixamorig:LeftHand');
-            const rightHand = player.getObjectByName('mixamorig:RightHand');
+            const leftHand = player.getObjectByName('mixamorigLeftHand');
+            const rightHand = player.getObjectByName('mixamorigRightHand');
             if (!leftHand || !rightHand) return;
 
             const {left, right} = createMeshes();
@@ -1633,8 +1633,6 @@ export function Game({models, sounds, matchId, character}) {
             // an object traversing another too quickly for detection.
 
             if (players.has(myPlayerId)) {
-
-
                 for (let i = 0; i < STEPS_PER_FRAME; i++) {
                     controls(deltaTime);
 
@@ -1658,7 +1656,7 @@ export function Game({models, sounds, matchId, character}) {
                     });
 
                     runes.forEach(r => {
-                        r.rotation.y += delta * 0.3;
+                        r.rotation.y += delta * 0.1;
                     });
 
                     // renderCursor();
