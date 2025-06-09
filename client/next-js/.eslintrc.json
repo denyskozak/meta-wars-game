@@ -1,5 +1,4 @@
 {
-  "$schema": "https://json.schemastore.org/eslintrc.json",
   "env": {
     "browser": false,
     "es2021": true,

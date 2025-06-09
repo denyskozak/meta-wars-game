@@ -8,6 +8,7 @@ const SPELL_COST = {
     'shield': 80,
     'blink': 20,
     'heal': 30,
+    'ice-veins': 40,
 };
 
 const RUNE_POSITIONS = [
@@ -344,12 +345,16 @@ ws.on('connection', (socket) => {
                             player.hp = Math.min(100, player.hp + 20);
                         }
 
-                        if (['fireball', 'iceball', 'shield'].includes(message.payload.type)) {
+                        if (['fireball', 'iceball', 'shield', 'ice-veins'].includes(message.payload.type)) {
                             broadcastToMatch(match.id, {
                                 type: 'CAST_SPELL',
                                 payload: message.payload,
                                 id,
                             }, id);
+                        }
+
+                        if (message.payload.type === 'ice-veins') {
+                            player.buffs.push({type: 'haste', percent: 0.3, expires: Date.now() + 15000});
                         }
 
                         broadcastToMatch(match.id, {
