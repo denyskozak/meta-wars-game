@@ -74,6 +74,7 @@ export default function GamePage() {
             spellCast: new Audio('/sounds/spell-cast.ogg'),
             background: new Audio('/sounds/Elwynn.mp3'),
             blink: new Audio('/sounds/blink.ogg'),
+            damage: new Audio('/sounds/damage.ogg'),
         }
         preloadModels(models)
             .then((loadedModels) => {
