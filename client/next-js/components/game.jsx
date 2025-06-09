@@ -255,6 +255,21 @@ export function Game({models, sounds, matchId, character}) {
         let globalSkillCooldown = false; // Tracks if the global cooldown is active
         let isCasting = false;
         const cooldownDuration = 700; // Cooldown duration in milliseconds
+        const SKILL_COOLDOWNS = {
+            fireball: 0,
+            iceball: 0,
+            'ice-shield': 30000,
+            'ice-veins': 25000,
+            blink: 10000,
+            heal: 0,
+        };
+
+        function startSkillCooldown(skill) {
+            const duration = SKILL_COOLDOWNS[skill];
+            if (duration && duration > 0) {
+                dispatchEvent('skill-cooldown', {skill, duration});
+            }
+        }
 
         // Function to activate the cooldown
         function activateGlobalCooldown() {
@@ -719,6 +734,7 @@ export function Game({models, sounds, matchId, character}) {
 
             // Activate cooldown
             activateGlobalCooldown();
+            startSkillCooldown('blink');
         }
 
         function castHeal() {
@@ -755,6 +771,7 @@ export function Game({models, sounds, matchId, character}) {
                 isHealActive = true;
                 setTimeout(() => (isHealActive = false), 700);
                 activateGlobalCooldown(); // Activate global cooldown
+                startSkillCooldown('heal');
             };
 
             isCasting = true;
@@ -933,6 +950,7 @@ export function Game({models, sounds, matchId, character}) {
                 }
 
                 activateGlobalCooldown(); // Activate global cooldown
+                startSkillCooldown(spellType);
             };
 
             isCasting = true;
