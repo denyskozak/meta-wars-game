@@ -29,7 +29,7 @@ export default function BagPage() {
                 type: '$Meta Wars coins',
                 amount: 10
             }])
-        }, 3000);
+        }, 5000);
     };
 
     const confirmOpen = () => {
