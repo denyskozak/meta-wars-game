@@ -29,13 +29,11 @@ export default function GamePage() {
     const {state: {character}} = useInterface();
 
     const models = [
-        {id: 'murloc', path: 'murloc_creature.glb'},
         {id: 'zone', path: 'zone2.glb'},
         {id: 'fireball', path: 'fireball2.glb'},
-        {id: 'character', path: 'skins/mad.glb'},
+        {id: 'character', path: 'skins/vampir.glb'},
         {id: 'heal-effect', path: 'heal-effect.glb'},
         {id: 'fire', path: 'stuff/fire.glb'},
-        {id: 'arthas', path: 'arthas.glb'},
         {id: 'bottle_magic', path: 'bottle_magic.glb'},
         {id: 'damage_rune', path: 'damage_rune.glb'},
         {id: 'heal_rune', path: 'heal_rune.glb'},

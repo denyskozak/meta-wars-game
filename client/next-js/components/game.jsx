@@ -886,6 +886,7 @@ export function Game({models, sounds, matchId, character}) {
             }
 
             if (mana < manaCost || isCasting) return; // Ensure the fireball model is loaded
+            const {mixer, actions} = players.get(myPlayerId)
 
             const onCastEnd = () => {
                 soundCast.pause();
@@ -906,19 +907,30 @@ export function Game({models, sounds, matchId, character}) {
 
             isCasting = true;
 
-            const {mixer, actions} = players.get(myPlayerId)
             const actionName = 'cast';
             controlAction({
                 action: actions[actionName],
                 actionName,
                 mixer: mixer,
-                loop: THREE.LoopOnce,
+                loop: THREE.LoopRepeat,
                 fadeIn: 0.1,
                 reset: true,
                 clampWhenFinished: true,
             });
             soundCast.volume = 0.5; // Adjust volume if needed
             soundCast.play();
+            setTimeout(() => {
+                const actionName = 'castEnd';
+                controlAction({
+                    action: actions['castEnd'],
+                    actionName,
+                    mixer: mixer,
+                    loop: THREE.LoopOnce,
+                    fadeIn: 0.1,
+                    reset: true,
+                    clampWhenFinished: true,
+                });
+            }, duration * 0.5)
             dispatchEvent('start-cast', {duration, onEnd: onCastEnd})
         }
 
@@ -1708,12 +1720,14 @@ export function Game({models, sounds, matchId, character}) {
                 mixer.timeScale = 40;
                 // const idle = mixer.clipAction(animations[2]).play();
                 // const walk = mixer.clipAction(animations[6]);
+                console.log("animations: ", animations);
 
                 const idleAction = mixer.clipAction(animations[2]);
-                const walkAction = mixer.clipAction(animations[6]);
-                const runAction = mixer.clipAction(animations[6]);
+                const walkAction = mixer.clipAction(animations[5]);
+                const runAction = mixer.clipAction(animations[5]);
                 const jumpAction = mixer.clipAction(animations[3]);
-                const castAction = mixer.clipAction(animations[0]);
+                const castAction = mixer.clipAction(animations[1]);
+                const castEndAction = mixer.clipAction(animations[0]);
 
                 scene.add(player);
                 players.set(id, {
@@ -1733,6 +1747,7 @@ export function Game({models, sounds, matchId, character}) {
                         run: runAction,
                         jump: jumpAction,
                         cast: castAction,
+                        castEnd: castEndAction,
                     },
                     prevPos: new THREE.Vector3().copy(player.position),
                     buffs: [],
