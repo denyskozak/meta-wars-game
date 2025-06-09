@@ -125,8 +125,8 @@ export function Game({models, sounds, matchId, character}) {
             blending: THREE.AdditiveBlending,
             uniforms: {
                 time: {value: 0},
-                coreCol: {value: new THREE.Color(0xfff2ad)},
-                flameCol: {value: new THREE.Color(0xff4400)},
+                coreCol: {value: new THREE.Color(0xfff8d0)},
+                flameCol: {value: new THREE.Color(0xff5500)},
             },
             vertexShader: /* glsl */`
                 uniform float time;
@@ -166,7 +166,7 @@ export function Game({models, sounds, matchId, character}) {
                   core  *= 0.9 + 0.1 * vNoise;
                   flame *= flow * flicker;
 
-                  vec3  col   = coreCol * core + flameCol * flame;
+                  vec3  col   = (coreCol * core + flameCol * flame) * 1.5;
                   float alpha = core + flame;
 
                   if (alpha < 0.05) discard;
@@ -183,8 +183,8 @@ export function Game({models, sounds, matchId, character}) {
         const iceballMaterial = new THREE.ShaderMaterial({
             uniforms: {
                 time: {value: 0.0},
-                color: {value: new THREE.Color(0x66ccff)},     // Основной холодный синий
-                glowColor: {value: new THREE.Color(0xccffff)}, // Голубовато-белое свечение
+                color: {value: new THREE.Color(0x88ddff)},     // Более яркий синий
+                glowColor: {value: new THREE.Color(0xffffff)}, // Усиленное свечение
             },
             vertexShader: `
     uniform float time;
@@ -215,7 +215,7 @@ export function Game({models, sounds, matchId, character}) {
       float glow = smoothstep(0.75, 0.25, dist) *
                    (0.5 + 0.5 * abs(sin(time * 4.0 + vNoise * 3.1415)));
 
-      vec3 finalColor = color * core + glowColor * glow;
+      vec3 finalColor = (color * core + glowColor * glow) * 1.5;
 
       float alpha = clamp(core + glow * 0.8, 0.0, 1.0);
 
@@ -300,6 +300,13 @@ export function Game({models, sounds, matchId, character}) {
         directionalLight.shadow.bias = -0.00006;
         scene.add(directionalLight);
 
+        // Create additional point lights around spawn points for a darker mood
+        spawns.forEach((pos) => {
+            const light = new THREE.PointLight(0xffaa88, 1.5, 15);
+            light.position.set(pos.x, pos.y + 2, pos.z);
+            scene.add(light);
+        });
+
         const renderer = new THREE.WebGLRenderer({antialias: true});
 
         renderer.setPixelRatio(window.devicePixelRatio);
@@ -321,8 +328,9 @@ export function Game({models, sounds, matchId, character}) {
         const SPHERE_RADIUS = 0.2;
 
         // Reduced projectile speed so spells are easier to see and dodge
-        const MIN_SPHERE_IMPULSE = 15;
-        const MAX_SPHERE_IMPULSE = 30;
+        // Increased projectile speed for a more dynamic feel
+        const MIN_SPHERE_IMPULSE = 30;
+        const MAX_SPHERE_IMPULSE = 60;
 
         const STEPS_PER_FRAME = 30;
 
