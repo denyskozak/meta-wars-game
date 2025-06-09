@@ -82,6 +82,7 @@ export function Game({models, sounds, matchId, character}) {
 
         const activeShields = new Map(); // key = playerId
         const activeHandEffects = new Map(); // key = playerId -> { effectKey: {left, right} }
+        const activeIceVeins = new Map(); // key = playerId -> effect mesh
 
         // Function to update the HP bar width
         function updateHPBar() {
@@ -495,6 +496,9 @@ export function Game({models, sounds, matchId, character}) {
                     castSpell('fireball');
                     break;
                 case "KeyR":
+                    castSpell('ice-veins');
+                    break;
+                case "KeyF":
                     castSpell('iceball');
                     break;
                 case "KeyG":
@@ -796,6 +800,17 @@ export function Game({models, sounds, matchId, character}) {
                         'iceball'
                     )
                     break;
+                case "ice-veins":
+                    castSpellImpl(
+                        playerId,
+                        40,
+                        1000,
+                        () => activateIceVeins(playerId),
+                        sounds.spellCast,
+                        sounds.spellCast,
+                        'ice-veins'
+                    )
+                    break;
             }
         }
 
@@ -812,6 +827,14 @@ export function Game({models, sounds, matchId, character}) {
             setTimeout(() => {
                 isShieldActive = false; // Deactivate shield
             }, SHIELD_DURATION * 1000);
+        }
+
+        function activateIceVeins(playerId) {
+            applyIceVeinsEffect(playerId);
+            sendToSocket({
+                type: 'CAST_SPELL',
+                payload: { type: 'ice-veins' }
+            });
         }
 
         function castSphere(model, sphereMesh, type) {
@@ -887,6 +910,12 @@ export function Game({models, sounds, matchId, character}) {
 
             if (mana < manaCost || isCasting) return; // Ensure the fireball model is loaded
             const {mixer, actions} = players.get(myPlayerId)
+
+            const buffs = players.get(playerId)?.buffs || [];
+            const haste = buffs.find(b => b.type === 'haste');
+            if (haste) {
+                duration = duration * (1 - (haste.percent || 0.3));
+            }
 
             const onCastEnd = () => {
                 soundCast.pause();
@@ -1479,6 +1508,33 @@ export function Game({models, sounds, matchId, character}) {
             }, duration);
         }
 
+        function applyIceVeinsEffect(playerId, duration = 15000) {
+            const existing = activeIceVeins.get(playerId);
+            if (existing) {
+                existing.parent?.remove(existing);
+            }
+
+            const player = players.get(playerId)?.model;
+            if (!player) return;
+
+            const geometry = new THREE.TorusGeometry(1, 0.15, 16, 100);
+            const material = new THREE.MeshBasicMaterial({
+                color: 0x66ccff,
+                transparent: true,
+                opacity: 0.6,
+            });
+            const ring = new THREE.Mesh(geometry, material);
+            ring.rotation.x = Math.PI / 2;
+
+            player.add(ring);
+            activeIceVeins.set(playerId, ring);
+
+            setTimeout(() => {
+                ring.parent?.remove(ring);
+                activeIceVeins.delete(playerId);
+            }, duration);
+        }
+
 
         function toggleShieldOnPlayer(id, visible) {
             let shield = activeShields.get(id);
@@ -1669,6 +1725,10 @@ export function Game({models, sounds, matchId, character}) {
 
                         target.getWorldPosition(mesh.position);
                         mesh.position.y += 0.2;
+                    });
+
+                    activeIceVeins.forEach((mesh) => {
+                        mesh.rotation.z += delta * 2;
                     });
 
                     runes.forEach(r => {
@@ -1883,6 +1943,9 @@ export function Game({models, sounds, matchId, character}) {
                             break;
                         case "shield":
                             castShieldOtherUser(message.payload, message.id)
+                            break;
+                        case "ice-veins":
+                            applyIceVeinsEffect(message.id);
                             break;
                     }
 

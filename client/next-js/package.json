@@ -6,7 +6,7 @@
   "dev": "next dev --turbopack",
   "build": "next build",
   "start": "next start",
-  "lint": "eslint . --ext .ts,.tsx -c .eslintrc.json --fix"
+  "lint": "npx -y eslint@8 -c .eslintrc.json . --ext .ts,.tsx --fix"
  },
  "dependencies": {
   "@gsap/react": "^2.1.2",
