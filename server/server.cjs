@@ -5,6 +5,7 @@ const UPDATE_MATCH_INTERVAL = 33;
 const SPELL_COST = {
     'fireball': 25,
     'iceball': 25,
+    'fireblast': 20,
     'shield': 80,
     'blink': 20,
     'heal': 30,
@@ -345,7 +346,7 @@ ws.on('connection', (socket) => {
                             player.hp = Math.min(100, player.hp + 20);
                         }
 
-                        if (['fireball', 'iceball', 'shield', 'ice-veins'].includes(message.payload.type)) {
+                        if (['fireball', 'iceball', 'shield', 'ice-veins', 'fireblast'].includes(message.payload.type)) {
                             broadcastToMatch(match.id, {
                                 type: 'CAST_SPELL',
                                 payload: message.payload,

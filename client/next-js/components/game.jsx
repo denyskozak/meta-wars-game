@@ -258,6 +258,7 @@ export function Game({models, sounds, matchId, character}) {
         const SKILL_COOLDOWNS = {
             fireball: 0,
             iceball: 0,
+            fireblast: 5000,
             'ice-shield': 30000,
             'ice-veins': 25000,
             blink: 10000,
@@ -326,6 +327,9 @@ export function Game({models, sounds, matchId, character}) {
 
         const NUM_SPHERES = 100;
         const SPHERE_RADIUS = 0.2;
+
+        const FIREBLAST_RANGE = 20;
+        const FIREBLAST_DAMAGE = 25;
 
         // Reduced projectile speed so spells are easier to see and dodge
         // Increased projectile speed for a more dynamic feel
@@ -517,7 +521,7 @@ export function Game({models, sounds, matchId, character}) {
                     !isCasting && setAnimation("idle");
                     break;
                 case "KeyE":
-                    castSpell('fireball');
+                    castSpell('fireblast');
                     break;
                 case "KeyR":
                     castSpell('ice-veins');
@@ -789,6 +793,45 @@ export function Game({models, sounds, matchId, character}) {
             dispatchEvent('start-cast', {duration: 2000, onEnd: onCastEnd})
         }
 
+        function getTargetPlayer() {
+            const origin = playerCollider.end.clone();
+            const dir = new THREE.Vector3();
+            camera.getWorldDirection(dir);
+            const raycaster = new THREE.Raycaster(origin, dir.normalize(), 0, FIREBLAST_RANGE);
+            let closest = null;
+            let minDist = Infinity;
+            players.forEach((p, id) => {
+                if (id === myPlayerId) return;
+                const box = new THREE.Box3().setFromObject(p.model);
+                const hit = raycaster.ray.intersectBox(box, new THREE.Vector3());
+                if (hit) {
+                    const dist = origin.distanceTo(hit);
+                    if (dist < minDist) {
+                        minDist = dist;
+                        closest = id;
+                    }
+                }
+            });
+            return closest;
+        }
+
+        function castFireblast() {
+            if (globalSkillCooldown || isCasting) return;
+            if (mana < 20) {
+                console.log("Not enough mana for fireblast!");
+                return;
+            }
+            const targetId = getTargetPlayer();
+            if (!targetId) return;
+
+            sendToSocket({
+                type: 'CAST_SPELL',
+                payload: { type: 'fireblast', targetId, damage: FIREBLAST_DAMAGE }
+            });
+            activateGlobalCooldown();
+            startSkillCooldown('fireblast');
+        }
+
         function castSpell(spellType, playerId = myPlayerId) {
             switch (spellType) {
                 case 'ice-shield':
@@ -812,6 +855,17 @@ export function Game({models, sounds, matchId, character}) {
                         sounds.fireballCast,
                         sounds.fireball,
                         'fireball'
+                    )
+                    break;
+                case "fireblast":
+                    castSpellImpl(
+                        playerId,
+                        20,
+                        100,
+                        () => castFireblast(),
+                        sounds.fireballCast,
+                        sounds.fireball,
+                        'fireblast'
                     )
                     break;
                 case "iceball":
@@ -1997,6 +2051,11 @@ export function Game({models, sounds, matchId, character}) {
                             break;
                         case "shield":
                             castShieldOtherUser(message.payload, message.id)
+                            break;
+                        case "fireblast":
+                            if (message.payload.targetId === myPlayerId) {
+                                takeDamage(message.payload.damage, message.id);
+                            }
                             break;
                         case "ice-veins":
                             applyIceVeinsEffect(message.id);
