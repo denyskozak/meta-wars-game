@@ -521,13 +521,13 @@ export function Game({models, sounds, matchId, character}) {
                     !isCasting && setAnimation("idle");
                     break;
                 case "KeyE":
-                    castSpell('fireblast');
+                    castSpell('fireball');
                     break;
                 case "KeyR":
-                    castSpell('ice-veins');
+                    castSpell('iceball');
                     break;
                 case "KeyF":
-                    castSpell('iceball');
+                    castSpell('ice-veins');
                     break;
                 case "KeyG":
                     leftMouseButtonClicked = true;
@@ -559,8 +559,9 @@ export function Game({models, sounds, matchId, character}) {
                         }, 150);
                     }
                     break;
-                case "KeyQ": // Press "Q" to cast shield
-                    castSpell('ice-shield');
+                case "KeyQ":
+                    castSpell('fireblast');
+
                     break;
                 case "Enter":
                     if (hp === 0) {
@@ -822,7 +823,12 @@ export function Game({models, sounds, matchId, character}) {
                 return;
             }
             const targetId = getTargetPlayer();
-            if (!targetId) return;
+            if (!targetId) {
+                dispatch({
+                    type: "SEND_CHAT_MESSAGE",
+                    payload: `No target for  fireblast!`,
+                });
+            }
 
             sendToSocket({
                 type: 'CAST_SPELL',

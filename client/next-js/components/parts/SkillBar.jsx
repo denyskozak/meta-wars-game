@@ -3,9 +3,9 @@ import './SkillBar.css';
 
 const SKILLS = [
     {id: 'fireball', key: 'E', icon: '/icons/fireball.png'},
-    {id: 'ice-veins', key: 'R', icon: '/icons/spell_veins.jpg'},
-    {id: 'ice-shield', key: 'Q', icon: '/icons/shield.png'},
-    {id: 'iceball', key: 'F', icon: '/icons/spell_frostbolt.jpg'},
+    {id: 'iceball', key: 'R', icon: '/icons/spell_frostbolt.jpg'},
+    {id: 'fireblast', key: 'Q', icon: '/icons/spell_fire_fireball.jpg'},
+    {id: 'ice-veins', key: 'F', icon: '/icons/spell_veins.jpg'},
 ];
 
 export const SkillBar = () => {
