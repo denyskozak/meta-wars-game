@@ -41,7 +41,7 @@ export function Modal({
         {() => (
           <>
             <ModalHeader className="flex flex-col gap-1">{title}</ModalHeader>
-            <ModalBody>
+            <ModalBody                     className="flex justify-center items-center">
               {children}
               {/*<p>*/}
               {/*    Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nullam pulvinar risus non*/}

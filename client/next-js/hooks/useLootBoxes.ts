@@ -17,5 +17,10 @@ export const useLootBoxes = () => {
 
   const lootboxes = Array.isArray(data?.data) ? data?.data : [];
 
-  return { lootboxes, refetch };
+  const mock = [
+      {id: 'asda324234'},
+      {id: 'wgw'},
+      {id: 'wef32f32'},
+  ]
+  return { lootboxes: mock, refetch };
 };

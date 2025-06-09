@@ -15,6 +15,7 @@ export default function BagPage() {
     const {lootboxes, refetch: refetchLoot} = useLootBoxes();
     const {skins, refetch: refetchSkins} = useSkins();
     const [opening, setOpening] = useState<string | null>(null);
+    const [loot, setLoot] = useState<{type: string, amount: number}[]>([]);
     const [selectedBox, setSelectedBox] = useState<string | null>(null);
 
     const openBox = (id: string) => {
@@ -24,13 +25,17 @@ export default function BagPage() {
             refetchLoot();
             refetchCoins();
             refetchSkins();
-            setOpening(null);
-        }, 1000);
+            setLoot([{
+                type: '$Meta Wars coins',
+                amount: 10
+            }])
+        }, 3000);
     };
 
     const confirmOpen = () => {
         if (selectedBox) {
             openBox(selectedBox);
+            setLoot([]);
             setSelectedBox(null);
         }
     };
@@ -53,7 +58,7 @@ export default function BagPage() {
                                     const id = lb.data?.objectId || lb.reference?.objectId || lb.id;
                                     return (
                                         <li key={id} className="flex flex-col items-center gap-2">
-                                            <Image src="/logo_big.png" alt="Loot box" width={80} height={80}/>
+                                            <Image src="/images/chest.webp" alt="Loot box" width={160} height={160}/>
                                             <Button
                                                 color="primary"
                                                 isLoading={opening === id}
@@ -94,11 +99,29 @@ export default function BagPage() {
                     open={!!selectedBox}
                     title="Open loot box"
                     onChange={() => setSelectedBox(null)}
-                    actions={[{ label: "Open", onPress: confirmOpen }]}
+                    actions={[{label: "Open", onPress: confirmOpen}]}
                 >
-                    <p>Do you want to open this loot box?</p>
+                    {opening
+                        ? (
+                            <Image src="/images/open-chest.gif" alt="Loot box" width={480} height={480}/>
+                        )
+                        : (
+                            <p>Do you want to open this loot box?</p>
+                        )}
+
                 </Modal>
             )}
+            <Modal
+                open={!!opening}
+                title="Open loot box"
+                onChange={() => setOpening(null)}
+                actions={[]}
+            >
+                {loot.length
+                ? (<span>Your loot: {loot.map(({ amount, type }) => (`${type} ${amount}`))}</span>)
+                : (<Image src="/images/open-chest.gif" alt="Loot box" width={480} height={480}/>)}
+
+            </Modal>
         </div>
     );
 }
