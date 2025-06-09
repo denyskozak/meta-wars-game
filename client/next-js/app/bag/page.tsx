@@ -8,12 +8,14 @@ import {useLootBoxes} from "@/hooks/useLootBoxes";
 import {useSkins} from "@/hooks/useSkins";
 import {useState} from "react";
 import {Navbar} from "@/components/navbar";
+import {Modal} from "@/components/modal";
 
 export default function BagPage() {
     const {coins, refetch: refetchCoins} = useCoins();
     const {lootboxes, refetch: refetchLoot} = useLootBoxes();
     const {skins, refetch: refetchSkins} = useSkins();
     const [opening, setOpening] = useState<string | null>(null);
+    const [selectedBox, setSelectedBox] = useState<string | null>(null);
 
     const openBox = (id: string) => {
         setOpening(id);
@@ -24,6 +26,13 @@ export default function BagPage() {
             refetchSkins();
             setOpening(null);
         }, 1000);
+    };
+
+    const confirmOpen = () => {
+        if (selectedBox) {
+            openBox(selectedBox);
+            setSelectedBox(null);
+        }
     };
 
     return (
@@ -39,7 +48,7 @@ export default function BagPage() {
                         {lootboxes.length === 0 ? (
                             <p className="text-default-500">No loot boxes</p>
                         ) : (
-                            <ul className="flex flex-wrap gap-4">
+                            <ul className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
                                 {lootboxes.map((lb: any) => {
                                     const id = lb.data?.objectId || lb.reference?.objectId || lb.id;
                                     return (
@@ -48,7 +57,7 @@ export default function BagPage() {
                                             <Button
                                                 color="primary"
                                                 isLoading={opening === id}
-                                                onPress={() => openBox(id)}
+                                                onPress={() => setSelectedBox(id)}
                                             >
                                                 Open
                                             </Button>
@@ -80,6 +89,16 @@ export default function BagPage() {
                     </div>
                 </Card>
             </div>
+            {selectedBox && (
+                <Modal
+                    open={!!selectedBox}
+                    title="Open loot box"
+                    onChange={() => setSelectedBox(null)}
+                    actions={[{ label: "Open", onPress: confirmOpen }]}
+                >
+                    <p>Do you want to open this loot box?</p>
+                </Modal>
+            )}
         </div>
     );
 }
