@@ -2013,6 +2013,11 @@ export function Game({models, sounds, matchId, character}) {
                 case "DAMAGE":
                     if (message.targetId) {
                         showDamage(message.targetId, message.amount);
+                        if (message.targetId === myPlayerId) {
+                            sounds.damage.volume = 0.5;
+                            sounds.damage.currentTime = 0;
+                            sounds.damage.play();
+                        }
                     }
                     break;
                 case "RUNE_PICKED":
