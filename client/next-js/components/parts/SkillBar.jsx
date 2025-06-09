@@ -16,6 +16,10 @@ export const SkillBar = () => {
                 <div className="skill-icon" style={{backgroundImage: "url('/icons/shield.png')"}}></div>
                 <div className="skill-key" id="icebolt-cooldown">Q</div>
             </div>
+            <div className="skill-button">
+                <div className="skill-icon" style={{backgroundImage: "url('/icons/spell_veins.jpg')"}}></div>
+                <div className="skill-key" id="ice-veins">F</div>
+            </div>
             {/*<div className="skill-button">*/}
             {/*    <div className="skill-icon" style={{backgroundImage: "url('/icons/spell_fire_sealoffire.jpg')"}}></div>*/}
             {/*    <div className="skill-key" id="heal-cooldown">F</div>*/}
