@@ -5,7 +5,7 @@ import Stats from "three/examples/jsm/libs/stats.module";
 import {Octree} from "three/examples/jsm/math/Octree";
 import {OctreeHelper} from "three/examples/jsm/helpers/OctreeHelper";
 import {Capsule} from "three/examples/jsm/math/Capsule";
-import {CSS2DRenderer} from "three/examples/jsm/renderers/CSS2DRenderer";
+import {CSS2DRenderer, CSS2DObject} from "three/examples/jsm/renderers/CSS2DRenderer";
 import {useCurrentAccount} from "@mysten/dapp-kit";
 import { useRouter } from "next/navigation";
 
@@ -61,6 +61,7 @@ export function Game({models, sounds, matchId, character}) {
         // Store other players
         const players = new Map();
         const runes = new Map();
+        const damageLabels = new Map();
         let myPlayerId = null;
 
         // Character Model and Animation Variables
@@ -1888,6 +1889,33 @@ export function Game({models, sounds, matchId, character}) {
             }
         }
 
+        function showDamage(playerId, amount) {
+            const player = players.get(playerId)?.model;
+            if (!player) return;
+
+            let record = damageLabels.get(playerId);
+            if (record) {
+                record.element.textContent = String(amount);
+                clearTimeout(record.timeout);
+            } else {
+                const div = document.createElement('div');
+                div.className = 'damage-label';
+                div.textContent = String(amount);
+                const label = new CSS2DObject(div);
+                label.position.set(0, 2.5, 0);
+                player.add(label);
+                record = {label, element: div};
+            }
+
+            const timeout = setTimeout(() => {
+                player.remove(record.label);
+                damageLabels.delete(playerId);
+            }, 5000);
+
+            record.timeout = timeout;
+            damageLabels.set(playerId, record);
+        }
+
         function castSphereOtherUser(data, ownerId) {
             const material = data.type === "fireball" ? fireballMaterial : iceballMaterial;
             const fireball = new THREE.Mesh(fireballGeometry, material.clone());
@@ -1982,7 +2010,10 @@ export function Game({models, sounds, matchId, character}) {
                         }, 500);
                     }
                     break;
-                case "damage":
+                case "DAMAGE":
+                    if (message.targetId) {
+                        showDamage(message.targetId, message.amount);
+                    }
                     break;
                 case "RUNE_PICKED":
                     removeRune(message.runeId);

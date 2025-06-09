@@ -64,3 +64,13 @@
     padding: 2px 5px;
     border-radius: 3px;
 }
+
+.damage-label {
+    color: #fff;
+    background: rgba(255, 0, 0, 0.7);
+    padding: 2px 4px;
+    border-radius: 3px;
+    font-weight: bold;
+    font-size: 12px;
+    pointer-events: none;
+}

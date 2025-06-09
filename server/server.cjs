@@ -415,6 +415,12 @@ ws.on('connection', (socket) => {
                             hp: victim.hp,
                             mana: victim.mana,
                         });
+
+                        broadcastToMatch(match.id, {
+                            type: 'DAMAGE',
+                            targetId: id,
+                            amount: totalDamage,
+                        });
                     }
                 }
                 break;
