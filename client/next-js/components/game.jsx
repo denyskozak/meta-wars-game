@@ -14,6 +14,14 @@ import {useInterface} from "../context/inteface";
 import {useWS} from "../hooks/useWS";
 import {world} from "../worlds/main/data";
 
+// spell implementations
+import castFireball from '../skills/mage/fireball';
+import castIceball from '../skills/mage/iceball';
+import castFireblast from '../skills/mage/fireblast';
+import castIceVeins from '../skills/mage/iceVeins';
+import castDarkball from '../skills/warlock/darkball';
+import castCorruption from '../skills/warlock/corruption';
+
 
 import {Interface} from "@/components/layout/Interface";
 import * as iceShieldMesh from "three/examples/jsm/utils/SkeletonUtils";
@@ -178,6 +186,23 @@ export function Game({models, sounds, matchId, character}) {
             fireballMaterial     // свой экземпляр
         );
 
+        const darkballMaterial = new THREE.ShaderMaterial({
+            transparent: true,
+            depthWrite: false,
+            blending: THREE.AdditiveBlending,
+            uniforms: {
+                time: {value: 0},
+                coreCol: {value: new THREE.Color(0x9b59b6)},
+                flameCol: {value: new THREE.Color(0x2c3e50)},
+            },
+            vertexShader: fireballMaterial.vertexShader,
+            fragmentShader: fireballMaterial.fragmentShader,
+        });
+        const darkballMesh = new THREE.Mesh(
+            fireballGeometry,
+            darkballMaterial
+        );
+
         const iceballGeometry = new THREE.SphereGeometry(0.1, 16, 16); // Ледяной шар
 
         const iceballMaterial = new THREE.ShaderMaterial({
@@ -257,6 +282,8 @@ export function Game({models, sounds, matchId, character}) {
         const cooldownDuration = 700; // Cooldown duration in milliseconds
         const SKILL_COOLDOWNS = {
             fireball: 0,
+            darkball: 0,
+            corruption: 10000,
             iceball: 0,
             fireblast: 5000,
             'ice-shield': 30000,
@@ -397,6 +424,7 @@ export function Game({models, sounds, matchId, character}) {
         const getTrailMaterial = (sphereType) => {
             const colors = {
                 'fireball': 0xff0000,
+                'darkball': 0x660066,
                 'iceball': 0x66ccff,
             }
 
@@ -521,10 +549,10 @@ export function Game({models, sounds, matchId, character}) {
                     !isCasting && setAnimation("idle");
                     break;
                 case "KeyE":
-                    castSpell('fireball');
+                    castSpell(character?.name === 'warlock' ? 'darkball' : 'fireball');
                     break;
                 case "KeyR":
-                    castSpell('iceball');
+                    castSpell(character?.name === 'warlock' ? 'corruption' : 'iceball');
                     break;
                 case "KeyF":
                     castSpell('ice-veins');
@@ -816,27 +844,7 @@ export function Game({models, sounds, matchId, character}) {
             return closest;
         }
 
-        function castFireblast() {
-            if (globalSkillCooldown || isCasting) return;
-            if (mana < 20) {
-                console.log("Not enough mana for fireblast!");
-                return;
-            }
-            const targetId = getTargetPlayer();
-            if (!targetId) {
-                dispatch({
-                    type: "SEND_CHAT_MESSAGE",
-                    payload: `No target for  fireblast!`,
-                });
-            }
 
-            sendToSocket({
-                type: 'CAST_SPELL',
-                payload: { type: 'fireblast', targetId, damage: FIREBLAST_DAMAGE }
-            });
-            activateGlobalCooldown();
-            startSkillCooldown('fireblast');
-        }
 
         function castSpell(spellType, playerId = myPlayerId) {
             switch (spellType) {
@@ -852,50 +860,67 @@ export function Game({models, sounds, matchId, character}) {
                     )
                     break;
                 case "fireball":
-                    igniteHands(playerId, 1000);
-                    castSpellImpl(
+                    castFireball({
                         playerId,
-                        30,
-                        1000,
-                        (model) => castSphere(model, fireballMesh.clone(), spellType),
-                        sounds.fireballCast,
-                        sounds.fireball,
-                        'fireball'
-                    )
+                        castSpellImpl,
+                        igniteHands,
+                        castSphere,
+                        fireballMesh,
+                        sounds,
+                    });
+                    break;
+                case "darkball":
+                    castDarkball({
+                        playerId,
+                        castSpellImpl,
+                        igniteHands,
+                        castSphere,
+                        darkballMesh,
+                        sounds,
+                    });
+                    break;
+                case "corruption":
+                    castCorruption({
+                        playerId,
+                        globalSkillCooldown,
+                        isCasting,
+                        mana,
+                        getTargetPlayer,
+                        dispatch,
+                        sendToSocket,
+                        activateGlobalCooldown,
+                        startSkillCooldown,
+                    });
                     break;
                 case "fireblast":
-                    castSpellImpl(
+                    castFireblast({
                         playerId,
-                        20,
-                        100,
-                        () => castFireblast(),
-                        sounds.fireballCast,
-                        sounds.fireball,
-                        'fireblast'
-                    )
+                        globalSkillCooldown,
+                        isCasting,
+                        mana,
+                        getTargetPlayer,
+                        dispatch,
+                        sendToSocket,
+                        activateGlobalCooldown,
+                        startSkillCooldown,
+                        FIREBLAST_DAMAGE,
+                    });
                     break;
                 case "iceball":
-                    freezeHands(playerId, 1000);
-                    castSpellImpl(
+                    castIceball({
                         playerId,
-                        50,
-                        1500,
-                        (model) => castSphere(model, iceballMesh.clone(), spellType),
-                        sounds.iceballCast,
-                        sounds.iceball,
-                        'iceball'
-                    )
+                        castSpellImpl,
+                        freezeHands,
+                        castSphere,
+                        iceballMesh,
+                        sounds,
+                    });
                     break;
                 case "ice-veins":
-                    castSpellImpl(
+                    castIceVeins({
                         playerId,
-                        40,
-                        1000,
-                        () => activateIceVeins(playerId),
-                        sounds.spellCast,
-                        sounds.spellCast,
-                        'ice-veins'
-                    )
+                        activateIceVeins,
+                    });
                     break;
             }
         }
@@ -2003,7 +2028,14 @@ export function Game({models, sounds, matchId, character}) {
         }
 
         function castSphereOtherUser(data, ownerId) {
-            const material = data.type === "fireball" ? fireballMaterial : iceballMaterial;
+            let material;
+            if (data.type === "fireball") {
+                material = fireballMaterial;
+            } else if (data.type === "darkball") {
+                material = darkballMaterial;
+            } else {
+                material = iceballMaterial;
+            }
             const fireball = new THREE.Mesh(fireballGeometry, material.clone());
 
             fireball.position.set(
@@ -2051,6 +2083,10 @@ export function Game({models, sounds, matchId, character}) {
                             igniteHands(message.id, 1000);
                             castSphereOtherUser(message.payload, message.id);
                             break;
+                        case "darkball":
+                            igniteHands(message.id, 1000);
+                            castSphereOtherUser(message.payload, message.id);
+                            break;
                         case "iceball":
                             freezeHands(message.id, 1000);
                             castSphereOtherUser(message.payload, message.id);
@@ -2061,6 +2097,14 @@ export function Game({models, sounds, matchId, character}) {
                         case "fireblast":
                             if (message.payload.targetId === myPlayerId) {
                                 takeDamage(message.payload.damage, message.id);
+                            }
+                            break;
+                        case "corruption":
+                            if (message.payload.targetId === myPlayerId) {
+                                dispatch({
+                                    type: "SEND_CHAT_MESSAGE",
+                                    payload: "You are afflicted by corruption!",
+                                });
                             }
                             break;
                         case "ice-veins":
