@@ -892,6 +892,18 @@ export function Game({models, sounds, matchId, character}) {
                         startSkillCooldown,
                     });
                     break;
+                case "darkball":
+                    igniteHands(playerId, 1000);
+                    castSpellImpl(
+                        playerId,
+                        30,
+                        1000,
+                        (model) => castSphere(model, darkballMesh.clone(), spellType),
+                        sounds.fireballCast,
+                        sounds.fireball,
+                        'darkball'
+                    )
+                    break;
                 case "fireblast":
                     castFireblast({
                         playerId,

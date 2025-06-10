@@ -18,6 +18,14 @@ const WARLOCK_SKILLS = [
     mageSkills.iceVeins,
 ];
 
+const WARLOCK_SKILLS = [
+    // Use the fireball icon until a dedicated asset is available
+    {id: 'darkball', key: 'E', icon: '/icons/fireball.png'},
+    {id: 'iceball', key: 'R', icon: '/icons/spell_frostbolt.jpg'},
+    {id: 'fireblast', key: 'Q', icon: '/icons/spell_fire_fireball.jpg'},
+    {id: 'ice-veins', key: 'F', icon: '/icons/spell_veins.jpg'},
+];
+
 export const SkillBar = () => {
     const {state: {character}} = useInterface();
     const skills = character?.name === 'warlock' ? WARLOCK_SKILLS : DEFAULT_SKILLS;
