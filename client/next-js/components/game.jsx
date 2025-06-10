@@ -1934,6 +1934,25 @@ export function Game({models, sounds, matchId, character}) {
             }
         }
 
+        function createStaffMesh() {
+            const group = new THREE.Group();
+            const stick = new THREE.Mesh(
+                new THREE.CylinderGeometry(0.05, 0.05, 1.5, 8),
+                new THREE.MeshStandardMaterial({color: 0x8B4513})
+            );
+            stick.position.y = 0.75;
+            const top = new THREE.Mesh(
+                new THREE.SphereGeometry(0.1, 16, 16),
+                new THREE.MeshStandardMaterial({color: 0xffffff})
+            );
+            top.position.y = 1.5;
+            group.add(stick);
+            group.add(top);
+            group.rotation.z = Math.PI / 2;
+            group.position.set(0, 0.9, -0.2);
+            return group;
+        }
+
         // Function to create a new player in the scene
         function createPlayer(id, name = "") {
             if (models['character']) {
@@ -1972,6 +1991,14 @@ export function Game({models, sounds, matchId, character}) {
                 const jumpAction = mixer.clipAction(animations[3]);
                 const castAction = mixer.clipAction(animations[1]);
                 const castEndAction = mixer.clipAction(animations[0]);
+
+                const staff = createStaffMesh();
+                const spine = player.getObjectByName('mixamorigSpine2') || player.getObjectByName('mixamorigSpine1');
+                if (spine) {
+                    spine.add(staff);
+                } else {
+                    player.add(staff);
+                }
 
                 scene.add(player);
                 players.set(id, {
