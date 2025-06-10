@@ -14,11 +14,6 @@ import { DiscordIcon } from "@/components/icons";
 
 // Sui JS SDK
 
-// EXAMPLE: Connect to Sui testnet
-
-// Replace with your actual deployed addresses!
-let firstRun = true;
-
 export default function General() {
   const container = useRef(null);
   const router = useRouter();
@@ -56,12 +51,6 @@ export default function General() {
     return () => clearInterval(interval);
   }, []);
 
-  useEffect(() => {
-    if (address && firstRun) {
-      firstRun = false;
-      router.push("/matches");
-    }
-  }, [address]);
   // useLayoutEffect(() => {
   //   if (window.TextPlugin) {
   //     gsap.registerPlugin(TextPlugin);
