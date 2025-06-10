@@ -11,6 +11,8 @@ import {
 } from "@heroui/react";
 import { Navbar } from "@/components/navbar";
 import { title, subtitle } from "@/components/primitives";
+import Image from "next/image";
+import React from "react";
 
 export default function TokenomicsPage() {
   return (
@@ -47,8 +49,8 @@ export default function TokenomicsPage() {
                 <TableCell>Sui</TableCell>
               </TableRow>
               <TableRow>
-                <TableCell>Max Supply</TableCell>
-                <TableCell>1,000,000,000 (fixed)</TableCell>
+                <TableCell>Initial Supply</TableCell>
+                <TableCell>1,000,000,000</TableCell>
               </TableRow>
               <TableRow>
                 <TableCell>Deflationary?</TableCell>
@@ -68,32 +70,12 @@ export default function TokenomicsPage() {
           </ul>
 
           <h2 className={title({ size: "md" })}>Token Flow Diagram</h2>
-          <pre className="overflow-x-auto whitespace-pre-wrap">{`
-       +-------------------+
-       |   PvP Matches     |      $MetaWars reward (chance)
-       +--------+----------+
-                |
-                v
-          +-----------+
-          |  Players  | <---------+
-          +-----------+           |
-                |                 |
-     +----------+-----------+     |
-     | Spend on Skins, Gear |     |
-     | Upgrades, Cosmetics  |     |
-     +----------+-----------+     |
-                |                 |
-            🔥 Burn 10% on        |
-          all transactions        |
-                |                 |
-           $MetaWars Supply       |
-             gradually drops      |
-                |                 |
-     +----------v-----------+     |
-     |   Market Scarcity    |-----+
-     |   → Price Increase   |
-     +----------------------+`}</pre>
-
+          <Image
+              alt="Token Flow"
+              width={200}
+              height={280}
+              src="/token_flow.png"
+          />
           <h2 className={title({ size: "md" })}>Deflation Mechanics (Burn Model)</h2>
           <p>10% of every transaction is burned.</p>
           <p>Includes item purchases, upgrades, forge fees, and marketplace trades.</p>
