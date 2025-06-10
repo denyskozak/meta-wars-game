@@ -1,6 +1,6 @@
 import {Transaction} from "@mysten/sui/transactions";
 import {useCurrentAccount, useSignTransaction, useSuiClient} from "@mysten/dapp-kit";
-import {PACKAGE_ID} from "@/consts";
+import {PACKAGE_ID, TREASURY_CAP_ID} from "@/consts";
 
 export const useTransaction = () => {
     const account = useCurrentAccount();
@@ -45,6 +45,22 @@ export const useTransaction = () => {
             tx.moveCall({
                 target: `${PACKAGE_ID}::character::delete`,
                 arguments: [tx.object(id)],
+            });
+
+            tx.setSender(account?.address);
+
+            return execTransaction(tx);
+        },
+        openLootBox(id) {
+            const tx = new Transaction();
+
+            tx.moveCall({
+                target: `${PACKAGE_ID}::lootbox::open`,
+                arguments: [
+                    tx.object(id),
+                    tx.object(TREASURY_CAP_ID),
+                    tx.pure([], 'vector<u8>'),
+                ],
             });
 
             tx.setSender(account?.address);

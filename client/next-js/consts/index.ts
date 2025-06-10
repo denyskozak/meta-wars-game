@@ -3,3 +3,4 @@ export const NETWORK = process.env.NEXT_PUBLIC_NETWORK as
   | "mainnet"
   | "testnet"
   | "devnet";
+export const TREASURY_CAP_ID = process.env.NEXT_PUBLIC_TREASURY_CAP_ID;

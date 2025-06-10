@@ -6,6 +6,7 @@ import {title} from "@/components/primitives";
 import {useCoins} from "@/hooks/useCoins";
 import {useLootBoxes} from "@/hooks/useLootBoxes";
 import {useSkins} from "@/hooks/useSkins";
+import {useTransaction} from "@/hooks";
 import {useState} from "react";
 import {Navbar} from "@/components/navbar";
 import {Modal} from "@/components/modal";
@@ -20,22 +21,23 @@ export default function BagPage() {
     const {coins, refetch: refetchCoins} = useCoins();
     const {lootboxes, refetch: refetchLoot} = useLootBoxes();
     const {skins, refetch: refetchSkins} = useSkins();
+    const {openLootBox} = useTransaction();
     const [opening, setOpening] = useState<string | null>(null);
     const [loot, setLoot] = useState<{type: string, amount: number}[]>([]);
     const [selectedBox, setSelectedBox] = useState<{id: string, type: string} | null>(null);
 
-    const openBox = (box: {id: string, type: string}) => {
+    const openBox = async (box: {id: string, type: string}) => {
         setOpening(box.id);
-        // TODO: integrate with on-chain transaction
-        setTimeout(() => {
-            refetchLoot();
-            refetchCoins();
-            refetchSkins();
-            setLoot([{
-                type: '$Meta Wars coins',
-                amount: 10
-            }])
-        }, 5000);
+        try {
+            await openLootBox(box.id);
+            await Promise.all([
+                refetchLoot(),
+                refetchCoins(),
+                refetchSkins(),
+            ]);
+        } finally {
+            setOpening(null);
+        }
     };
 
     const confirmOpen = () => {
