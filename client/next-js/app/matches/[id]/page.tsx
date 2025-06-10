@@ -3,6 +3,7 @@
 
 import {useWS} from "@/hooks/useWS";
 import {useEffect, useState} from "react";
+import Image from "next/image";
 import {Button, Table, TableHeader, TableColumn, TableBody, TableRow, TableCell} from "@heroui/react";
 import {useParams, useRouter} from "next/navigation";
 import {Navbar} from "@/components/navbar";
@@ -28,6 +29,12 @@ export default function MatchesPage() {
     const [players, setPlayers] = useState<number[]>([]);
     const [classType, setClassType] = useState('mage');
     const [skin, setSkin] = useState('mad');
+    const classOptions = [
+        {value: 'mage', label: 'Mage', icon: '/icons/mage.png'},
+        {value: 'warrior', label: 'Warrior', icon: '/icons/shield.png'},
+        {value: 'archer', label: 'Archer', icon: '/icons/target.svg'},
+        {value: 'warlock', label: 'Warlock', icon: '/icons/warlock.webp'},
+    ];
     console.log("players: ", players);
     useEffect(() => {
         socket.onmessage = (event) => {
@@ -82,17 +89,23 @@ export default function MatchesPage() {
 
                 <div className="flex gap-4 items-end">
                     <div className="flex flex-col">
-                        <label className="mb-1 text-sm">Class</label>
-                        <select className="p-2 rounded bg-default-100 text-black" value={classType} onChange={e => setClassType(e.target.value)}>
-                            <option value="mage">Mage</option>
-                            <option value="warrior">Warrior</option>
-                            <option value="archer">Archer</option>
-                            <option value="warlock">Warlock</option>
-                        </select>
+                        <span className="mb-1 text-sm">Class</span>
+                        <div className="grid grid-cols-4 gap-2">
+                            {classOptions.map(opt => (
+                                <button
+                                    key={opt.value}
+                                    onClick={() => setClassType(opt.value)}
+                                    className={`flex flex-col items-center p-2 border rounded ${classType === opt.value ? 'border-primary' : 'border-default-200'}`}
+                                >
+                                    <Image src={opt.icon} alt={opt.label} width={48} height={48} />
+                                    <span className="text-xs mt-1">{opt.label}</span>
+                                </button>
+                            ))}
+                        </div>
                     </div>
                     <div className="flex flex-col">
-                        <label className="mb-1 text-sm">Skin</label>
-                        <select className="p-2 rounded bg-default-100 text-black" value={skin} onChange={e => setSkin(e.target.value)}>
+                        <label className="mb-1 text-sm" htmlFor="skin-select">Skin</label>
+                        <select id="skin-select" className="p-2 rounded bg-default-100 text-black" value={skin} onChange={e => setSkin(e.target.value)}>
                             <option value="mad">Mad</option>
                             <option value="arthas">Arthas</option>
                             <option value="stormwind_guard">Guard</option>
