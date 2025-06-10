@@ -26,19 +26,24 @@ export default function General() {
   const address = account?.address;
   const slides = [
     {
-      title: "Play to Win — and Earn",
+      titles: ["Magic", "PvP"],
       subtitle:
-        "Every match matters. Earn $MetaWars, loot, and gear — then trade it freely.",
+        "Truly feelings classic RPG with shooter mechanic",
     },
     {
-      title: "Built by Players, Not Publishers",
+      titles: ["Play to Win", "and Earn"],
       subtitle:
-        "No studio. No VC puppets. Meta Wars is a DAO-native game — shaped by those who play it.",
+        "Earn $MetaWars, loot, and gear — then trade it freely.",
     },
     {
-      title: "Top Players Rule the Meta",
+      titles: ["Built by Players", "Not Publishers"],
       subtitle:
-        "The leaderboard isn't just for show. The best players influence real game balance and direction.",
+        "Meta Wars is a DAO-native game — shaped by those who play it.",
+    },
+    {
+      titles: ["Top Players", "Rule the Meta"],
+      subtitle:
+        "The best players influence real game balance and direction.",
     },
   ];
   const [index, setIndex] = useState(0);
@@ -46,7 +51,7 @@ export default function General() {
   useEffect(() => {
     const interval = setInterval(() => {
       setIndex((i) => (i + 1) % slides.length);
-    }, 5000);
+    }, 10000);
 
     return () => clearInterval(interval);
   }, []);
@@ -85,15 +90,19 @@ export default function General() {
         <div className="inline-block max-w-xl text-center justify-center items-center">
           <AnimatePresence mode="wait">
             <motion.div
-              key={slides[index].title}
+              key={slides[index].titles[0]}
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -10 }}
               initial={{ opacity: 0, y: 10 }}
               transition={{ duration: 0.5 }}
             >
               <span className={getTitle({ color: "cyan" })}>
-                {slides[index].title}
+                {slides[index].titles[0]}
               </span>
+              <span className={getTitle({ color: "yellow" })}>
+                &nbsp;-&nbsp;{slides[index].titles[1]}
+              </span>
+
               <div
                 className={subtitle({
                   class: "mt-4",
