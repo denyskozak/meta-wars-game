@@ -2102,26 +2102,34 @@ export function Game({models, sounds, matchId, character}) {
             if (!player) return;
 
             let record = damageLabels.get(playerId);
-            if (record) {
-                record.element.textContent = String(amount);
-                clearTimeout(record.timeout);
-            } else {
-                const div = document.createElement('div');
-                div.className = 'damage-label';
-                div.textContent = String(amount);
-                const label = new CSS2DObject(div);
+            if (!record) {
+                const container = document.createElement('div');
+                container.className = 'damage-label-container';
+                const label = new CSS2DObject(container);
                 label.position.set(0, 2.5, 0);
                 player.add(label);
-                record = {label, element: div};
+                record = {label, container};
+                damageLabels.set(playerId, record);
             }
 
-            const timeout = setTimeout(() => {
-                player.remove(record.label);
-                damageLabels.delete(playerId);
-            }, 5000);
+            const div = document.createElement('div');
+            div.className = 'damage-label';
+            div.textContent = String(amount);
+            record.container.prepend(div);
 
-            record.timeout = timeout;
-            damageLabels.set(playerId, record);
+            if (record.container.childElementCount > 3) {
+                record.container.removeChild(record.container.lastElementChild);
+            }
+
+            setTimeout(() => {
+                if (div.parentNode) {
+                    div.parentNode.removeChild(div);
+                }
+                if (record.container.childElementCount === 0) {
+                    player.remove(record.label);
+                    damageLabels.delete(playerId);
+                }
+            }, 5000);
         }
 
         function castSphereOtherUser(data, ownerId) {
