@@ -17,6 +17,10 @@ export const siteConfig = {
       label: "Rules",
       href: "/rules",
     },
+    {
+      label: "Tokenomics",
+      href: "/tokenomics",
+    },
     // {
     //   label: "Pricing",
     //   href: "/pricing",
