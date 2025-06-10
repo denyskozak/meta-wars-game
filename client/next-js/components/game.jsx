@@ -296,11 +296,18 @@ export function Game({models, sounds, matchId, character}) {
             blink: 10000,
             heal: 0,
         };
+        const skillCooldownTimers = {};
+
+        function isSkillOnCooldown(skill) {
+            return skillCooldownTimers[skill] && skillCooldownTimers[skill] > Date.now();
+        }
 
         function startSkillCooldown(skill) {
             const duration = SKILL_COOLDOWNS[skill];
             if (duration && duration > 0) {
                 dispatchEvent('skill-cooldown', {skill, duration});
+                skillCooldownTimers[skill] = Date.now() + duration;
+                setTimeout(() => delete skillCooldownTimers[skill], duration);
             }
         }
 
@@ -720,16 +727,12 @@ export function Game({models, sounds, matchId, character}) {
         }
 
 
-        let skillsCDs = {
-            blink: false,
-        };
-
         function castBlink() {
             const BLINK_DISTANCE = 5; // Distance to teleport forward
             const BLINK_MANA_COST = 20; // Mana cost for blink
             const BLINK_COOLDOWN = 10000; // Cooldown in milliseconds
 
-            if (globalSkillCooldown || isCasting || skillsCDs.blink) {
+            if (globalSkillCooldown || isCasting || isSkillOnCooldown('blink')) {
                 return;
             }
 
@@ -747,8 +750,7 @@ export function Game({models, sounds, matchId, character}) {
             sounds.blink.volume = 0.5;
             sounds.blink.play();
 
-            skillsCDs.blink = true;
-            setTimeout(() => (skillsCDs.blink = false), BLINK_COOLDOWN);
+            startSkillCooldown('blink');
 
             const playerPosition = new THREE.Vector3();
 
@@ -791,7 +793,7 @@ export function Game({models, sounds, matchId, character}) {
             const HEAL_AMOUNT = 20; // Amount of HP restored
             const HEAL_MANA_COST = 30; // Mana cost for healing
 
-            if (globalSkillCooldown || isCasting) {
+            if (globalSkillCooldown || isCasting || isSkillOnCooldown('heal')) {
                 return;
             }
 
@@ -972,10 +974,15 @@ export function Game({models, sounds, matchId, character}) {
                     });
                     break;
                 case "ice-veins":
+                    if (globalSkillCooldown || isCasting || isSkillOnCooldown('ice-veins')) {
+                        break;
+                    }
                     castIceVeins({
                         playerId,
                         activateIceVeins,
                     });
+                    activateGlobalCooldown();
+                    startSkillCooldown('ice-veins');
                     break;
             }
         }
@@ -1072,7 +1079,7 @@ export function Game({models, sounds, matchId, character}) {
 
         function castSpellImpl(playerId, manaCost, duration, onUsage = () => {
         }, soundCast, soundCastEnd, spellType) {
-            if (globalSkillCooldown) {
+            if (globalSkillCooldown || isSkillOnCooldown(spellType)) {
                 return;
             }
 
