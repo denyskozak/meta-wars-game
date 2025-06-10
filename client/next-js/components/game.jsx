@@ -876,6 +876,7 @@ export function Game({models, sounds, matchId, character}) {
                         castSphere,
                         fireballMesh,
                         sounds,
+                        damage: FIREBALL_DAMAGE,
                     });
                     break;
                 case "darkball":
@@ -886,6 +887,7 @@ export function Game({models, sounds, matchId, character}) {
                         castSphere,
                         darkballMesh,
                         sounds,
+                        damage: DARKBALL_DAMAGE,
                     });
                     break;
                 case "corruption":
@@ -938,7 +940,7 @@ export function Game({models, sounds, matchId, character}) {
                         playerId,
                         30,
                         1000,
-                        (model) => castSphere(model, darkballMesh.clone(), spellType),
+                        (model) => castSphere(model, darkballMesh.clone(), spellType, DARKBALL_DAMAGE),
                         sounds.fireballCast,
                         sounds.fireball,
                         'darkball'
@@ -966,6 +968,7 @@ export function Game({models, sounds, matchId, character}) {
                         castSphere,
                         iceballMesh,
                         sounds,
+                        damage: ICEBALL_DAMAGE,
                     });
                     break;
                 case "ice-veins":
@@ -1000,7 +1003,7 @@ export function Game({models, sounds, matchId, character}) {
             });
         }
 
-        function castSphere(model, sphereMesh, type) {
+        function castSphere(model, sphereMesh, type, damage) {
             sphereMesh.rotation.copy(model.rotation);
             // fireball.rotation.x += THREE.MathUtils.degToRad(90);
 
@@ -1033,6 +1036,7 @@ export function Game({models, sounds, matchId, character}) {
                 type: "CAST_SPELL",
                 payload: {
                     type,
+                    damage,
                     position: {
                         x: sphereMesh.position.x,
                         y: sphereMesh.position.y,
@@ -1057,12 +1061,7 @@ export function Game({models, sounds, matchId, character}) {
                 velocity: velocity,
                 initialPosition: initialPosition,
                 type,
-                damage:
-                    type === 'fireball'
-                        ? FIREBALL_DAMAGE
-                        : type === 'iceball'
-                            ? ICEBALL_DAMAGE
-                            : DARKBALL_DAMAGE,
+                damage,
 
                 trail: [], // массив точек следа
                 lastTrailTime: performance.now(),
@@ -1204,7 +1203,7 @@ export function Game({models, sounds, matchId, character}) {
             }
 
             if (touchedPlayer) {
-                const damage = sphere.damage ?? FIREBALL_DAMAGE;
+                const damage = sphere.damage;
                 if (sphere.type === 'iceball') {
                     movementSpeedModifier = 0.5;
                     setTimeout(() => (movementSpeedModifier = 1), 1000);
@@ -2181,12 +2180,7 @@ export function Game({models, sounds, matchId, character}) {
                     data.velocity.z,
                 ),
                 type: data.type,
-                damage:
-                    data.type === 'fireball'
-                        ? FIREBALL_DAMAGE
-                        : data.type === 'iceball'
-                            ? ICEBALL_DAMAGE
-                            : DARKBALL_DAMAGE,
+                damage: data.damage,
                 ownerId,
             });
         }

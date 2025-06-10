@@ -68,7 +68,7 @@ export default function TokenomicsPage() {
           </ul>
 
           <h2 className={title({ size: "md" })}>Token Flow Diagram</h2>
-          <pre className="overflow-x-auto whitespace-pre-wrap">
+          <pre className="overflow-x-auto whitespace-pre-wrap">{`
        +-------------------+
        |   PvP Matches     |      $MetaWars reward (chance)
        +--------+----------+
@@ -92,7 +92,7 @@ export default function TokenomicsPage() {
      +----------v-----------+     |
      |   Market Scarcity    |-----+
      |   → Price Increase   |
-     +----------------------+</pre>
+     +----------------------+`}</pre>
 
           <h2 className={title({ size: "md" })}>Deflation Mechanics (Burn Model)</h2>
           <p>10% of every transaction is burned.</p>
