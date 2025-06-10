@@ -1,5 +1,6 @@
 const WebSocket = require('ws');
 const http = require('http');
+const { mintChest } = require('./sui.cjs');
 
 const UPDATE_MATCH_INTERVAL = 33;
 const SPELL_COST = {
@@ -76,7 +77,7 @@ function broadcastToMatch(matchId, message, excludeId = null) {
     }
 }
 
-function createPlayer() {
+function createPlayer(address) {
     return {
         position: {
             x: 0,
@@ -92,8 +93,31 @@ function createPlayer() {
         assists: 0,
         points: 0,
         hp: 100,
-        mana: 100
+        mana: 100,
+        chests: [],
+        address
     };
+}
+
+function finalizeMatch(match) {
+    if (match.finished) return;
+    match.finished = true;
+    const sorted = Array.from(match.players.entries()).sort((a, b) => b[1].kills - a[1].kills);
+    match.summary = sorted.map(([pid, p], idx) => {
+        let chest = 'common';
+        if (idx === 0) chest = 'epic';
+        else if (idx === 1) chest = 'rare';
+        p.chests.push(chest);
+        if (p.address) {
+            mintChest(p.address, chest).catch(err => console.error('mintChest failed', err));
+        }
+        return { id: pid, kills: p.kills, deaths: p.deaths, chest };
+    });
+    finishedMatches.set(match.id, match.summary);
+    broadcastToMatch(match.id, {
+        type: 'MATCH_FINISHED',
+        matchId: match.id,
+    });
 }
 
 function checkRunePickup(match, playerId) {
@@ -163,17 +187,7 @@ function applyDamage(match, victimId, dealerId, damage) {
                 killerId: dealerId,
             });
             if (attacker.kills >= 15 && !match.finished) {
-                match.finished = true;
-                match.summary = Array.from(match.players.entries()).map(([pid, p]) => ({
-                    id: pid,
-                    kills: p.kills,
-                    deaths: p.deaths,
-                }));
-                finishedMatches.set(match.id, match.summary);
-                broadcastToMatch(match.id, {
-                    type: 'MATCH_FINISHED',
-                    matchId: match.id,
-                });
+                finalizeMatch(match);
             }
         }
     }
@@ -270,18 +284,7 @@ ws.on('connection', (socket) => {
                     killerPlayer.points += 100;
 
                     if (killerPlayer.kills >= 15 && !match.finished) {
-                        match.finished = true;
-                        match.summary = Array.from(match.players.entries()).map(([pid, p]) => ({
-                            id: pid,
-                            kills: p.kills,
-                            deaths: p.deaths
-                        }));
-                        finishedMatches.set(match.id, match.summary);
-
-                        broadcastToMatch(match.id, {
-                            type: 'MATCH_FINISHED',
-                            matchId: match.id,
-                        });
+                        finalizeMatch(match);
                     }
                 }
                 break;
@@ -342,7 +345,7 @@ ws.on('connection', (socket) => {
                     break;
                 }
 
-                matchToJoin.players.set(id, createPlayer());
+                matchToJoin.players.set(id, createPlayer(message.address));
                 playerMatchMap.set(id, message.matchId);
                 if (matchToJoin.players.size >= matchToJoin.maxPlayers) {
                     matchToJoin.isFull = true;
