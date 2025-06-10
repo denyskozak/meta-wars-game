@@ -9,6 +9,7 @@ export default function castFireblast({ playerId, globalSkillCooldown, isCasting
   const targetId = getTargetPlayer();
   if (!targetId) {
     dispatch({ type: 'SEND_CHAT_MESSAGE', payload: `No target for  fireblast!` });
+    return;
   }
   sendToSocket({ type: 'CAST_SPELL', payload: { type: 'fireblast', targetId, damage: FIREBLAST_DAMAGE } });
   activateGlobalCooldown();
