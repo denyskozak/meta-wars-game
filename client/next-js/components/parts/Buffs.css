@@ -1,0 +1,27 @@
+.buffs-container {
+    position: absolute;
+    top: 20px;
+    right: 20px;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px;
+    width: 140px;
+    pointer-events: none;
+    z-index: 1000;
+}
+
+.buff-icon {
+    width: 32px;
+    height: 32px;
+    background: rgba(0,0,0,0.6);
+    border: 1px solid #555;
+    border-radius: 4px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.buff-icon img {
+    width: 28px;
+    height: 28px;
+}
