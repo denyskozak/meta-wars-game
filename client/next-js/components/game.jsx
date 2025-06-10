@@ -859,6 +859,9 @@ export function Game({models, sounds, matchId, character}) {
 
 
         function castSpell(spellType, playerId = myPlayerId) {
+            if (globalSkillCooldown || isCasting || isSkillOnCooldown(spellType)) {
+                return;
+            }
             switch (spellType) {
                 case 'ice-shield':
                     castSpellImpl(
@@ -975,9 +978,6 @@ export function Game({models, sounds, matchId, character}) {
                     });
                     break;
                 case "ice-veins":
-                    if (globalSkillCooldown || isCasting || isSkillOnCooldown('ice-veins')) {
-                        break;
-                    }
                     castIceVeins({
                         playerId,
                         activateIceVeins,

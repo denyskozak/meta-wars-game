@@ -9,6 +9,7 @@ export default function castCorruption({ playerId, globalSkillCooldown, isCastin
   const targetId = getTargetPlayer();
   if (!targetId) {
     dispatch({ type: 'SEND_CHAT_MESSAGE', payload: `No target for corruption!` });
+    return;
   }
   sendToSocket({ type: 'CAST_SPELL', payload: { type: 'corruption', targetId } });
   activateGlobalCooldown();
