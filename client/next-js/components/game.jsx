@@ -2147,7 +2147,7 @@ export function Game({models, sounds, matchId, character}) {
                     player.remove(record.label);
                     damageLabels.delete(playerId);
                 }
-            }, 5000);
+            }, 1000);
         }
 
         function showSelfDamage(amount) {
