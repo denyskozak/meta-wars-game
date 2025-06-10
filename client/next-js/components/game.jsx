@@ -1088,9 +1088,9 @@ export function Game({models, sounds, matchId, character}) {
             const {mixer, actions} = players.get(myPlayerId)
 
             const buffs = players.get(playerId)?.buffs || [];
-            const haste = buffs.find(b => b.type === 'haste');
-            if (haste) {
-                duration = duration * (1 - (haste.percent || 0.3));
+            const iceVeins = buffs.find(b => b.type === 'ice-veins');
+            if (iceVeins) {
+                duration = duration * (1 - (iceVeins.percent || 0.4));
             }
 
             const onCastEnd = () => {

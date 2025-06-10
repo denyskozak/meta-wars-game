@@ -442,7 +442,12 @@ ws.on('connection', (socket) => {
                         }
 
                         if (message.payload.type === 'ice-veins') {
-                            player.buffs.push({type: 'haste', percent: 0.3, expires: Date.now() + 15000});
+                            player.buffs.push({
+                                type: 'ice-veins',
+                                percent: 0.4,
+                                expires: Date.now() + 15000,
+                                icon: '/icons/spell_veins.jpg',
+                            });
                         }
                         if (message.payload.type === 'corruption' && message.payload.targetId) {
                             const target = match.players.get(message.payload.targetId);
