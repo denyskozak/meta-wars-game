@@ -1,14 +1,26 @@
 import {useEffect, useState} from 'react';
+import {useInterface} from '@/context/inteface';
 import './SkillBar.css';
 
-const SKILLS = [
+const DEFAULT_SKILLS = [
     {id: 'fireball', key: 'E', icon: '/icons/fireball.png'},
     {id: 'iceball', key: 'R', icon: '/icons/spell_frostbolt.jpg'},
     {id: 'fireblast', key: 'Q', icon: '/icons/spell_fire_fireball.jpg'},
     {id: 'ice-veins', key: 'F', icon: '/icons/spell_veins.jpg'},
 ];
 
+const WARLOCK_SKILLS = [
+    // Use the fireball icon until a dedicated asset is available
+    {id: 'darkball', key: 'E', icon: '/icons/fireball.png'},
+    {id: 'iceball', key: 'R', icon: '/icons/spell_frostbolt.jpg'},
+    {id: 'fireblast', key: 'Q', icon: '/icons/spell_fire_fireball.jpg'},
+    {id: 'ice-veins', key: 'F', icon: '/icons/spell_veins.jpg'},
+];
+
 export const SkillBar = () => {
+    const {state: {character}} = useInterface();
+    const skills = character?.name === 'warlock' ? WARLOCK_SKILLS : DEFAULT_SKILLS;
+
     const [cooldowns, setCooldowns] = useState({});
 
     useEffect(() => {
@@ -44,7 +56,7 @@ export const SkillBar = () => {
 
     return (
         <div id="skills-bar">
-            {SKILLS.map((skill) => {
+            {skills.map((skill) => {
                 const data = cooldowns[skill.id];
                 let percent = 0;
                 let text = skill.key;

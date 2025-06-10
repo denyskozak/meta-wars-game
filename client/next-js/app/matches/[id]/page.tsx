@@ -87,6 +87,7 @@ export default function MatchesPage() {
                             <option value="mage">Mage</option>
                             <option value="warrior">Warrior</option>
                             <option value="archer">Archer</option>
+                            <option value="warlock">Warlock</option>
                         </select>
                     </div>
                     <div className="flex flex-col">

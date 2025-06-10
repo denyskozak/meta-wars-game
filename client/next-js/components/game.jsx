@@ -178,6 +178,23 @@ export function Game({models, sounds, matchId, character}) {
             fireballMaterial     // свой экземпляр
         );
 
+        const darkballMaterial = new THREE.ShaderMaterial({
+            transparent: true,
+            depthWrite: false,
+            blending: THREE.AdditiveBlending,
+            uniforms: {
+                time: {value: 0},
+                coreCol: {value: new THREE.Color(0x9b59b6)},
+                flameCol: {value: new THREE.Color(0x2c3e50)},
+            },
+            vertexShader: fireballMaterial.vertexShader,
+            fragmentShader: fireballMaterial.fragmentShader,
+        });
+        const darkballMesh = new THREE.Mesh(
+            fireballGeometry,
+            darkballMaterial
+        );
+
         const iceballGeometry = new THREE.SphereGeometry(0.1, 16, 16); // Ледяной шар
 
         const iceballMaterial = new THREE.ShaderMaterial({
@@ -257,6 +274,7 @@ export function Game({models, sounds, matchId, character}) {
         const cooldownDuration = 700; // Cooldown duration in milliseconds
         const SKILL_COOLDOWNS = {
             fireball: 0,
+            darkball: 0,
             iceball: 0,
             fireblast: 5000,
             'ice-shield': 30000,
@@ -397,6 +415,7 @@ export function Game({models, sounds, matchId, character}) {
         const getTrailMaterial = (sphereType) => {
             const colors = {
                 'fireball': 0xff0000,
+                'darkball': 0x660066,
                 'iceball': 0x66ccff,
             }
 
@@ -521,7 +540,7 @@ export function Game({models, sounds, matchId, character}) {
                     !isCasting && setAnimation("idle");
                     break;
                 case "KeyE":
-                    castSpell('fireball');
+                    castSpell(character?.name === 'warlock' ? 'darkball' : 'fireball');
                     break;
                 case "KeyR":
                     castSpell('iceball');
@@ -861,6 +880,18 @@ export function Game({models, sounds, matchId, character}) {
                         sounds.fireballCast,
                         sounds.fireball,
                         'fireball'
+                    )
+                    break;
+                case "darkball":
+                    igniteHands(playerId, 1000);
+                    castSpellImpl(
+                        playerId,
+                        30,
+                        1000,
+                        (model) => castSphere(model, darkballMesh.clone(), spellType),
+                        sounds.fireballCast,
+                        sounds.fireball,
+                        'darkball'
                     )
                     break;
                 case "fireblast":
@@ -2003,7 +2034,14 @@ export function Game({models, sounds, matchId, character}) {
         }
 
         function castSphereOtherUser(data, ownerId) {
-            const material = data.type === "fireball" ? fireballMaterial : iceballMaterial;
+            let material;
+            if (data.type === "fireball") {
+                material = fireballMaterial;
+            } else if (data.type === "darkball") {
+                material = darkballMaterial;
+            } else {
+                material = iceballMaterial;
+            }
             const fireball = new THREE.Mesh(fireballGeometry, material.clone());
 
             fireball.position.set(
@@ -2048,6 +2086,10 @@ export function Game({models, sounds, matchId, character}) {
                 case "CAST_SPELL":
                     switch (message?.payload?.type) {
                         case "fireball":
+                            igniteHands(message.id, 1000);
+                            castSphereOtherUser(message.payload, message.id);
+                            break;
+                        case "darkball":
                             igniteHands(message.id, 1000);
                             castSphereOtherUser(message.payload, message.id);
                             break;
