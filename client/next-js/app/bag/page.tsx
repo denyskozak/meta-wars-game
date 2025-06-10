@@ -10,16 +10,22 @@ import {useState} from "react";
 import {Navbar} from "@/components/navbar";
 import {Modal} from "@/components/modal";
 
+const chestImages: Record<string, string> = {
+    common: "/images/chest-common.webp",
+    rare: "/images/chest-rare.webp",
+    epic: "/images/chest-epic.webp",
+};
+
 export default function BagPage() {
     const {coins, refetch: refetchCoins} = useCoins();
     const {lootboxes, refetch: refetchLoot} = useLootBoxes();
     const {skins, refetch: refetchSkins} = useSkins();
     const [opening, setOpening] = useState<string | null>(null);
     const [loot, setLoot] = useState<{type: string, amount: number}[]>([]);
-    const [selectedBox, setSelectedBox] = useState<string | null>(null);
+    const [selectedBox, setSelectedBox] = useState<{id: string, type: string} | null>(null);
 
-    const openBox = (id: string) => {
-        setOpening(id);
+    const openBox = (box: {id: string, type: string}) => {
+        setOpening(box.id);
         // TODO: integrate with on-chain transaction
         setTimeout(() => {
             refetchLoot();
@@ -56,13 +62,15 @@ export default function BagPage() {
                             <ul className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
                                 {lootboxes.map((lb: any) => {
                                     const id = lb.data?.objectId || lb.reference?.objectId || lb.id;
+                                    const type = lb.type || 'common';
                                     return (
                                         <li key={id} className="flex flex-col items-center gap-2">
-                                            <Image src="/images/chest.webp" alt="Loot box" width={160} height={160}/>
+                                            <Image src={chestImages[type] || chestImages.common} alt={`Loot box ${type}`} width={160} height={160}/>
+                                            <span className="capitalize">{type}</span>
                                             <Button
                                                 color="primary"
                                                 isLoading={opening === id}
-                                                onPress={() => setSelectedBox(id)}
+                                                onPress={() => setSelectedBox({id, type})}
                                             >
                                                 Open
                                             </Button>
@@ -106,7 +114,10 @@ export default function BagPage() {
                             <Image src="/images/open-chest.gif" alt="Loot box" width={480} height={480}/>
                         )
                         : (
-                            <p>Do you want to open this loot box?</p>
+                            <>
+                                <Image src={chestImages[selectedBox.type] || chestImages.common} alt={`Loot box ${selectedBox.type}`} width={160} height={160}/>
+                                <p className="mt-2">Do you want to open this {selectedBox.type} loot box?</p>
+                            </>
                         )}
 
                 </Modal>
