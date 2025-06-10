@@ -275,6 +275,7 @@ export function Game({models, sounds, matchId, character}) {
         const SKILL_COOLDOWNS = {
             fireball: 0,
             darkball: 0,
+            corruption: 10000,
             iceball: 0,
             fireblast: 5000,
             'ice-shield': 30000,
@@ -543,7 +544,7 @@ export function Game({models, sounds, matchId, character}) {
                     castSpell(character?.name === 'warlock' ? 'darkball' : 'fireball');
                     break;
                 case "KeyR":
-                    castSpell('iceball');
+                    castSpell(character?.name === 'warlock' ? 'corruption' : 'iceball');
                     break;
                 case "KeyF":
                     castSpell('ice-veins');
@@ -857,6 +858,28 @@ export function Game({models, sounds, matchId, character}) {
             startSkillCooldown('fireblast');
         }
 
+        function castCorruption() {
+            if (globalSkillCooldown || isCasting) return;
+            if (mana < 30) {
+                console.log("Not enough mana for corruption!");
+                return;
+            }
+            const targetId = getTargetPlayer();
+            if (!targetId) {
+                dispatch({
+                    type: "SEND_CHAT_MESSAGE",
+                    payload: `No target for corruption!`,
+                });
+            }
+
+            sendToSocket({
+                type: 'CAST_SPELL',
+                payload: { type: 'corruption', targetId }
+            });
+            activateGlobalCooldown();
+            startSkillCooldown('corruption');
+        }
+
         function castSpell(spellType, playerId = myPlayerId) {
             switch (spellType) {
                 case 'ice-shield':
@@ -892,6 +915,17 @@ export function Game({models, sounds, matchId, character}) {
                         sounds.fireballCast,
                         sounds.fireball,
                         'darkball'
+                    )
+                    break;
+                case "corruption":
+                    castSpellImpl(
+                        playerId,
+                        30,
+                        1000,
+                        () => castCorruption(),
+                        sounds.spellCast,
+                        sounds.spellCast,
+                        'corruption'
                     )
                     break;
                 case "fireblast":
@@ -2103,6 +2137,14 @@ export function Game({models, sounds, matchId, character}) {
                         case "fireblast":
                             if (message.payload.targetId === myPlayerId) {
                                 takeDamage(message.payload.damage, message.id);
+                            }
+                            break;
+                        case "corruption":
+                            if (message.payload.targetId === myPlayerId) {
+                                dispatch({
+                                    type: "SEND_CHAT_MESSAGE",
+                                    payload: "You are afflicted by corruption!",
+                                });
                             }
                             break;
                         case "ice-veins":

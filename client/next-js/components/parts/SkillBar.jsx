@@ -12,7 +12,7 @@ const DEFAULT_SKILLS = [
 const WARLOCK_SKILLS = [
     // Use the fireball icon until a dedicated asset is available
     {id: 'darkball', key: 'E', icon: '/icons/fireball.png'},
-    {id: 'iceball', key: 'R', icon: '/icons/spell_frostbolt.jpg'},
+    {id: 'corruption', key: 'R', icon: '/icons/corruption.png'},
     {id: 'fireblast', key: 'Q', icon: '/icons/spell_fire_fireball.jpg'},
     {id: 'ice-veins', key: 'F', icon: '/icons/spell_veins.jpg'},
 ];
