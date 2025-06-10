@@ -12,6 +12,7 @@ const client = new SuiClient({
 const PACKAGE_ID = '0x9747359e604b83d72dbaaa05ec39558a390138f656085d7abf6604e1805c3546';
 const TREASURY_CAP_OBJECT_ID = '0xa39d534ad0acc77b4d83f099a556d88ac11745c4d4d395b00d99217d9d22ff13';
 const LOOTBOX_CAP_OBJECT_ID = '0x0123456789abcdef';
+const CLOCK_OBJECT_ID = '0x6';
 
 // Function to send a mint transaction
 async function mintCoins(recipientAddress, amount) {
@@ -57,7 +58,11 @@ async function mintChest(recipientAddress, type) {
         const fn = `create_${type}`;
         const [box] = tx.moveCall({
             target: `${PACKAGE_ID}::lootbox::${fn}`,
-            arguments: [tx.object(LOOTBOX_CAP_OBJECT_ID)],
+            arguments: [
+                tx.object(LOOTBOX_CAP_OBJECT_ID),
+                tx.object(TREASURY_CAP_OBJECT_ID),
+                tx.object(CLOCK_OBJECT_ID),
+            ],
         });
         tx.transferObjects([box], tx.pure.address(recipientAddress));
         tx.setGasBudget(10000000);

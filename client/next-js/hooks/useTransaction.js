@@ -1,6 +1,6 @@
 import {Transaction} from "@mysten/sui/transactions";
 import {useCurrentAccount, useSignTransaction, useSuiClient} from "@mysten/dapp-kit";
-import {PACKAGE_ID, TREASURY_CAP_ID} from "@/consts";
+import {PACKAGE_ID, CLOCK_ID} from "@/consts";
 
 export const useTransaction = () => {
     const account = useCurrentAccount();
@@ -58,8 +58,7 @@ export const useTransaction = () => {
                 target: `${PACKAGE_ID}::lootbox::open`,
                 arguments: [
                     tx.object(id),
-                    tx.object(TREASURY_CAP_ID),
-                    tx.pure([], 'vector<u8>'),
+                    tx.object(CLOCK_ID),
                 ],
             });
 
