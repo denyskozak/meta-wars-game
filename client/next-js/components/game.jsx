@@ -90,6 +90,7 @@ export function Game({models, sounds, matchId, character}) {
         const hpBar = document.getElementById("hpBar");
         const damageBar = document.getElementById("damage");
         const manaBar = document.getElementById("manaBar");
+        const selfDamage = document.getElementById("selfDamage");
 
         const activeShields = new Map(); // key = playerId
         const activeHandEffects = new Map(); // key = playerId -> { effectKey: {left, right} }
@@ -2149,6 +2150,19 @@ export function Game({models, sounds, matchId, character}) {
             }, 5000);
         }
 
+        function showSelfDamage(amount) {
+            if (!selfDamage) return;
+            const div = document.createElement('div');
+            div.className = 'damage-label';
+            div.textContent = String(amount);
+            selfDamage.appendChild(div);
+            setTimeout(() => {
+                if (div.parentNode) {
+                    div.parentNode.removeChild(div);
+                }
+            }, 1000);
+        }
+
         function castSphereOtherUser(data, ownerId) {
             let material;
             if (data.type === "fireball") {
@@ -2286,6 +2300,7 @@ export function Game({models, sounds, matchId, character}) {
                     if (message.targetId) {
                         showDamage(message.targetId, message.amount);
                         if (message.targetId === myPlayerId) {
+                            showSelfDamage(message.amount);
                             sounds.damage.volume = 0.5;
                             sounds.damage.currentTime = 0;
                             sounds.damage.play();

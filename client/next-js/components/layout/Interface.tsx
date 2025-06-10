@@ -40,6 +40,8 @@ export const Interface = () => {
                 />
             </div>
 
+            <div id="selfDamage" className="self-damage-container"></div>
+
             <button
                 id="respawnButton"
                 style={{
