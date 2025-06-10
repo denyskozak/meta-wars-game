@@ -21,67 +21,101 @@ module meta_war::lootbox {
     /// ---------- NFT --------------------------------------------------------
     public struct Skin  has key { id: UID, kind: u8 }      // 1-3
     public struct Medal has key { id: UID }
+    public struct StaffFoo has key { id: UID }
+    public struct StaffBar has key { id: UID }
+    public struct EpicToken has key { id: UID }
 
     /// ---------- Loot-box ---------------------------------------------------
-    public struct LootBox has key { id: UID }
+    public struct LootBox has key { id: UID, quality: u8 }
 
-    /// чеканить коробку
+    const COMMON: u8 = 0;
+    const RARE: u8 = 1;
+    const EPIC: u8 = 2;
+
+    /// чеканить коробку качества common (по умолчанию)
     /// требуются права администратора
     public fun create(
         cap : &mut LootBoxAdminCap,
         ctx : &mut TxContext
     ): LootBox {
-        // переменная cap не используется по значению, но присутствует
-        LootBox { id: object::new(ctx) }
+        create_common(cap, ctx)
     }
 
-    /// открыть коробку
+    /// чеканить common коробку
+    public fun create_common(
+        _cap : &mut LootBoxAdminCap,
+        ctx  : &mut TxContext
+    ): LootBox {
+        LootBox { id: object::new(ctx), quality: COMMON }
+    }
+
+    /// чеканить rare коробку
+    public fun create_rare(
+        _cap : &mut LootBoxAdminCap,
+        ctx  : &mut TxContext
+    ): LootBox {
+        LootBox { id: object::new(ctx), quality: RARE }
+    }
+
+    /// чеканить epic коробку
+    public fun create_epic(
+        _cap : &mut LootBoxAdminCap,
+        ctx  : &mut TxContext
+    ): LootBox {
+        LootBox { id: object::new(ctx), quality: EPIC }
+    }
+
+    /// открыть коробку в зависимости от её качества
     /// * `lb`     — сама коробка (сжигается)
     /// * `tc`     — TreasuryCap ваших монет
-    /// * `owned`  — vector<u8> уже имеющихся скинов
     public fun open(
         lb    : LootBox,
         tc    : &mut coin::TreasuryCap<COIN>,
-        owned : vector<u8>,
+        _owned: vector<u8>,
         ctx   : &mut TxContext,
     ) {
-        /* 1. монеты (1-100) */
-        let amount = (random::rand_u64(ctx) % 100) + 1;
-        let coins  = coin::mint(tc, amount, ctx);
-        transfer::public_transfer(coins, tx_context::sender(ctx));
-
-        /* 2. шанс на NFT */
-        distribute_extra(lb, owned, ctx);
-    }
-
-    fun distribute_extra(lb: LootBox, owned: vector<u8>, ctx: &mut TxContext) {
-        let r = random::rand_u64(ctx) % 100;           // 0..99
-
-        if (r < 89) { object::delete_object(lb); return }       // только монеты
-
-        if (r < 93) { try_mint_skin(1, owned, ctx);  object::delete_object(lb); return }
-        if (r < 97) { try_mint_skin(2, owned, ctx);  object::delete_object(lb); return }
-        if (r < 99) { try_mint_skin(3, owned, ctx);  object::delete_object(lb); return }
-
-        /* 1 % – редкая медаль */
-        let med = Medal { id: object::new(ctx) };
-        transfer::public_transfer(med, tx_context::sender(ctx));
-        object::delete_object(lb);
-    }
-
-    fun try_mint_skin(kind: u8, owned: vector<u8>, ctx: &mut TxContext) {
-        if (!has_skin(owned, kind)) {
-            let nft = Skin { id: object::new(ctx), kind };
-            transfer::public_transfer(nft, tx_context::sender(ctx));
+        if (lb.quality == COMMON) {
+            open_common(lb, tc, ctx)
+        } else if (lb.quality == RARE) {
+            open_rare(lb, tc, ctx)
+        } else {
+            open_epic(lb, tc, ctx)
         }
     }
 
-    fun has_skin(owned: vector<u8>, kind: u8): bool {
-        let i = 0;
-        while (i < vector::length(&owned)) {
-            if (vector::borrow(&owned, i) == &kind) return true;
-            i = i + 1;
-        };
-        false
+    fun open_common(lb: LootBox, tc: &mut coin::TreasuryCap<COIN>, ctx: &mut TxContext) {
+        let amount = (random::rand_u64(ctx) % 3) + 1;         // 1..3
+        let coins  = coin::mint(tc, amount, ctx);
+        transfer::public_transfer(coins, tx_context::sender(ctx));
+        object::delete_object(lb);
+    }
+
+    fun open_rare(lb: LootBox, tc: &mut coin::TreasuryCap<COIN>, ctx: &mut TxContext) {
+        let amount = (random::rand_u64(ctx) % 6) + 3;         // 3..8
+        let coins  = coin::mint(tc, amount, ctx);
+        transfer::public_transfer(coins, tx_context::sender(ctx));
+        maybe_mint_staff(ctx);
+        object::delete_object(lb);
+    }
+
+    fun open_epic(lb: LootBox, tc: &mut coin::TreasuryCap<COIN>, ctx: &mut TxContext) {
+        let amount = (random::rand_u64(ctx) % 3) + 8;         // 8..10
+        let coins  = coin::mint(tc, amount, ctx);
+        transfer::public_transfer(coins, tx_context::sender(ctx));
+        maybe_mint_staff(ctx);
+        let et = EpicToken { id: object::new(ctx) };
+        transfer::public_transfer(et, tx_context::sender(ctx));
+        object::delete_object(lb);
+    }
+
+    fun maybe_mint_staff(ctx: &mut TxContext) {
+        let r = random::rand_u64(ctx) % 100;
+        if (r < 5) {
+            let foo = StaffFoo { id: object::new(ctx) };
+            transfer::public_transfer(foo, tx_context::sender(ctx));
+        } else if (r < 10) {
+            let bar = StaffBar { id: object::new(ctx) };
+            transfer::public_transfer(bar, tx_context::sender(ctx));
+        }
     }
 }
