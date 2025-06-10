@@ -2323,6 +2323,8 @@ export function Game({models, sounds, matchId, character}) {
                             mana = player.mana;
                             updateHPBar();
                             updateManaBar();
+                            dispatch({type: 'SET_BUFFS', payload: player.buffs || []});
+                            dispatch({type: 'SET_DEBUFFS', payload: player.debuffs || []});
                         }
 
                     }

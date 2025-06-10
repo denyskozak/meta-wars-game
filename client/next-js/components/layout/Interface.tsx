@@ -3,6 +3,7 @@ import {CastBar} from "../parts/CastBar";
 import {Chat} from "../parts/Chat";
 import {Coins} from "../parts/Coins";
 import {Scoreboard} from "../parts/Scoreboard";
+import {Buffs} from "../parts/Buffs";
 
 import './Interface.css';
 import Image from "next/image";
@@ -57,6 +58,7 @@ export const Interface = () => {
             </button>
 
             <Scoreboard />
+            <Buffs />
             <SkillBar/>
             <CastBar/>
             <Chat />
