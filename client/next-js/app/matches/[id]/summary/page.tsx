@@ -10,6 +10,7 @@ interface PlayerSummary {
     id: number;
     kills: number;
     deaths: number;
+    chest?: string;
 }
 
 export default function MatchSummaryPage() {
@@ -39,10 +40,11 @@ export default function MatchSummaryPage() {
             <div className="flex justify-center items-center">
                 <div className="max-w-[640px] min-w-[480px] flex gap-8 flex-col">
                     <Table aria-label="Match summary">
-                        <TableHeader>
+                    <TableHeader>
                             <TableColumn>Player</TableColumn>
                             <TableColumn>Kills</TableColumn>
                             <TableColumn>Deaths</TableColumn>
+                            <TableColumn>Chest</TableColumn>
                         </TableHeader>
                         <TableBody>
                             {summary.map(p => (
@@ -50,6 +52,7 @@ export default function MatchSummaryPage() {
                                     <TableCell>{`Player ${p.id}`}</TableCell>
                                     <TableCell>{p.kills}</TableCell>
                                     <TableCell>{p.deaths}</TableCell>
+                                    <TableCell>{p.chest}</TableCell>
                                 </TableRow>
                             ))}
                         </TableBody>
