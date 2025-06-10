@@ -363,6 +363,10 @@ export function Game({models, sounds, matchId, character}) {
         const FIREBLAST_RANGE = 20;
         const FIREBLAST_DAMAGE = 25;
 
+        const FIREBALL_DAMAGE = 40;
+        const ICEBALL_DAMAGE = 25;
+        const DARKBALL_DAMAGE = 30;
+
         // Reduced projectile speed so spells are easier to see and dodge
         // Increased projectile speed for a more dynamic feel
         const MIN_SPHERE_IMPULSE = 30;
@@ -872,6 +876,7 @@ export function Game({models, sounds, matchId, character}) {
                         castSphere,
                         fireballMesh,
                         sounds,
+                        damage: FIREBALL_DAMAGE,
                     });
                     break;
                 case "darkball":
@@ -882,6 +887,7 @@ export function Game({models, sounds, matchId, character}) {
                         castSphere,
                         darkballMesh,
                         sounds,
+                        damage: DARKBALL_DAMAGE,
                     });
                     break;
                 case "corruption":
@@ -934,7 +940,7 @@ export function Game({models, sounds, matchId, character}) {
                         playerId,
                         30,
                         1000,
-                        (model) => castSphere(model, darkballMesh.clone(), spellType),
+                        (model) => castSphere(model, darkballMesh.clone(), spellType, DARKBALL_DAMAGE),
                         sounds.fireballCast,
                         sounds.fireball,
                         'darkball'
@@ -962,6 +968,7 @@ export function Game({models, sounds, matchId, character}) {
                         castSphere,
                         iceballMesh,
                         sounds,
+                        damage: ICEBALL_DAMAGE,
                     });
                     break;
                 case "ice-veins":
@@ -996,7 +1003,7 @@ export function Game({models, sounds, matchId, character}) {
             });
         }
 
-        function castSphere(model, sphereMesh, type) {
+        function castSphere(model, sphereMesh, type, damage) {
             sphereMesh.rotation.copy(model.rotation);
             // fireball.rotation.x += THREE.MathUtils.degToRad(90);
 
@@ -1029,6 +1036,7 @@ export function Game({models, sounds, matchId, character}) {
                 type: "CAST_SPELL",
                 payload: {
                     type,
+                    damage,
                     position: {
                         x: sphereMesh.position.x,
                         y: sphereMesh.position.y,
@@ -1053,6 +1061,7 @@ export function Game({models, sounds, matchId, character}) {
                 velocity: velocity,
                 initialPosition: initialPosition,
                 type,
+                damage,
 
                 trail: [], // массив точек следа
                 lastTrailTime: performance.now(),
@@ -1194,11 +1203,12 @@ export function Game({models, sounds, matchId, character}) {
             }
 
             if (touchedPlayer) {
-                takeDamage(25, userIdTouched);
+                const damage = sphere.damage;
                 if (sphere.type === 'iceball') {
                     movementSpeedModifier = 0.5;
                     setTimeout(() => (movementSpeedModifier = 1), 1000);
                 }
+                takeDamage(damage, userIdTouched);
             }
         }
 
@@ -2170,6 +2180,7 @@ export function Game({models, sounds, matchId, character}) {
                     data.velocity.z,
                 ),
                 type: data.type,
+                damage: data.damage,
                 ownerId,
             });
         }

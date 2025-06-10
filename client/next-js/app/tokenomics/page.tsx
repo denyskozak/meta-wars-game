@@ -70,7 +70,6 @@ export default function TokenomicsPage() {
           </ul>
 
           <h2 className={title({ size: "md" })}>Token Flow Diagram</h2>
-
           <Image
               alt="Token Flow"
               width={200}
