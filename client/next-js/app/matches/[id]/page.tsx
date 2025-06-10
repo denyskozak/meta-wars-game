@@ -2,7 +2,7 @@
 
 
 import {useWS} from "@/hooks/useWS";
-import {useEffect, useState} from "react";
+import {useEffect, useMemo, useState} from "react";
 import Image from "next/image";
 import {Button, Table, TableHeader, TableColumn, TableBody, TableRow, TableCell} from "@heroui/react";
 import {useParams, useRouter} from "next/navigation";
@@ -67,52 +67,62 @@ export default function MatchesPage() {
         router.push(`/matches/${params.id}/game`);
     };
 
+    const classInfo = useMemo(() => {
+        return classType
+            ? classOptions.find(({ value }) => value === classType)
+            : null;
+    }, [classType]);
+
     return (
         <div className="h-full">
-            <Navbar />
+            <Navbar/>
             <div className="flex max-w-[650px] m-auto flex-col items-center mt-4 gap-4">
-                <div className="flex flex-col">
-                    <span className="mb-1 text-sm">Class</span>
-                    <div className="grid grid-cols-2 gap-2 ">
-                        {classOptions.map(opt => (
-                            <button
-                                key={opt.value}
-                                onClick={() => setClassType(opt.value)}
-                                className={`flex flex-col items-center p-2 border rounded ${classType === opt.value ? 'border-primary' : 'border-default-200'}`}
-                            >
-                                <Image src={opt.icon} alt={opt.label} width={256} height={256} />
-                                <span className="text-xs mt-1">{opt.label}</span>
-                            </button>
-                        ))}
-                    </div>
-                </div>
-                <h2 className="text-xl font-semibold">Lobby: {match?.name || params?.id}</h2>
-                <Table aria-label="Players">
-                    <TableHeader>
-                        <TableColumn>Players</TableColumn>
-                    </TableHeader>
-                    <TableBody>
-                        {players.map(pid => (
-                            <TableRow key={pid}>
-                                <TableCell>{`Player ${pid}`}</TableCell>
-                            </TableRow>
-                        ))}
-                    </TableBody>
-                </Table>
+                {classType
+                    ? (
+                        <>
+                            <h2 className="text-xl font-semibold">Lobby: {match?.name || params?.id}</h2>
+                            <Table aria-label="Players">
+                                <TableHeader>
+                                    <TableColumn>Players</TableColumn>
+                                </TableHeader>
+                                <TableBody>
+                                    {players.map(pid => (
+                                        <TableRow key={pid}>
+                                            <TableCell>{`Player ${pid}`}</TableCell>
+                                        </TableRow>
+                                    ))}
+                                </TableBody>
+                            </Table>
 
-                <div className="flex gap-4 items-end">
+                            <div className="flex gap-4 items-center flex-col">
 
-                    <div className="flex flex-col">
-                        <label className="mb-1 text-sm" htmlFor="skin-select">Skin</label>
-                        <select id="skin-select" className="p-2 rounded bg-default-100 text-black" value={skin} onChange={e => setSkin(e.target.value)}>
-                            <option value="mad">Mad</option>
-                            <option value="arthas">Arthas</option>
-                            <option value="stormwind_guard">Guard</option>
-                        </select>
-                    </div>
-                    <Button disabled={!Boolean(classType)} color="primary" onPress={handleReady}>Ready</Button>
-                </div>
-                <Chat />
+                                <Image src={classInfo?.icon || ''} alt={classInfo?.label || ''} width={256} height={256}/>
+
+                                <Button disabled={!Boolean(classType)} color="primary"
+                                        onPress={handleReady}>Ready?</Button>
+                            </div>
+                        </>
+                    )
+                    : (
+                        <div className="flex flex-col text-center">
+                            <span className="mb-1 text-large">Choose a Class:</span>
+                            <div className="grid grid-cols-2 gap-2 ">
+                                {classOptions.map(opt => (
+                                    <button
+                                        key={opt.value}
+                                        onClick={() => setClassType(opt.value)}
+                                        className={`flex flex-col items-center p-2`}
+                                    >
+                                        <Image src={opt.icon} alt={opt.label} width={256} height={256}/>
+                                        <span className="text-xs mt-1">{opt.label}</span>
+                                    </button>
+                                ))}
+                            </div>
+                        </div>
+                    )}
+
+
+                <Chat/>
             </div>
         </div>
     );
