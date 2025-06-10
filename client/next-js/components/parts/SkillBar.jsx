@@ -1,12 +1,21 @@
 import {useEffect, useState} from 'react';
 import {useInterface} from '@/context/inteface';
 import './SkillBar.css';
+import * as mageSkills from '../../skills/mage';
+import * as warlockSkills from '../../skills/warlock';
 
 const DEFAULT_SKILLS = [
-    {id: 'fireball', key: 'E', icon: '/icons/fireball.png'},
-    {id: 'iceball', key: 'R', icon: '/icons/spell_frostbolt.jpg'},
-    {id: 'fireblast', key: 'Q', icon: '/icons/spell_fire_fireball.jpg'},
-    {id: 'ice-veins', key: 'F', icon: '/icons/spell_veins.jpg'},
+    mageSkills.fireball,
+    mageSkills.iceball,
+    mageSkills.fireblast,
+    mageSkills.iceVeins,
+];
+
+const WARLOCK_SKILLS = [
+    warlockSkills.darkball,
+    warlockSkills.corruption,
+    mageSkills.fireblast,
+    mageSkills.iceVeins,
 ];
 
 const WARLOCK_SKILLS = [

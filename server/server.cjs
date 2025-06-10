@@ -5,6 +5,7 @@ const UPDATE_MATCH_INTERVAL = 33;
 const SPELL_COST = {
     'fireball': 25,
     'darkball': 25,
+    'corruption': 30,
     'iceball': 25,
     'fireblast': 20,
     'shield': 80,
@@ -83,6 +84,7 @@ function createPlayer() {
         animationAction: '',
         rotation: {y: 0},
         buffs: [],
+        debuffs: [],
         kills: 0,
         deaths: 0,
         assists: 0,
@@ -134,6 +136,60 @@ function checkRunePickup(match, playerId) {
     }
 }
 
+function applyDamage(match, victimId, dealerId, damage) {
+    const victim = match.players.get(victimId);
+    if (!victim) return;
+    const attacker = match.players.get(dealerId);
+    let totalDamage = Number(damage);
+    if (attacker && attacker.buffs.length) {
+        const now = Date.now();
+        attacker.buffs.forEach(buff => {
+            if (buff.type === 'damage' && buff.expires > now) {
+                totalDamage += buff.bonus;
+            }
+        });
+    }
+
+    victim.hp = Math.max(0, victim.hp - totalDamage);
+    if (victim.hp <= 0) {
+        victim.deaths++;
+        if (attacker) {
+            attacker.kills++;
+            attacker.points += 100;
+            broadcastToMatch(match.id, {
+                type: 'KILL',
+                killerId: dealerId,
+            });
+            if (attacker.kills >= 15 && !match.finished) {
+                match.finished = true;
+                match.summary = Array.from(match.players.entries()).map(([pid, p]) => ({
+                    id: pid,
+                    kills: p.kills,
+                    deaths: p.deaths,
+                }));
+                finishedMatches.set(match.id, match.summary);
+                broadcastToMatch(match.id, {
+                    type: 'MATCH_FINISHED',
+                    matchId: match.id,
+                });
+            }
+        }
+    }
+
+    broadcastToMatch(match.id, {
+        type: 'UPDATE_STATS',
+        playerId: victimId,
+        hp: victim.hp,
+        mana: victim.mana,
+    });
+
+    broadcastToMatch(match.id, {
+        type: 'DAMAGE',
+        targetId: victimId,
+        amount: totalDamage,
+    });
+}
+
 ws.on('connection', (socket) => {
     console.log('New client connected.');
     const id = Date.now();
@@ -153,12 +209,22 @@ ws.on('connection', (socket) => {
     setInterval(() => {
         const now = Date.now();
         for (const match of matches.values()) {
-            match.players.forEach(player => {
+            match.players.forEach((player, pid) => {
                 if (player.mana < 100) {
                     player.mana = Math.min(100, player.mana + 5);
                 }
                 if (player.buffs.length) {
                     player.buffs = player.buffs.filter(b => b.expires > now);
+                }
+                if (player.debuffs && player.debuffs.length) {
+                    player.debuffs = player.debuffs.filter(deb => {
+                        if (deb.nextTick <= now) {
+                            deb.nextTick = now + deb.interval;
+                            applyDamage(match, pid, deb.casterId, deb.damage);
+                            deb.ticks--;
+                        }
+                        return deb.ticks > 0;
+                    });
                 }
             });
         }
@@ -347,7 +413,7 @@ ws.on('connection', (socket) => {
                             player.hp = Math.min(100, player.hp + 20);
                         }
 
-                        if (['fireball', 'darkball', 'iceball', 'shield', 'ice-veins', 'fireblast'].includes(message.payload.type)) {
+                        if (['fireball', 'darkball', 'corruption', 'iceball', 'shield', 'ice-veins', 'fireblast'].includes(message.payload.type)) {
                             broadcastToMatch(match.id, {
                                 type: 'CAST_SPELL',
                                 payload: message.payload,
@@ -357,6 +423,20 @@ ws.on('connection', (socket) => {
 
                         if (message.payload.type === 'ice-veins') {
                             player.buffs.push({type: 'haste', percent: 0.3, expires: Date.now() + 15000});
+                        }
+                        if (message.payload.type === 'corruption' && message.payload.targetId) {
+                            const target = match.players.get(message.payload.targetId);
+                            if (target) {
+                                target.debuffs = target.debuffs || [];
+                                target.debuffs.push({
+                                    type: 'corruption',
+                                    casterId: id,
+                                    damage: 10,
+                                    interval: 2000,
+                                    nextTick: Date.now() + 2000,
+                                    ticks: 5,
+                                });
+                            }
                         }
 
                         broadcastToMatch(match.id, {
@@ -371,59 +451,7 @@ ws.on('connection', (socket) => {
 
             case 'TAKE_DAMAGE':
                 if (match) {
-                    const victim = match.players.get(id);
-                    if (victim) {
-                        const attacker = match.players.get(message.damageDealerId);
-                        let totalDamage = Number(message.damage);
-                        if (attacker && attacker.buffs.length) {
-                            const now = Date.now();
-                            attacker.buffs.forEach(buff => {
-                                if (buff.type === 'damage' && buff.expires > now) {
-                                    totalDamage += buff.bonus;
-                                }
-                            });
-                        }
-
-                        victim.hp = Math.max(0, victim.hp - totalDamage);
-                        if (victim.hp <= 0) {
-                        victim.deaths++;
-                        const killer = match.players.get(message.damageDealerId);
-                        if (killer) {
-                            killer.kills++;
-                            killer.points += 100;
-                            broadcastToMatch(match.id, {
-                                type: 'KILL',
-                                killerId: message.damageDealerId,
-                            });
-                            if (killer.kills >= 15 && !match.finished) {
-                                    match.finished = true;
-                                    match.summary = Array.from(match.players.entries()).map(([pid, p]) => ({
-                                        id: pid,
-                                        kills: p.kills,
-                                        deaths: p.deaths,
-                                    }));
-                                    finishedMatches.set(match.id, match.summary);
-                                    broadcastToMatch(match.id, {
-                                        type: 'MATCH_FINISHED',
-                                        matchId: match.id,
-                                    });
-                                }
-                            }
-                        }
-
-                        broadcastToMatch(match.id, {
-                            type: 'UPDATE_STATS',
-                            playerId: id,
-                            hp: victim.hp,
-                            mana: victim.mana,
-                        });
-
-                        broadcastToMatch(match.id, {
-                            type: 'DAMAGE',
-                            targetId: id,
-                            amount: totalDamage,
-                        });
-                    }
+                    applyDamage(match, id, message.damageDealerId, message.damage);
                 }
                 break;
 
