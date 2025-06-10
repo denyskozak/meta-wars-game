@@ -57,7 +57,10 @@ async function mintChest(recipientAddress, type) {
         const fn = `create_${type}`;
         const [box] = tx.moveCall({
             target: `${PACKAGE_ID}::lootbox::${fn}`,
-            arguments: [tx.object(LOOTBOX_CAP_OBJECT_ID)],
+            arguments: [
+                tx.object(LOOTBOX_CAP_OBJECT_ID),
+                tx.object(TREASURY_CAP_OBJECT_ID),
+            ],
         });
         tx.transferObjects([box], tx.pure.address(recipientAddress));
         tx.setGasBudget(10000000);
