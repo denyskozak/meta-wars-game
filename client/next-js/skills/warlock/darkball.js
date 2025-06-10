@@ -1,4 +1,4 @@
-export const meta = { id: 'darkball', key: 'E', icon: '/icons/fireball.png' };
+export const meta = { id: 'darkball', key: 'E', icon: '/icons/spell_shadowbolt.jpg' };
 
 export default function castDarkball({ playerId, castSpellImpl, igniteHands, castSphere, darkballMesh, sounds }) {
   igniteHands(playerId, 1000);
