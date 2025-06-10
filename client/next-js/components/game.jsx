@@ -21,6 +21,8 @@ import castFireblast from '../skills/mage/fireblast';
 import castIceVeins from '../skills/mage/iceVeins';
 import castDarkball from '../skills/warlock/darkball';
 import castCorruption from '../skills/warlock/corruption';
+import castImmolate from '../skills/warlock/immolate';
+import castConflagrate from '../skills/warlock/conflagrate';
 
 
 import {Interface} from "@/components/layout/Interface";
@@ -92,6 +94,7 @@ export function Game({models, sounds, matchId, character}) {
         const activeShields = new Map(); // key = playerId
         const activeHandEffects = new Map(); // key = playerId -> { effectKey: {left, right} }
         const activeIceVeins = new Map(); // key = playerId -> effect mesh
+        const activeImmolation = new Map(); // key = playerId -> effect mesh
 
         // Function to update the HP bar width
         function updateHPBar() {
@@ -284,8 +287,10 @@ export function Game({models, sounds, matchId, character}) {
             fireball: 0,
             darkball: 0,
             corruption: 10000,
+            immolate: 10000,
             iceball: 0,
             fireblast: 5000,
+            conflagrate: 5000,
             'ice-shield': 30000,
             'ice-veins': 25000,
             blink: 10000,
@@ -555,7 +560,7 @@ export function Game({models, sounds, matchId, character}) {
                     castSpell(character?.name === 'warlock' ? 'corruption' : 'iceball');
                     break;
                 case "KeyF":
-                    castSpell('ice-veins');
+                    castSpell(character?.name === 'warlock' ? 'conflagrate' : 'ice-veins');
                     break;
                 case "KeyG":
                     leftMouseButtonClicked = true;
@@ -588,7 +593,7 @@ export function Game({models, sounds, matchId, character}) {
                     }
                     break;
                 case "KeyQ":
-                    castSpell('fireblast');
+                    castSpell(character?.name === 'warlock' ? 'immolate' : 'fireblast');
 
                     break;
                 case "Enter":
@@ -890,6 +895,34 @@ export function Game({models, sounds, matchId, character}) {
                         sendToSocket,
                         activateGlobalCooldown,
                         startSkillCooldown,
+                    });
+                    break;
+                case "immolate":
+                    castImmolate({
+                        playerId,
+                        globalSkillCooldown,
+                        isCasting,
+                        mana,
+                        getTargetPlayer,
+                        dispatch,
+                        sendToSocket,
+                        activateGlobalCooldown,
+                        startSkillCooldown,
+                    });
+                    break;
+                case "conflagrate":
+                    castConflagrate({
+                        playerId,
+                        globalSkillCooldown,
+                        isCasting,
+                        mana,
+                        getTargetPlayer,
+                        dispatch,
+                        sendToSocket,
+                        activateGlobalCooldown,
+                        startSkillCooldown,
+                        FIREBLAST_DAMAGE,
+                        isTargetBurning: (id) => activeImmolation.has(id),
                     });
                     break;
                 case "darkball":
@@ -1659,6 +1692,26 @@ export function Game({models, sounds, matchId, character}) {
             }, duration);
         }
 
+        function applyImmolationEffect(playerId, duration = 5000) {
+            const existing = activeImmolation.get(playerId);
+            if (existing) {
+                existing.parent?.remove(existing);
+            }
+
+            const player = players.get(playerId)?.model;
+            if (!player) return;
+
+            const effect = SkeletonUtils.clone(models["fire"]);
+            effect.scale.set(0.5, 0.5, 0.5);
+            scene.add(effect);
+            activeImmolation.set(playerId, effect);
+
+            setTimeout(() => {
+                effect.parent?.remove(effect);
+                activeImmolation.delete(playerId);
+            }, duration);
+        }
+
 
         function toggleShieldOnPlayer(id, visible) {
             let shield = activeShields.get(id);
@@ -1853,6 +1906,13 @@ export function Game({models, sounds, matchId, character}) {
 
                     activeIceVeins.forEach((mesh) => {
                         mesh.rotation.z += delta * 2;
+                    });
+
+                    activeImmolation.forEach((mesh, id) => {
+                        const target = players.get(id)?.model;
+                        if (!target) return;
+                        target.getWorldPosition(mesh.position);
+                        mesh.position.y += 0.5;
                     });
 
                     runes.forEach(r => {
@@ -2117,6 +2177,20 @@ export function Game({models, sounds, matchId, character}) {
                                     type: "SEND_CHAT_MESSAGE",
                                     payload: "You are afflicted by corruption!",
                                 });
+                            }
+                            break;
+                        case "immolate":
+                            applyImmolationEffect(message.payload.targetId);
+                            if (message.payload.targetId === myPlayerId) {
+                                dispatch({
+                                    type: "SEND_CHAT_MESSAGE",
+                                    payload: "You are burning!",
+                                });
+                            }
+                            break;
+                        case "conflagrate":
+                            if (message.payload.targetId === myPlayerId) {
+                                takeDamage(message.payload.damage, message.id);
                             }
                             break;
                         case "ice-veins":

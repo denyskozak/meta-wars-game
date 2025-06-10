@@ -6,8 +6,10 @@ const SPELL_COST = {
     'fireball': 25,
     'darkball': 25,
     'corruption': 30,
+    'immolate': 30,
     'iceball': 25,
     'fireblast': 20,
+    'conflagrate': 20,
     'shield': 80,
     'blink': 20,
     'heal': 30,
@@ -408,12 +410,19 @@ ws.on('connection', (socket) => {
                     const player = match.players.get(id);
                     const cost = SPELL_COST[message.payload?.type] || 0;
                     if (player && player.mana >= cost) {
+                        if (message.payload.type === 'conflagrate' && message.payload.targetId) {
+                            const target = match.players.get(message.payload.targetId);
+                            if (!target || !Array.isArray(target.debuffs) || !target.debuffs.find(d => d.type === 'immolate')) {
+                                break;
+                            }
+                        }
+
                         player.mana -= cost;
                         if (message.payload.type === 'heal') {
                             player.hp = Math.min(100, player.hp + 20);
                         }
 
-                        if (['fireball', 'darkball', 'corruption', 'iceball', 'shield', 'ice-veins', 'fireblast'].includes(message.payload.type)) {
+                        if (['fireball', 'darkball', 'corruption', 'immolate', 'conflagrate', 'iceball', 'shield', 'ice-veins', 'fireblast'].includes(message.payload.type)) {
                             broadcastToMatch(match.id, {
                                 type: 'CAST_SPELL',
                                 payload: message.payload,
@@ -434,6 +443,20 @@ ws.on('connection', (socket) => {
                                     damage: 10,
                                     interval: 2000,
                                     nextTick: Date.now() + 2000,
+                                    ticks: 5,
+                                });
+                            }
+                        }
+                        if (message.payload.type === 'immolate' && message.payload.targetId) {
+                            const target = match.players.get(message.payload.targetId);
+                            if (target) {
+                                target.debuffs = target.debuffs || [];
+                                target.debuffs.push({
+                                    type: 'immolate',
+                                    casterId: id,
+                                    damage: 10,
+                                    interval: 1000,
+                                    nextTick: Date.now() + 1000,
                                     ticks: 5,
                                 });
                             }

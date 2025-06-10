@@ -14,8 +14,8 @@ const DEFAULT_SKILLS = [
 const WARLOCK_SKILLS = [
     warlockSkills.darkball,
     warlockSkills.corruption,
-    mageSkills.fireblast,
-    mageSkills.iceVeins,
+    warlockSkills.immolate,
+    warlockSkills.conflagrate,
 ];
 
 export const SkillBar = () => {
