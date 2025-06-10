@@ -5,7 +5,7 @@ export default function castIceball({ playerId, castSpellImpl, freezeHands, cast
   castSpellImpl(
     playerId,
     50,
-    1500,
+    1200,
     (model) => castSphere(model, iceballMesh.clone(), meta.id),
     sounds.iceballCast,
     sounds.iceball,

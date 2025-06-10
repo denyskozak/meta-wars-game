@@ -5,7 +5,7 @@ export default function castFireball({ playerId, castSpellImpl, igniteHands, cas
   castSpellImpl(
     playerId,
     30,
-    1000,
+    1500,
     (model) => castSphere(model, fireballMesh.clone(), meta.id),
     sounds.fireballCast,
     sounds.fireball,

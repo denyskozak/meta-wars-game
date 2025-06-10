@@ -363,6 +363,10 @@ export function Game({models, sounds, matchId, character}) {
         const FIREBLAST_RANGE = 20;
         const FIREBLAST_DAMAGE = 25;
 
+        const FIREBALL_DAMAGE = 40;
+        const ICEBALL_DAMAGE = 25;
+        const DARKBALL_DAMAGE = 30;
+
         // Reduced projectile speed so spells are easier to see and dodge
         // Increased projectile speed for a more dynamic feel
         const MIN_SPHERE_IMPULSE = 30;
@@ -1053,6 +1057,12 @@ export function Game({models, sounds, matchId, character}) {
                 velocity: velocity,
                 initialPosition: initialPosition,
                 type,
+                damage:
+                    type === 'fireball'
+                        ? FIREBALL_DAMAGE
+                        : type === 'iceball'
+                            ? ICEBALL_DAMAGE
+                            : DARKBALL_DAMAGE,
 
                 trail: [], // массив точек следа
                 lastTrailTime: performance.now(),
@@ -1194,11 +1204,12 @@ export function Game({models, sounds, matchId, character}) {
             }
 
             if (touchedPlayer) {
-                takeDamage(25, userIdTouched);
+                const damage = sphere.damage ?? FIREBALL_DAMAGE;
                 if (sphere.type === 'iceball') {
                     movementSpeedModifier = 0.5;
                     setTimeout(() => (movementSpeedModifier = 1), 1000);
                 }
+                takeDamage(damage, userIdTouched);
             }
         }
 
@@ -2102,26 +2113,34 @@ export function Game({models, sounds, matchId, character}) {
             if (!player) return;
 
             let record = damageLabels.get(playerId);
-            if (record) {
-                record.element.textContent = String(amount);
-                clearTimeout(record.timeout);
-            } else {
-                const div = document.createElement('div');
-                div.className = 'damage-label';
-                div.textContent = String(amount);
-                const label = new CSS2DObject(div);
+            if (!record) {
+                const container = document.createElement('div');
+                container.className = 'damage-label-container';
+                const label = new CSS2DObject(container);
                 label.position.set(0, 2.5, 0);
                 player.add(label);
-                record = {label, element: div};
+                record = {label, container};
+                damageLabels.set(playerId, record);
             }
 
-            const timeout = setTimeout(() => {
-                player.remove(record.label);
-                damageLabels.delete(playerId);
-            }, 5000);
+            const div = document.createElement('div');
+            div.className = 'damage-label';
+            div.textContent = String(amount);
+            record.container.prepend(div);
 
-            record.timeout = timeout;
-            damageLabels.set(playerId, record);
+            if (record.container.childElementCount > 3) {
+                record.container.removeChild(record.container.lastElementChild);
+            }
+
+            setTimeout(() => {
+                if (div.parentNode) {
+                    div.parentNode.removeChild(div);
+                }
+                if (record.container.childElementCount === 0) {
+                    player.remove(record.label);
+                    damageLabels.delete(playerId);
+                }
+            }, 5000);
         }
 
         function castSphereOtherUser(data, ownerId) {
@@ -2162,6 +2181,12 @@ export function Game({models, sounds, matchId, character}) {
                     data.velocity.z,
                 ),
                 type: data.type,
+                damage:
+                    data.type === 'fireball'
+                        ? FIREBALL_DAMAGE
+                        : data.type === 'iceball'
+                            ? ICEBALL_DAMAGE
+                            : DARKBALL_DAMAGE,
                 ownerId,
             });
         }
