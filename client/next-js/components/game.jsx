@@ -922,7 +922,10 @@ export function Game({models, sounds, matchId, character}) {
                         activateGlobalCooldown,
                         startSkillCooldown,
                         FIREBLAST_DAMAGE,
-                        isTargetBurning: (id) => activeImmolation.has(id),
+                        isTargetBurning: (id) => {
+                            console.log("activeImmolation: ", activeImmolation);
+                            return activeImmolation.has(id);
+                        },
                     });
                     break;
                 case "darkball":
@@ -1408,7 +1411,6 @@ export function Game({models, sounds, matchId, character}) {
                 return;
             }
 
-            console.log("action.isRunning(): ", action.isRunning());
             // Check if the action is already playing
             if (action.isRunning()) {
                 return; // Prevent double triggering
@@ -1705,7 +1707,7 @@ export function Game({models, sounds, matchId, character}) {
             effect.scale.set(0.5, 0.5, 0.5);
             scene.add(effect);
             activeImmolation.set(playerId, effect);
-
+            console.log("activeImmolation: after update ", activeImmolation);
             setTimeout(() => {
                 effect.parent?.remove(effect);
                 activeImmolation.delete(playerId);
@@ -1807,7 +1809,6 @@ export function Game({models, sounds, matchId, character}) {
                 y: model?.rotation?.y || 0, // Send only the Y-axis rotation
             };
 
-            console.log("position: ", position);
             sendToSocket({type: "UPDATE_POSITION", position, rotation});
         }
 
@@ -1957,7 +1958,6 @@ export function Game({models, sounds, matchId, character}) {
         function createPlayer(id, name = "") {
             if (models['character']) {
                 const player = SkeletonUtils.clone(models['character']);
-                console.log("player: ", player);
                 player.position.set(...USER_DEFAULT_POSITION);
 
                 player.scale.set(0.4, 0.4, 0.4);
@@ -1983,7 +1983,6 @@ export function Game({models, sounds, matchId, character}) {
                 mixer.timeScale = 40;
                 // const idle = mixer.clipAction(animations[2]).play();
                 // const walk = mixer.clipAction(animations[6]);
-                console.log("animations: ", animations);
 
                 const idleAction = mixer.clipAction(animations[2]);
                 const walkAction = mixer.clipAction(animations[5]);
@@ -2042,7 +2041,6 @@ export function Game({models, sounds, matchId, character}) {
                 playerData.points = message.points;
                 playerData.buffs = message.buffs;
 
-                console.log("message: ", message);
                 const action = actions?.[message.animationAction];
                 if (action && message.animationAction !== playerData.currentAction) {
                     controlAction({
@@ -2346,7 +2344,6 @@ export function Game({models, sounds, matchId, character}) {
                     console.log("MATCH_READY: ", message);
                     myPlayerId = message.myPlayerId;
                     message.players.forEach((playerId) => {
-                        console.log("playerId: ", playerId);
                         createPlayer(Number(playerId), String(playerId));
                     })
                     break;

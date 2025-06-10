@@ -1,4 +1,4 @@
-export const meta = { id: 'corruption', key: 'R', icon: '/icons/corruption.png' };
+export const meta = { id: 'corruption', key: 'R', icon: '/icons/spell_corruption.jpg' };
 
 export default function castCorruption({ playerId, globalSkillCooldown, isCasting, mana, getTargetPlayer, dispatch, sendToSocket, activateGlobalCooldown, startSkillCooldown }) {
   if (globalSkillCooldown || isCasting) return;

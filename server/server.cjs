@@ -422,7 +422,15 @@ ws.on('connection', (socket) => {
                             player.hp = Math.min(100, player.hp + 20);
                         }
 
-                        if (['fireball', 'darkball', 'corruption', 'immolate', 'conflagrate', 'iceball', 'shield', 'ice-veins', 'fireblast'].includes(message.payload.type)) {
+                        if (['immolate'].includes(message.payload.type)) {
+                            broadcastToMatch(match.id, {
+                                type: 'CAST_SPELL',
+                                payload: message.payload,
+                                id,
+                            });
+                        }
+                        
+                        if (['fireball', 'darkball', 'corruption', 'conflagrate', 'iceball', 'shield', 'ice-veins', 'fireblast'].includes(message.payload.type)) {
                             broadcastToMatch(match.id, {
                                 type: 'CAST_SPELL',
                                 payload: message.payload,

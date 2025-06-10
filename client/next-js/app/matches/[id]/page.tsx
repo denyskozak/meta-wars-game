@@ -27,12 +27,10 @@ export default function MatchesPage() {
 
     const [match, setMatch] = useState<Match | null>(null);
     const [players, setPlayers] = useState<number[]>([]);
-    const [classType, setClassType] = useState('mage');
+    const [classType, setClassType] = useState('');
     const [skin, setSkin] = useState('mad');
     const classOptions = [
         {value: 'mage', label: 'Mage', icon: '/icons/mage.png'},
-        {value: 'warrior', label: 'Warrior', icon: '/icons/shield.png'},
-        {value: 'archer', label: 'Archer', icon: '/icons/target.svg'},
         {value: 'warlock', label: 'Warlock', icon: '/icons/warlock.webp'},
     ];
     console.log("players: ", players);
@@ -72,7 +70,22 @@ export default function MatchesPage() {
     return (
         <div className="h-full">
             <Navbar />
-            <div className="flex flex-col items-center mt-4 gap-4">
+            <div className="flex max-w-[650px] m-auto flex-col items-center mt-4 gap-4">
+                <div className="flex flex-col">
+                    <span className="mb-1 text-sm">Class</span>
+                    <div className="grid grid-cols-2 gap-2 ">
+                        {classOptions.map(opt => (
+                            <button
+                                key={opt.value}
+                                onClick={() => setClassType(opt.value)}
+                                className={`flex flex-col items-center p-2 border rounded ${classType === opt.value ? 'border-primary' : 'border-default-200'}`}
+                            >
+                                <Image src={opt.icon} alt={opt.label} width={256} height={256} />
+                                <span className="text-xs mt-1">{opt.label}</span>
+                            </button>
+                        ))}
+                    </div>
+                </div>
                 <h2 className="text-xl font-semibold">Lobby: {match?.name || params?.id}</h2>
                 <Table aria-label="Players">
                     <TableHeader>
@@ -88,21 +101,7 @@ export default function MatchesPage() {
                 </Table>
 
                 <div className="flex gap-4 items-end">
-                    <div className="flex flex-col">
-                        <span className="mb-1 text-sm">Class</span>
-                        <div className="grid grid-cols-4 gap-2">
-                            {classOptions.map(opt => (
-                                <button
-                                    key={opt.value}
-                                    onClick={() => setClassType(opt.value)}
-                                    className={`flex flex-col items-center p-2 border rounded ${classType === opt.value ? 'border-primary' : 'border-default-200'}`}
-                                >
-                                    <Image src={opt.icon} alt={opt.label} width={48} height={48} />
-                                    <span className="text-xs mt-1">{opt.label}</span>
-                                </button>
-                            ))}
-                        </div>
-                    </div>
+
                     <div className="flex flex-col">
                         <label className="mb-1 text-sm" htmlFor="skin-select">Skin</label>
                         <select id="skin-select" className="p-2 rounded bg-default-100 text-black" value={skin} onChange={e => setSkin(e.target.value)}>
@@ -111,7 +110,7 @@ export default function MatchesPage() {
                             <option value="stormwind_guard">Guard</option>
                         </select>
                     </div>
-                    <Button color="primary" onPress={handleReady}>Ready</Button>
+                    <Button disabled={!Boolean(classType)} color="primary" onPress={handleReady}>Ready</Button>
                 </div>
                 <Chat />
             </div>

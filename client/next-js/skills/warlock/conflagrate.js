@@ -24,6 +24,7 @@ export default function castConflagrate({
     return;
   }
 
+  console.log("targetId: ", targetId);
   if (typeof isTargetBurning === 'function' && !isTargetBurning(targetId)) {
     dispatch({ type: 'SEND_CHAT_MESSAGE', payload: `Target is not affected by Immolate!` });
     return;
