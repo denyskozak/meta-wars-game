@@ -460,6 +460,7 @@ ws.on('connection', (socket) => {
                                     interval: 2000,
                                     nextTick: Date.now() + 2000,
                                     ticks: 5,
+                                    icon: '/icons/spell_corruption.jpg',
                                 });
                             }
                         }
@@ -474,6 +475,7 @@ ws.on('connection', (socket) => {
                                     interval: 1000,
                                     nextTick: Date.now() + 1000,
                                     ticks: 5,
+                                    icon: '/icons/spell_immolation.jpg',
                                 });
                             }
                         }
