@@ -7,9 +7,19 @@ import {Buffs} from "../parts/Buffs";
 
 import './Interface.css';
 import Image from "next/image";
-import React from "react";
+import React, {useEffect, useState} from "react";
 
 export const Interface = () => {
+    const [target, setTarget] = useState<{id:number, hp:number, mana:number, address:string}|null>(null);
+
+    useEffect(() => {
+        const handler = (e: CustomEvent) => {
+            setTarget(e.detail);
+        };
+        window.addEventListener('target-update', handler as EventListener);
+        return () => window.removeEventListener('target-update', handler as EventListener);
+    }, []);
+
     return (
         <div className="interface-container">
             <div className="bar-container hp-bar-container">
@@ -19,6 +29,18 @@ export const Interface = () => {
             <div className="bar-container mana-bar-container">
                 <div className="bar-fill mana-bar-fill" id="manaBar"></div>
             </div>
+
+            {target && (
+                <div id="targetPanel" className="target-panel">
+                    <div id="targetAddress" className="target-address">{target.address}</div>
+                    <div className="bar-container hp-bar-container">
+                        <div className="bar-fill hp-bar-fill" id="targetHpBar" style={{width: `${target.hp}%`}}></div>
+                    </div>
+                    <div className="bar-container mana-bar-container">
+                        <div className="bar-fill mana-bar-fill" id="targetManaBar" style={{width: `${target.mana}%`}}></div>
+                    </div>
+                </div>
+            )}
 
             <div id="target" style={{
                 position: 'absolute',

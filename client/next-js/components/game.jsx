@@ -91,6 +91,7 @@ export function Game({models, sounds, matchId, character}) {
         const damageBar = document.getElementById("damage");
         const manaBar = document.getElementById("manaBar");
         const selfDamage = document.getElementById("selfDamage");
+        let targetedPlayerId = null;
 
         const activeShields = new Map(); // key = playerId
         const activeHandEffects = new Map(); // key = playerId -> { effectKey: {left, right} }
@@ -105,6 +106,24 @@ export function Game({models, sounds, matchId, character}) {
         // Function to update the Mana bar width
         function updateManaBar() {
             manaBar.style.width = `${mana}%`;
+        }
+
+        function dispatchTargetUpdate() {
+            if (!targetedPlayerId || !players.has(targetedPlayerId)) {
+                dispatchEvent('target-update', null);
+                return;
+            }
+            const p = players.get(targetedPlayerId);
+            if (!p) {
+                dispatchEvent('target-update', null);
+                return;
+            }
+            dispatchEvent('target-update', {
+                id: targetedPlayerId,
+                hp: p.hp,
+                mana: p.mana,
+                address: p.address || `Player ${targetedPlayerId}`,
+            });
         }
 
         // Function to handle damage and update health
@@ -686,9 +705,18 @@ export function Game({models, sounds, matchId, character}) {
         document.addEventListener("mousedown", (event) => {
             if (event.button === 2) {
                 // Right mouse button
-                console.log("Right mouse button clicked!");
-                // Add your logic for right-click actions here
                 handleRightClick();
+            }
+            if (event.button === 0) {
+                // Left mouse button
+                const id = getTargetPlayer();
+                if (id) {
+                    targetedPlayerId = id;
+                    dispatchTargetUpdate();
+                } else {
+                    targetedPlayerId = null;
+                    dispatchTargetUpdate();
+                }
             }
         });
 
@@ -2046,7 +2074,7 @@ export function Game({models, sounds, matchId, character}) {
         }
 
         // Function to create a new player in the scene
-        function createPlayer(id, name = "") {
+        function createPlayer(id, name = "", address = "") {
             if (models['character']) {
                 const player = SkeletonUtils.clone(models['character']);
                 player.position.set(...USER_DEFAULT_POSITION);
@@ -2112,6 +2140,7 @@ export function Game({models, sounds, matchId, character}) {
                     },
                     prevPos: new THREE.Vector3().copy(player.position),
                     buffs: [],
+                    address,
                 });
                 playerMixers.push(mixer);   // массив всех чужих миксеров
             }
@@ -2131,6 +2160,9 @@ export function Game({models, sounds, matchId, character}) {
                 playerData.assists = message.assists;
                 playerData.points = message.points;
                 playerData.buffs = message.buffs;
+                playerData.hp = message.hp;
+                playerData.mana = message.mana;
+                playerData.address = message.address || playerData.address;
 
                 const action = actions?.[message.animationAction];
                 if (action && message.animationAction !== playerData.currentAction) {
@@ -2185,6 +2217,10 @@ export function Game({models, sounds, matchId, character}) {
             if (players.has(id)) {
                 scene.remove(players.get(id));
                 delete players.get(id);
+                if (id === targetedPlayerId) {
+                    targetedPlayerId = null;
+                    dispatchTargetUpdate();
+                }
             }
         }
 
@@ -2356,6 +2392,9 @@ export function Game({models, sounds, matchId, character}) {
                         const p = players.get(message.playerId);
                         p.hp = message.hp;
                         p.mana = message.mana;
+                        if (message.playerId === targetedPlayerId) {
+                            dispatchTargetUpdate();
+                        }
                     }
                     break;
                 case "KILL":
@@ -2413,6 +2452,10 @@ export function Game({models, sounds, matchId, character}) {
                             updateManaBar();
                             dispatch({type: 'SET_BUFFS', payload: player.buffs || []});
                             dispatch({type: 'SET_DEBUFFS', payload: player.debuffs || []});
+                        }
+
+                        if (numId === targetedPlayerId) {
+                            dispatchTargetUpdate();
                         }
 
                     }
