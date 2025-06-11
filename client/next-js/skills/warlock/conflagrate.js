@@ -27,6 +27,7 @@ export default function castConflagrate({
   const targetId = getTargetPlayer();
   if (!targetId) {
     dispatch({ type: 'SEND_CHAT_MESSAGE', payload: `No target for conflagrate!` });
+    sounds?.noTarget?.play?.();
     return;
   }
 

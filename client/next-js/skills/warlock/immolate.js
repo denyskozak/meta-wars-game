@@ -14,6 +14,7 @@ export default function castImmolate({ playerId, globalSkillCooldown, isCasting,
   const targetId = getTargetPlayer();
   if (!targetId) {
     dispatch({ type: 'SEND_CHAT_MESSAGE', payload: `No target for immolate!` });
+    sounds?.noTarget?.play?.();
     return;
   }
   sendToSocket({ type: 'CAST_SPELL', payload: { type: 'immolate', targetId } });

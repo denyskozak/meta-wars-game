@@ -76,6 +76,7 @@ export default function GamePage() {
             blink: new Audio('/sounds/blink.ogg'),
             damage: new Audio('/sounds/damage.ogg'),
             noMana: new Audio('/sounds/no-mana.ogg'),
+            noTarget: new Audio('/sounds/no-target.ogg'),
         }
         preloadModels(models)
             .then((loadedModels) => {
