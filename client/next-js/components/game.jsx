@@ -398,6 +398,9 @@ export function Game({models, sounds, matchId, character}) {
         const MIN_SPHERE_IMPULSE = 15;
         const MAX_SPHERE_IMPULSE = 30;
 
+        // Maximum distance any sphere can travel
+        const SPHERE_MAX_DISTANCE = 30;
+
         const STEPS_PER_FRAME = 30;
 
         const sphereGeometry = new THREE.IcosahedronGeometry(SPHERE_RADIUS, 5);
@@ -1304,9 +1307,6 @@ export function Game({models, sounds, matchId, character}) {
 
                     // sphere.velocity.addScaledVector(result.normal, -result.normal.dot(sphere.velocity) * 1.5);
                     // sphere.collider.center.add(result.normal.multiplyScalar(result.depth));
-                } else {
-                    // Apply gravity to fireball
-                    sphere.velocity.y -= GRAVITY * deltaTime;
                 }
 
                 // Check distance from initial position
@@ -1314,9 +1314,7 @@ export function Game({models, sounds, matchId, character}) {
                     const traveledDistance = sphere.collider.center.distanceTo(
                         sphere.initialPosition,
                     );
-                    const maxDistance = 30; // Maximum distance the fireball can travel
-
-                    if (traveledDistance > maxDistance) {
+                    if (traveledDistance > SPHERE_MAX_DISTANCE) {
                         scene.remove(sphere.mesh); // Remove the fireball from the scene
                         spheres.splice(index, 1); // Remove it from the array
                     }
