@@ -1712,20 +1712,31 @@ export function Game({models, sounds, matchId, character}) {
             const player = players.get(playerId)?.model;
             if (!player) return;
 
-            const geometry = new THREE.TorusGeometry(1, 0.15, 16, 100);
-            const material = new THREE.MeshBasicMaterial({
-                color: 0x66ccff,
-                transparent: true,
-                opacity: 0.6,
-            });
-            const ring = new THREE.Mesh(geometry, material);
-            ring.rotation.x = Math.PI / 2;
+            const group = new THREE.Group();
+            const tex = new THREE.TextureLoader().load('/textures/ice.jpg');
+            tex.wrapS = tex.wrapT = THREE.RepeatWrapping;
 
-            player.add(ring);
-            activeIceVeins.set(playerId, ring);
+            const material = new THREE.SpriteMaterial({
+                map: tex,
+                color: 0xffffff,
+                transparent: true,
+                opacity: 0.75,
+            });
+
+            for (let i = 0; i < 3; i++) {
+                const sprite = new THREE.Sprite(material.clone());
+                sprite.scale.set(1.5, 1.5, 1.5);
+                const angle = (i / 3) * Math.PI * 2;
+                sprite.position.set(Math.cos(angle) * 0.8, 1, Math.sin(angle) * 0.8);
+                group.add(sprite);
+            }
+
+            group.rotation.x = Math.PI / 2;
+            player.add(group);
+            activeIceVeins.set(playerId, group);
 
             setTimeout(() => {
-                ring.parent?.remove(ring);
+                group.parent?.remove(group);
                 activeIceVeins.delete(playerId);
             }, duration);
         }
@@ -1943,6 +1954,11 @@ export function Game({models, sounds, matchId, character}) {
 
                     activeIceVeins.forEach((mesh) => {
                         mesh.rotation.z += delta * 2;
+                        mesh.children.forEach(c => {
+                            if (c.material?.map) {
+                                c.material.map.offset.y -= delta * 0.5;
+                            }
+                        });
                     });
 
                     activeImmolation.forEach((mesh, id) => {
