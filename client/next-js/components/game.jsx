@@ -855,11 +855,26 @@ export function Game({models, sounds, matchId, character}) {
             dispatchEvent('start-cast', {duration: 2000, onEnd: onCastEnd})
         }
 
+        function getAimDirection() {
+            const cameraDir = new THREE.Vector3();
+            camera.getWorldDirection(cameraDir);
+
+            // When aiming down sights, align projectiles with the on screen crosshair
+            if (isFocused) {
+                const cameraPos = camera.position.clone();
+                const farPoint = cameraPos.clone().add(cameraDir.clone().multiplyScalar(1000));
+                const start = playerCollider.end.clone();
+                return farPoint.sub(start).normalize();
+            }
+
+            // Default behaviour - fire in the camera direction
+            return cameraDir.normalize();
+        }
+
         function getTargetPlayer() {
             const origin = playerCollider.end.clone();
-            const dir = new THREE.Vector3();
-            camera.getWorldDirection(dir);
-            const raycaster = new THREE.Raycaster(origin, dir.normalize(), 0, FIREBLAST_RANGE);
+            const dir = getAimDirection();
+            const raycaster = new THREE.Raycaster(origin, dir, 0, FIREBLAST_RANGE);
             let closest = null;
             let minDist = Infinity;
             players.forEach((p, id) => {
@@ -1034,21 +1049,18 @@ export function Game({models, sounds, matchId, character}) {
 
         function castSphere(model, sphereMesh, type, damage) {
             sphereMesh.rotation.copy(model.rotation);
-            // fireball.rotation.x += THREE.MathUtils.degToRad(90);
 
             scene.add(sphereMesh); // Add the sphereMesh to the scene
 
-            // Set the initial position of the sphereMesh
-            camera.getWorldDirection(playerDirection);
-            // todo return if need
-            // const initialPosition = playerCollider.end.clone().addScaledVector(playerDirection, playerCollider.radius * 1.5);
+            // Compute aim direction based on camera ray and player position
+            const aimDir = getAimDirection();
+
             const initialPosition = playerCollider.end
                 .clone()
-                .addScaledVector(playerDirection, playerCollider.radius * 2);
+                .addScaledVector(aimDir, playerCollider.radius * 2);
 
             sphereMesh.position.copy(initialPosition);
 
-            // Set the velocity for the sphereMesh
             // Calculate smoother impulse using cubic easing
             const chargeTime = Math.min(performance.now() - mouseTime, 1000); // Cap charge time to 1 second
             const chargeFactor = chargeTime / 1000; // Normalize to range [0, 1]
@@ -1058,7 +1070,7 @@ export function Game({models, sounds, matchId, character}) {
                 chargeFactor * chargeFactor * (3 - 2 * chargeFactor),
             ); // Smoothstep with more power
 
-            const velocity = playerDirection.clone().multiplyScalar(impulse);
+            const velocity = aimDir.clone().multiplyScalar(impulse);
 
             // Send the fireball data to the server
             sendToSocket({
