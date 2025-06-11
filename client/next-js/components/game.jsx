@@ -131,6 +131,9 @@ export function Game({models, sounds, matchId, character}) {
             8,      // cap-seg (больше сегментов → плавнее)
             16      // radial-seg
         );
+
+        const fireTexture = new THREE.TextureLoader().load('/textures/fire.jpg');
+        fireTexture.wrapS = fireTexture.wrapT = THREE.RepeatWrapping;
         const fireballMaterial = new THREE.ShaderMaterial({
             transparent: true,
             depthWrite: false,
@@ -139,11 +142,13 @@ export function Game({models, sounds, matchId, character}) {
                 time: {value: 0},
                 coreCol: {value: new THREE.Color(0xfff8d0)},
                 flameCol: {value: new THREE.Color(0xff5500)},
+                fireTex: {value: fireTexture},
             },
             vertexShader: /* glsl */`
                 uniform float time;
                 varying vec3 vPos;
                 varying float vNoise;
+                varying vec2 vUv;
 
                 float hash(vec2 p){ return fract(sin(dot(p, vec2(41.0,289.0))) * 1e4); }
                 float noise(vec2 p){
@@ -156,6 +161,7 @@ export function Game({models, sounds, matchId, character}) {
 
                 void main(){
                   vPos = position;
+                  vUv  = uv;
                   float n = noise(position.xy * 4.0 + time*2.0);
                   vNoise = n;
                   vec3 displaced = position + normal * (0.1 + 0.05 * n) * sin((position.z + time) * 8.0);
@@ -165,8 +171,10 @@ export function Game({models, sounds, matchId, character}) {
                 uniform float time;
                 uniform vec3  coreCol;
                 uniform vec3  flameCol;
+                uniform sampler2D fireTex;
                 varying vec3  vPos;
                 varying float vNoise;
+                varying vec2  vUv;
 
                 void main(){
                   float r = length(vPos.xy) / 0.15;
@@ -178,7 +186,10 @@ export function Game({models, sounds, matchId, character}) {
                   core  *= 0.9 + 0.1 * vNoise;
                   flame *= flow * flicker;
 
-                  vec3  col   = (coreCol * core + flameCol * flame) * 1.5;
+                  vec2 uv = vUv + vec2(0.0, time * -2.0);
+                  vec3 texCol = texture2D(fireTex, uv).rgb;
+
+                  vec3  col   = (coreCol * core + flameCol * flame) * texCol * 1.5;
                   float alpha = core + flame;
 
                   if (alpha < 0.05) discard;
@@ -198,6 +209,7 @@ export function Game({models, sounds, matchId, character}) {
                 time: {value: 0},
                 coreCol: {value: new THREE.Color(0x9b59b6)},
                 flameCol: {value: new THREE.Color(0x2c3e50)},
+                fireTex: {value: fireTexture},
             },
             vertexShader: fireballMaterial.vertexShader,
             fragmentShader: fireballMaterial.fragmentShader,
@@ -209,11 +221,15 @@ export function Game({models, sounds, matchId, character}) {
 
         const iceballGeometry = new THREE.SphereGeometry(0.1, 16, 16); // Ледяной шар
 
+        const iceTexture = new THREE.TextureLoader().load('/textures/ice.jpg');
+        iceTexture.wrapS = iceTexture.wrapT = THREE.RepeatWrapping;
+
         const iceballMaterial = new THREE.ShaderMaterial({
             uniforms: {
                 time: {value: 0.0},
                 color: {value: new THREE.Color(0x88ddff)},     // Более яркий синий
                 glowColor: {value: new THREE.Color(0xffffff)}, // Усиленное свечение
+                iceTex: {value: iceTexture},
             },
             vertexShader: `
     uniform float time;
@@ -234,6 +250,7 @@ export function Game({models, sounds, matchId, character}) {
     uniform float time;
     uniform vec3 color;
     uniform vec3 glowColor;
+    uniform sampler2D iceTex;
     varying vec2 vUv;
     varying float vNoise;
 
@@ -244,7 +261,9 @@ export function Game({models, sounds, matchId, character}) {
       float glow = smoothstep(0.75, 0.25, dist) *
                    (0.5 + 0.5 * abs(sin(time * 4.0 + vNoise * 3.1415)));
 
-      vec3 finalColor = (color * core + glowColor * glow) * 1.5;
+      vec2 uv = vUv * 2.0 + vec2(time * -0.5, 0.0);
+      vec3 texCol = texture2D(iceTex, uv).rgb;
+      vec3 finalColor = (color * core + glowColor * glow) * texCol * 1.5;
 
       float alpha = clamp(core + glow * 0.8, 0.0, 1.0);
 
@@ -363,7 +382,7 @@ export function Game({models, sounds, matchId, character}) {
         stats.domElement.style.top = "0px";
 
 
-        const GRAVITY = 30;
+        const GRAVITY = 15; // более медленное падение заклинаний
 
         const NUM_SPHERES = 100;
         const SPHERE_RADIUS = 0.2;
@@ -375,10 +394,9 @@ export function Game({models, sounds, matchId, character}) {
         const ICEBALL_DAMAGE = 25;
         const DARKBALL_DAMAGE = 30;
 
-        // Reduced projectile speed so spells are easier to see and dodge
-        // Increased projectile speed for a more dynamic feel
-        const MIN_SPHERE_IMPULSE = 30;
-        const MAX_SPHERE_IMPULSE = 60;
+        // Медленнее пускаем сферы как настоящие заклинания
+        const MIN_SPHERE_IMPULSE = 15;
+        const MAX_SPHERE_IMPULSE = 30;
 
         const STEPS_PER_FRAME = 30;
 
