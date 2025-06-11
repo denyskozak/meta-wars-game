@@ -1,0 +1,31 @@
+module meta_war::profile_test {
+    use sui::test::{Self, TestContext};
+    use sui::vector;
+    use sui::object;
+
+    use meta_war::profile;
+
+    #[test_only]
+    public fun test_create(ctx: &mut TestContext) {
+        let prof = profile::create(b"bob", ctx);
+        assert!(prof.rank == 0, 0);
+        assert!(vector::length(&prof.nickname) == 3, 1);
+        object::delete_object(prof);
+    }
+
+    #[test_only]
+    public fun test_add_rank(ctx: &mut TestContext) {
+        let mut prof = profile::create(b"alice", ctx);
+        profile::add_rank(&mut prof, 5);
+        assert!(prof.rank == 5, 0);
+        object::delete_object(prof);
+    }
+
+    #[test_only]
+    public fun test_set_nickname(ctx: &mut TestContext) {
+        let mut prof = profile::create(b"nick", ctx);
+        profile::set_nickname(&mut prof, b"neo");
+        assert!(vector::length(&prof.nickname) == 3, 0);
+        object::delete_object(prof);
+    }
+}

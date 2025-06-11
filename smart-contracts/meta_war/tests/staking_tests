@@ -1,0 +1,38 @@
+module meta_war::staking_test {
+    use sui::test::{Self, TestContext};
+    use sui::coin;
+    use sui::vector;
+
+    use meta_war::coin::{Self as mw_coin, COIN};
+    use meta_war::staking;
+
+    /* helper: получить treas-cap */
+    fun cap(ctx: &mut TestContext): &mut coin::TreasuryCap<COIN>
+            acquires coin::TreasuryCap {
+        borrow_global_mut<coin::TreasuryCap<COIN>>(TestContext::sender(ctx))
+    }
+
+    /* helper: баланс COIN */
+    fun bal(ctx: &mut TestContext): u64 acquires coin::Coin {
+        let addr = TestContext::sender(ctx);
+        let coins = test::coins_owned_by<COIN>(ctx, addr);
+        let mut sum = 0;
+        let i = 0;
+        while (i < vector::length(&coins)) {
+            sum = sum + coin::value(&vector::borrow(&coins, i));
+            i = i + 1
+        }; sum
+    }
+
+    #[test_only]
+    public fun test_stake_unstake(ctx: &mut TestContext)
+            acquires coin::TreasuryCap, coin::Coin {
+        mw_coin::init(mw_coin::COIN{}, ctx);
+        let start = bal(ctx);
+        let c = coin::mint(cap(ctx), 10, ctx);
+        let stake = staking::stake(c, ctx);
+        assert!(bal(ctx) == start, 0);
+        staking::unstake(stake, ctx);
+        assert!(bal(ctx) == start + 10, 1);
+    }
+}
