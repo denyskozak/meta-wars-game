@@ -999,6 +999,7 @@ export function Game({models, sounds, matchId, character}) {
                         sendToSocket,
                         activateGlobalCooldown,
                         startSkillCooldown,
+                        sounds,
                     });
                     break;
                 case "immolate":
@@ -1012,6 +1013,7 @@ export function Game({models, sounds, matchId, character}) {
                         sendToSocket,
                         activateGlobalCooldown,
                         startSkillCooldown,
+                        sounds,
                     });
                     break;
                 case "conflagrate":
@@ -1030,6 +1032,7 @@ export function Game({models, sounds, matchId, character}) {
                             console.log("activeImmolation: ", activeImmolation);
                             return activeImmolation.has(id);
                         },
+                        sounds,
                     });
                     break;
                 case "darkball":
@@ -1056,6 +1059,7 @@ export function Game({models, sounds, matchId, character}) {
                         activateGlobalCooldown,
                         startSkillCooldown,
                         FIREBLAST_DAMAGE,
+                        sounds,
                     });
                     break;
                 case "iceball":
