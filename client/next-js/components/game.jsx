@@ -131,6 +131,9 @@ export function Game({models, sounds, matchId, character}) {
             8,      // cap-seg (больше сегментов → плавнее)
             16      // radial-seg
         );
+
+        const fireTexture = new THREE.TextureLoader().load('/textures/fire.jpg');
+        fireTexture.wrapS = fireTexture.wrapT = THREE.RepeatWrapping;
         const fireballMaterial = new THREE.ShaderMaterial({
             transparent: true,
             depthWrite: false,
@@ -139,11 +142,13 @@ export function Game({models, sounds, matchId, character}) {
                 time: {value: 0},
                 coreCol: {value: new THREE.Color(0xfff8d0)},
                 flameCol: {value: new THREE.Color(0xff5500)},
+                fireTex: {value: fireTexture},
             },
             vertexShader: /* glsl */`
                 uniform float time;
                 varying vec3 vPos;
                 varying float vNoise;
+                varying vec2 vUv;
 
                 float hash(vec2 p){ return fract(sin(dot(p, vec2(41.0,289.0))) * 1e4); }
                 float noise(vec2 p){
@@ -156,6 +161,7 @@ export function Game({models, sounds, matchId, character}) {
 
                 void main(){
                   vPos = position;
+                  vUv  = uv;
                   float n = noise(position.xy * 4.0 + time*2.0);
                   vNoise = n;
                   vec3 displaced = position + normal * (0.1 + 0.05 * n) * sin((position.z + time) * 8.0);
@@ -165,8 +171,10 @@ export function Game({models, sounds, matchId, character}) {
                 uniform float time;
                 uniform vec3  coreCol;
                 uniform vec3  flameCol;
+                uniform sampler2D fireTex;
                 varying vec3  vPos;
                 varying float vNoise;
+                varying vec2  vUv;
 
                 void main(){
                   float r = length(vPos.xy) / 0.15;
@@ -178,7 +186,10 @@ export function Game({models, sounds, matchId, character}) {
                   core  *= 0.9 + 0.1 * vNoise;
                   flame *= flow * flicker;
 
-                  vec3  col   = (coreCol * core + flameCol * flame) * 1.5;
+                  vec2 uv = vUv + vec2(0.0, time * -2.0);
+                  vec3 texCol = texture2D(fireTex, uv).rgb;
+
+                  vec3  col   = (coreCol * core + flameCol * flame) * texCol * 1.5;
                   float alpha = core + flame;
 
                   if (alpha < 0.05) discard;
@@ -198,6 +209,7 @@ export function Game({models, sounds, matchId, character}) {
                 time: {value: 0},
                 coreCol: {value: new THREE.Color(0x9b59b6)},
                 flameCol: {value: new THREE.Color(0x2c3e50)},
+                fireTex: {value: fireTexture},
             },
             vertexShader: fireballMaterial.vertexShader,
             fragmentShader: fireballMaterial.fragmentShader,
