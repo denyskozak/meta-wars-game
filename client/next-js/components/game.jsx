@@ -455,8 +455,9 @@ export function Game({models, sounds, matchId, character}) {
         let isChatActive = false;
         let isHealActive = false;
 
-        // Function to adjust the FOV (zoom)
+        // Crosshair elements
         const target = document.getElementById("target");
+        const targetImage = document.getElementById("targetImage");
         let isFocused = false;
 
         const getTrailMaterial = (sphereType) => {
@@ -678,6 +679,7 @@ export function Game({models, sounds, matchId, character}) {
                 target.style.display = "none"; // Показываем перекрестие
                 showModel(true);
             }
+            highlightCrosshair();
         };
 
         // chatch even
@@ -890,6 +892,20 @@ export function Game({models, sounds, matchId, character}) {
                 }
             });
             return closest;
+        }
+
+        function highlightCrosshair() {
+            if (!targetImage) return;
+            if (!isFocused) {
+                targetImage.src = '/icons/target.svg';
+                return;
+            }
+            const id = getTargetPlayer();
+            if (id) {
+                targetImage.src = '/icons/target-green.svg';
+            } else {
+                targetImage.src = '/icons/target.svg';
+            }
         }
 
 
@@ -1984,6 +2000,7 @@ export function Game({models, sounds, matchId, character}) {
 
                     // renderCursor();
                     updateCameraPosition();
+                    highlightCrosshair();
                 }
 
                 teleportPlayerIfOob();
