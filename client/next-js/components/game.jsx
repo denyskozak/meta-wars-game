@@ -221,11 +221,15 @@ export function Game({models, sounds, matchId, character}) {
 
         const iceballGeometry = new THREE.SphereGeometry(0.1, 16, 16); // Ледяной шар
 
+        const iceTexture = new THREE.TextureLoader().load('/textures/ice.jpg');
+        iceTexture.wrapS = iceTexture.wrapT = THREE.RepeatWrapping;
+
         const iceballMaterial = new THREE.ShaderMaterial({
             uniforms: {
                 time: {value: 0.0},
                 color: {value: new THREE.Color(0x88ddff)},     // Более яркий синий
                 glowColor: {value: new THREE.Color(0xffffff)}, // Усиленное свечение
+                iceTex: {value: iceTexture},
             },
             vertexShader: `
     uniform float time;
@@ -246,6 +250,7 @@ export function Game({models, sounds, matchId, character}) {
     uniform float time;
     uniform vec3 color;
     uniform vec3 glowColor;
+    uniform sampler2D iceTex;
     varying vec2 vUv;
     varying float vNoise;
 
@@ -256,7 +261,9 @@ export function Game({models, sounds, matchId, character}) {
       float glow = smoothstep(0.75, 0.25, dist) *
                    (0.5 + 0.5 * abs(sin(time * 4.0 + vNoise * 3.1415)));
 
-      vec3 finalColor = (color * core + glowColor * glow) * 1.5;
+      vec2 uv = vUv * 2.0 + vec2(time * -0.5, 0.0);
+      vec3 texCol = texture2D(iceTex, uv).rgb;
+      vec3 finalColor = (color * core + glowColor * glow) * texCol * 1.5;
 
       float alpha = clamp(core + glow * 0.8, 0.0, 1.0);
 
@@ -375,7 +382,7 @@ export function Game({models, sounds, matchId, character}) {
         stats.domElement.style.top = "0px";
 
 
-        const GRAVITY = 30;
+        const GRAVITY = 15; // более медленное падение заклинаний
 
         const NUM_SPHERES = 100;
         const SPHERE_RADIUS = 0.2;
@@ -387,10 +394,9 @@ export function Game({models, sounds, matchId, character}) {
         const ICEBALL_DAMAGE = 25;
         const DARKBALL_DAMAGE = 30;
 
-        // Reduced projectile speed so spells are easier to see and dodge
-        // Increased projectile speed for a more dynamic feel
-        const MIN_SPHERE_IMPULSE = 30;
-        const MAX_SPHERE_IMPULSE = 60;
+        // Медленнее пускаем сферы как настоящие заклинания
+        const MIN_SPHERE_IMPULSE = 15;
+        const MAX_SPHERE_IMPULSE = 30;
 
         const STEPS_PER_FRAME = 30;
 
