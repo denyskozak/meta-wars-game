@@ -794,6 +794,11 @@ export function Game({models, sounds, matchId, character}) {
 
             if (mana < BLINK_MANA_COST) {
                 console.log("Not enough mana to blink!");
+                if (sounds.noMana) {
+                    sounds.noMana.currentTime = 0;
+                    sounds.noMana.volume = 0.5;
+                    sounds.noMana.play();
+                }
 
                 return;
             }
@@ -860,6 +865,11 @@ export function Game({models, sounds, matchId, character}) {
             // Check if enough mana is available
             if (mana < HEAL_MANA_COST) {
                 console.log("Not enough mana to heal!");
+                if (sounds.noMana) {
+                    sounds.noMana.currentTime = 0;
+                    sounds.noMana.volume = 0.5;
+                    sounds.noMana.play();
+                }
 
                 return;
             }
@@ -999,6 +1009,7 @@ export function Game({models, sounds, matchId, character}) {
                         sendToSocket,
                         activateGlobalCooldown,
                         startSkillCooldown,
+                        sounds,
                     });
                     break;
                 case "immolate":
@@ -1012,6 +1023,7 @@ export function Game({models, sounds, matchId, character}) {
                         sendToSocket,
                         activateGlobalCooldown,
                         startSkillCooldown,
+                        sounds,
                     });
                     break;
                 case "conflagrate":
@@ -1030,6 +1042,7 @@ export function Game({models, sounds, matchId, character}) {
                             console.log("activeImmolation: ", activeImmolation);
                             return activeImmolation.has(id);
                         },
+                        sounds,
                     });
                     break;
                 case "darkball":
@@ -1056,6 +1069,7 @@ export function Game({models, sounds, matchId, character}) {
                         activateGlobalCooldown,
                         startSkillCooldown,
                         FIREBLAST_DAMAGE,
+                        sounds,
                     });
                     break;
                 case "iceball":
@@ -1173,7 +1187,14 @@ export function Game({models, sounds, matchId, character}) {
                 return;
             }
 
-            if (mana < manaCost || isCasting) return; // Ensure the fireball model is loaded
+            if (mana < manaCost || isCasting) {
+                if (mana < manaCost && sounds.noMana) {
+                    sounds.noMana.currentTime = 0;
+                    sounds.noMana.volume = 0.5;
+                    sounds.noMana.play();
+                }
+                return; // Ensure the fireball model is loaded
+            }
             const {mixer, actions} = players.get(myPlayerId)
 
             const buffs = players.get(playerId)?.buffs || [];
