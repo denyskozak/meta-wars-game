@@ -7,6 +7,8 @@ export const initInterfaceState = {
     character: null,
     scoreboardData: [],
     scoreboardVisible: false,
+    buffs: [],
+    debuffs: [],
 };
 
 export const interfaceReducer = (state, action) => {
@@ -26,6 +28,12 @@ export const interfaceReducer = (state, action) => {
         }
         case 'SET_SCOREBOARD_VISIBLE': {
             return {...state, scoreboardVisible: action.payload};
+        }
+        case 'SET_BUFFS': {
+            return {...state, buffs: action.payload};
+        }
+        case 'SET_DEBUFFS': {
+            return {...state, debuffs: action.payload};
         }
         default:
             return {...state};
