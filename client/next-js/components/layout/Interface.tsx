@@ -33,7 +33,8 @@ export const Interface = () => {
             }}>
 
                 <Image
-                    alt="Turtle Art"
+                    id="targetImage"
+                    alt="Target"
                     width={25}
                     height={25}
                     src="/icons/target.svg"
