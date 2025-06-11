@@ -4,6 +4,11 @@ export default function castFireblast({ playerId, globalSkillCooldown, isCasting
   if (globalSkillCooldown || isCasting) return;
   if (mana < 20) {
     console.log('Not enough mana for fireblast!');
+    if (sounds?.noMana) {
+      sounds.noMana.currentTime = 0;
+      sounds.noMana.volume = 0.5;
+      sounds.noMana.play();
+    }
     return;
   }
   const targetId = getTargetPlayer();
