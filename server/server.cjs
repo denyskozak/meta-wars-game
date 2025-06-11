@@ -134,10 +134,10 @@ function checkRunePickup(match, playerId) {
             match.runes.splice(i, 1);
             switch (rune.type) {
                 case 'heal':
-                    player.hp = Math.min(100, player.hp + 20);
+                    player.hp = Math.min(100, player.hp + 50);
                     break;
                 case 'mana':
-                    player.mana = Math.min(100, player.mana + 20);
+                    player.mana = Math.min(100, player.mana + 50);
                     break;
                 case 'damage':
                     player.buffs.push({type: 'damage', bonus: 10, expires: Date.now() + 60000});
@@ -227,7 +227,7 @@ ws.on('connection', (socket) => {
         for (const match of matches.values()) {
             match.players.forEach((player, pid) => {
                 if (player.mana < 100) {
-                    player.mana = Math.min(100, player.mana + 5);
+                    player.mana = Math.min(100, player.mana + 2);
                 }
                 if (player.buffs.length) {
                     player.buffs = player.buffs.filter(b => b.expires > now);
