@@ -18,10 +18,6 @@ export const siteConfig = {
       href: "/tokenomics",
     },
     {
-      label: "DAO",
-      href: "/dao",
-    },
-    {
       label: "Rating",
       href: "/rating",
     },
