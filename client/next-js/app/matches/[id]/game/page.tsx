@@ -7,6 +7,8 @@ import {useCurrentAccount} from "@mysten/dapp-kit";
 import {useInterface} from "@/context/inteface";
 import * as THREE from "three";
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader';
+import { DRACOLoader } from 'three/examples/jsm/loaders/DRACOLoader';
+import { MeshoptDecoder } from 'three/examples/jsm/libs/meshopt_decoder.module.js';
 import {useParams} from "next/navigation";
 import {useWS} from "@/hooks/useWS";
 import Image from "next/image";
@@ -14,7 +16,12 @@ import {Loading} from "@/components/loading";
 
 THREE.Cache.enabled = true;
 
+const dracoLoader = new DRACOLoader();
+dracoLoader.setDecoderPath('/libs/draco/');
+
 const loader = new GLTFLoader().setPath('/models/');
+loader.setDRACOLoader(dracoLoader);
+loader.setMeshoptDecoder(MeshoptDecoder);
 
 export default function GamePage() {
     const account = useCurrentAccount();
