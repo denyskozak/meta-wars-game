@@ -2093,15 +2093,24 @@ export function Game({models, sounds, matchId, character}) {
         }
 
         function createStaffMesh() {
+            const staffId = character?.name === 'warlock' ? 'warlock_staff' : 'mage_staff';
+            const base = models[staffId];
+            if (base) {
+                const staff = SkeletonUtils.clone(base);
+                staff.scale.set(0.4, 0.4, 0.4);
+                staff.rotation.z = Math.PI / 2;
+                staff.position.set(0, 0.9, -0.2);
+                return staff;
+            }
             const group = new THREE.Group();
             const stick = new THREE.Mesh(
                 new THREE.CylinderGeometry(0.05, 0.05, 1.5, 8),
-                new THREE.MeshStandardMaterial({color: 0x8B4513})
+                new THREE.MeshStandardMaterial({ color: 0x8B4513 })
             );
             stick.position.y = 0.75;
             const top = new THREE.Mesh(
                 new THREE.SphereGeometry(0.1, 16, 16),
-                new THREE.MeshStandardMaterial({color: 0xffffff})
+                new THREE.MeshStandardMaterial({ color: 0xffffff })
             );
             top.position.y = 1.5;
             group.add(stick);
