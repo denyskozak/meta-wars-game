@@ -2105,7 +2105,8 @@ export function Game({models, sounds, matchId, character}) {
             if (base) {
                 const staff = SkeletonUtils.clone(base);
                 staff.scale.set(0.4, 0.4, 0.4);
-                staff.rotation.z = Math.PI / 2;
+                // Rotate the staff so it stands vertically behind the back
+                staff.rotation.set(Math.PI / 2, 0, 0);
                 staff.position.set(0, 0.9, -0.2);
                 return staff;
             }
@@ -2122,7 +2123,8 @@ export function Game({models, sounds, matchId, character}) {
             top.position.y = 1.5;
             group.add(stick);
             group.add(top);
-            group.rotation.z = Math.PI / 2;
+            // Rotate placeholder staff vertically as well
+            group.rotation.set(Math.PI / 2, 0, 0);
             group.position.set(0, 0.9, -0.2);
             return group;
         }
