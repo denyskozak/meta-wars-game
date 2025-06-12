@@ -18,6 +18,12 @@
     color: #fff;
 }
 
+#chat-header {
+    font-weight: bold;
+    margin-bottom: 5px;
+    text-align: center;
+}
+
 .chat-message {
     margin: 5px 0;
     word-wrap: break-word;
