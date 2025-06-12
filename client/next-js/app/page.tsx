@@ -5,6 +5,7 @@ import React from "react";
 
 import General from "@/components/general";
 import {Navbar} from "@/components/navbar";
+import { Chat } from "@/components/parts/Chat";
 
 export default function Home() {
   return (
@@ -23,6 +24,7 @@ export default function Home() {
             <main className="z-[1] flex justify-center w-full h-full overflow-y-auto">
                 <General />
             </main>
+            <Chat />
         </div>
 
       {/*<Card className="max-w-100">*/}
