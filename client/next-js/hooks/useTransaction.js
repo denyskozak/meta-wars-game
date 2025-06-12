@@ -64,6 +64,19 @@ export const useTransaction = () => {
             tx.setSender(account?.address);
 
             return execTransaction(tx);
+        },
+        createProfile(nickname) {
+            const tx = new Transaction();
+
+            const [profile] = tx.moveCall({
+                target: `${PACKAGE_ID}::profile::create`,
+                arguments: [tx.pure.string(nickname)],
+            });
+
+            tx.transferObjects([profile], tx.pure.address(account?.address));
+            tx.setSender(account?.address);
+
+            return execTransaction(tx);
         }
     }
 }
