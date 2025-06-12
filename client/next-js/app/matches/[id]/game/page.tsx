@@ -28,7 +28,7 @@ export default function GamePage() {
     const {state: {character}} = useInterface();
 
     const models = [
-        {id: 'zone', path: 'zone5.glb'},
+        {id: 'zone', path: 'zone2.glb'},
         {id: 'fireball', path: 'fireball2.glb'},
         {id: 'character', path: 'skins/vampir.glb'},
         {id: 'heal-effect', path: 'heal-effect.glb'},
