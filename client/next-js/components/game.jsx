@@ -620,6 +620,13 @@ export function Game({models, sounds, matchId, character}) {
                 case "KeyG":
                     leftMouseButtonClicked = true;
                     break;
+                case "KeyJ":
+                    const currentPosition = new THREE.Vector3();
+                    playerCollider.getCenter(currentPosition);
+                    console.log(
+                        `Player position: x=${currentPosition.x}, y=${currentPosition.y}, z=${currentPosition.z}`,
+                    );
+                    break;
                 case "KeyT":
                     dispatch({type: 'SET_SCOREBOARD_VISIBLE', payload: true});
                     break;
