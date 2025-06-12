@@ -46,6 +46,7 @@ function createMatch({name, maxPlayers = 4, ownerId}) {
     const match = {
         id: matchId,
         name,
+        status: 'waiting',
         players: new Map(),
         playersReady: 0,
         maxPlayers: Number(maxPlayers),
@@ -102,6 +103,7 @@ function createPlayer(address) {
 function finalizeMatch(match) {
     if (match.finished) return;
     match.finished = true;
+    match.status = 'finished';
     const sorted = Array.from(match.players.entries()).sort((a, b) => b[1].kills - a[1].kills);
     match.summary = sorted.map(([pid, p], idx) => {
         let chest = 'common';
@@ -213,11 +215,13 @@ ws.on('connection', (socket) => {
 
     setInterval(() => {
         for (const [id, match] of matches) {
-            broadcastToMatch(id, {
-                type: 'UPDATE_MATCH',
-                ...match,
-                players: Object.fromEntries(match.players)
-            });
+            if (match.status === 'on-going') {
+                broadcastToMatch(id, {
+                    type: 'UPDATE_MATCH',
+                    ...match,
+                    players: Object.fromEntries(match.players)
+                });
+            }
 
         }
     }, UPDATE_MATCH_INTERVAL);
@@ -261,6 +265,7 @@ ws.on('connection', (socket) => {
                 if (match) {
                     match.playersReady++;
                     if (match.playersReady === match.maxPlayers) {
+                        match.status = 'on-going';
                         const matchReadyMessage = {
                             type: 'MATCH_READY',
                             id: match.id,
