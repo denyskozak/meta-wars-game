@@ -1,6 +1,4 @@
 "use client";
-
-
 import {useWS} from "@/hooks/useWS";
 import {useEffect, useMemo, useState} from "react";
 import Image from "next/image";
@@ -52,7 +50,7 @@ export default function MatchesPage() {
                     setPlayers(prev => prev.filter(p => p !== message.playerId));
                     break;
                 case 'MATCH_READY':
-                    router.push(`/matches/${params.id}/game`);
+                    router.push(`/matches/${params?.id}/game`);
                     break;
             }
         };
@@ -69,7 +67,7 @@ export default function MatchesPage() {
 
     const handleReady = () => {
         dispatch({type: 'SET_CHARACTER', payload: {name: classType, skin}});
-        router.push(`/matches/${params.id}/game`);
+        router.push(`/matches/${params?.id}/game`);
     };
 
     const classInfo = useMemo(() => {

@@ -1,6 +1,4 @@
 "use client";
-
-
 import {useWS} from "@/hooks/useWS";
 import React, {useEffect, useState} from "react";
 import {Table, TableHeader, TableColumn, TableBody, TableRow, TableCell, Button, useDisclosure} from "@heroui/react";
@@ -15,7 +13,6 @@ import {Input} from "@heroui/input";
 import {useRouter} from "next/navigation";
 import {Navbar} from "@/components/navbar";
 import {ProfileForm} from "@/components/profile-form";
-
 
 interface Match {
     id: string;

@@ -16,7 +16,6 @@ THREE.Cache.enabled = true;
 
 const loader = new GLTFLoader().setPath('/models/');
 
-
 export default function GamePage() {
     const account = useCurrentAccount();
     const params = useParams();
@@ -83,7 +82,6 @@ export default function GamePage() {
         }
         preloadModels(models)
             .then((loadedModels) => {
-
                 setPreloadedData({models: loadedModels, sounds});
             });
     }, []);
@@ -95,7 +93,7 @@ export default function GamePage() {
 
     return (
         <Game
-            matchId={params.id}
+            matchId={params?.id}
             character={character}
             models={preloadedData.models}
             sounds={preloadedData.sounds}
