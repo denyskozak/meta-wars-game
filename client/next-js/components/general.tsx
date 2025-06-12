@@ -21,7 +21,7 @@ export default function General() {
   const address = account?.address;
   const slides = [
     {
-      titles: ["Magic", "PvP"],
+      titles: ["Magic PvP", "with shooter elements  "],
       subtitle:
         "Truly feelings classic RPG with shooter mechanic",
     },
@@ -31,7 +31,7 @@ export default function General() {
         "Earn $MetaWars, loot, and gear — then trade it freely.",
     },
     {
-      titles: ["Built by Players", "Not Publishers"],
+      titles: ["First DAO", "based game"],
       subtitle:
         "Meta Wars is a DAO-native game — shaped by those who play it.",
     },
@@ -46,7 +46,7 @@ export default function General() {
   useEffect(() => {
     const interval = setInterval(() => {
       setIndex((i) => (i + 1) % slides.length);
-    }, 10000);
+    }, 3000);
 
     return () => clearInterval(interval);
   }, []);

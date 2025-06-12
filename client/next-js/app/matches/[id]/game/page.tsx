@@ -79,7 +79,7 @@ export default function GamePage() {
             damage: new Audio('/sounds/damage.ogg'),
             noMana: new Audio('/sounds/no-mana.ogg'),
             noTarget: new Audio('/sounds/no-target.ogg'),
-            cooldown: new Audio('/sounds/coldown.ogg'),
+            cooldown: new Audio('/sounds/cooldown.ogg'),
         }
         preloadModels(models)
             .then((loadedModels) => {

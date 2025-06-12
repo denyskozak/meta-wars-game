@@ -2165,6 +2165,7 @@ export function Game({models, sounds, matchId, character}) {
                 const castEndAction = mixer.clipAction(animations[0]);
 
                 const staff = createStaffMesh();
+                console.log("player: ", player.children);
                 const spine = player.getObjectByName('mixamorig:Spine2') || player.getObjectByName('mixamorig:Spine1');
                 if (spine) {
                     spine.add(staff);
