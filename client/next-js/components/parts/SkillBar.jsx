@@ -59,21 +59,16 @@ export const SkillBar = () => {
         <div id="skills-bar">
             {skills.map((skill) => {
                 const data = cooldowns[skill.id];
-                let percent = 0;
                 let text = skill.key;
                 if (data) {
                     const remaining = data.end - Date.now();
-                    percent = remaining / data.duration;
                     text = Math.ceil(remaining / 1000);
                 }
                 return (
                     <div className="skill-button" key={skill.id}>
                         <div className="skill-icon" style={{backgroundImage: `url('${skill.icon}')`}}></div>
                         {data && (
-                            <div
-                                className="cooldown-overlay"
-                                style={{height: `${Math.max(0, percent) * 100}%`}}
-                            >
+                            <div className="cooldown-overlay">
                                 {text}
                             </div>
                         )}
