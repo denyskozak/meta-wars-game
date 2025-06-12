@@ -470,6 +470,7 @@ export function Game({models, sounds, matchId, character}) {
         const SHIELD_MANA_COST = 40; // Mana cost for the shield
         const SHIELD_DURATION = 3; // Shield duration in seconds
         const DAMAGE_REDUCTION = 0.5; // Reduces damage by 50%
+        const ICE_VEINS_ROT_SPEED = 1; // Rotation speed for Ice Veins effect
         // Activate shield
         let isShieldActive = false;
         let isChatActive = false;
@@ -1809,12 +1810,17 @@ export function Game({models, sounds, matchId, character}) {
                 opacity: 0.75,
             });
 
-            for (let i = 0; i < 3; i++) {
-                const sprite = new THREE.Sprite(material.clone());
-                sprite.scale.set(1.5, 1.5, 1.5);
-                const angle = (i / 3) * Math.PI * 2;
-                sprite.position.set(Math.cos(angle) * 0.8, 1, Math.sin(angle) * 0.8);
-                group.add(sprite);
+            const layers = 2;
+            const spritesPerLayer = 3;
+            for (let layer = 0; layer < layers; layer++) {
+                const height = 0.8 + layer * 0.4;
+                for (let i = 0; i < spritesPerLayer; i++) {
+                    const sprite = new THREE.Sprite(material.clone());
+                    sprite.scale.set(1.2, 1.2, 1.2);
+                    const angle = (i / spritesPerLayer) * Math.PI * 2;
+                    sprite.position.set(Math.cos(angle) * 0.8, height, Math.sin(angle) * 0.8);
+                    group.add(sprite);
+                }
             }
 
             group.rotation.x = Math.PI / 2;
@@ -2039,7 +2045,7 @@ export function Game({models, sounds, matchId, character}) {
                     });
 
                     activeIceVeins.forEach((mesh) => {
-                        mesh.rotation.z += delta * 2;
+                        mesh.rotation.z += delta * ICE_VEINS_ROT_SPEED;
                         mesh.children.forEach(c => {
                             if (c.material?.map) {
                                 c.material.map.offset.y -= delta * 0.5;
