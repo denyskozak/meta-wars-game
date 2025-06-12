@@ -34,7 +34,7 @@ export default function MatchesPage() {
     ];
     console.log("players: ", players);
     useEffect(() => {
-        socket.onmessage = (event) => {
+        const handleMessage = (event: MessageEvent) => {
             const message = JSON.parse(event.data);
             switch (message.type) {
                 case 'GET_MATCH':
@@ -57,8 +57,14 @@ export default function MatchesPage() {
             }
         };
 
+        socket.addEventListener('message', handleMessage);
+
         sendToSocket({type: 'JOIN_MATCH'});
         sendToSocket({type: 'GET_MATCH'});
+
+        return () => {
+            socket.removeEventListener('message', handleMessage);
+        };
     }, []);
 
     const handleReady = () => {

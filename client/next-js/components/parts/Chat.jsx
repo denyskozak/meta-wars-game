@@ -15,7 +15,7 @@ export const Chat = () => {
   const [userCount, setUserCount] = useState(0);
 
   useEffect(() => {
-    socket.onmessage = (event) => {
+    const handleMessage = (event) => {
       const message = JSON.parse(event.data);
 
       switch (message.type) {
@@ -31,8 +31,10 @@ export const Chat = () => {
       }
     };
 
+    socket.addEventListener('message', handleMessage);
+
     return () => {
-      socket.onmessage = null;
+      socket.removeEventListener('message', handleMessage);
     };
   }, []);
 

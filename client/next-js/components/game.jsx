@@ -2374,7 +2374,7 @@ export function Game({models, sounds, matchId, character}) {
         }
 
         // Handle incoming messages from the server
-        socket.onmessage = async (event) => {
+        const handleMessage = async (event) => {
             let message = JSON.parse(event.data);
 
             switch (message.type) {
@@ -2564,10 +2564,14 @@ export function Game({models, sounds, matchId, character}) {
             }
         };
 
+        socket.addEventListener('message', handleMessage);
+
         sendToSocket({
             type: 'READY_FOR_MATCH'
         });
-        return () => {};
+        return () => {
+            socket.removeEventListener('message', handleMessage);
+        };
     }, []);
     return (
         <div ref={containerRef} id="game-container" className="w-full h-full">
