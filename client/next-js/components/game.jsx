@@ -1851,7 +1851,10 @@ export function Game({models, sounds, matchId, character}) {
             const player = players.get(playerId)?.model;
             if (!player) return;
 
-            const effect = SkeletonUtils.clone(models["fire"]);
+            const effect = new THREE.Mesh(
+                fireballGeometry,
+                fireballMaterial.clone()
+            );
             effect.scale.set(0.5, 0.5, 0.5);
             scene.add(effect);
             activeImmolation.set(playerId, effect);
