@@ -7,7 +7,6 @@ import Image from "next/image";
 import {Button, Table, TableHeader, TableColumn, TableBody, TableRow, TableCell} from "@heroui/react";
 import {useParams, useRouter} from "next/navigation";
 import {Navbar} from "@/components/navbar";
-import {Chat} from "@/components/parts/Chat";
 import {useInterface} from "@/context/inteface";
 
 
@@ -121,8 +120,6 @@ export default function MatchesPage() {
                         </div>
                     )}
 
-
-                <Chat/>
             </div>
         </div>
     );

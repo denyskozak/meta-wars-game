@@ -6,9 +6,9 @@
     background-color: rgba(0, 0, 0, 0.7);
     border: 2px solid #222;
     border-radius: 5px;
-    position: absolute;
-    bottom: 120px; /* Place above the cast bar */
-    left: 20px; /* Align it to the left */
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
     padding: 10px;
     display: flex;
     flex-direction: column; /* Show the latest messages at the bottom */
