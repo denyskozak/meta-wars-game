@@ -2100,14 +2100,14 @@ export function Game({models, sounds, matchId, character}) {
         }
 
         function createStaffMesh() {
-            const staffId = character?.name === 'warlock' ? 'warlock_staff' : 'mage_staff';
+            const staffId = 'mage_staff';
             const base = models[staffId];
             if (base) {
                 const staff = SkeletonUtils.clone(base);
-                staff.scale.set(0.4, 0.4, 0.4);
+                staff.scale.set(0.3, 0.3, 0.3);
                 // Ensure the staff points upward and sits behind the character
-                staff.rotation.set(0, 0, 0);
-                staff.position.set(0, 0.9, -0.2);
+                staff.rotation.set(0, 1.5, 0);
+                staff.position.set(0, 0.4, -0.25);
                 return staff;
             }
             const group = new THREE.Group();
