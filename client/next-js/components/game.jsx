@@ -962,7 +962,16 @@ export function Game({models, sounds, matchId, character}) {
                 return;
             }
 
-            if (globalSkillCooldown || isCasting || isSkillOnCooldown(spellType)) {
+            if (isSkillOnCooldown(spellType)) {
+                if (sounds?.cooldown) {
+                    sounds.cooldown.currentTime = 0;
+                    sounds.cooldown.volume = 0.5;
+                    sounds.cooldown.play();
+                }
+                return;
+            }
+
+            if (globalSkillCooldown || isCasting) {
                 return;
             }
             switch (spellType) {
