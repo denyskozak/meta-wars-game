@@ -418,7 +418,8 @@ export function Game({models, sounds, matchId, character}) {
         const MAX_SPHERE_IMPULSE = 30;
 
         // Maximum distance any sphere can travel
-        const SPHERE_MAX_DISTANCE = 30;
+        // Use the same range as fireblast for consistency
+        const SPHERE_MAX_DISTANCE = FIREBLAST_RANGE;
 
         const STEPS_PER_FRAME = 30;
 
@@ -1015,14 +1016,12 @@ export function Game({models, sounds, matchId, character}) {
                 case "immolate":
                     castImmolate({
                         playerId,
-                        globalSkillCooldown,
-                        isCasting,
+                        castSpellImpl,
+                        igniteHands,
                         mana,
                         getTargetPlayer,
                         dispatch,
                         sendToSocket,
-                        activateGlobalCooldown,
-                        startSkillCooldown,
                         sounds,
                     });
                     break;
