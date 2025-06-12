@@ -35,7 +35,7 @@ export default function MatchesPage() {
     const {isOpen, onOpen, onOpenChange} = useDisclosure();
 
     useEffect(() => {
-        socket.onmessage = async (event) => {
+        const handleMessage = async (event: MessageEvent) => {
             let message = JSON.parse(event.data);
             console.log("message: ", message);
             switch (message.type) {
@@ -44,6 +44,12 @@ export default function MatchesPage() {
                     break;
 
             }
+        };
+
+        socket.addEventListener('message', handleMessage);
+
+        return () => {
+            socket.removeEventListener('message', handleMessage);
         };
 
 

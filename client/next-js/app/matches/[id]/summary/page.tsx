@@ -20,7 +20,7 @@ export default function MatchSummaryPage() {
     const [summary, setSummary] = useState<PlayerSummary[]>([]);
 
     useEffect(() => {
-        socket.onmessage = (event) => {
+        const handleMessage = (event: MessageEvent) => {
             const message = JSON.parse(event.data);
             switch (message.type) {
                 case "MATCH_SUMMARY":
@@ -29,7 +29,13 @@ export default function MatchSummaryPage() {
             }
         };
 
+        socket.addEventListener('message', handleMessage);
+
         sendToSocket({type: 'GET_MATCH_SUMMARY', matchId: params?.id});
+
+        return () => {
+            socket.removeEventListener('message', handleMessage);
+        };
     }, []);
 
     const back = () => router.push('/matches');
