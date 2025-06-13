@@ -98,6 +98,41 @@ export function Game({models, sounds, matchId, character}) {
         const activeIceVeins = new Map(); // key = playerId -> effect mesh
         const activeImmolation = new Map(); // key = playerId -> effect mesh
 
+        const glowTexture = (() => {
+            const size = 64;
+            const canvas = document.createElement('canvas');
+            canvas.width = canvas.height = size;
+            const ctx = canvas.getContext('2d');
+            const grad = ctx.createRadialGradient(
+                size / 2,
+                size / 2,
+                0,
+                size / 2,
+                size / 2,
+                size / 2
+            );
+            grad.addColorStop(0, 'rgba(255,255,255,1)');
+            grad.addColorStop(0.5, 'rgba(255,255,255,0.5)');
+            grad.addColorStop(1, 'rgba(255,255,255,0)');
+            ctx.fillStyle = grad;
+            ctx.fillRect(0, 0, size, size);
+            return new THREE.CanvasTexture(canvas);
+        })();
+
+        function makeGlowSprite(color = 0xffffff, size = 1) {
+            const material = new THREE.SpriteMaterial({
+                map: glowTexture,
+                color,
+                transparent: true,
+                depthWrite: false,
+                blending: THREE.AdditiveBlending,
+            });
+            const sprite = new THREE.Sprite(material);
+            sprite.scale.set(size, size, 1);
+            sprite.renderOrder = 999;
+            return sprite;
+        }
+
         // Function to update the HP bar width
         function updateHPBar() {
             hpBar.style.width = `${hp}%`;
@@ -2240,6 +2275,14 @@ export function Game({models, sounds, matchId, character}) {
                     child.material = child.material.clone();
                 }
             });
+
+            let color = 0xffffff;
+            if (data.type === 'heal') color = 0x00ff7f;
+            if (data.type === 'mana') color = 0x44aaff;
+            if (data.type === 'damage') color = 0xff3333;
+            const glow = makeGlowSprite(color, 1.5);
+            glow.position.y = 0.2;
+            rune.add(glow);
 
             scene.add(rune);
             runes.set(data.id, rune);
