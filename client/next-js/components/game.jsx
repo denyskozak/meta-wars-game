@@ -1815,36 +1815,22 @@ export function Game({models, sounds, matchId, character}) {
             const player = players.get(playerId)?.model;
             if (!player) return;
 
-            const group = new THREE.Group();
-            const tex = new THREE.TextureLoader().load('/textures/ice.jpg');
-            tex.wrapS = tex.wrapT = THREE.RepeatWrapping;
+            const base = models['ice-veins'];
+            if (!base) return;
 
-            const material = new THREE.SpriteMaterial({
-                map: tex,
-                color: 0xffffff,
-                transparent: true,
-                opacity: 0.75,
+            const effect = SkeletonUtils.clone(base);
+            effect.scale.set(0.5, 0.5, 0.5);
+            effect.traverse((child) => {
+                if (child.isMesh) {
+                    child.material = child.material.clone();
+                }
             });
 
-            const layers = 2;
-            const spritesPerLayer = 3;
-            for (let layer = 0; layer < layers; layer++) {
-                const height = 0.8 + layer * 0.4;
-                for (let i = 0; i < spritesPerLayer; i++) {
-                    const sprite = new THREE.Sprite(material.clone());
-                    sprite.scale.set(1.2, 1.2, 1.2);
-                    const angle = (i / spritesPerLayer) * Math.PI * 2;
-                    sprite.position.set(Math.cos(angle) * 0.8, height, Math.sin(angle) * 0.8);
-                    group.add(sprite);
-                }
-            }
-
-            group.rotation.x = Math.PI / 2;
-            player.add(group);
-            activeIceVeins.set(playerId, group);
+            player.add(effect);
+            activeIceVeins.set(playerId, effect);
 
             setTimeout(() => {
-                group.parent?.remove(group);
+                effect.parent?.remove(effect);
                 activeIceVeins.delete(playerId);
             }, duration);
         }
