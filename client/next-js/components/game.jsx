@@ -215,10 +215,8 @@ export function Game({models, sounds, matchId, character}) {
                   gl_FragColor = vec4(col, alpha);
                 }`
         });
-        const fireballMesh = new THREE.Mesh(
-            fireballGeometry,
-            fireballMaterial     // свой экземпляр
-        );
+        const fireballMesh = SkeletonUtils.clone(models['fireball']);
+        fireballMesh.scale.set(0.00004, 0.00004, 0.00004);
 
         const darkballMaterial = new THREE.ShaderMaterial({
             transparent: true,
