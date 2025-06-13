@@ -505,7 +505,7 @@ export function Game({models, sounds, matchId, character}) {
         const SHIELD_MANA_COST = 40; // Mana cost for the shield
         const SHIELD_DURATION = 3; // Shield duration in seconds
         const DAMAGE_REDUCTION = 0.5; // Reduces damage by 50%
-        const ICE_VEINS_ROT_SPEED = 1; // Rotation speed for Ice Veins effect
+        const ICE_VEINS_ROT_SPEED = 1; // Rotation speed for Ice Veins effect (horizontal)
         // Activate shield
         let isShieldActive = false;
         let isChatActive = false;
@@ -2121,7 +2121,8 @@ export function Game({models, sounds, matchId, character}) {
                     });
 
                     activeIceVeins.forEach((mesh) => {
-                        mesh.rotation.z += delta * ICE_VEINS_ROT_SPEED;
+                        // Rotate around the vertical axis so the effect spins horizontally
+                        mesh.rotation.y += delta * ICE_VEINS_ROT_SPEED;
                         mesh.children.forEach(c => {
                             if (c.material?.map) {
                                 c.material.map.offset.x -= delta * 0.2;
