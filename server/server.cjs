@@ -174,10 +174,10 @@ function checkRunePickup(match, playerId) {
             match.runes.splice(i, 1);
             switch (rune.type) {
                 case 'heal':
-                    player.hp = Math.min(MAX_HP, player.hp + 50);
+                    player.hp = Math.min(MAX_HP, player.hp + 100);
                     break;
                 case 'mana':
-                    player.mana = Math.min(100, player.mana + 50);
+                    player.mana = Math.min(100, player.mana + 100);
                     break;
                 case 'damage':
                     player.buffs.push({
@@ -278,7 +278,7 @@ ws.on('connection', (socket) => {
         for (const match of matches.values()) {
             match.players.forEach((player, pid) => {
                 if (player.mana < 100) {
-                    player.mana = Math.min(100, player.mana + 2);
+                    player.mana = Math.min(100, player.mana + 1);
                 }
                 if (player.buffs.length) {
                     player.buffs = player.buffs.filter(b => b.expires > now);
@@ -295,7 +295,7 @@ ws.on('connection', (socket) => {
                 }
             });
         }
-    }, 1000);
+    }, 500);
 
     socket.on('message', (data) => {
         let message = {};
@@ -476,7 +476,7 @@ ws.on('connection', (socket) => {
 
                         player.mana -= cost;
                         if (message.payload.type === 'heal') {
-                            player.hp = Math.min(MAX_HP, player.hp + 20);
+                            player.hp = Math.min(MAX_HP, player.hp + 50);
                         }
 
                         if (['immolate'].includes(message.payload.type)) {
@@ -510,7 +510,7 @@ ws.on('connection', (socket) => {
                                 target.debuffs.push({
                                     type: 'corruption',
                                     casterId: id,
-                                    damage: 7,
+                                    damage: 4,
                                     interval: 2000,
                                     nextTick: Date.now() + 2000,
                                     ticks: 5,

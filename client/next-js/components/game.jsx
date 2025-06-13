@@ -88,9 +88,7 @@ export function Game({models, sounds, matchId, character}) {
 
         let movementSpeedModifier = 1; // Normal speed
 
-        const hpBar = document.getElementById("hpBar");
         const damageBar = document.getElementById("damage");
-        const manaBar = document.getElementById("manaBar");
         const selfDamage = document.getElementById("selfDamage");
         let targetedPlayerId = null;
 
@@ -137,13 +135,11 @@ export function Game({models, sounds, matchId, character}) {
 
         // Function to update the HP bar width
         function updateHPBar() {
-            hpBar.style.width = `${(hp / MAX_HP) * 100}%`;
             dispatchEvent('self-update', { hp, mana });
         }
 
         // Function to update the Mana bar width
         function updateManaBar() {
-            manaBar.style.width = `${mana}%`;
             dispatchEvent('self-update', { hp, mana });
         }
 
