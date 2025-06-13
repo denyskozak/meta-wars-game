@@ -1004,8 +1004,15 @@ export function Game({models, sounds, matchId, character}) {
                 return;
             }
             const id = getTargetPlayer();
-            if (id) {
-                targetImage.src = '/icons/target-green.svg';
+            if (id && players.has(id)) {
+                const start = playerCollider.end.clone();
+                const targetPos = players.get(id).model.position.clone();
+                const dist = start.distanceTo(targetPos);
+                if (dist <= FIREBLAST_RANGE) {
+                    targetImage.src = '/icons/target-green.svg';
+                } else {
+                    targetImage.src = '/icons/target.svg';
+                }
             } else {
                 targetImage.src = '/icons/target.svg';
             }
