@@ -454,8 +454,10 @@ ws.on('connection', (socket) => {
             case 'UPDATE_POSITION':
                 if (match) {
                     const player = match.players.get(id);
-                    player.position = message.position;
-                    player.rotation = message.rotation;
+                    if (message) {
+                        player.position = message.position;
+                        player.rotation = message.rotation;
+                    }
                     checkRunePickup(match, id);
                 }
                 break;

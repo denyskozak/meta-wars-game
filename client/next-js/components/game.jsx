@@ -1960,7 +1960,6 @@ export function Game({models, sounds, matchId, character}) {
             if (!base) return;
 
             const effect = SkeletonUtils.clone(base);
-            effect.scale.set(0.5, 0.5, 0.5);
             effect.traverse((child) => {
                 if (child.isMesh) {
                     child.material = child.material.clone();
