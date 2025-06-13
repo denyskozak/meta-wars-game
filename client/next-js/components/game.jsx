@@ -1691,10 +1691,26 @@ export function Game({models, sounds, matchId, character}) {
             USER_DEFAULT_POSITION[2],
         );
         playerCollider.radius = 0.35;
-        const tourchDemo = SkeletonUtils.clone(models['torch']);
-        tourchDemo.position.set(...USER_DEFAULT_POSITION);
-        tourchDemo.scale.set(0.3, 0.3, 0.3)
-        scene.add(tourchDemo)
+        const torchPositions = [
+            {x: -43.52580547526639, y: 0.14420588534998963, z: -9.455423449249436},
+            {x: -39.05849469150937, y: 0.0421284753764084, z: -5.815063492803456},
+            {x: -21.797763613239496, y: 0.15059653596605488, z: -4.8172303222808806},
+            {x: -19.59879364156808, y: -0.0376956842439064, z: -13.855212475656389},
+            {x: -21.473298810186247, y: 0.171059096524247, z: -22.168549857112748},
+        ];
+
+        const TORCH_Y_OFFSET = -0.2;
+
+        torchPositions.forEach((pos) => {
+            const torch = SkeletonUtils.clone(models['torch']);
+            torch.scale.set(0.3, 0.3, 0.3);
+            torch.position.set(pos.x, pos.y + TORCH_Y_OFFSET, pos.z);
+            scene.add(torch);
+
+            const light = new THREE.PointLight(0xffaa33, 1.5, 10);
+            light.position.set(pos.x, pos.y + 0.5 + TORCH_Y_OFFSET, pos.z);
+            scene.add(light);
+        });
 
         function isAnyActionRunning(excludeActions = []) {
             const {mixer, actions} = players.get(myPlayerId)
