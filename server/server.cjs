@@ -149,7 +149,12 @@ function checkRunePickup(match, playerId) {
                     player.mana = Math.min(100, player.mana + 50);
                     break;
                 case 'damage':
-                    player.buffs.push({type: 'damage', percent: 0.4, expires: Date.now() + 60000});
+                    player.buffs.push({
+                        type: 'damage',
+                        percent: 0.4,
+                        expires: Date.now() + 60000,
+                        icon: '/icons/rune_power.jpg'
+                    });
                     break;
             }
 
