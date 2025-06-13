@@ -215,8 +215,10 @@ export function Game({models, sounds, matchId, character}) {
                   gl_FragColor = vec4(col, alpha);
                 }`
         });
-        const fireballMesh = SkeletonUtils.clone(models['fireball']);
-        fireballMesh.scale.set(0.000004, 0.000004, 0.000004);
+        const fireballMesh = new THREE.Mesh(
+            fireballGeometry,
+            fireballMaterial     // own instance
+        );
 
         const darkballMaterial = new THREE.ShaderMaterial({
             transparent: true,
@@ -1131,10 +1133,19 @@ export function Game({models, sounds, matchId, character}) {
             });
         }
 
-        function castSphere(model, sphereMesh, type, damage) {
+       function castSphere(model, sphereMesh, type, damage) {
             sphereMesh.rotation.copy(model.rotation);
 
             scene.add(sphereMesh); // Add the sphereMesh to the scene
+
+            const lightColor = {
+                fireball: 0xffaa33,
+                darkball: 0x8844ff,
+                iceball: 0x88ddff,
+            }[type] || 0xffffff;
+            const light = new THREE.PointLight(lightColor, 1, 5);
+            light.position.copy(sphereMesh.position);
+            scene.add(light);
 
             // Compute aim direction based on camera ray and player position
             const aimDir = getAimDirection();
@@ -1187,6 +1198,8 @@ export function Game({models, sounds, matchId, character}) {
                 initialPosition: initialPosition,
                 type,
                 damage,
+                light,
+                ownerId: myPlayerId,
 
                 trail: [], // массив точек следа
                 lastTrailTime: performance.now(),
@@ -1336,7 +1349,9 @@ export function Game({models, sounds, matchId, character}) {
 
             if (touchedPlayer) {
                 const damage = sphere.damage;
-                if (sphere.type === 'iceball') {
+                if (sphere.type === 'fireball') {
+                    applyImmolationEffect(myPlayerId, 1000);
+                } else if (sphere.type === 'iceball') {
                     movementSpeedModifier = 0.5;
                     setTimeout(() => (movementSpeedModifier = 1), 1000);
                 }
@@ -1380,8 +1395,11 @@ export function Game({models, sounds, matchId, character}) {
         //
         // }
 
-        const removeSphere = (sphere, index) => {
+       const removeSphere = (sphere, index) => {
             scene.remove(sphere.mesh); // Remove the fireball from the scene
+            if (sphere.light) {
+                scene.remove(sphere.light);
+            }
             spheres.splice(index, 1); // Remove it from the array
 
             if (sphere.trail) {
@@ -1418,8 +1436,7 @@ export function Game({models, sounds, matchId, character}) {
                         sphere.initialPosition,
                     );
                     if (traveledDistance > SPHERE_MAX_DISTANCE) {
-                        scene.remove(sphere.mesh); // Remove the fireball from the scene
-                        spheres.splice(index, 1); // Remove it from the array
+                        removeSphere(sphere, index);
                     }
                 }
 
@@ -1451,9 +1468,12 @@ export function Game({models, sounds, matchId, character}) {
 
             // spheresCollisions(); // Handle collisions between spheres
 
-            for (let sphere of spheres) {
-                sphere.mesh.position.copy(sphere.collider.center);
-            }
+           for (let sphere of spheres) {
+               sphere.mesh.position.copy(sphere.collider.center);
+                if (sphere.light) {
+                    sphere.light.position.copy(sphere.collider.center);
+                }
+           }
         }
 
         // function getForwardVector() {
@@ -2314,14 +2334,15 @@ export function Game({models, sounds, matchId, character}) {
         }
 
         function castSphereOtherUser(data, ownerId) {
-            let sphere;
+            let material;
             if (data.type === "fireball") {
-                sphere = fireballMaterial;
+                material = fireballMaterial;
             } else if (data.type === "darkball") {
-                sphere =  new THREE.Mesh(fireballGeometry, darkballMaterial.clone());
+                material = darkballMaterial;
             } else {
-                sphere =  new THREE.Mesh(fireballGeometry, iceballMaterial.clone());
+                material = iceballMaterial;
             }
+            const sphere = new THREE.Mesh(fireballGeometry, material.clone());
 
             sphere.position.set(
                 data.position.x,
