@@ -451,7 +451,7 @@ export function Game({models, sounds, matchId, character}) {
         stats.domElement.style.top = "0px";
 
 
-        const GRAVITY = 15; // более медленное падение заклинаний
+        const GRAVITY = 20;
 
         const NUM_SPHERES = 100;
         const SPHERE_RADIUS = 0.2;
@@ -1121,7 +1121,6 @@ export function Game({models, sounds, matchId, character}) {
                         startSkillCooldown,
                         FIREBLAST_DAMAGE,
                         isTargetBurning: (id) => {
-                            console.log("activeImmolation: ", activeImmolation);
                             return activeImmolation.has(id);
                         },
                         sounds,

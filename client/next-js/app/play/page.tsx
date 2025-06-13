@@ -12,7 +12,7 @@ export default function MatchesPage() {
     const router = useRouter();
     const account = useCurrentAccount();
     return (
-        <div className="h-ful w-full  items-center justify-center">
+        <div className="h-full w-full  items-center justify-center">
             <Navbar/>
             <div className="flex w-full h-[calc(100%-98px)] items-center justify-center">
 
@@ -35,7 +35,11 @@ export default function MatchesPage() {
                                 </div>
                             </>
                         )
-                        : (<ConnectionButton className="m-auto" text="Connect to Play"/>)
+                        : (<>
+                            <Image src="/images/tower_bg.png" alt="Arena Match" width={3000} height={1400}
+                                   className="w-full h-full absolute object-cover rounded-t-lg"/>
+                            <ConnectionButton className="m-auto" text="Connect to Play"/>
+                        </>)
                 }
             </div>
 

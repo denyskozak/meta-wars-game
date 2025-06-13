@@ -34,15 +34,15 @@ export const Interface = () => {
     return (
         <div className="interface-container">
             <div className="absolute top-24 left-5 w-40 space-y-1">
-                <Progress id="hpBar" aria-label="HP" value={(selfStats.hp / MAX_HP) * 100} color="danger" />
-                <Progress id="manaBar" aria-label="Mana" value={selfStats.mana} color="primary" />
+                <Progress id="hpBar" aria-label="HP" value={(selfStats.hp / MAX_HP) * 100} color="primary" disableAnimation />
+                <Progress id="manaBar" aria-label="Mana" value={selfStats.mana} color="secondary" disableAnimation />
             </div>
 
             {target && (
                 <div id="targetPanel" className="target-panel">
                     <div id="targetAddress" className="target-address">{target.address}</div>
-                    <Progress id="targetHpBar" aria-label="Target HP" value={(target.hp / MAX_HP) * 100} color="danger" className="mb-1 w-40" />
-                    <Progress id="targetManaBar" aria-label="Target Mana" value={target.mana} color="primary" className="w-40" />
+                    <Progress id="targetHpBar" aria-label="Target HP" value={(target.hp / MAX_HP) * 100} color="primary" className="mb-1 w-40" disableAnimation />
+                    <Progress id="targetManaBar" aria-label="Target Mana" value={target.mana} color="secondary" className="w-40" disableAnimation />
                 </div>
             )}
 

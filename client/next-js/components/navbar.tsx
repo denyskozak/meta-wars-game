@@ -154,10 +154,12 @@ export const Navbar = () => {
             <Button
                 className="border-2 border-black shadow-lg overflow-hidden group "
                 size="lg"
-                onPress={() => router.push("/play")}
+                onPress={() => router.push("/play" )}
             >
                 <span className="absolute inset-0 bg-gradient-to-r from-pink-500 via-red-500 to-yellow-500 animate-pulse opacity-100 group-hover:opacity-100 blur-md" />
-                <span className="relative z-10">Launch Game</span>
+                <span className="relative z-10">{
+                    account ? 'Play' : 'Launch Game'
+                }</span>
             </Button>
         </NavbarItem>
       </NavbarContent>
