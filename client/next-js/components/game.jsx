@@ -7,7 +7,7 @@ import {OctreeHelper} from "three/examples/jsm/helpers/OctreeHelper";
 import {Capsule} from "three/examples/jsm/math/Capsule";
 import {CSS2DRenderer, CSS2DObject} from "three/examples/jsm/renderers/CSS2DRenderer";
 import {useCurrentAccount} from "@mysten/dapp-kit";
-import { useRouter } from "next/navigation";
+import {useRouter} from "next/navigation";
 
 import {useCoins} from "../hooks/useCoins";
 import {useInterface} from "../context/inteface";
@@ -570,7 +570,7 @@ export function Game({models, sounds, matchId, character}) {
         function respawnPlayer() {
             hp = 100; // Восстанавливаем HP
             updateHPBar(); // Обновляем отображение HP
-            sendToSocket({ type: 'RESPAWN' });
+            sendToSocket({type: 'RESPAWN'});
             teleportTo({
                 x: USER_DEFAULT_POSITION[0],
                 y: USER_DEFAULT_POSITION[1] + 0.75,
@@ -849,7 +849,7 @@ export function Game({models, sounds, matchId, character}) {
 
             sendToSocket({
                 type: 'CAST_SPELL',
-                payload: { type: 'blink' }
+                payload: {type: 'blink'}
             });
 
             sounds.blink.volume = 0.5;
@@ -932,7 +932,7 @@ export function Game({models, sounds, matchId, character}) {
 
                 sendToSocket({
                     type: 'CAST_SPELL',
-                    payload: { type: 'heal' }
+                    payload: {type: 'heal'}
                 });
                 isHealActive = true;
                 setTimeout(() => (isHealActive = false), 700);
@@ -997,7 +997,6 @@ export function Game({models, sounds, matchId, character}) {
                 targetImage.src = '/icons/target.svg';
             }
         }
-
 
 
         function castSpell(spellType, playerId = myPlayerId) {
@@ -1164,11 +1163,11 @@ export function Game({models, sounds, matchId, character}) {
             applyIceVeinsEffect(playerId);
             sendToSocket({
                 type: 'CAST_SPELL',
-                payload: { type: 'ice-veins' }
+                payload: {type: 'ice-veins'}
             });
         }
 
-       function castSphere(model, sphereMesh, type, damage) {
+        function castSphere(model, sphereMesh, type, damage) {
             sphereMesh.rotation.copy(model.rotation);
 
             scene.add(sphereMesh); // Add the sphereMesh to the scene
@@ -1430,7 +1429,7 @@ export function Game({models, sounds, matchId, character}) {
         //
         // }
 
-       const removeSphere = (sphere, index) => {
+        const removeSphere = (sphere, index) => {
             scene.remove(sphere.mesh); // Remove the fireball from the scene
             if (sphere.light) {
                 scene.remove(sphere.light);
@@ -1503,12 +1502,12 @@ export function Game({models, sounds, matchId, character}) {
 
             // spheresCollisions(); // Handle collisions between spheres
 
-           for (let sphere of spheres) {
-               sphere.mesh.position.copy(sphere.collider.center);
+            for (let sphere of spheres) {
+                sphere.mesh.position.copy(sphere.collider.center);
                 if (sphere.light) {
                     sphere.light.position.copy(sphere.collider.center);
                 }
-           }
+            }
         }
 
         // function getForwardVector() {
@@ -1692,7 +1691,10 @@ export function Game({models, sounds, matchId, character}) {
             USER_DEFAULT_POSITION[2],
         );
         playerCollider.radius = 0.35;
-
+        const tourchDemo = SkeletonUtils.clone(models['torch']);
+        tourchDemo.position.set(...USER_DEFAULT_POSITION);
+        tourchDemo.scale.set(0.3, 0.3, 0.3)
+        scene.add(tourchDemo)
 
         function isAnyActionRunning(excludeActions = []) {
             const {mixer, actions} = players.get(myPlayerId)
@@ -2152,12 +2154,12 @@ export function Game({models, sounds, matchId, character}) {
             const group = new THREE.Group();
             const stick = new THREE.Mesh(
                 new THREE.CylinderGeometry(0.05, 0.05, 1.5, 8),
-                new THREE.MeshStandardMaterial({ color: 0x8B4513 })
+                new THREE.MeshStandardMaterial({color: 0x8B4513})
             );
             stick.position.y = 0.75;
             const top = new THREE.Mesh(
                 new THREE.SphereGeometry(0.1, 16, 16),
-                new THREE.MeshStandardMaterial({ color: 0xffffff })
+                new THREE.MeshStandardMaterial({color: 0xffffff})
             );
             top.position.y = 1.5;
             group.add(stick);
@@ -2625,7 +2627,7 @@ export function Game({models, sounds, matchId, character}) {
     return (
         <div ref={containerRef} id="game-container" className="w-full h-full">
             <Interface/>
-            {!isReadyToPlay && (<Loading text="Loading Players ..." />)}
+            {!isReadyToPlay && (<Loading text="Loading Players ..."/>)}
         </div>
     );
 }

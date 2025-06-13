@@ -38,6 +38,7 @@ export default function GamePage() {
         {id: 'zone', path: 'zone3.glb'},
         {id: 'character', path: 'skins/vampir.glb'},
         {id: 'heal-effect', path: 'heal-effect.glb'},
+        {id: 'torch', path: 'torch.glb'},
         {id: 'fire', path: 'stuff/fire.glb'},
         {id: 'bottle_magic', path: 'bottle_magic.glb'},
         {id: 'damage_rune', path: 'damage_rune.glb'},
