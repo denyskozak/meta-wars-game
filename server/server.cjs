@@ -25,6 +25,11 @@ const RUNE_POSITIONS = [
     {x: -42.27178226357139, y: -0.22907007956606334, z: -18.60619180482683},
     {x: -51.52105370516859, y: 3.146791487777967, z: -10.023874448302047},
     {x: -34.583011643221006, y: -0.18904481708676546, z: -8.590959573499276},
+    {x: -21.710011922359623, y: 0.2425669861893634, z: -20.13331458247075},
+    {x: -23.676337524607863, y: 0.054566298926251144, z: -15.571212214304152},
+    {x: -40.089663914387636, y: 0.041655422908179474, z: -13.728663680943066},
+    {x: -36.50262796113628, y: 0.2355841766123002, z: -4.169230097373605},
+    {x: -53.90549527296531, y: 1.7524780629720447, z: 9.026442028539353},
 ];
 
 const RUNE_TYPES = ['damage', 'heal', 'mana'];
@@ -144,7 +149,7 @@ function checkRunePickup(match, playerId) {
                     player.mana = Math.min(100, player.mana + 50);
                     break;
                 case 'damage':
-                    player.buffs.push({type: 'damage', bonus: 10, expires: Date.now() + 60000});
+                    player.buffs.push({type: 'damage', percent: 0.4, expires: Date.now() + 60000});
                     break;
             }
 
@@ -175,7 +180,11 @@ function applyDamage(match, victimId, dealerId, damage) {
         const now = Date.now();
         attacker.buffs.forEach(buff => {
             if (buff.type === 'damage' && buff.expires > now) {
-                totalDamage += buff.bonus;
+                if (typeof buff.percent === 'number') {
+                    totalDamage += totalDamage * buff.percent;
+                } else if (typeof buff.bonus === 'number') {
+                    totalDamage += buff.bonus;
+                }
             }
         });
     }
