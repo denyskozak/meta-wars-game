@@ -1699,11 +1699,11 @@ export function Game({models, sounds, matchId, character}) {
             {x: -21.473298810186247, y: 0.171059096524247, z: -22.168549857112748},
         ];
 
-        const TORCH_Y_OFFSET = -0.2;
+        const TORCH_Y_OFFSET = -0.5;
 
         torchPositions.forEach((pos) => {
             const torch = SkeletonUtils.clone(models['torch']);
-            torch.scale.set(0.3, 0.3, 0.3);
+            torch.scale.set(0.2, 0.2, 0.2);
             torch.position.set(pos.x, pos.y + TORCH_Y_OFFSET, pos.z);
             scene.add(torch);
 

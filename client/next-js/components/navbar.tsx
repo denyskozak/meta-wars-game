@@ -39,8 +39,6 @@ import { ConnectionButton } from "@/components/connection-button";
 let clickedOnBalance = 0;
 
 export const Navbar = () => {
-  const [visibleCreateChampionship, setVisibleCreateChampionship] =
-    useState(false);
 
   const account = useCurrentAccount();
   const { currentWallet, connectionStatus } = useCurrentWallet();
@@ -134,29 +132,10 @@ export const Navbar = () => {
         <NavbarItem className="hidden md:flex gap-4">
           {account ? (
             <>
-              {visibleCreateChampionship && (
-                <Button
-                  className="text-sm font-normal text-default-600 bg-default-100"
-                  variant="flat"
-                  onPress={() => {
-                    router.push("/championships/create");
-                  }}
-                >
-                  New Championship
-                </Button>
-              )}
               {account && (
                 <Button
                   className="text-sm font-normal text-default-600 bg-default-100"
                   variant="flat"
-                  onPress={() => {
-                    if (clickedOnBalance > 10) {
-                      setVisibleCreateChampionship(true);
-
-                      return;
-                    }
-                    clickedOnBalance++;
-                  }}
                 >
                   Balance:
                   <CoinIcon className="text-danger" />
@@ -172,7 +151,14 @@ export const Navbar = () => {
           {/*>*/}
           {/*  {address ? "Profile" : "Sign in"}*/}
           {/*</Button>*/}
-          <ConnectionButton />
+            <Button
+                className="border-2 border-black shadow-lg overflow-hidden group "
+                size="lg"
+                onPress={() => router.push("/play")}
+            >
+                <span className="absolute inset-0 bg-gradient-to-r from-pink-500 via-red-500 to-yellow-500 animate-pulse opacity-100 group-hover:opacity-100 blur-md" />
+                <span className="relative z-10">Launch Game</span>
+            </Button>
         </NavbarItem>
       </NavbarContent>
 
