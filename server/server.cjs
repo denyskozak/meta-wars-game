@@ -1,6 +1,6 @@
 const WebSocket = require('ws');
 const http = require('http');
-const { mintChest } = require('./sui.cjs');
+// const { mintChest } = require('./sui.cjs');
 
 const UPDATE_MATCH_INTERVAL = 33;
 const SPELL_COST = {
@@ -118,7 +118,7 @@ function finalizeMatch(match) {
         else if (idx === 1) chest = 'rare';
         p.chests.push(chest);
         if (p.address) {
-            mintChest(p.address, chest).catch(err => console.error('mintChest failed', err));
+            // mintChest(p.address, chest).catch(err => console.error('mintChest failed', err));
         }
         return { id: pid, kills: p.kills, deaths: p.deaths, chest };
     });
