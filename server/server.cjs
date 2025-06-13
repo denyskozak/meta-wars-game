@@ -100,7 +100,7 @@ function createPlayer(address) {
         deaths: 0,
         assists: 0,
         points: 0,
-        hp: 100,
+        hp: 200,
         mana: 100,
         chests: [],
         address
@@ -143,7 +143,7 @@ function checkRunePickup(match, playerId) {
             match.runes.splice(i, 1);
             switch (rune.type) {
                 case 'heal':
-                    player.hp = Math.min(100, player.hp + 50);
+                    player.hp = Math.min(200, player.hp + 50);
                     break;
                 case 'mana':
                     player.mana = Math.min(100, player.mana + 50);
@@ -443,7 +443,7 @@ ws.on('connection', (socket) => {
 
                         player.mana -= cost;
                         if (message.payload.type === 'heal') {
-                            player.hp = Math.min(100, player.hp + 20);
+                            player.hp = Math.min(200, player.hp + 20);
                         }
 
                         if (['immolate'].includes(message.payload.type)) {
@@ -521,7 +521,7 @@ ws.on('connection', (socket) => {
                 if (match) {
                     const p = match.players.get(id);
                     if (p) {
-                        p.hp = 100;
+                        p.hp = 200;
                         p.mana = 100;
                         broadcastToMatch(match.id, {
                             type: 'UPDATE_STATS',

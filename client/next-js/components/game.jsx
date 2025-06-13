@@ -78,7 +78,7 @@ export function Game({models, sounds, matchId, character}) {
         let camera;
         const animations = models["character_animations"];
 
-        let hp = 100,
+        let hp = 200,
             mana = 100;
         let actions = [];
         let playerMixers = [];
@@ -135,7 +135,7 @@ export function Game({models, sounds, matchId, character}) {
 
         // Function to update the HP bar width
         function updateHPBar() {
-            hpBar.style.width = `${hp}%`;
+            hpBar.style.width = `${hp / 2}%`;
         }
 
         // Function to update the Mana bar width
@@ -579,7 +579,7 @@ export function Game({models, sounds, matchId, character}) {
         };
 
         function respawnPlayer() {
-            hp = 100; // Восстанавливаем HP
+            hp = 200; // Восстанавливаем HP
             updateHPBar(); // Обновляем отображение HP
             sendToSocket({type: 'RESPAWN'});
             teleportTo({
