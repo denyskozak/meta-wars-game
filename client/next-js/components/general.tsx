@@ -18,7 +18,6 @@ export default function General() {
   const container = useRef(null);
   const router = useRouter();
   const account = useCurrentAccount();
-  const address = account?.address;
   const slides = [
     {
       titles: ["Magic PvP", "with shooter elements  "],
@@ -112,21 +111,16 @@ export default function General() {
         {/*    <span className={`${getTitle()} fade-in-animation`}>Championships&nbsp;</span>*/}
         {/*</div>*/}
 
-        {address ? (
+
           <Button
             className="border-2 border-black shadow-lg overflow-hidden group "
             size="lg"
-            onPress={() => router.push("/matches")}
+            onPress={() => router.push("/play")}
           >
             <span className="absolute inset-0 bg-gradient-to-r from-pink-500 via-red-500 to-yellow-500 animate-pulse opacity-100 group-hover:opacity-100 blur-md" />
-            <span className="relative z-10">Find Match</span>
+            <span className="relative z-10">Launch Game</span>
           </Button>
-        ) : (
-          <ConnectionButton
-            className="border-2 border-black"
-            text="Connect to Play"
-          />
-        )}
+
       </section>
     </div>
   );

@@ -216,7 +216,7 @@ export function Game({models, sounds, matchId, character}) {
                 }`
         });
         const fireballMesh = SkeletonUtils.clone(models['fireball']);
-        fireballMesh.scale.set(0.00004, 0.00004, 0.00004);
+        fireballMesh.scale.set(0.000004, 0.000004, 0.000004);
 
         const darkballMaterial = new THREE.ShaderMaterial({
             transparent: true,
@@ -2051,7 +2051,7 @@ export function Game({models, sounds, matchId, character}) {
                         mesh.rotation.z += delta * ICE_VEINS_ROT_SPEED;
                         mesh.children.forEach(c => {
                             if (c.material?.map) {
-                                c.material.map.offset.y -= delta * 0.5;
+                                c.material.map.offset.x -= delta * 0.2;
                             }
                         });
                     });
@@ -2314,33 +2314,32 @@ export function Game({models, sounds, matchId, character}) {
         }
 
         function castSphereOtherUser(data, ownerId) {
-            let material;
+            let sphere;
             if (data.type === "fireball") {
-                material = fireballMaterial;
+                sphere = fireballMaterial;
             } else if (data.type === "darkball") {
-                material = darkballMaterial;
+                sphere =  new THREE.Mesh(fireballGeometry, darkballMaterial.clone());
             } else {
-                material = iceballMaterial;
+                sphere =  new THREE.Mesh(fireballGeometry, iceballMaterial.clone());
             }
-            const fireball = new THREE.Mesh(fireballGeometry, material.clone());
 
-            fireball.position.set(
+            sphere.position.set(
                 data.position.x,
                 data.position.y,
                 data.position.z,
             );
-            fireball.rotation.set(
+            sphere.rotation.set(
                 data.rotation.x,
                 data.rotation.y,
                 data.rotation.z,
             );
 
-            scene.add(fireball);
+            scene.add(sphere);
 
             spheres.push({
-                mesh: fireball,
+                mesh: sphere,
                 collider: new THREE.Sphere(
-                    new THREE.Vector3().copy(fireball.position),
+                    new THREE.Vector3().copy(sphere.position),
                     SPHERE_RADIUS,
                 ),
                 trail: [], // массив точек следа
