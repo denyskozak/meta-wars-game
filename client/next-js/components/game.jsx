@@ -430,6 +430,17 @@ export function Game({models, sounds, matchId, character}) {
         renderer.shadowMap.type = THREE.VSMShadowMap;
         renderer.toneMapping = THREE.ACESFilmicToneMapping;
 
+        function preloadFireball() {
+            const temp = fireballMesh.clone();
+            temp.visible = false;
+            const tempLight = new THREE.PointLight(0xffaa33, 1, 5);
+            temp.add(tempLight);
+            scene.add(temp);
+            renderer.compile(scene, camera);
+            scene.remove(temp);
+        }
+        preloadFireball();
+
         const stats = new Stats();
 
         stats.domElement.style.position = "absolute";
