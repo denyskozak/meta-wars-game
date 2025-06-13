@@ -36,7 +36,6 @@ export default function GamePage() {
 
     const models = [
         {id: 'zone', path: 'zone3.glb'},
-        {id: 'fireball', path: 'fireball.glb'},
         {id: 'character', path: 'skins/vampir.glb'},
         {id: 'heal-effect', path: 'heal-effect.glb'},
         {id: 'fire', path: 'stuff/fire.glb'},
