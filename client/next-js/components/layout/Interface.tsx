@@ -87,7 +87,6 @@ export const Interface = () => {
             <SkillBar/>
             <CastBar/>
             <Chat />
-            <Coins />
         </div>
     )
 }
