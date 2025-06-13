@@ -4,6 +4,7 @@ import {Chat} from "../parts/Chat";
 import {Coins} from "../parts/Coins";
 import {Scoreboard} from "../parts/Scoreboard";
 import {Buffs} from "../parts/Buffs";
+import {Progress} from "@heroui/react";
 
 import './Interface.css';
 import Image from "next/image";
@@ -12,6 +13,7 @@ import {MAX_HP} from "../../consts";
 
 export const Interface = () => {
     const [target, setTarget] = useState<{id:number, hp:number, mana:number, address:string}|null>(null);
+    const [selfStats, setSelfStats] = useState<{hp:number, mana:number}>({hp: MAX_HP, mana: 100});
 
     useEffect(() => {
         const handler = (e: CustomEvent) => {
@@ -21,29 +23,26 @@ export const Interface = () => {
         return () => window.removeEventListener('target-update', handler as EventListener);
     }, []);
 
+    useEffect(() => {
+        const handler = (e: CustomEvent) => {
+            setSelfStats(e.detail);
+        };
+        window.addEventListener('self-update', handler as EventListener);
+        return () => window.removeEventListener('self-update', handler as EventListener);
+    }, []);
+
     return (
         <div className="interface-container">
-            <div className="bar-container hp-bar-container">
-                <div className="bar-fill hp-bar-fill" id="hpBar"></div>
-            </div>
-
-            <div className="bar-container mana-bar-container">
-                <div className="bar-fill mana-bar-fill" id="manaBar"></div>
+            <div className="absolute top-24 left-5 w-40 space-y-1">
+                <Progress id="hpBar" aria-label="HP" value={(selfStats.hp / MAX_HP) * 100} color="danger" />
+                <Progress id="manaBar" aria-label="Mana" value={selfStats.mana} color="primary" />
             </div>
 
             {target && (
                 <div id="targetPanel" className="target-panel">
                     <div id="targetAddress" className="target-address">{target.address}</div>
-                    <div className="bar-container hp-bar-container">
-                        <div
-                            className="bar-fill hp-bar-fill"
-                            id="targetHpBar"
-                            style={{width: `${(target.hp / MAX_HP) * 100}%`}}
-                        ></div>
-                    </div>
-                    <div className="bar-container mana-bar-container">
-                        <div className="bar-fill mana-bar-fill" id="targetManaBar" style={{width: `${target.mana}%`}}></div>
-                    </div>
+                    <Progress id="targetHpBar" aria-label="Target HP" value={(target.hp / MAX_HP) * 100} color="danger" className="mb-1 w-40" />
+                    <Progress id="targetManaBar" aria-label="Target Mana" value={target.mana} color="primary" className="w-40" />
                 </div>
             )}
 

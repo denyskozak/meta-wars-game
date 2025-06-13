@@ -138,11 +138,13 @@ export function Game({models, sounds, matchId, character}) {
         // Function to update the HP bar width
         function updateHPBar() {
             hpBar.style.width = `${(hp / MAX_HP) * 100}%`;
+            dispatchEvent('self-update', { hp, mana });
         }
 
         // Function to update the Mana bar width
         function updateManaBar() {
             manaBar.style.width = `${mana}%`;
+            dispatchEvent('self-update', { hp, mana });
         }
 
         function dispatchTargetUpdate() {
