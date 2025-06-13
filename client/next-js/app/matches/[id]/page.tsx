@@ -20,7 +20,7 @@ export default function MatchesPage() {
     const params = useParams();
     const router = useRouter();
     const {socket, sendToSocket} = useWS(params?.id);
-    const {dispatch} = useInterface();
+    const {dispatch} = useInterface() as any;
 
     const [match, setMatch] = useState<Match | null>(null);
     const [players, setPlayers] = useState<number[]>([]);
