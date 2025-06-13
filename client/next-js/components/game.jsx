@@ -840,7 +840,7 @@ export function Game({models, sounds, matchId, character}) {
             const BLINK_COOLDOWN = 10000; // Cooldown in milliseconds
 
             if (!isFocused) {
-                return;
+                handleRightClick();
             }
 
             if (globalSkillCooldown || isCasting || isSkillOnCooldown('blink')) {
@@ -910,7 +910,7 @@ export function Game({models, sounds, matchId, character}) {
             const HEAL_MANA_COST = 30; // Mana cost for healing
 
             if (!isFocused) {
-                return;
+                handleRightClick();
             }
 
             if (globalSkillCooldown || isCasting || isSkillOnCooldown('heal')) {
@@ -1012,7 +1012,7 @@ export function Game({models, sounds, matchId, character}) {
 
         function castSpell(spellType, playerId = myPlayerId) {
             if (!isFocused) {
-                return;
+                handleRightClick();
             }
 
             if (isSkillOnCooldown(spellType)) {
