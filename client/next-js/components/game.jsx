@@ -96,6 +96,7 @@ export function Game({models, sounds, matchId, character}) {
         const activeShields = new Map(); // key = playerId
         const activeHandEffects = new Map(); // key = playerId -> { effectKey: {left, right} }
         const activeIceVeins = new Map(); // key = playerId -> effect mesh
+        const activeDamageEffects = new Map(); // key = playerId -> effect mesh
         const activeImmolation = new Map(); // key = playerId -> effect mesh
 
         const glowTexture = (() => {
@@ -1917,6 +1918,35 @@ export function Game({models, sounds, matchId, character}) {
             }, duration);
         }
 
+        function applyDamageRuneEffect(playerId, duration = 60000) {
+            const existing = activeDamageEffects.get(playerId);
+            if (existing) {
+                existing.parent?.remove(existing);
+            }
+
+            const player = players.get(playerId)?.model;
+            if (!player) return;
+
+            const base = models['damage_effect'];
+            if (!base) return;
+
+            const effect = SkeletonUtils.clone(base);
+            effect.scale.set(0.5, 0.5, 0.5);
+            effect.traverse((child) => {
+                if (child.isMesh) {
+                    child.material = child.material.clone();
+                }
+            });
+
+            player.add(effect);
+            activeDamageEffects.set(playerId, effect);
+
+            setTimeout(() => {
+                effect.parent?.remove(effect);
+                activeDamageEffects.delete(playerId);
+            }, duration);
+        }
+
         function applyImmolationEffect(playerId, duration = 5000) {
             const existing = activeImmolation.get(playerId);
             if (existing) {
@@ -2133,6 +2163,15 @@ export function Game({models, sounds, matchId, character}) {
 
                     activeIceVeins.forEach((mesh) => {
                         // Rotate around the vertical axis so the effect spins horizontally
+                        mesh.rotation.y += delta * ICE_VEINS_ROT_SPEED;
+                        mesh.children.forEach(c => {
+                            if (c.material?.map) {
+                                c.material.map.offset.x -= delta * 0.2;
+                            }
+                        });
+                    });
+
+                    activeDamageEffects.forEach((mesh) => {
                         mesh.rotation.y += delta * ICE_VEINS_ROT_SPEED;
                         mesh.children.forEach(c => {
                             if (c.material?.map) {
@@ -2555,6 +2594,9 @@ export function Game({models, sounds, matchId, character}) {
                     break;
                 case "RUNE_PICKED":
                     removeRune(message.runeId);
+                    if (message.runeType === 'damage') {
+                        applyDamageRuneEffect(message.playerId);
+                    }
                     if (message.playerId === myPlayerId) {
                         let text = '';
                         switch (message.runeType) {
