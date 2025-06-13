@@ -970,7 +970,10 @@ export function Game({models, sounds, matchId, character}) {
             if (isFocused) {
                 const cameraPos = camera.position.clone();
                 const farPoint = cameraPos.clone().add(cameraDir.clone().multiplyScalar(1000));
-                const start = playerCollider.end.clone();
+                const start = playerCollider.start
+                    .clone()
+                    .add(playerCollider.end)
+                    .multiplyScalar(0.5);
                 return farPoint.sub(start).normalize();
             }
 
@@ -979,7 +982,10 @@ export function Game({models, sounds, matchId, character}) {
         }
 
         function getTargetPlayer() {
-            const origin = playerCollider.end.clone();
+            const origin = playerCollider.start
+                .clone()
+                .add(playerCollider.end)
+                .multiplyScalar(0.5);
             const dir = getAimDirection();
             const raycaster = new THREE.Raycaster(origin, dir, 0, FIREBLAST_RANGE);
             let closest = null;
@@ -1007,7 +1013,10 @@ export function Game({models, sounds, matchId, character}) {
             }
             const id = getTargetPlayer();
             if (id && players.has(id)) {
-                const start = playerCollider.end.clone();
+                const start = playerCollider.start
+                    .clone()
+                    .add(playerCollider.end)
+                    .multiplyScalar(0.5);
                 const targetPos = players.get(id).model.position.clone();
                 const dist = start.distanceTo(targetPos);
                 if (dist <= FIREBLAST_RANGE) {
@@ -1206,8 +1215,10 @@ export function Game({models, sounds, matchId, character}) {
             // Compute aim direction based on camera ray and player position
             const aimDir = getAimDirection();
 
-            const initialPosition = playerCollider.end
+            const initialPosition = playerCollider.start
                 .clone()
+                .add(playerCollider.end)
+                .multiplyScalar(0.5)
                 .addScaledVector(aimDir, playerCollider.radius * 2);
 
             sphereMesh.position.copy(initialPosition);
