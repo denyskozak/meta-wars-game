@@ -38,12 +38,12 @@ export default function MatchesPage() {
                 case 'GET_MATCH':
                     if (message.match) {
                         setMatch(message.match);
-                        setPlayers(Array.from(message.match.players).map(([id]) => Number(id)));
+                        setPlayers((message.match.players as Array<[string, unknown]>).map(([id]) => Number(id)));
                     }
                     break;
                 case 'MATCH_JOINED':
                     if (message.players) {
-                        setPlayers(Array.from(message.players).map(([id]) => Number(id)));
+                        setPlayers((message.players as Array<[string, unknown]>).map(([id]) => Number(id)));
                     }
                     break;
                 case 'PLAYER_LEFT':
