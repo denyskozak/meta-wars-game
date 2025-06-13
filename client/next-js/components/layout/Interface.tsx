@@ -8,6 +8,7 @@ import {Buffs} from "../parts/Buffs";
 import './Interface.css';
 import Image from "next/image";
 import React, {useEffect, useState} from "react";
+import {MAX_HP} from "../../consts";
 
 export const Interface = () => {
     const [target, setTarget] = useState<{id:number, hp:number, mana:number, address:string}|null>(null);
@@ -34,7 +35,11 @@ export const Interface = () => {
                 <div id="targetPanel" className="target-panel">
                     <div id="targetAddress" className="target-address">{target.address}</div>
                     <div className="bar-container hp-bar-container">
-                        <div className="bar-fill hp-bar-fill" id="targetHpBar" style={{width: `${target.hp / 2}%`}}></div>
+                        <div
+                            className="bar-fill hp-bar-fill"
+                            id="targetHpBar"
+                            style={{width: `${(target.hp / MAX_HP) * 100}%`}}
+                        ></div>
                     </div>
                     <div className="bar-container mana-bar-container">
                         <div className="bar-fill mana-bar-fill" id="targetManaBar" style={{width: `${target.mana}%`}}></div>
