@@ -1,4 +1,5 @@
 import React, {useLayoutEffect, useRef, useState} from "react";
+import {MAX_HP} from "../consts";
 import * as THREE from "three";
 import * as SkeletonUtils from "three/examples/jsm/utils/SkeletonUtils";
 import Stats from "three/examples/jsm/libs/stats.module";
@@ -78,7 +79,7 @@ export function Game({models, sounds, matchId, character}) {
         let camera;
         const animations = models["character_animations"];
 
-        let hp = 200,
+        let hp = MAX_HP,
             mana = 100;
         let actions = [];
         let playerMixers = [];
@@ -136,7 +137,7 @@ export function Game({models, sounds, matchId, character}) {
 
         // Function to update the HP bar width
         function updateHPBar() {
-            hpBar.style.width = `${hp / 2}%`;
+            hpBar.style.width = `${(hp / MAX_HP) * 100}%`;
         }
 
         // Function to update the Mana bar width
@@ -580,7 +581,7 @@ export function Game({models, sounds, matchId, character}) {
         };
 
         function respawnPlayer() {
-            hp = 200; // Восстанавливаем HP
+            hp = MAX_HP; // Восстанавливаем HP
             updateHPBar(); // Обновляем отображение HP
             sendToSocket({type: 'RESPAWN'});
             teleportTo({
