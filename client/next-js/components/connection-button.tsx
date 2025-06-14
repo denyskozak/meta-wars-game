@@ -15,7 +15,7 @@ export function ConnectionButton({className, text = "Connect"}: ConnectionButton
 
     if (currentAccount) {
         return (
-            <Button color="primary" onPress={() => router.push("/bag")}>
+            <Button color="primary" onPress={() => router.push("/loot")}>
                 Your bag
             </Button>
         );

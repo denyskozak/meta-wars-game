@@ -1,14 +1,14 @@
 import { useCurrentAccount, useSuiClientQuery } from "@mysten/dapp-kit";
 import { PACKAGE_ID } from "@/consts";
 
-export const useSkins = () => {
+export const useItems = () => {
   const account = useCurrentAccount();
 
   const { data, refetch } = useSuiClientQuery(
     "getOwnedObjects",
     {
       owner: account?.address || "",
-      filter: { StructType: `${PACKAGE_ID}::lootbox::Skin` },
+      filter: { StructType: `${PACKAGE_ID}::item::Item` },
       options: { showContent: true },
     },
     {
@@ -16,7 +16,7 @@ export const useSkins = () => {
     },
   );
 
-  const skins = Array.isArray(data?.data) ? data?.data : [];
+  const items = Array.isArray(data?.data) ? data.data : [];
 
-  return { skins, refetch };
+  return { items, refetch };
 };
