@@ -37,6 +37,7 @@ export default function castImmolate({
     },
     sounds.fireballCast,
     sounds.fireball,
-    meta.id
+    meta.id,
+    false
   );
 }

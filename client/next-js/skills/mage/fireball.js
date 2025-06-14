@@ -5,10 +5,11 @@ export default function castFireball({ playerId, castSpellImpl, igniteHands, cas
   castSpellImpl(
     playerId,
     30,
-    1500,
+    0,
     (model) => castSphere(model, fireballMesh.clone(), meta.id, damage),
     sounds.fireballCast,
     sounds.fireball,
-    meta.id
+    meta.id,
+    true
   );
 }
