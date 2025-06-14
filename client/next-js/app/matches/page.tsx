@@ -12,7 +12,6 @@ import {
 import {Input} from "@heroui/input";
 import {useRouter} from "next/navigation";
 import {Navbar} from "@/components/navbar";
-import {ProfileForm} from "@/components/profile-form";
 
 interface Match {
     id: string;
@@ -82,7 +81,6 @@ export default function MatchesPage() {
 
             <div className="flex justify-center items-center">
                <div className="max-w-[640px] min-w-[480px] flex gap-8 flex-col">
-                   <ProfileForm />
                    <Button size='lg' onPress={onOpen}>Create Match</Button>
                    <Button size='lg' color="primary" onPress={fetchMatches}>Fetch Matches</Button>
                    <Table aria-label="Example static collection table">

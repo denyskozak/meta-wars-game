@@ -415,6 +415,14 @@ ws.on('connection', (socket) => {
                         }));
                     }
                 });
+
+                socket.send(JSON.stringify({
+                    type: 'GET_MATCH',
+                    match: {
+                        ...matchToJoin,
+                        players: Array.from(matchToJoin.players),
+                    },
+                }));
                 break;
 
             case 'LEAVE_MATCH':
@@ -442,6 +450,14 @@ ws.on('connection', (socket) => {
                             }
                         });
                     }
+
+                    socket.send(JSON.stringify({
+                        type: 'GET_MATCH',
+                        match: {
+                            ...matchToLeave,
+                            players: Array.from(matchToLeave.players),
+                        },
+                    }));
                 }
                 break;
 

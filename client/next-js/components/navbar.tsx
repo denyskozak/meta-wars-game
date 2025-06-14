@@ -133,14 +133,16 @@ export const Navbar = () => {
           {account ? (
             <>
               {account && (
-                <Button
-                  className="text-sm font-normal text-default-600 bg-default-100"
-                  variant="flat"
-                >
-                  Balance:
-                  <CoinIcon className="text-danger" />
-                  {` ${convertMistToSui(data?.totalBalance ? Number(data?.totalBalance) : 0)}`}
-                </Button>
+                  <Button
+                      className="border-2 border-black shadow-lg overflow-hidden group "
+                      size="lg"
+                      onPress={() => router.push("/loot" )}
+                  >
+                      <span className="absolute inset-0 bg-gradient-to-r from-orange-500 via-yellow-500 to-purple-500 animate-pulse opacity-100 group-hover:opacity-100 blur-md" />
+                      <span className="relative z-10">
+                          Loot
+                      </span>
+                  </Button>
               )}
             </>
           ) : null}
