@@ -46,6 +46,18 @@ module meta_war::item {
         Item { id: object::new(ctx), item_type, options }
     }
 
+    /// Create item with options provided in a table. The table is transferred
+    /// into the new item. This allows the server to fully customise item
+    /// metadata before minting.
+    public fun create_item_with_options(
+        _cap: &AdminCap,
+        item_type: vector<u8>,
+        options: table::Table<vector<u8>, vector<u8>>,
+        ctx: &mut TxContext,
+    ): Item {
+        Item { id: object::new(ctx), item_type, options }
+    }
+
     /// Add key-value option to the item.
     public fun add_option(item: &mut Item, key: vector<u8>, value: vector<u8>) {
         table::add(&mut item.options, key, value)
