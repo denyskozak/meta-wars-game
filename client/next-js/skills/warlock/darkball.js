@@ -5,10 +5,11 @@ export default function castDarkball({ playerId, castSpellImpl, igniteHands, cas
   castSpellImpl(
     playerId,
     30,
-    1200,
+    0,
     (model) => castSphere(model, darkballMesh.clone(), meta.id, damage),
     sounds.fireballCast,
     sounds.fireball,
-    meta.id
+    meta.id,
+    true
   );
 }

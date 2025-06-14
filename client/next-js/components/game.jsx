@@ -1056,7 +1056,8 @@ export function Game({models, sounds, matchId, character}) {
                         () => castShield(),
                         sounds.spellCast,
                         sounds.spellCast,
-                        'ice-shield'
+                        'ice-shield',
+                        false
                     )
                     break;
                 case "fireball":
@@ -1135,7 +1136,8 @@ export function Game({models, sounds, matchId, character}) {
                         (model) => castSphere(model, darkballMesh.clone(), spellType, DARKBALL_DAMAGE),
                         sounds.fireballCast,
                         sounds.fireball,
-                        'darkball'
+                        'darkball',
+                        false
                     )
                     break;
                 case "fireblast":
@@ -1276,7 +1278,7 @@ export function Game({models, sounds, matchId, character}) {
         }
 
         function castSpellImpl(playerId, manaCost, duration, onUsage = () => {
-        }, soundCast, soundCastEnd, spellType) {
+        }, soundCast, soundCastEnd, spellType, instant = false) {
             if (globalSkillCooldown || isSkillOnCooldown(spellType)) {
                 return;
             }
@@ -1297,22 +1299,28 @@ export function Game({models, sounds, matchId, character}) {
                 duration = duration * (1 - (iceVeins.percent || 0.4));
             }
 
-            const onCastEnd = () => {
-                soundCast.pause();
-                // Play fireball sound
-                soundCastEnd.volume = 0.5; // Adjust volume if needed
+            const execute = () => {
+                soundCastEnd.volume = 0.5;
                 soundCastEnd.play();
 
-                isCasting = false;
-
                 if (players.has(playerId)) {
-                    const {model} = players.get(playerId);
-
+                    const { model } = players.get(playerId);
                     onUsage(model);
                 }
 
-                activateGlobalCooldown(); // Activate global cooldown
+                activateGlobalCooldown();
                 startSkillCooldown(spellType);
+            };
+
+            if (instant) {
+                execute();
+                return;
+            }
+
+            const onCastEnd = () => {
+                soundCast.pause();
+                isCasting = false;
+                execute();
             };
 
             isCasting = true;
@@ -1327,7 +1335,7 @@ export function Game({models, sounds, matchId, character}) {
                 reset: true,
                 clampWhenFinished: true,
             });
-            soundCast.volume = 0.5; // Adjust volume if needed
+            soundCast.volume = 0.5;
             soundCast.play();
             setTimeout(() => {
                 const actionName = 'castEnd';
@@ -1340,8 +1348,8 @@ export function Game({models, sounds, matchId, character}) {
                     reset: true,
                     clampWhenFinished: true,
                 });
-            }, duration * 0.5)
-            dispatchEvent('start-cast', {duration, onEnd: onCastEnd})
+            }, duration * 0.5);
+            dispatchEvent('start-cast', { duration, onEnd: onCastEnd });
         }
 
         function playerCollisions() {
