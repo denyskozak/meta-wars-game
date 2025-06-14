@@ -12,6 +12,7 @@ const client = new SuiClient({
 const PACKAGE_ID = '0x9747359e604b83d72dbaaa05ec39558a390138f656085d7abf6604e1805c3546';
 const TREASURY_CAP_OBJECT_ID = '0xa39d534ad0acc77b4d83f099a556d88ac11745c4d4d395b00d99217d9d22ff13';
 const LOOTBOX_CAP_OBJECT_ID = '0x0123456789abcdef';
+const ADMIN_CAP_OBJECT_ID = '0xabcdef0123456789';
 
 // Function to send a mint transaction
 async function mintCoins(recipientAddress, amount) {
@@ -79,6 +80,7 @@ async function mintItem(recipientAddress, itemType) {
         const [it] = tx.moveCall({
             target: `${PACKAGE_ID}::item::create_item`,
             arguments: [
+                tx.object(ADMIN_CAP_OBJECT_ID),
                 tx.pure.string(itemType),
             ],
         });

@@ -7,10 +7,15 @@ module meta_war::item_test {
 
     use meta_war::coin::{Self as mw_coin, COIN};
     use meta_war::item;
+    use meta_war::admin;
 
-    fun cap(ctx: &mut TestContext): &mut coin::TreasuryCap<COIN> acquires coin::TreasuryCap {
-        borrow_global_mut<coin::TreasuryCap<COIN>>(TestContext::sender(ctx))
-    }
+fun cap(ctx: &mut TestContext): &mut coin::TreasuryCap<COIN> acquires coin::TreasuryCap {
+    borrow_global_mut<coin::TreasuryCap<COIN>>(TestContext::sender(ctx))
+}
+
+fun admincap(ctx: &mut TestContext): &mut admin::AdminCap acquires admin::AdminCap {
+    borrow_global_mut<admin::AdminCap>(TestContext::sender(ctx))
+}
 
     fun bal(ctx: &mut TestContext): u64 acquires coin::Coin {
         let addr = TestContext::sender(ctx);
@@ -25,14 +30,18 @@ module meta_war::item_test {
 
     #[test_only]
     public fun test_create_item(ctx: &mut TestContext) {
-        let it = item::create_item(b"sword", ctx);
+        admin::init(ctx);
+        let cap_ref = test::borrow_my_mut<admin::AdminCap>(ctx, 0);
+        let it = item::create_item(&cap_ref, b"sword", ctx);
         assert!(vector::length(&it.item_type) == 5, 0);
         object::delete_object(it);
     }
 
     #[test_only]
     public fun test_add_option(ctx: &mut TestContext) {
-        let mut it = item::create_item(b"shield", ctx);
+        admin::init(ctx);
+        let cap_ref = test::borrow_my_mut<admin::AdminCap>(ctx, 0);
+        let mut it = item::create_item(&cap_ref, b"shield", ctx);
         item::add_option(&mut it, b"def", b"1");
         let val = table::borrow(&it.options, b"def");
         assert!(vector::length(&val) == 1, 0);
@@ -43,7 +52,9 @@ module meta_war::item_test {
     public fun test_award_coins(ctx: &mut TestContext)
             acquires coin::TreasuryCap, coin::Coin {
         mw_coin::init(mw_coin::COIN{}, ctx);
-        let rewards = item::create_rewards(1, 5, 10, ctx);
+        admin::init(ctx);
+        let cap_ref = test::borrow_my_mut<admin::AdminCap>(ctx, 0);
+        let rewards = item::create_rewards(&cap_ref, 1, 5, 10, ctx);
         let start = bal(ctx);
         item::award_coins(&rewards, 1, cap(ctx), TestContext::sender(ctx), ctx);
         assert!(bal(ctx) == start + 10, 0);

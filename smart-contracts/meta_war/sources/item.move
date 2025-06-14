@@ -6,6 +6,7 @@ module meta_war::item {
     use sui::coin;
 
     use meta_war::coin::{COIN};
+    use meta_war::admin::{AdminCap};
 
     /// Generic item that can store arbitrary options.
     public struct Item has key {
@@ -23,12 +24,24 @@ module meta_war::item {
     }
 
     /// Create reward table specifying coin reward for each category.
-    public fun create_rewards(simple: u64, rare: u64, epic: u64, ctx: &mut TxContext): RewardTable {
+    /// Requires admin capability to ensure only the server can mint rewards.
+    public fun create_rewards(
+        _cap: &AdminCap,
+        simple: u64,
+        rare: u64,
+        epic: u64,
+        ctx: &mut TxContext,
+    ): RewardTable {
         RewardTable { id: object::new(ctx), simple, rare, epic }
     }
 
     /// Mint new item of given type with empty options table.
-    public fun create_item(item_type: vector<u8>, ctx: &mut TxContext): Item {
+    /// Only callable by holder of the AdminCap.
+    public fun create_item(
+        _cap: &AdminCap,
+        item_type: vector<u8>,
+        ctx: &mut TxContext,
+    ): Item {
         let options = table::new<vector<u8>, vector<u8>>(ctx);
         Item { id: object::new(ctx), item_type, options }
     }
