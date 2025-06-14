@@ -427,23 +427,26 @@ export function Game({models, sounds, matchId, character}) {
 
         const renderer = new THREE.WebGLRenderer({antialias: true});
 
-        renderer.setPixelRatio(window.devicePixelRatio);
+        renderer.setPixelRatio(Math.min(window.devicePixelRatio, 1.5));
         renderer.setSize(window.innerWidth, window.innerHeight);
         renderer.setAnimationLoop(animate);
         renderer.shadowMap.enabled = true;
         renderer.shadowMap.type = THREE.VSMShadowMap;
         renderer.toneMapping = THREE.ACESFilmicToneMapping;
 
-        function preloadFireball() {
-            const temp = fireballMesh.clone();
+        function preloadMesh(mesh, color = 0xffaa33) {
+            const temp = mesh.clone();
             temp.visible = false;
-            const tempLight = new THREE.PointLight(0xffaa33, 1, 5);
-            temp.add(tempLight);
+            const light = new THREE.PointLight(color, 1, 5);
+            temp.add(light);
             scene.add(temp);
             renderer.compile(scene, camera);
             scene.remove(temp);
         }
-        preloadFireball();
+
+        preloadMesh(fireballMesh, 0xffaa33);
+        preloadMesh(darkballMesh, 0x8844ff);
+        preloadMesh(iceballMesh, 0x88ddff);
 
         const stats = new Stats();
 
