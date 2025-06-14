@@ -95,8 +95,54 @@ async function mintItem(recipientAddress, itemType) {
     }
 }
 
+async function mintItemWithOptions(recipientAddress, itemType, opts = {}) {
+    try {
+        const tx = new Transaction();
+
+        const [table] = tx.moveCall({
+            target: '0x2::table::new',
+            typeArguments: ['0x1::string::String', '0x1::string::String'],
+            arguments: [],
+        });
+
+        if (opts.class) {
+            tx.moveCall({
+                target: '0x2::table::add',
+                typeArguments: ['0x1::string::String', '0x1::string::String'],
+                arguments: [table, tx.pure.string('class'), tx.pure.string(opts.class)],
+            });
+        }
+
+        if (opts.skin) {
+            tx.moveCall({
+                target: '0x2::table::add',
+                typeArguments: ['0x1::string::String', '0x1::string::String'],
+                arguments: [table, tx.pure.string('skin'), tx.pure.string(opts.skin)],
+            });
+        }
+
+        const [it] = tx.moveCall({
+            target: `${PACKAGE_ID}::item::create_item_with_options`,
+            arguments: [
+                tx.object(ADMIN_CAP_OBJECT_ID),
+                tx.pure.string(itemType),
+                table,
+            ],
+        });
+        tx.transferObjects([it], tx.pure.address(recipientAddress));
+        tx.setGasBudget(10000000);
+        tx.setSender(keypair.toSuiAddress());
+        const bytes = await tx.build({ client });
+        const { signature, bytes: signed } = await keypair.signTransaction(bytes);
+        await client.executeTransactionBlock({ transactionBlock: signed, signature });
+    } catch (error) {
+        console.error('mintItemWithOptions failed:', error);
+    }
+}
+
 module.exports = {
     mintCoins,
     mintChest,
     mintItem,
+    mintItemWithOptions,
 };

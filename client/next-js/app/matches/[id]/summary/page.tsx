@@ -10,7 +10,9 @@ interface PlayerSummary {
     id: number;
     kills: number;
     deaths: number;
-    chest?: string;
+    reward: string;
+    coins: number;
+    item?: { class: string; skin: string } | null;
 }
 
 export default function MatchSummaryPage() {
@@ -50,7 +52,9 @@ export default function MatchSummaryPage() {
                             <TableColumn>Player</TableColumn>
                             <TableColumn>Kills</TableColumn>
                             <TableColumn>Deaths</TableColumn>
-                            <TableColumn>Chest</TableColumn>
+                            <TableColumn>Reward</TableColumn>
+                            <TableColumn>Coins</TableColumn>
+                            <TableColumn>Item</TableColumn>
                         </TableHeader>
                         <TableBody>
                             {summary.map(p => (
@@ -58,7 +62,9 @@ export default function MatchSummaryPage() {
                                     <TableCell>{`Player ${p.id}`}</TableCell>
                                     <TableCell>{p.kills}</TableCell>
                                     <TableCell>{p.deaths}</TableCell>
-                                    <TableCell>{p.chest}</TableCell>
+                                    <TableCell>{p.reward}</TableCell>
+                                    <TableCell>{p.coins}</TableCell>
+                                    <TableCell>{p.item ? `${p.item.skin} ${p.item.class}` : '-'}</TableCell>
                                 </TableRow>
                             ))}
                         </TableBody>

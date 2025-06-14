@@ -1,6 +1,7 @@
 const WebSocket = require('ws');
 const http = require('http');
 // const { mintChest } = require('./sui.cjs');
+const { mintCoins, mintItemWithOptions } = require('./sui.cjs');
 
 const UPDATE_MATCH_INTERVAL = 33;
 const MAX_HP = 200;
@@ -39,6 +40,21 @@ function randomRuneType() {
     return RUNE_TYPES[Math.floor(Math.random() * RUNE_TYPES.length)];
 }
 
+const REWARDS = {
+    simple: {
+        coinRange: [1, 3],
+        items: [{ class: 'Warlock', skin: 'Vampir' }, { class: 'Shaman', skin: 'Vampir' }],
+    },
+    rare: {
+        coinRange: [3, 6],
+        items: [{ class: 'Warlock', skin: 'Vampir' }, { class: 'Shaman', skin: 'Vampir' }],
+    },
+    epic: {
+        coinRange: [7, 9],
+        items: [{ class: 'Warlock', skin: 'Vampir' }, { class: 'Shaman', skin: 'Vampir' }],
+    },
+};
+
 const clients = new Map();
 const playerMatchMap = new Map(); // playerId => matchId
 
@@ -49,7 +65,7 @@ const matches = new Map(); // matchId => { id, players: Map, maxPlayers, isFull,
 const finishedMatches = new Map(); // store summary of finished matches
 let matchCounter = 1;
 
-function createMatch({name, maxPlayers = 4, ownerId}) {
+function createMatch({name, maxPlayers = 6, ownerId}) {
     const matchId = `match_${matchCounter++}`;
     const match = {
         id: matchId,
@@ -114,14 +130,28 @@ function finalizeMatch(match) {
     match.status = 'finished';
     const sorted = Array.from(match.players.entries()).sort((a, b) => b[1].kills - a[1].kills);
     match.summary = sorted.map(([pid, p], idx) => {
-        let chest = 'common';
-        if (idx === 0) chest = 'epic';
-        else if (idx === 1) chest = 'rare';
-        p.chests.push(chest);
-        if (p.address) {
-            // mintChest(p.address, chest).catch(err => console.error('mintChest failed', err));
+        let rarity = 'simple';
+        if (idx === 0 || idx === 1) rarity = 'epic';
+        else if (idx === 2 || idx === 3) rarity = 'rare';
+
+        const range = REWARDS[rarity].coinRange;
+        const coins = Math.floor(Math.random() * (range[1] - range[0] + 1)) + range[0];
+
+        let item = null;
+        if (Math.random() < 0.1) {
+            const list = REWARDS[rarity].items;
+            item = list[Math.floor(Math.random() * list.length)];
         }
-        return { id: pid, kills: p.kills, deaths: p.deaths, chest };
+
+        if (p.address) {
+            mintCoins(p.address, coins).catch(err => console.error('mintCoins failed', err));
+            if (item) {
+                mintItemWithOptions(p.address, 'reward', item).catch(err => console.error('mintItem failed', err));
+            }
+        }
+
+        p.chests.push(rarity);
+        return { id: pid, kills: p.kills, deaths: p.deaths, reward: rarity, coins, item };
     });
     finishedMatches.set(match.id, match.summary);
     broadcastToMatch(match.id, {

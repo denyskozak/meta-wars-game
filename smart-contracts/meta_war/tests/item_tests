@@ -38,6 +38,19 @@ fun admincap(ctx: &mut TestContext): &mut admin::AdminCap acquires admin::AdminC
     }
 
     #[test_only]
+    public fun test_create_item_with_options(ctx: &mut TestContext) {
+        admin::init(ctx);
+        let cap_ref = test::borrow_my_mut<admin::AdminCap>(ctx, 0);
+        let mut opts = table::new<vector<u8>, vector<u8>>(ctx);
+        table::add(&mut opts, b"class", b"Mage");
+        table::add(&mut opts, b"skin", b"Fire");
+        let it = item::create_item_with_options(&cap_ref, b"sword", opts, ctx);
+        let class = table::borrow(&it.options, b"class");
+        assert!(vector::length(&class) == 4, 0);
+        object::delete_object(it);
+    }
+
+    #[test_only]
     public fun test_add_option(ctx: &mut TestContext) {
         admin::init(ctx);
         let cap_ref = test::borrow_my_mut<admin::AdminCap>(ctx, 0);
