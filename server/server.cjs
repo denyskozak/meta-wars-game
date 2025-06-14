@@ -102,7 +102,23 @@ function broadcastToMatch(matchId, message, excludeId = null) {
     }
 }
 
-function createPlayer(address) {
+function broadcastMatchesToWaitingClients() {
+    const allMatches = Array.from(matches.values()).map(match => ({
+        ...match,
+        players: Array.from(match.players).map(([playerId]) => playerId),
+    }));
+
+    for (const [cid, client] of clients) {
+        if (!playerMatchMap.has(cid)) {
+            client.send(JSON.stringify({
+                type: 'MATCH_LIST',
+                matches: allMatches,
+            }));
+        }
+    }
+}
+
+function createPlayer(address, classType) {
     return {
         position: {
             x: 0,
@@ -120,7 +136,8 @@ function createPlayer(address) {
         hp: MAX_HP,
         mana: 100,
         chests: [],
-        address
+        address,
+        classType
     };
 }
 
@@ -388,6 +405,7 @@ ws.on('connection', (socket) => {
                     name: message.name,
                     ownerId: id,
                 });
+                broadcastMatchesToWaitingClients();
                 break;
 
             case 'JOIN_MATCH':
@@ -397,7 +415,7 @@ ws.on('connection', (socket) => {
                     break;
                 }
 
-                matchToJoin.players.set(id, createPlayer(message.address));
+                matchToJoin.players.set(id, createPlayer(message.address, message.classType || message.character?.name));
                 playerMatchMap.set(id, message.matchId);
                 if (matchToJoin.players.size >= matchToJoin.maxPlayers) {
                     matchToJoin.isFull = true;
@@ -423,6 +441,7 @@ ws.on('connection', (socket) => {
                         players: Array.from(matchToJoin.players),
                     },
                 }));
+                broadcastMatchesToWaitingClients();
                 break;
 
             case 'LEAVE_MATCH':
@@ -458,6 +477,7 @@ ws.on('connection', (socket) => {
                             players: Array.from(matchToLeave.players),
                         },
                     }));
+                    broadcastMatchesToWaitingClients();
                 }
                 break;
 
@@ -627,6 +647,7 @@ ws.on('connection', (socket) => {
                 }
             }
         }
+        broadcastMatchesToWaitingClients();
     });
 });
 
