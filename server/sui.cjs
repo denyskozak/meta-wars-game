@@ -73,7 +73,28 @@ async function mintChest(recipientAddress, type) {
     }
 }
 
+async function mintItem(recipientAddress, itemType) {
+    try {
+        const tx = new Transaction();
+        const [it] = tx.moveCall({
+            target: `${PACKAGE_ID}::item::create_item`,
+            arguments: [
+                tx.pure.string(itemType),
+            ],
+        });
+        tx.transferObjects([it], tx.pure.address(recipientAddress));
+        tx.setGasBudget(10000000);
+        tx.setSender(keypair.toSuiAddress());
+        const bytes = await tx.build({ client });
+        const { signature, bytes: signed } = await keypair.signTransaction(bytes);
+        await client.executeTransactionBlock({ transactionBlock: signed, signature });
+    } catch (error) {
+        console.error('mintItem failed:', error);
+    }
+}
+
 module.exports = {
     mintCoins,
     mintChest,
+    mintItem,
 };
