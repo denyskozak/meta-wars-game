@@ -6,26 +6,22 @@ import {Button, Table, TableHeader, TableColumn, TableBody, TableRow, TableCell}
 import {useParams, useRouter} from "next/navigation";
 import {Navbar} from "@/components/navbar";
 import {useInterface} from "@/context/inteface";
+import {InterfaceContextValue, MatchDetail, PlayerData} from "@/types";
 
 
-interface Match {
-    id: string;
-    name: string;
-    players: string[];
-    maxPlayers: number;
-    isFull: boolean;
-}
+type Match = MatchDetail;
 
 export default function MatchesPage() {
     const params = useParams();
     const router = useRouter();
     const {socket, sendToSocket} = useWS(params?.id);
-    const {dispatch} = useInterface() as any;
+    const {dispatch} = useInterface() as InterfaceContextValue;
 
     const [match, setMatch] = useState<Match | null>(null);
-    const [players, setPlayers] = useState<number[]>([]);
+    const [players, setPlayers] = useState<{id: number, address: string, classType: string}[]>([]);
     const [classType, setClassType] = useState('');
     const [skin, setSkin] = useState('mad');
+    const [joined, setJoined] = useState(false);
     const classOptions = [
         {value: 'mage', label: 'Mage', icon: '/icons/mage.png'},
         {value: 'warlock', label: 'Warlock', icon: '/icons/warlock.webp'},
@@ -38,16 +34,24 @@ export default function MatchesPage() {
                 case 'GET_MATCH':
                     if (message.match) {
                         setMatch(message.match);
-                        setPlayers((message.match.players as Array<[string, unknown]>).map(([id]) => Number(id)));
+                        setPlayers((message.match.players as Array<[string, PlayerData]>).map(([pid, pdata]) => ({
+                            id: Number(pid),
+                            address: pdata.address,
+                            classType: pdata.classType,
+                        })));
                     }
                     break;
                 case 'MATCH_JOINED':
                     if (message.players) {
-                        setPlayers((message.players as Array<[string, unknown]>).map(([id]) => Number(id)));
+                        setPlayers((message.players as Array<[string, PlayerData]>).map(([pid, pdata]) => ({
+                            id: Number(pid),
+                            address: pdata.address,
+                            classType: pdata.classType,
+                        })));
                     }
                     break;
                 case 'PLAYER_LEFT':
-                    setPlayers(prev => prev.filter(p => p !== message.playerId));
+                    setPlayers(prev => prev.filter(p => p.id !== message.playerId));
                     break;
                 case 'MATCH_READY':
                     router.push(`/matches/${params?.id}/game`);
@@ -57,15 +61,23 @@ export default function MatchesPage() {
 
         socket.addEventListener('message', handleMessage);
 
-        sendToSocket({type: 'JOIN_MATCH'});
-        sendToSocket({type: 'GET_MATCH'});
-
         return () => {
             socket.removeEventListener('message', handleMessage);
         };
     }, []);
 
+    useEffect(() => {
+        if (classType && !joined) {
+            sendToSocket({ type: 'JOIN_MATCH', classType });
+            sendToSocket({ type: 'GET_MATCH' });
+            setJoined(true);
+        }
+    }, [classType, joined]);
+
     const handleReady = () => {
+        if (!joined && classType) {
+            sendToSocket({ type: 'JOIN_MATCH', classType });
+        }
         dispatch({type: 'SET_CHARACTER', payload: {name: classType, skin}});
         router.push(`/matches/${params?.id}/game`);
     };
@@ -86,12 +98,14 @@ export default function MatchesPage() {
                             <h2 className="text-xl font-semibold">Lobby: {match?.name || params?.id}</h2>
                             <Table aria-label="Players">
                                 <TableHeader>
-                                    <TableColumn>Players</TableColumn>
+                                    <TableColumn>Address</TableColumn>
+                                    <TableColumn>Class</TableColumn>
                                 </TableHeader>
                                 <TableBody>
-                                    {players.map(pid => (
-                                        <TableRow key={pid}>
-                                            <TableCell>{`Player ${pid}`}</TableCell>
+                                    {players.map(p => (
+                                        <TableRow key={p.id}>
+                                            <TableCell>{p.address}</TableCell>
+                                            <TableCell>{p.classType}</TableCell>
                                         </TableRow>
                                     ))}
                                 </TableBody>

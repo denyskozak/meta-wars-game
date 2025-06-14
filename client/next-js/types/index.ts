@@ -1,4 +1,4 @@
-import { SVGProps } from "react";
+import React, { SVGProps } from "react";
 
 export type IconSvgProps = SVGProps<SVGSVGElement> & {
   size?: number;
@@ -47,4 +47,27 @@ export interface Championship {
       round: number;
     }[];
   };
+}
+
+export interface PlayerData {
+  address: string;
+  classType: string;
+}
+
+export interface MatchDetail {
+  id: string;
+  name: string;
+  players: Array<[string, PlayerData]>;
+  maxPlayers: number;
+  isFull: boolean;
+}
+
+export interface InterfaceAction {
+  type: string;
+  payload?: unknown;
+}
+
+export interface InterfaceContextValue {
+  state: unknown;
+  dispatch: React.Dispatch<InterfaceAction>;
 }
