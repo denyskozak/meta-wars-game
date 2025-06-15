@@ -21,6 +21,10 @@ export const siteConfig = {
       label: "Rating",
       href: "/rating",
     },
+    {
+      label: "DAO",
+      href: "/dao",
+    },
     // {
     //   label: "Pricing",
     //   href: "/pricing",
