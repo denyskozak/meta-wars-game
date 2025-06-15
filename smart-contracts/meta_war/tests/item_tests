@@ -30,7 +30,7 @@ fun admincap(ctx: &mut TestContext): &mut admin::AdminCap acquires admin::AdminC
 
     #[test_only]
     public fun test_create_item(ctx: &mut TestContext) {
-        admin::init(ctx);
+        admin::create_cap(ctx);
         let cap_ref = test::borrow_my_mut<admin::AdminCap>(ctx, 0);
         let it = item::create_item(&cap_ref, b"sword", ctx);
         assert!(vector::length(&it.item_type) == 5, 0);
@@ -39,7 +39,7 @@ fun admincap(ctx: &mut TestContext): &mut admin::AdminCap acquires admin::AdminC
 
     #[test_only]
     public fun test_create_item_with_options(ctx: &mut TestContext) {
-        admin::init(ctx);
+        admin::create_cap(ctx);
         let cap_ref = test::borrow_my_mut<admin::AdminCap>(ctx, 0);
         let mut opts = table::new<vector<u8>, vector<u8>>(ctx);
         table::add(&mut opts, b"class", b"Mage");
@@ -52,7 +52,7 @@ fun admincap(ctx: &mut TestContext): &mut admin::AdminCap acquires admin::AdminC
 
     #[test_only]
     public fun test_add_option(ctx: &mut TestContext) {
-        admin::init(ctx);
+        admin::create_cap(ctx);
         let cap_ref = test::borrow_my_mut<admin::AdminCap>(ctx, 0);
         let mut it = item::create_item(&cap_ref, b"shield", ctx);
         item::add_option(&mut it, b"def", b"1");
@@ -65,7 +65,7 @@ fun admincap(ctx: &mut TestContext): &mut admin::AdminCap acquires admin::AdminC
     public fun test_award_coins(ctx: &mut TestContext)
             acquires coin::TreasuryCap, coin::Coin {
         mw_coin::init(mw_coin::COIN{}, ctx);
-        admin::init(ctx);
+        admin::create_cap(ctx);
         let cap_ref = test::borrow_my_mut<admin::AdminCap>(ctx, 0);
         let rewards = item::create_rewards(&cap_ref, 1, 5, 10, ctx);
         let start = bal(ctx);
