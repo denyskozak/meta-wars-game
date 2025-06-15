@@ -1,7 +1,10 @@
 module meta_war::coin {
     use sui::coin::{Self, TreasuryCap};
+    use sui::tx_context::{Self, TxContext};
+    use sui::transfer;
     use sui::url::new_unsafe_from_bytes;
-
+    use sui::option;
+    use sui::coin;
 
     public struct COIN has drop {}
 

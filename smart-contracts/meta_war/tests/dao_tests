@@ -1,0 +1,19 @@
+module meta_war::dao_test {
+    use sui::test::{Self, TestContext};
+    use sui::object;
+
+    use meta_war::dao;
+    use meta_war::admin;
+
+    #[test_only]
+    public fun test_vote(ctx: &mut TestContext) {
+        admin::create_cap(ctx);
+        let cap_ref = test::borrow_my_mut<admin::AdminCap>(ctx, 0);
+        let ticket = dao::mint_ticket(&cap_ref, ctx);
+        let mut proposal = dao::create_proposal(&cap_ref, b"test", ctx);
+        dao::vote(&mut proposal, &ticket, true, ctx);
+        assert!(proposal.yes == 1, 0);
+        object::delete_object(ticket);
+        object::delete_object(proposal);
+    }
+}
