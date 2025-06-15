@@ -1,7 +1,6 @@
 import React, {useLayoutEffect, useRef, useState} from "react";
 import {MAX_HP} from "../consts";
 import * as THREE from "three";
-import { EXRLoader } from "three/examples/jsm/loaders/EXRLoader.js";
 import * as SkeletonUtils from "three/examples/jsm/utils/SkeletonUtils";
 import Stats from "three/examples/jsm/libs/stats.module";
 import {Octree} from "three/examples/jsm/math/Octree";
@@ -58,7 +57,7 @@ function dispatchEvent(name = '', detail = {}) {
     }))
 }
 
-export function Game({models, sounds, matchId, character}) {
+export function Game({models, sounds, textures, matchId, character}) {
     const containerRef = useRef(null);
     const {refetch: refetchCoins} = useCoins();
     const {dispatch} = useInterface();
@@ -187,7 +186,7 @@ export function Game({models, sounds, matchId, character}) {
             16      // radial-seg
         );
 
-        const fireTexture = new THREE.TextureLoader().load('/textures/fire.jpg');
+        const fireTexture = textures.fire;
         fireTexture.wrapS = fireTexture.wrapT = THREE.RepeatWrapping;
         const fireballMaterial = new THREE.ShaderMaterial({
             transparent: true,
@@ -276,7 +275,7 @@ export function Game({models, sounds, matchId, character}) {
 
         const iceballGeometry = new THREE.SphereGeometry(0.1, 16, 16); // Ледяной шар
 
-        const iceTexture = new THREE.TextureLoader().load('/textures/ice.jpg');
+        const iceTexture = textures.ice;
         iceTexture.wrapS = iceTexture.wrapT = THREE.RepeatWrapping;
 
         const iceballMaterial = new THREE.ShaderMaterial({
@@ -344,13 +343,11 @@ export function Game({models, sounds, matchId, character}) {
 
         const scene = new THREE.Scene();
 
-        // Load environment texture
-        const exrLoader = new EXRLoader();
-        exrLoader.load('/textures/world.exr', (texture) => {
-            texture.mapping = THREE.EquirectangularReflectionMapping;
-            scene.environment = texture;
-            scene.background = texture; // optional
-        });
+        // Use preloaded environment texture
+        const worldTexture = textures.world;
+        worldTexture.mapping = THREE.EquirectangularReflectionMapping;
+        scene.environment = worldTexture;
+        scene.background = worldTexture; // optional
 
         scene.fog = new THREE.Fog(0x88ccee, 0, 50);
 
@@ -1828,7 +1825,7 @@ export function Game({models, sounds, matchId, character}) {
 
         // Create a bubble-like shield
         const bubbleGeometry = new THREE.SphereGeometry(1.5, 32, 32); // Reduced segments for better performance
-        const frostNormal = new THREE.TextureLoader().load('/textures/ice.jpg');
+        const frostNormal = textures.ice.clone();
         frostNormal.wrapS = frostNormal.wrapT = THREE.RepeatWrapping;
         frostNormal.repeat.set(4, 4);                 // мелкий узор
 
