@@ -6,13 +6,17 @@ import {Scoreboard} from "../parts/Scoreboard";
 import {Buffs} from "../parts/Buffs";
 import {Progress} from "@heroui/react";
 
+import {useInterface} from "@/context/inteface";
+import {CLASS_ICONS} from "@/consts/classes";
+
 import './Interface.css';
 import Image from "next/image";
 import React, {useEffect, useState} from "react";
 import {MAX_HP} from "../../consts";
 
 export const Interface = () => {
-    const [target, setTarget] = useState<{id:number, hp:number, mana:number, address:string}|null>(null);
+    const {state: {character}} = useInterface();
+    const [target, setTarget] = useState<{id:number, hp:number, mana:number, address:string, classType?:string}|null>(null);
     const [selfStats, setSelfStats] = useState<{hp:number, mana:number}>({hp: MAX_HP, mana: 100});
 
     useEffect(() => {
@@ -33,16 +37,30 @@ export const Interface = () => {
 
     return (
         <div className="interface-container">
-            <div className="absolute top-24 left-5 w-40 space-y-1">
-                <Progress id="hpBar" aria-label="HP" value={(selfStats.hp / MAX_HP) * 100} color="primary" disableAnimation />
-                <Progress id="manaBar" aria-label="Mana" value={selfStats.mana} color="secondary" disableAnimation />
+            <div className="absolute top-24 left-5 flex items-center gap-2">
+                {character?.name && (
+                    <div className="w-8 h-8 rounded-full overflow-hidden bg-black/50 flex items-center justify-center">
+                        <Image src={CLASS_ICONS[character.name] || ''} alt={character.name} width={32} height={32}/>
+                    </div>
+                )}
+                <div className="w-40 space-y-1">
+                    <Progress id="hpBar" aria-label="HP" value={(selfStats.hp / MAX_HP) * 100} color="primary" disableAnimation />
+                    <Progress id="manaBar" aria-label="Mana" value={selfStats.mana} color="secondary" disableAnimation />
+                </div>
             </div>
 
             {target && (
                 <div id="targetPanel" className="target-panel">
-                    <div id="targetAddress" className="target-address">{target.address}</div>
-                    <Progress id="targetHpBar" aria-label="Target HP" value={(target.hp / MAX_HP) * 100} color="primary" className="mb-1 w-40" disableAnimation />
-                    <Progress id="targetManaBar" aria-label="Target Mana" value={target.mana} color="secondary" className="w-40" disableAnimation />
+                    {target.classType && (
+                        <div className="w-8 h-8 rounded-full overflow-hidden bg-black/50 flex items-center justify-center">
+                            <Image src={CLASS_ICONS[target.classType] || ''} alt={target.classType} width={32} height={32} />
+                        </div>
+                    )}
+                    <div className="flex flex-col">
+                        <div id="targetAddress" className="target-address">{target.address}</div>
+                        <Progress id="targetHpBar" aria-label="Target HP" value={(target.hp / MAX_HP) * 100} color="primary" className="mb-1 w-40" disableAnimation />
+                        <Progress id="targetManaBar" aria-label="Target Mana" value={target.mana} color="secondary" className="w-40" disableAnimation />
+                    </div>
                 </div>
             )}
 
