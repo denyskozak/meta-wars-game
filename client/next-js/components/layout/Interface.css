@@ -64,8 +64,8 @@
 
 #targetPanel {
     position: absolute;
-    top: 20px;
-    right: 20px;
+    top: 24px;
+    left: 180px;
     display: flex;
     align-items: center;
     gap: 4px;

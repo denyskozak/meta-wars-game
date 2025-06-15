@@ -2,7 +2,7 @@ export const meta = { id: 'fireblast', key: 'Q', icon: '/icons/spell_fire_fireba
 
 export default function castFireblast({ playerId, globalSkillCooldown, isCasting, mana, getTargetPlayer, dispatch, sendToSocket, activateGlobalCooldown, startSkillCooldown, FIREBLAST_DAMAGE, sounds }) {
   if (globalSkillCooldown || isCasting) return;
-  if (mana < 20) {
+  if (mana < 30) {
     console.log('Not enough mana for fireblast!');
     if (sounds?.noMana) {
       sounds.noMana.currentTime = 0;
