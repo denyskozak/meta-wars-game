@@ -1172,14 +1172,15 @@ export function Game({models, sounds, textures, matchId, character}) {
                     });
                     break;
                 case "ice-veins":
-                    castIceVeins({
+                    if (castIceVeins({
                         playerId,
                         activateIceVeins,
                         mana,
                         sounds,
-                    });
-                    activateGlobalCooldown();
-                    startSkillCooldown('ice-veins');
+                    })) {
+                        activateGlobalCooldown();
+                        startSkillCooldown('ice-veins');
+                    }
                     break;
             }
         }
