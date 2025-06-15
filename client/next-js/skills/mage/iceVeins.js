@@ -10,8 +10,9 @@ export default function castIceVeins({ playerId, activateIceVeins, mana, sounds 
       sounds.noMana.volume = 0.5;
       sounds.noMana.play();
     }
-    return;
+    return false;
   }
 
   activateIceVeins(playerId);
+  return true;
 }
