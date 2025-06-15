@@ -35,7 +35,7 @@ export const useDao = () => {
 
   const hasTicket = Array.isArray(tickets?.data) && tickets.data.length > 0;
   const ticketId = hasTicket
-    ? tickets.data[0].data?.objectId || tickets.data[0].reference?.objectId
+    ? tickets.data[0].data?.objectId
     : undefined;
 
   const proposals: DaoProposal[] = Array.isArray(proposalsData?.data)
@@ -46,7 +46,7 @@ export const useDao = () => {
           ? descBytes
           : new TextDecoder().decode(Uint8Array.from(descBytes));
         return {
-          id: p.data?.objectId || p.reference?.objectId || "",
+          id: p.data?.objectId || "",
           description,
           yes: Number(fields.yes || 0),
           no: Number(fields.no || 0),

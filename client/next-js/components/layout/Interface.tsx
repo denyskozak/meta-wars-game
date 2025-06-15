@@ -15,7 +15,9 @@ import React, {useEffect, useState} from "react";
 import {MAX_HP} from "../../consts";
 
 export const Interface = () => {
-    const {state: {character}} = useInterface();
+    const {
+        state: { character },
+    } = useInterface() as { state: { character: { name?: string } | null } };
     const [target, setTarget] = useState<{id:number, hp:number, mana:number, address:string, classType?:string}|null>(null);
     const [selfStats, setSelfStats] = useState<{hp:number, mana:number}>({hp: MAX_HP, mana: 100});
 
