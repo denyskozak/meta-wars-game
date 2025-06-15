@@ -1,6 +1,7 @@
 import React, {useLayoutEffect, useRef, useState} from "react";
 import {MAX_HP} from "../consts";
 import * as THREE from "three";
+import { EXRLoader } from "three/examples/jsm/loaders/EXRLoader.js";
 import * as SkeletonUtils from "three/examples/jsm/utils/SkeletonUtils";
 import Stats from "three/examples/jsm/libs/stats.module";
 import {Octree} from "three/examples/jsm/math/Octree";
@@ -343,7 +344,14 @@ export function Game({models, sounds, matchId, character}) {
 
         const scene = new THREE.Scene();
 
-        scene.background = new THREE.Color(0x88ccee);
+        // Load environment texture
+        const exrLoader = new EXRLoader();
+        exrLoader.load('/textures/world.exr', (texture) => {
+            texture.mapping = THREE.EquirectangularReflectionMapping;
+            scene.environment = texture;
+            scene.background = texture; // optional
+        });
+
         scene.fog = new THREE.Fog(0x88ccee, 0, 50);
 
         camera = new THREE.PerspectiveCamera(
