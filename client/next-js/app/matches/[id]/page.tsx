@@ -1,6 +1,6 @@
 "use client";
 import {useWS} from "@/hooks/useWS";
-import {useEffect, useMemo, useState} from "react";
+import {useCallback, useEffect, useMemo, useState} from "react";
 import Image from "next/image";
 import {Button, Table, TableHeader, TableColumn, TableBody, TableRow, TableCell} from "@heroui/react";
 import {useParams, useRouter} from "next/navigation";
@@ -18,14 +18,24 @@ export default function MatchesPage() {
     const {dispatch} = useInterface() as InterfaceContextValue;
 
     const [match, setMatch] = useState<Match | null>(null);
-    const [players, setPlayers] = useState<{id: number, address: string, classType: string}[]>([]);
+    const [players, setPlayers] = useState<{ id: number, address: string, classType: string }[]>([]);
     const [classType, setClassType] = useState('');
     const [skin, setSkin] = useState('mad');
     const [joined, setJoined] = useState(false);
-    const classOptions = [
-        {value: 'mage', label: 'Mage', icon: '/icons/mage.png'},
-        {value: 'warlock', label: 'Warlock', icon: '/icons/warlock.webp'},
-    ];
+    const classOptions = {
+        mage: {
+            label: 'Mage',
+            icon: '/icons/mage.png'
+        }
+        ,
+        warlock:
+            {
+                label: 'Warlock',
+                icon: '/icons/warlock.webp'
+            }
+        ,
+    };
+
     console.log("players: ", players);
     useEffect(() => {
         const handleMessage = (event: MessageEvent) => {
@@ -68,25 +78,20 @@ export default function MatchesPage() {
 
     useEffect(() => {
         if (classType && !joined) {
-            sendToSocket({ type: 'JOIN_MATCH', classType });
-            sendToSocket({ type: 'GET_MATCH' });
+            sendToSocket({type: 'JOIN_MATCH', classType});
+            sendToSocket({type: 'GET_MATCH'});
             setJoined(true);
         }
     }, [classType, joined]);
 
     const handleReady = () => {
         if (!joined && classType) {
-            sendToSocket({ type: 'JOIN_MATCH', classType });
+            sendToSocket({type: 'JOIN_MATCH', classType});
         }
         dispatch({type: 'SET_CHARACTER', payload: {name: classType, skin}});
         router.push(`/matches/${params?.id}/game`);
     };
 
-    const classInfo = useMemo(() => {
-        return classType
-            ? classOptions.find(({ value }) => value === classType)
-            : null;
-    }, [classType]);
 
     return (
         <div className="h-full">
@@ -105,7 +110,10 @@ export default function MatchesPage() {
                                     {players.map(p => (
                                         <TableRow key={p.id}>
                                             <TableCell>{p.address}</TableCell>
-                                            <TableCell>{p.classType}</TableCell>
+                                            <TableCell>{p.classType}
+                                                <Image src={classOptions[p.classType].icon || ''} alt={classOptions[p.classType].label || ''} title={classOptions[p.classType].label || ''} width={48}
+                                                       height={48}/>
+                                            </TableCell>
                                         </TableRow>
                                     ))}
                                 </TableBody>
@@ -113,7 +121,7 @@ export default function MatchesPage() {
 
                             <div className="flex gap-4 items-center flex-col">
 
-                                <Image src={classInfo?.icon || ''} alt={classInfo?.label || ''} width={256} height={256}/>
+
 
                                 <Button disabled={!Boolean(classType)} color="primary"
                                         onPress={handleReady}>Ready?</Button>
@@ -124,10 +132,10 @@ export default function MatchesPage() {
                         <div className="flex flex-col text-center">
                             <span className="mb-1 text-large">Choose a Class:</span>
                             <div className="grid grid-cols-2 gap-2 ">
-                                {classOptions.map(opt => (
+                                {Object.entries(classOptions).map(([value, opt]) => (
                                     <button
-                                        key={opt.value}
-                                        onClick={() => setClassType(opt.value)}
+                                        key={value}
+                                        onClick={() => setClassType(value)}
                                         className={`flex flex-col items-center p-2`}
                                     >
                                         <Image src={opt.icon} alt={opt.label} width={256} height={256}/>

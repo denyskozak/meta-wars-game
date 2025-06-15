@@ -20,24 +20,20 @@ export default function General() {
   const account = useCurrentAccount();
   const slides = [
     {
-      titles: ["Magic PvP", "with shooter elements  "],
-      subtitle:
-        "Truly feelings classic RPG with shooter mechanic",
+      titles: ["Arcane Warfare", "Meets Precision Shooting"],
+      subtitle: "Spell-slinging PvP with the thrill of FPS combat.",
     },
     {
-      titles: ["Play to Win", "and Earn"],
-      subtitle:
-        "Earn $MetaWars, loot, and gear — then trade it freely.",
+      titles: ["Win Battles,", "Earn Real Rewards"],
+      subtitle: "Claim $MetaWars tokens, loot, and rare gear — fully tradable.",
     },
     {
-      titles: ["First DAO", "based game"],
-      subtitle:
-        "Meta Wars is a DAO-native game — shaped by those who play it.",
+      titles: ["No Studio. No CEO.", "Just DAO."],
+      subtitle: "The first MMORPG built by players, not publishers.",
     },
     {
-      titles: ["Top Players", "Rule the Meta"],
-      subtitle:
-        "The best players influence real game balance and direction.",
+      titles: ["Climb the Ladder,", "Control the Game"],
+      subtitle: "Top players shape balance, economy, and the future of Meta Wars.",
     },
   ];
   const [index, setIndex] = useState(0);
@@ -45,7 +41,7 @@ export default function General() {
   useEffect(() => {
     const interval = setInterval(() => {
       setIndex((i) => (i + 1) % slides.length);
-    }, 3000);
+    }, 5000);
 
     return () => clearInterval(interval);
   }, []);
@@ -72,7 +68,7 @@ export default function General() {
   // }, []);
 
   return (
-    <div ref={container} className="pt-24 flex justify-center flex-col">
+    <div ref={container} className="pt-24 flex items-center flex-col">
       {/* HeroUI-like header */}
       <div style={{ textAlign: "center" }}>
         <div className="inline-block max-w-xl text-center justify-center items-center">
@@ -101,12 +97,9 @@ export default function General() {
               </div>
             </motion.div>
           </AnimatePresence>
-          <Link isExternal aria-label="Discord" href={siteConfig.links.discord}>
-            <DiscordIcon className="text-[#FFB457]" size={36} />
-          </Link>
         </div>
       </div>
-      <section className="m-auto flex justify-center items-center flex-col gap-2  fade-in-animation">
+      <section className="absolute bottom-1/3  flex justify-center items-center flex-col gap-2  fade-in-animation">
         {/*<div>*/}
         {/*    <span className={`${getTitle()} fade-in-animation`}>Championships&nbsp;</span>*/}
         {/*</div>*/}
