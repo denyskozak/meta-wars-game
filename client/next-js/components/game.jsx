@@ -158,6 +158,7 @@ export function Game({models, sounds, textures, matchId, character}) {
                 hp: p.hp,
                 mana: p.mana,
                 address: p.address || `Player ${targetedPlayerId}`,
+                classType: p.classType
             });
         }
 
@@ -2269,7 +2270,7 @@ export function Game({models, sounds, textures, matchId, character}) {
         }
 
         // Function to create a new player in the scene
-        function createPlayer(id, name = "", address = "") {
+        function createPlayer(id, name = "", address = "", classType = "") {
             if (models['character']) {
                 const player = SkeletonUtils.clone(models['character']);
                 player.position.set(...USER_DEFAULT_POSITION);
@@ -2337,6 +2338,7 @@ export function Game({models, sounds, textures, matchId, character}) {
                     prevPos: new THREE.Vector3().copy(player.position),
                     buffs: [],
                     address,
+                    classType,
                 });
                 playerMixers.push(mixer);   // массив всех чужих миксеров
             }
@@ -2359,6 +2361,9 @@ export function Game({models, sounds, textures, matchId, character}) {
                 playerData.hp = message.hp;
                 playerData.mana = message.mana;
                 playerData.address = message.address || playerData.address;
+                if (message.classType) {
+                    playerData.classType = message.classType;
+                }
 
                 const action = actions?.[message.animationAction];
                 if (action && message.animationAction !== playerData.currentAction) {
@@ -2527,6 +2532,18 @@ export function Game({models, sounds, textures, matchId, character}) {
             let message = JSON.parse(event.data);
 
             switch (message.type) {
+                case "GET_MATCH":
+                    if (message.match && Array.isArray(message.match.players)) {
+                        message.match.players.forEach(([pid, pdata]) => {
+                            const id = Number(pid);
+                            if (players.has(id)) {
+                                players.get(id).classType = pdata.classType;
+                            } else {
+                                players.set(id, { classType: pdata.classType });
+                            }
+                        });
+                    }
+                    break;
                 case "CAST_SPELL":
                     switch (message?.payload?.type) {
                         case "fireball":
@@ -2710,7 +2727,8 @@ export function Game({models, sounds, textures, matchId, character}) {
                     console.log("MATCH_READY: ", message);
                     myPlayerId = message.myPlayerId;
                     message.players.forEach((playerId) => {
-                        createPlayer(Number(playerId), String(playerId));
+                        const cls = players.get(Number(playerId))?.classType || "";
+                        createPlayer(Number(playerId), String(playerId), String(playerId), cls);
                     })
                     break;
             }
@@ -2718,6 +2736,9 @@ export function Game({models, sounds, textures, matchId, character}) {
 
         socket.addEventListener('message', handleMessage);
 
+        sendToSocket({
+            type: 'GET_MATCH'
+        });
         sendToSocket({
             type: 'READY_FOR_MATCH'
         });
