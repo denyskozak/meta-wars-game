@@ -1,7 +1,7 @@
 const WebSocket = require('ws');
 const http = require('http');
 // const { mintChest } = require('./sui.cjs');
-const { mintCoins, mintItemWithOptions } = require('./sui.cjs');
+// const { mintCoins, mintItemWithOptions } = require('./sui.cjs');
 
 const UPDATE_MATCH_INTERVAL = 33;
 const MAX_HP = 200;
@@ -161,10 +161,10 @@ function finalizeMatch(match) {
         }
 
         if (p.address) {
-            mintCoins(p.address, coins).catch(err => console.error('mintCoins failed', err));
-            if (item) {
-                mintItemWithOptions(p.address, 'reward', item).catch(err => console.error('mintItem failed', err));
-            }
+            // mintCoins(p.address, coins).catch(err => console.error('mintCoins failed', err));
+            // if (item) {
+            //     mintItemWithOptions(p.address, 'reward', item).catch(err => console.error('mintItem failed', err));
+            // }
         }
 
         p.chests.push(rarity);
@@ -295,7 +295,7 @@ ws.on('connection', (socket) => {
         for (const match of matches.values()) {
             match.players.forEach((player, pid) => {
                 if (player.mana < 100) {
-                    player.mana = Math.min(100, player.mana + 1);
+                    player.mana = Math.min(100, player.mana + 3);
                 }
                 if (player.buffs.length) {
                     player.buffs = player.buffs.filter(b => b.expires > now);
