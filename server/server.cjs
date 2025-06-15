@@ -555,7 +555,7 @@ ws.on('connection', (socket) => {
                                 target.debuffs.push({
                                     type: 'corruption',
                                     casterId: id,
-                                    damage: 4,
+                                    damage: 8,
                                     interval: 2000,
                                     nextTick: Date.now() + 2000,
                                     ticks: 5,
@@ -570,7 +570,7 @@ ws.on('connection', (socket) => {
                                 target.debuffs.push({
                                     type: 'immolate',
                                     casterId: id,
-                                    damage: 7,
+                                    damage: 10,
                                     interval: 1000,
                                     nextTick: Date.now() + 1000,
                                     ticks: 5,
