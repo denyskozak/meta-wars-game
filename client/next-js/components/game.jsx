@@ -163,7 +163,7 @@ export function Game({models, sounds, textures, matchId, character}) {
         }
 
         // Function to handle damage and update health
-        let takeDamage = (amount, userIdTouched) => {
+        let takeDamage = (amount, userIdTouched, spellType = '') => {
             if (isShieldActive) {
                 amount *= DAMAGE_REDUCTION; // Apply damage reduction
             }
@@ -177,6 +177,7 @@ export function Game({models, sounds, textures, matchId, character}) {
                 type: "TAKE_DAMAGE",
                 damageDealerId: userIdTouched,
                 damage: amount,
+                spellType,
             });
         };
 
@@ -1174,6 +1175,8 @@ export function Game({models, sounds, textures, matchId, character}) {
                     castIceVeins({
                         playerId,
                         activateIceVeins,
+                        mana,
+                        sounds,
                     });
                     activateGlobalCooldown();
                     startSkillCooldown('ice-veins');
@@ -1431,10 +1434,9 @@ export function Game({models, sounds, textures, matchId, character}) {
                 if (sphere.type === 'fireball') {
                     applyImmolationEffect(myPlayerId, 1000);
                 } else if (sphere.type === 'iceball') {
-                    movementSpeedModifier = 0.5;
-                    setTimeout(() => (movementSpeedModifier = 1), 1000);
+                    applySlowEffect(myPlayerId, 1000);
                 }
-                takeDamage(damage, userIdTouched);
+                takeDamage(damage, userIdTouched, sphere.type);
             }
         }
 
@@ -2002,6 +2004,13 @@ export function Game({models, sounds, textures, matchId, character}) {
             }, duration);
         }
 
+        function applySlowEffect(playerId, duration = 1000) {
+            if (playerId === myPlayerId) {
+                movementSpeedModifier = 0.5;
+                setTimeout(() => (movementSpeedModifier = 1), duration);
+            }
+        }
+
 
         function toggleShieldOnPlayer(id, visible) {
             let shield = activeShields.get(id);
@@ -2558,12 +2567,17 @@ export function Game({models, sounds, textures, matchId, character}) {
                             freezeHands(message.id, 1000);
                             castSphereOtherUser(message.payload, message.id);
                             break;
+                        case "iceball-hit":
+                            if (message.payload.targetId === myPlayerId) {
+                                applySlowEffect(myPlayerId, 1000);
+                            }
+                            break;
                         case "shield":
                             castShieldOtherUser(message.payload, message.id)
                             break;
                         case "fireblast":
                             if (message.payload.targetId === myPlayerId) {
-                                takeDamage(message.payload.damage, message.id);
+                                takeDamage(message.payload.damage, message.id, 'fireblast');
                             }
                             break;
                         case "corruption":
@@ -2585,7 +2599,7 @@ export function Game({models, sounds, textures, matchId, character}) {
                             break;
                         case "conflagrate":
                             if (message.payload.targetId === myPlayerId) {
-                                takeDamage(message.payload.damage, message.id);
+                                takeDamage(message.payload.damage, message.id, 'conflagrate');
                             }
                             break;
                         case "ice-veins":

@@ -6,17 +6,17 @@ const { mintCoins, mintItemWithOptions } = require('./sui.cjs');
 const UPDATE_MATCH_INTERVAL = 33;
 const MAX_HP = 200;
 const SPELL_COST = {
-    'fireball': 25,
+    'fireball': 35,
     'darkball': 25,
     'corruption': 30,
     'immolate': 30,
-    'iceball': 25,
-    'fireblast': 20,
+    'iceball': 35,
+    'fireblast': 30,
     'conflagrate': 20,
     'shield': 80,
     'blink': 20,
     'heal': 30,
-    'ice-veins': 40,
+    'ice-veins': 50,
 };
 
 const RUNE_POSITIONS = [
@@ -302,12 +302,21 @@ ws.on('connection', (socket) => {
                 }
                 if (player.debuffs && player.debuffs.length) {
                     player.debuffs = player.debuffs.filter(deb => {
-                        if (deb.nextTick <= now) {
+                        if (deb.nextTick !== undefined && deb.nextTick <= now) {
                             deb.nextTick = now + deb.interval;
                             applyDamage(match, pid, deb.casterId, deb.damage);
                             deb.ticks--;
                         }
-                        return deb.ticks > 0;
+
+                        if (deb.ticks !== undefined) {
+                            return deb.ticks > 0;
+                        }
+
+                        if (deb.expires !== undefined) {
+                            return deb.expires > now;
+                        }
+
+                        return false;
                     });
                 }
             });
@@ -583,6 +592,24 @@ ws.on('connection', (socket) => {
             case 'TAKE_DAMAGE':
                 if (match) {
                     applyDamage(match, id, message.damageDealerId, message.damage);
+                    if (message.spellType === 'iceball') {
+                        const target = match.players.get(id);
+                        if (target) {
+                            target.debuffs = target.debuffs || [];
+                            target.debuffs = target.debuffs.filter(d => d.type !== 'slow');
+                            target.debuffs.push({
+                                type: 'slow',
+                                percent: 0.5,
+                                expires: Date.now() + 1000,
+                                icon: '/icons/spell_frostbolt.jpg',
+                            });
+                            broadcastToMatch(match.id, {
+                                type: 'CAST_SPELL',
+                                payload: { type: 'iceball-hit', targetId: id },
+                                id: message.damageDealerId,
+                            });
+                        }
+                    }
                 }
                 break;
 
