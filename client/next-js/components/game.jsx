@@ -252,10 +252,8 @@ export function Game({models, sounds, textures, matchId, character}) {
                   gl_FragColor = vec4(col, alpha);
                 }`
         });
-        const fireballMesh = new THREE.Mesh(
-            fireballGeometry,
-            fireballMaterial     // own instance
-        );
+        const fireballMesh = SkeletonUtils.clone(models['fireball']);
+        fireballMesh.scale.set(0.3, 0.3, 0.3);
 
         const darkballMaterial = new THREE.ShaderMaterial({
             transparent: true,
@@ -2491,15 +2489,19 @@ export function Game({models, sounds, textures, matchId, character}) {
         }
 
         function castSphereOtherUser(data, ownerId) {
-            let material;
+            let sphere;
             if (data.type === "fireball") {
-                material = fireballMaterial;
-            } else if (data.type === "darkball") {
-                material = darkballMaterial;
+                sphere = SkeletonUtils.clone(models['fireball']);
+                sphere.scale.set(0.3, 0.3, 0.3);
             } else {
-                material = iceballMaterial;
+                let material;
+                if (data.type === "darkball") {
+                    material = darkballMaterial;
+                } else {
+                    material = iceballMaterial;
+                }
+                sphere = new THREE.Mesh(fireballGeometry, material.clone());
             }
-            const sphere = new THREE.Mesh(fireballGeometry, material.clone());
 
             sphere.position.set(
                 data.position.x,

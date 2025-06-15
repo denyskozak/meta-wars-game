@@ -6,6 +6,7 @@ import * as THREE from "three";
 import { EXRLoader } from "three/examples/jsm/loaders/EXRLoader.js";
 import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader";
 import { DRACOLoader } from "three/examples/jsm/loaders/DRACOLoader";
+import { FBXLoader } from "three/examples/jsm/loaders/FBXLoader";
 import { MeshoptDecoder } from "three/examples/jsm/libs/meshopt_decoder.module.js";
 import { useParams } from "next/navigation";
 
@@ -21,6 +22,7 @@ const dracoLoader = new DRACOLoader();
 dracoLoader.setDecoderPath("/libs/draco/");
 
 const loader = new GLTFLoader().setPath("/models/");
+const fbxLoader = new FBXLoader().setPath("/models/");
 
 loader.setDRACOLoader(dracoLoader);
 loader.setMeshoptDecoder(MeshoptDecoder);
@@ -51,6 +53,7 @@ export default function GamePage() {
         {id: 'mana_rune', path: 'mana_rune.glb'},
         {id: 'mage_staff', path: 'skins/items/mage-staff.glb'},
         {id: 'warlock_staff', path: 'skins/items/warlock-staff.glb'},
+        {id: 'fireball', path: 'fireball.fbx'},
         {id: 'ice-veins', path: 'ice-veins.glb'},
         {id: 'damage_effect', path: 'ice-veins.glb'},
     ];
@@ -62,12 +65,19 @@ export default function GamePage() {
       const promises = modelPaths.map(
         (model) =>
           new Promise<void>((resolve, reject) => {
-            loader.load(
+            const loaderToUse = model.path.endsWith('.fbx') ? fbxLoader : loader;
+            loaderToUse.load(
               model.path,
-              (gltf) => {
-                loadedModels[model.id] = gltf.scene;
-                if (gltf.animations) {
-                  loadedModels[`${model.id}_animations`] = gltf.animations;
+              (obj) => {
+                // GLTFLoader returns a GLTF object with scene and animations
+                if ('scene' in obj) {
+                  loadedModels[model.id] = obj.scene;
+                  if (obj.animations) {
+                    loadedModels[`${model.id}_animations`] = obj.animations;
+                  }
+                } else {
+                  // FBXLoader returns a THREE.Group directly
+                  loadedModels[model.id] = obj;
                 }
                 resolve();
               },
