@@ -1,12 +1,22 @@
 "use client";
 
-import { Card, Table, TableHeader, TableColumn, TableBody, TableRow, TableCell, Button } from "@heroui/react";
+import {Card, Table, TableHeader, TableColumn, TableBody, TableRow, TableCell, Button, addToast} from "@heroui/react";
 import { Navbar } from "@/components/navbar";
 import { title } from "@/components/primitives";
 import { useDao } from "@/hooks/useDao";
 
 export default function DaoPage() {
   const { proposals, hasTicket, vote } = useDao();
+
+  const voteHandler = (id: string, value: boolean) => {
+    if (hasTicket) {
+      addToast({
+        title: "For voting join Meta-Wars organization.",
+      });
+      return;
+    }
+    return vote(id, value);
+  };
 
   return (
     <div className="h-full">
@@ -19,7 +29,7 @@ export default function DaoPage() {
               <TableColumn>Description</TableColumn>
               <TableColumn>Yes</TableColumn>
               <TableColumn>No</TableColumn>
-              {hasTicket && <TableColumn>Vote</TableColumn>}
+              <TableColumn>Vote</TableColumn>
             </TableHeader>
             <TableBody>
               {proposals.map((p) => (
@@ -27,14 +37,12 @@ export default function DaoPage() {
                   <TableCell>{p.description}</TableCell>
                   <TableCell>{p.yes}</TableCell>
                   <TableCell>{p.no}</TableCell>
-                  {hasTicket && (
                     <TableCell>
                       <div className="flex gap-2">
-                        <Button size="sm" onPress={() => vote(p.id, true)}>Yes</Button>
-                        <Button size="sm" onPress={() => vote(p.id, false)}>No</Button>
+                        <Button size="sm" onPress={() => voteHandler(p.id, true)}>Yes</Button>
+                        <Button size="sm" onPress={() => voteHandler(p.id, false)}>No</Button>
                       </div>
                     </TableCell>
-                  )}
                 </TableRow>
               ))}
             </TableBody>
