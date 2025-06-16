@@ -42,7 +42,7 @@ export const Interface = () => {
             <div className="absolute top-24 left-5 flex items-center gap-2">
                 {character?.name && (
                     <div className="w-8 h-8 rounded-full overflow-hidden bg-black/50 flex items-center justify-center">
-                        <Image src={CLASS_ICONS[character.name] || ''} alt={character.name} width={32} height={32}/>
+                        <Image src={CLASS_ICONS[character.name] || ''} alt={character.name} width={250} height={250}/>
                     </div>
                 )}
                 <div className="w-40 space-y-1">
@@ -55,7 +55,7 @@ export const Interface = () => {
                 <div id="targetPanel" className="target-panel">
                     {target.classType && (
                         <div className="w-8 h-8 rounded-full overflow-hidden bg-black/50 flex items-center justify-center">
-                            <Image src={CLASS_ICONS[target.classType] || ''} alt={target.classType} width={32} height={32} />
+                            <Image src={CLASS_ICONS[target.classType] || ''} alt={target.classType} width={250} height={250} />
                         </div>
                     )}
                     <div className="flex flex-col">
