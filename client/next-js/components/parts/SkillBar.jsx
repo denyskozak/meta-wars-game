@@ -23,6 +23,7 @@ export const SkillBar = () => {
     const skills = character?.name === 'warlock' ? WARLOCK_SKILLS : DEFAULT_SKILLS;
 
     const [cooldowns, setCooldowns] = useState({});
+    const [pressed, setPressed] = useState({});
 
     useEffect(() => {
         const handleCooldown = (e) => {
@@ -34,7 +35,19 @@ export const SkillBar = () => {
             }));
         };
         window.addEventListener('skill-cooldown', handleCooldown);
-        return () => window.removeEventListener('skill-cooldown', handleCooldown);
+        const handleSkillUse = (e) => {
+            const {skill} = e.detail || {};
+            if (!skill) return;
+            setPressed((p) => ({...p, [skill]: true}));
+            setTimeout(() => {
+                setPressed((p) => ({...p, [skill]: false}));
+            }, 150);
+        };
+        window.addEventListener('skill-use', handleSkillUse);
+        return () => {
+            window.removeEventListener('skill-cooldown', handleCooldown);
+            window.removeEventListener('skill-use', handleSkillUse);
+        };
     }, []);
 
     useEffect(() => {
@@ -65,7 +78,7 @@ export const SkillBar = () => {
                     text = Math.ceil(remaining / 1000);
                 }
                 return (
-                    <div className="skill-button" key={skill.id}>
+                    <div className={`skill-button${pressed[skill.id] ? ' pressed' : ''}`} key={skill.id}>
                         <div className="skill-icon" style={{backgroundImage: `url('${skill.icon}')`}}></div>
                         {data && (
                             <div className="cooldown-overlay">
