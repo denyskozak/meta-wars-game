@@ -17,6 +17,15 @@
     transform: scale(1.1);
 }
 
+.skill-button:active {
+    transform: scale(0.9);
+}
+
+.skill-button.pressed {
+    transform: scale(0.9);
+    transition-duration: 0.1s;
+}
+
 .skill-icon {
     width: 80%;
     height: 80%;

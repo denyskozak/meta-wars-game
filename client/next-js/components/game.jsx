@@ -1037,6 +1037,7 @@ export function Game({models, sounds, textures, matchId, character}) {
 
 
         function castSpell(spellType, playerId = myPlayerId) {
+            dispatchEvent('skill-use', { skill: spellType });
             if (!isFocused) {
                 handleRightClick();
             }
@@ -1213,14 +1214,6 @@ export function Game({models, sounds, textures, matchId, character}) {
 
             scene.add(sphereMesh); // Add the sphereMesh to the scene
 
-            const lightColor = {
-                fireball: 0xffaa33,
-                darkball: 0x8844ff,
-                iceball: 0x88ddff,
-            }[type] || 0xffffff;
-            const light = new THREE.PointLight(lightColor, 1, 5);
-            light.position.copy(sphereMesh.position);
-            scene.add(light);
 
             // Compute aim direction based on camera ray and player position
             const aimDir = getAimDirection();
@@ -1275,7 +1268,6 @@ export function Game({models, sounds, textures, matchId, character}) {
                 initialPosition: initialPosition,
                 type,
                 damage,
-                light,
                 ownerId: myPlayerId,
 
                 trail: [], // массив точек следа
@@ -1479,9 +1471,6 @@ export function Game({models, sounds, textures, matchId, character}) {
 
         const removeSphere = (sphere, index) => {
             scene.remove(sphere.mesh); // Remove the fireball from the scene
-            if (sphere.light) {
-                scene.remove(sphere.light);
-            }
             spheres.splice(index, 1); // Remove it from the array
 
             if (sphere.trail) {
@@ -1552,9 +1541,6 @@ export function Game({models, sounds, textures, matchId, character}) {
 
             for (let sphere of spheres) {
                 sphere.mesh.position.copy(sphere.collider.center);
-                if (sphere.light) {
-                    sphere.light.position.copy(sphere.collider.center);
-                }
             }
         }
 
