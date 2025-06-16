@@ -575,8 +575,8 @@ export function Game({models, sounds, textures, matchId, character}) {
 
 
         const trailGeometry = new THREE.SphereGeometry(0.05, 8, 8); // Маленький шар
-        const TRAIL_INTERVAL = 5; // В мс, как часто добавлять точки
-        const TRAIL_LIFETIME = 100; // Сколько живет одна точка
+        const TRAIL_INTERVAL = 1; // В мс, как часто добавлять точки
+        const TRAIL_LIFETIME = 250; // Сколько живет одна точка
 
         function adjustFOV(delta) {
             camera.fov = THREE.MathUtils.clamp(camera.fov + delta, minFOV, maxFOV);
