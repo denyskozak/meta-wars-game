@@ -31,6 +31,19 @@ const RUNE_POSITIONS = [
     {x: -14.943379506611887, y: 0.41016149148808506, z: -12.976100563215507},
 ];
 
+const SPAWN_POINTS = [
+    {x: -41.849391064557935, y: 1.3085525784595764, z: -0.7840938159276118},
+    {x: -46.42248289494676, y: 0.41527976194619626, z: -21.603091194083497},
+    {x: -30.74329645409973, y: 0.30453703672891463, z: -28.155936814794597},
+    {x: -13.000132445208342, y: 0.2797758251195597, z: -25.188257878192154},
+    {x: -13.490956800438346, y: 0.39571999597926, z: 1.1589954251604742},
+    {x: -41.95264509377698, y: 1.4702305560704132, z: 0.9677510383984183},
+];
+
+function randomSpawnPoint() {
+    return SPAWN_POINTS[Math.floor(Math.random() * SPAWN_POINTS.length)];
+}
+
 const RUNE_TYPES = ['damage', 'heal', 'mana'];
 
 function randomRuneType() {
@@ -116,12 +129,10 @@ function broadcastMatchesToWaitingClients() {
 }
 
 function createPlayer(address, classType) {
+    const spawn = randomSpawnPoint();
     return {
-        position: {
-            x: 0,
-            y: 0,
-            z: 0
-        },
+        position: {...spawn},
+        spawn_point: spawn,
         animationAction: '',
         rotation: {y: 0},
         buffs: [],
@@ -253,6 +264,18 @@ function applyDamage(match, victimId, dealerId, damage) {
                 finalizeMatch(match);
             }
         }
+
+        const spawn = randomSpawnPoint();
+        victim.position = { ...spawn };
+        victim.spawn_point = spawn;
+        victim.hp = MAX_HP;
+        victim.mana = 100;
+
+        broadcastToMatch(match.id, {
+            type: 'PLAYER_RESPAWN',
+            playerId: victimId,
+            position: spawn,
+        });
     }
 
     broadcastToMatch(match.id, {
@@ -344,6 +367,13 @@ ws.on('connection', (socket) => {
                             }),
                         };
                         broadcastToMatch(match.id, matchReadyMessage);
+                        match.players.forEach((p, pid) => {
+                            broadcastToMatch(match.id, {
+                                type: 'PLAYER_RESPAWN',
+                                playerId: pid,
+                                position: p.position,
+                            });
+                        });
                     }
                 }
                 break;
@@ -421,7 +451,13 @@ ws.on('connection', (socket) => {
                     break;
                 }
 
-                matchToJoin.players.set(id, createPlayer(message.address, message.classType || message.character?.name));
+                const newPlayer = createPlayer(message.address, message.classType || message.character?.name);
+                matchToJoin.players.set(id, newPlayer);
+                broadcastToMatch(matchToJoin.id, {
+                    type: 'PLAYER_RESPAWN',
+                    playerId: id,
+                    position: newPlayer.position,
+                });
                 playerMatchMap.set(id, message.matchId);
                 if (matchToJoin.players.size >= matchToJoin.maxPlayers) {
                     matchToJoin.isFull = true;
