@@ -46,8 +46,8 @@ export const Interface = () => {
                     </div>
                 )}
                 <div className="w-40 space-y-1">
-                    <Progress id="hpBar" aria-label="HP" value={(selfStats.hp / MAX_HP) * 100} color="primary" disableAnimation />
-                    <Progress id="manaBar" aria-label="Mana" value={selfStats.mana} color="secondary" disableAnimation />
+                    <Progress id="hpBar" aria-label="HP" value={(selfStats.hp / MAX_HP) * 100} color="secondary" disableAnimation />
+                    <Progress id="manaBar" aria-label="Mana" value={selfStats.mana} color="primary" disableAnimation />
                 </div>
             </div>
 
@@ -60,8 +60,8 @@ export const Interface = () => {
                     )}
                     <div className="flex flex-col">
                         <div id="targetAddress" className="target-address">{target.address}</div>
-                        <Progress id="targetHpBar" aria-label="Target HP" value={(target.hp / MAX_HP) * 100} color="primary" className="mb-1 w-40" disableAnimation />
-                        <Progress id="targetManaBar" aria-label="Target Mana" value={target.mana} color="secondary" className="w-40" disableAnimation />
+                        <Progress id="targetHpBar" aria-label="Target HP" value={(target.hp / MAX_HP) * 100} color="secondary" className="mb-1 w-40" disableAnimation />
+                        <Progress id="targetManaBar" aria-label="Target Mana" value={target.mana} color="primary" className="w-40" disableAnimation />
                     </div>
                 </div>
             )}
