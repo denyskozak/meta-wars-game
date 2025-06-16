@@ -4,7 +4,7 @@ const http = require('http');
 // const { mintCoins, mintItemWithOptions } = require('./sui.cjs');
 
 const UPDATE_MATCH_INTERVAL = 33;
-const MAX_HP = 200;
+const MAX_HP = 120;
 const SPELL_COST = {
     'fireball': 25,
     'darkball': 25,
