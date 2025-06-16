@@ -41,7 +41,7 @@ export const Interface = () => {
         <div className="interface-container">
             <div className="absolute top-24 left-5 flex items-center gap-2">
                 {character?.name && (
-                    <div className="w-8 h-8 rounded-full overflow-hidden bg-black/50 flex items-center justify-center">
+                    <div className="w-20 h-20 rounded-full overflow-hidden bg-black/50 flex items-center justify-center">
                         <Image src={CLASS_ICONS[character.name] || ''} alt={character.name} width={250} height={250}/>
                     </div>
                 )}
@@ -54,7 +54,7 @@ export const Interface = () => {
             {target && (
                 <div id="targetPanel" className="target-panel">
                     {target.classType && (
-                        <div className="w-8 h-8 rounded-full overflow-hidden bg-black/50 flex items-center justify-center">
+                        <div className="w-20 h-20 rounded-full overflow-hidden bg-black/50 flex items-center justify-center">
                             <Image src={CLASS_ICONS[target.classType] || ''} alt={target.classType} width={250} height={250} />
                         </div>
                     )}
