@@ -29,6 +29,7 @@ import castConflagrate from '../skills/warlock/conflagrate';
 import {Interface} from "@/components/layout/Interface";
 import * as iceShieldMesh from "three/examples/jsm/utils/SkeletonUtils";
 import {Loading} from "@/components/loading";
+import { Countdown } from "./parts/Countdown";
 
 const USER_DEFAULT_POSITION = [
     -36.198117096583466, 0.22499999997500564, -11.704829764915257,
@@ -64,6 +65,7 @@ export function Game({models, sounds, textures, matchId, character}) {
     const {socket, sendToSocket} = useWS(matchId);
     const router = useRouter();
     const [isReadyToPlay, setIsReadyToPlay] = useState(false);
+    const [countdown, setCountdown] = useState(0);
     // scoreboard visibility and data managed via interface context
     const account = useCurrentAccount();
     const address = account?.address;
@@ -74,6 +76,24 @@ export function Game({models, sounds, textures, matchId, character}) {
         const runes = new Map();
         const damageLabels = new Map();
         let myPlayerId = null;
+
+        let controlsEnabled = false;
+        let countdownInterval = null;
+
+        const startCountdown = () => {
+            controlsEnabled = false;
+            setCountdown(5);
+            let remaining = 5;
+            countdownInterval = setInterval(() => {
+                remaining -= 1;
+                setCountdown(remaining);
+                if (remaining <= 0) {
+                    controlsEnabled = true;
+                    clearInterval(countdownInterval);
+                    countdownInterval = null;
+                }
+            }, 1000);
+        };
 
         // Character Model and Animation Variables
         let camera;
@@ -645,6 +665,8 @@ export function Game({models, sounds, textures, matchId, character}) {
 
             if (isChatActive) return;
 
+            if (!controlsEnabled) return;
+
             keyStates[event.code] = true;
 
             switch (event.code) {
@@ -725,6 +747,8 @@ export function Game({models, sounds, textures, matchId, character}) {
         document.addEventListener("keyup", (event) => {
             if (isChatActive) return;
 
+            if (!controlsEnabled) return;
+
             keyStates[event.code] = false;
 
             switch (event.code) {
@@ -768,6 +792,7 @@ export function Game({models, sounds, textures, matchId, character}) {
 
         // chatch even
         document.addEventListener("mousedown", (event) => {
+            if (!controlsEnabled) return;
             if (event.button === 2) {
                 // Right mouse button
                 handleRightClick();
@@ -1565,6 +1590,7 @@ export function Game({models, sounds, textures, matchId, character}) {
 
         function controls(deltaTime) {
             if (isChatActive) return;
+            if (!controlsEnabled) return;
             const model = players.get(myPlayerId).model;
             // Adjust walking and running speed
             const baseWalkSpeed = 8; // Base walking speed
@@ -2168,9 +2194,10 @@ export function Game({models, sounds, textures, matchId, character}) {
 
             if (players.has(myPlayerId)) {
                 for (let i = 0; i < STEPS_PER_FRAME; i++) {
-                    controls(deltaTime);
-
-                    updateMyPlayer(deltaTime);
+                    if (controlsEnabled) {
+                        controls(deltaTime);
+                        updateMyPlayer(deltaTime);
+                    }
 
                     for (const [playerId] of players) {
                         if (playerId !== myPlayerId) {
@@ -2731,6 +2758,7 @@ export function Game({models, sounds, textures, matchId, character}) {
                         const cls = players.get(Number(playerId))?.classType || "";
                         createPlayer(Number(playerId), String(playerId), String(playerId), cls);
                     })
+                    startCountdown();
                     break;
             }
         };
@@ -2745,11 +2773,15 @@ export function Game({models, sounds, textures, matchId, character}) {
         });
         return () => {
             socket.removeEventListener('message', handleMessage);
+            if (countdownInterval) {
+                clearInterval(countdownInterval);
+            }
         };
     }, []);
     return (
         <div ref={containerRef} id="game-container" className="w-full h-full">
             <Interface/>
+            {countdown > 0 && <Countdown seconds={countdown} onComplete={() => setCountdown(0)} />}
             {!isReadyToPlay && (<Loading text="Loading Players ..."/>)}
         </div>
     );
