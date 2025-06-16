@@ -133,7 +133,7 @@ function createPlayer(address, classType) {
     return {
         position: {...spawn},
         spawn_point: spawn,
-        animationAction: '',
+        animationAction: 'idle',
         rotation: {y: 0},
         buffs: [],
         debuffs: [],
@@ -270,6 +270,7 @@ function applyDamage(match, victimId, dealerId, damage) {
         victim.spawn_point = spawn;
         victim.hp = MAX_HP;
         victim.mana = 100;
+        victim.animationAction = 'idle';
 
         broadcastToMatch(match.id, {
             type: 'PLAYER_RESPAWN',
@@ -315,7 +316,7 @@ ws.on('connection', (socket) => {
         for (const match of matches.values()) {
             match.players.forEach((player, pid) => {
                 if (player.mana < 100) {
-                    player.mana = Math.min(100, player.mana + 3);
+                    player.mana = Math.min(100, player.mana + 2.1);
                 }
                 if (player.buffs.length) {
                     player.buffs = player.buffs.filter(b => b.expires > now);

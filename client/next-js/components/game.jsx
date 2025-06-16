@@ -2351,7 +2351,12 @@ export function Game({models, sounds, textures, matchId, character}) {
                     address,
                     classType,
                 });
+                idleAction.play();
                 playerMixers.push(mixer);   // массив всех чужих миксеров
+                const pData = players.get(id);
+                if (pData) {
+                    pData.currentAction = 'idle';
+                }
             }
         }
 
