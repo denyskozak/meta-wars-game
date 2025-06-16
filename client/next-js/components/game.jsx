@@ -35,11 +35,12 @@ const USER_DEFAULT_POSITION = [
 ];
 
 const spawns = [
-    {x: -17.12683322968667, y: 0.34999999995822706, z: -12.781498582746165},
-    {x: -28.60683425667782, y: 0.3499999999897787, z: 9.049836139148344},
-    {x: -53.86411418000327, y: 0.3499999999897787, z: -17.914153181078696},
-    {x: -15.911929442319186, y: 0.35000000000000003, z: -11.362410041589836},
-    {x: 18.036347505858117, y: 0.35000000000000003, z: -23.924371817675073},
+    {x: -41.849391064557935, y: 1.3085525784595764, z: -0.7840938159276118},
+    {x: -46.42248289494676, y: 0.41527976194619626, z: -21.603091194083497},
+    {x: -30.74329645409973, y: 0.30453703672891463, z: -28.155936814794597},
+    {x: -13.000132445208342, y: 0.2797758251195597, z: -25.188257878192154},
+    {x: -13.490956800438346, y: 0.39571999597926, z: 1.1589954251604742},
+    {x: -41.95264509377698, y: 1.4702305560704132, z: 0.9677510383984183},
 ];
 
 function getRandomElement(array) {
@@ -588,16 +589,10 @@ export function Game({models, sounds, textures, matchId, character}) {
             containerRef.current.appendChild(stats.domElement);
         };
 
-        function respawnPlayer() {
-            hp = MAX_HP; // Восстанавливаем HP
-            updateHPBar(); // Обновляем отображение HP
-            sendToSocket({type: 'RESPAWN'});
-            teleportTo({
-                x: USER_DEFAULT_POSITION[0],
-                y: USER_DEFAULT_POSITION[1] + 0.75,
-                z: USER_DEFAULT_POSITION[2],
-            });
-            document.getElementById("respawnButton").style.display = "none"; // Скрываем кнопку воскрешения
+        function respawnPlayer(position) {
+            hp = MAX_HP;
+            updateHPBar();
+            teleportTo(position);
         }
 
         // Function to update the camera position and rotation
@@ -713,11 +708,6 @@ export function Game({models, sounds, textures, matchId, character}) {
                 case "KeyQ":
                     castSpell(character?.name === 'warlock' ? 'immolate' : 'fireblast');
 
-                    break;
-                case "Enter":
-                    if (hp === 0) {
-                        respawnPlayer();
-                    }
                     break;
             }
         });
@@ -2152,10 +2142,8 @@ export function Game({models, sounds, textures, matchId, character}) {
             });
             // Если игрок мёртв, отключаем управление
             if (hp <= 0) {
-                document.getElementById("respawnButton").style.display = "block"; // Показываем кнопку
-                playerVelocity.set(0, 0, 0); // Останавливаем движение
-
-                return; // Пропускаем обновления
+                playerVelocity.set(0, 0, 0);
+                return;
             }
 
             const deltaTime = Math.min(0.04, delta) / STEPS_PER_FRAME;
@@ -2608,7 +2596,7 @@ export function Game({models, sounds, textures, matchId, character}) {
                         updateHPBar();
                         updateManaBar();
                         if (hp <= 0) {
-                            document.getElementById("respawnButton").style.display = "block";
+                            // waiting for server respawn
                         }
                     } else if (players.has(message.playerId)) {
                         const p = players.get(message.playerId);
@@ -2661,6 +2649,15 @@ export function Game({models, sounds, textures, matchId, character}) {
                         }
                         if (text) {
                             dispatch({type: 'SEND_CHAT_MESSAGE', payload: text});
+                        }
+                    }
+                    break;
+                case "PLAYER_RESPAWN":
+                    if (players.has(message.playerId)) {
+                        const p = players.get(message.playerId);
+                        p.position = message.position;
+                        if (message.playerId === myPlayerId) {
+                            respawnPlayer(message.position);
                         }
                     }
                     break;

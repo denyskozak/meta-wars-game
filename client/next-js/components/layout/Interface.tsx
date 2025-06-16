@@ -89,22 +89,7 @@ export const Interface = () => {
 
             <div id="selfDamage" className="self-damage-container"></div>
 
-            <button
-                id="respawnButton"
-                style={{
-                    position: 'absolute',
-                    top: '50%',
-                    left: '50%',
-                    transform: 'translate(-50%, -50%)',
-                    padding: '10px 20px',
-                    fontSize: '20px',
-                    display: 'none', // Скрыто по умолчанию
-                    zIndex: 1000,
-                    pointerEvents: 'auto'
-                }}
-            >
-                Enter for Respawn
-            </button>
+
 
             <Scoreboard />
             <Buffs />
