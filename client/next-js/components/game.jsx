@@ -491,8 +491,8 @@ export function Game({models, sounds, textures, matchId, character}) {
         const DARKBALL_DAMAGE = 30;
 
         // Медленнее пускаем сферы как настоящие заклинания
-        const MIN_SPHERE_IMPULSE = 15;
-        const MAX_SPHERE_IMPULSE = 30;
+        const MIN_SPHERE_IMPULSE = 12;
+        const MAX_SPHERE_IMPULSE = 24;
 
         // Maximum distance any sphere can travel
         // Use the same range as fireblast for consistency
