@@ -8,6 +8,7 @@ const MAX_HP = 120;
 const MANA_REGEN_INTERVAL = 1000;
 const MANA_REGEN_AMOUNT = 1.3; // 30% faster mana regeneration
 const SPELL_COST = require('../client/next-js/consts/spellCosts.json');
+const ICEBALL_ICON = '/icons/spell_frostbolt.jpg';
 
 const RUNE_POSITIONS = [
     {x: -36.33733552736014, y: 0.18650680579857343, z: -4.580323077732503},
@@ -353,7 +354,7 @@ ws.on('connection', (socket) => {
         for (const match of matches.values()) {
             match.runes = generateRunes(match.id);
         }
-    }, 60000);
+    }, 120000);
 
     socket.on('message', (data) => {
         let message = {};
@@ -629,9 +630,9 @@ ws.on('connection', (socket) => {
                             target.debuffs = target.debuffs.filter(d => d.type !== 'slow');
                             target.debuffs.push({
                                 type: 'slow',
-                                percent: 0.5,
-                                expires: Date.now() + 1000,
-                                icon: '/icons/spell_frostbolt.jpg',
+                                percent: 0.4,
+                                expires: Date.now() + 3000,
+                                icon: ICEBALL_ICON,
                             });
                             broadcastToMatch(match.id, {
                                 type: 'CAST_SPELL',

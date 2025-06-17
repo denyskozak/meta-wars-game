@@ -449,7 +449,7 @@ export function Game({models, sounds, textures, matchId, character}) {
             darkball: 0,
             corruption: 10000,
             immolate: 10000,
-            iceball: 0,
+            iceball: 5000,
             fireblast: 5000,
             chaosbolt: 6000,
             'ice-shield': 30000,
@@ -1496,7 +1496,7 @@ export function Game({models, sounds, textures, matchId, character}) {
                 if (sphere.type === 'fireball') {
                     applyImmolationEffect(myPlayerId, 1000);
                 } else if (sphere.type === 'iceball') {
-                    applySlowEffect(myPlayerId, 1000);
+                    applySlowEffect(myPlayerId, 3000);
                 }
                 takeDamage(damage, userIdTouched, sphere.type);
             }
@@ -2021,9 +2021,9 @@ export function Game({models, sounds, textures, matchId, character}) {
             }, duration);
         }
 
-        function applySlowEffect(playerId, duration = 1000) {
+        function applySlowEffect(playerId, duration = 3000) {
             if (playerId === myPlayerId) {
-                movementSpeedModifier = 0.5;
+                movementSpeedModifier = 0.6;
                 setTimeout(() => (movementSpeedModifier = 1), duration);
             }
         }
@@ -2587,7 +2587,7 @@ export function Game({models, sounds, textures, matchId, character}) {
                             break;
                         case "iceball-hit":
                             if (message.payload.targetId === myPlayerId) {
-                                applySlowEffect(myPlayerId, 1000);
+                                applySlowEffect(myPlayerId, 3000);
                             }
                             break;
                         case "shield":
