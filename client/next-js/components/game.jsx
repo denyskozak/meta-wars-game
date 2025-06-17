@@ -985,6 +985,22 @@ export function Game({models, sounds, textures, matchId, character}) {
             return cameraDir.normalize();
         }
 
+        function hasLineOfSight(targetId) {
+            if (!players.has(targetId)) return false;
+            const origin = playerCollider.start
+                .clone()
+                .add(playerCollider.end)
+                .multiplyScalar(0.5);
+            const targetPos = players.get(targetId).model.position.clone();
+            const dir = targetPos.clone().sub(origin).normalize();
+            const ray = new THREE.Ray(origin, dir);
+            const collision = worldOctree.rayIntersect(ray);
+            if (collision && collision.distance < origin.distanceTo(targetPos)) {
+                return false;
+            }
+            return true;
+        }
+
         function getTargetPlayer() {
             const origin = playerCollider.start
                 .clone()
@@ -1000,7 +1016,7 @@ export function Game({models, sounds, textures, matchId, character}) {
                 const hit = raycaster.ray.intersectBox(box, new THREE.Vector3());
                 if (hit) {
                     const dist = origin.distanceTo(hit);
-                    if (dist < minDist) {
+                    if (dist < minDist && hasLineOfSight(id)) {
                         minDist = dist;
                         closest = id;
                     }
@@ -1016,7 +1032,7 @@ export function Game({models, sounds, textures, matchId, character}) {
                 return;
             }
             const id = getTargetPlayer();
-            if (id && players.has(id)) {
+            if (id && players.has(id) && hasLineOfSight(id)) {
                 const start = playerCollider.start
                     .clone()
                     .add(playerCollider.end)
