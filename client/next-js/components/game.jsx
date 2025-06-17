@@ -1562,7 +1562,7 @@ export function Game({models, sounds, textures, matchId, character}) {
             // spheresCollisions(); // Handle collisions between spheres
 
             for (let sphere of spheres) {
-                sphere.mesh.position.copy(sphere.collider.center);
+                sphere.mesh?.position.copy(sphere.collider?.center); // TODO fix
             }
         }
 
