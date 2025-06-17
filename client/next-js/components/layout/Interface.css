@@ -28,12 +28,13 @@
     border-radius: 3px;
 }
 
+
 .damage-label {
     color: #fff;
     padding: 2px 4px;
     border-radius: 3px;
     font-weight: 800;
-    font-size: 16px;
+    font-size: 24px;
     pointer-events: none;
     display: flex;
     align-items: center;
@@ -41,14 +42,16 @@
     animation: floatFade 1s ease-out forwards;
 }
 
-.damage-icon {
-    width: 16px;
-    height: 16px;
-}
 
-#selfDamage .damage-icon {
+.damage-icon {
     width: 24px;
     height: 24px;
+}
+
+
+#selfDamage .damage-icon {
+    width: 32px;
+    height: 32px;
 }
 
 .damage-label-container {
@@ -72,7 +75,7 @@
 }
 
 #selfDamage .damage-label {
-    font-size: 24px;
+    font-size: 32px;
 }
 
 #targetPanel {
