@@ -1,3 +1,5 @@
+import { SPELL_COST } from '../../consts';
+
 export const meta = { id: 'immolate', key: 'Q', icon: '/icons/spell_immolation.jpg' };
 
 export default function castImmolate({
@@ -10,7 +12,7 @@ export default function castImmolate({
   sendToSocket,
   sounds,
 }) {
-  if (mana < 30) {
+  if (mana < SPELL_COST['immolate']) {
     console.log('Not enough mana for immolate!');
     if (sounds?.noMana) {
       sounds.noMana.currentTime = 0;
@@ -30,7 +32,7 @@ export default function castImmolate({
   igniteHands(playerId, 1500);
   castSpellImpl(
     playerId,
-    30,
+    SPELL_COST['immolate'],
     1500,
     () => {
       sendToSocket({ type: 'CAST_SPELL', payload: { type: 'immolate', targetId } });

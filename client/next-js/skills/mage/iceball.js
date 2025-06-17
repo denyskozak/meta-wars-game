@@ -1,10 +1,12 @@
+import { SPELL_COST } from '../../consts';
+
 export const meta = { id: 'iceball', key: 'R', icon: '/icons/spell_frostbolt.jpg' };
 
 export default function castIceball({ playerId, castSpellImpl, freezeHands, castSphere, iceballMesh, sounds, damage }) {
   freezeHands(playerId, 1000);
   castSpellImpl(
     playerId,
-    60,
+    SPELL_COST['iceball'],
     0,
     (model) => castSphere(model, iceballMesh.clone(), meta.id, damage),
     sounds.iceballCast,

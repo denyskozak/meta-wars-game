@@ -1,3 +1,5 @@
+import { SPELL_COST } from '../../consts';
+
 export const meta = { id: 'conflagrate', key: 'F', icon: '/icons/spell_fire_fireball.jpg' };
 
 export default function castConflagrate({
@@ -15,7 +17,7 @@ export default function castConflagrate({
   sounds,
 }) {
   if (globalSkillCooldown || isCasting) return;
-  if (mana < 20) {
+  if (mana < SPELL_COST['conflagrate']) {
     console.log('Not enough mana for conflagrate!');
     if (sounds?.noMana) {
       sounds.noMana.currentTime = 0;

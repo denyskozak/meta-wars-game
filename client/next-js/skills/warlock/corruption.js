@@ -1,8 +1,10 @@
+import { SPELL_COST } from '../../consts';
+
 export const meta = { id: 'corruption', key: 'R', icon: '/icons/spell_corruption.jpg' };
 
 export default function castCorruption({ playerId, globalSkillCooldown, isCasting, mana, getTargetPlayer, dispatch, sendToSocket, activateGlobalCooldown, startSkillCooldown, sounds }) {
   if (globalSkillCooldown || isCasting) return;
-  if (mana < 30) {
+  if (mana < SPELL_COST['corruption']) {
     console.log('Not enough mana for corruption!');
     if (sounds?.noMana) {
       sounds.noMana.currentTime = 0;

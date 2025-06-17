@@ -7,3 +7,4 @@ export const TREASURY_CAP_ID = process.env.NEXT_PUBLIC_TREASURY_CAP_ID;
 
 // Base health for players. Used for health bar calculations on both client and server
 export const MAX_HP = 120;
+export { default as SPELL_COST } from './spellCosts.json';
