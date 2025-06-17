@@ -6,7 +6,7 @@ const http = require('http');
 const UPDATE_MATCH_INTERVAL = 33;
 const MAX_HP = 120;
 const MANA_REGEN_INTERVAL = 1000;
-const MANA_REGEN_AMOUNT = 1;
+const MANA_REGEN_AMOUNT = 1.3; // 30% faster mana regeneration
 const SPELL_COST = require('../client/next-js/consts/spellCosts.json');
 
 const RUNE_POSITIONS = [
