@@ -20,11 +20,11 @@ import {world} from "../worlds/main/data";
 import castFireball, { meta as fireballMeta } from '../skills/mage/fireball';
 import castIceball, { meta as iceballMeta } from '../skills/mage/iceball';
 import castFireblast, { meta as fireblastMeta } from '../skills/mage/fireblast';
-import castIceVeins, { meta as iceVeinsMeta } from '../skills/mage/iceVeins';
+import castPyroblast, { meta as pyroblastMeta } from '../skills/mage/pyroblast';
 import castDarkball, { meta as darkballMeta } from '../skills/warlock/darkball';
 import castCorruption, { meta as corruptionMeta } from '../skills/warlock/corruption';
 import castImmolate, { meta as immolateMeta } from '../skills/warlock/immolate';
-import castConflagrate, { meta as conflagrateMeta } from '../skills/warlock/conflagrate';
+import castChaosBolt, { meta as chaosBoltMeta } from '../skills/warlock/chaosBolt';
 
 
 import {Interface} from "@/components/layout/Interface";
@@ -36,17 +36,19 @@ const SPELL_ICONS = {
     [fireballMeta.id]: fireballMeta.icon,
     [iceballMeta.id]: iceballMeta.icon,
     [fireblastMeta.id]: fireblastMeta.icon,
-    [iceVeinsMeta.id]: iceVeinsMeta.icon,
+    [pyroblastMeta.id]: pyroblastMeta.icon,
     [darkballMeta.id]: darkballMeta.icon,
     [corruptionMeta.id]: corruptionMeta.icon,
     [immolateMeta.id]: immolateMeta.icon,
-    [conflagrateMeta.id]: conflagrateMeta.icon,
+    [chaosBoltMeta.id]: chaosBoltMeta.icon,
 };
 
 const SPELL_SCALES = {
     fireball: 1.5,
     iceball: 1.5,
     darkball: 1.5,
+    pyroblast: 4.5,
+    chaosBolt: 4.5,
 };
 
 const USER_DEFAULT_POSITION = [
@@ -133,7 +135,6 @@ export function Game({models, sounds, textures, matchId, character}) {
 
         const activeShields = new Map(); // key = playerId
         const activeHandEffects = new Map(); // key = playerId -> { effectKey: {left, right} }
-        const activeIceVeins = new Map(); // key = playerId -> effect mesh
         const activeDamageEffects = new Map(); // key = playerId -> effect mesh
         const activeImmolation = new Map(); // key = playerId -> effect mesh
 
@@ -301,6 +302,16 @@ export function Game({models, sounds, textures, matchId, character}) {
             SPELL_SCALES.fireball,
         );
 
+        const pyroblastMesh = new THREE.Mesh(
+            fireballGeometry,
+            fireballMaterial.clone()
+        );
+        pyroblastMesh.scale.set(
+            SPELL_SCALES.pyroblast,
+            SPELL_SCALES.pyroblast,
+            SPELL_SCALES.pyroblast,
+        );
+
         const darkballMaterial = new THREE.ShaderMaterial({
             transparent: true,
             depthWrite: false,
@@ -322,6 +333,16 @@ export function Game({models, sounds, textures, matchId, character}) {
             SPELL_SCALES.darkball,
             SPELL_SCALES.darkball,
             SPELL_SCALES.darkball,
+        );
+
+        const chaosBoltMesh = new THREE.Mesh(
+            fireballGeometry,
+            darkballMaterial.clone()
+        );
+        chaosBoltMesh.scale.set(
+            SPELL_SCALES.chaosBolt,
+            SPELL_SCALES.chaosBolt,
+            SPELL_SCALES.chaosBolt,
         );
 
         const iceballGeometry = new THREE.SphereGeometry(0.13, 16, 16); // Ледяной шар (увеличен на 30%)
@@ -425,9 +446,9 @@ export function Game({models, sounds, textures, matchId, character}) {
             immolate: 10000,
             iceball: 0,
             fireblast: 5000,
-            conflagrate: 5000,
+            chaosbolt: 6000,
             'ice-shield': 30000,
-            'ice-veins': 25000,
+            pyroblast: 6000,
             blink: 10000,
             heal: 0,
         };
@@ -502,6 +523,8 @@ export function Game({models, sounds, textures, matchId, character}) {
         }
 
         preloadMesh(fireballMesh, 0xffaa33);
+        preloadMesh(pyroblastMesh, 0xffaa33);
+        preloadMesh(chaosBoltMesh, 0x8844ff);
         preloadMesh(darkballMesh, 0x8844ff);
         preloadMesh(iceballMesh, 0x88ddff);
 
@@ -521,6 +544,8 @@ export function Game({models, sounds, textures, matchId, character}) {
         const FIREBLAST_DAMAGE = 25;
 
         const FIREBALL_DAMAGE = 40;
+        const PYROBLAST_DAMAGE = FIREBALL_DAMAGE * 2;
+        const CHAOSBOLT_DAMAGE = FIREBALL_DAMAGE * 2;
         const ICEBALL_DAMAGE = 25;
         const DARKBALL_DAMAGE = 30;
 
@@ -581,7 +606,7 @@ export function Game({models, sounds, textures, matchId, character}) {
         const SHIELD_MANA_COST = SPELL_COST['shield'];
         const SHIELD_DURATION = 3; // Shield duration in seconds
         const DAMAGE_REDUCTION = 0.5; // Reduces damage by 50%
-        const ICE_VEINS_ROT_SPEED = 1; // Rotation speed for Ice Veins effect (horizontal)
+        const EFFECT_ROT_SPEED = 1; // Rotation speed for floating effects
         // Activate shield
         let isShieldActive = false;
         let isChatActive = false;
@@ -707,7 +732,7 @@ export function Game({models, sounds, textures, matchId, character}) {
                     castSpell(character?.name === 'warlock' ? 'corruption' : 'iceball');
                     break;
                 case "KeyF":
-                    castSpell(character?.name === 'warlock' ? 'conflagrate' : 'ice-veins');
+                    castSpell(character?.name === 'warlock' ? 'chaosbolt' : 'pyroblast');
                     break;
                 case "KeyG":
                     leftMouseButtonClicked = true;
@@ -1165,22 +1190,15 @@ export function Game({models, sounds, textures, matchId, character}) {
                         sounds,
                     });
                     break;
-                case "conflagrate":
-                    castConflagrate({
+                case "chaosbolt":
+                    castChaosBolt({
                         playerId,
-                        globalSkillCooldown,
-                        isCasting,
-                        mana,
-                        getTargetPlayer,
-                        dispatch,
-                        sendToSocket,
-                        activateGlobalCooldown,
-                        startSkillCooldown,
-                        FIREBLAST_DAMAGE,
-                        isTargetBurning: (id) => {
-                            return activeImmolation.has(id);
-                        },
+                        castSpellImpl,
+                        igniteHands,
+                        castSphere,
+                        chaosBoltMesh,
                         sounds,
+                        damage: CHAOSBOLT_DAMAGE,
                     });
                     break;
                 case "darkball":
@@ -1222,16 +1240,27 @@ export function Game({models, sounds, textures, matchId, character}) {
                         damage: ICEBALL_DAMAGE,
                     });
                     break;
-                case "ice-veins":
-                    if (castIceVeins({
+                case "pyroblast":
+                    castPyroblast({
                         playerId,
-                        activateIceVeins,
-                        mana,
+                        castSpellImpl,
+                        igniteHands,
+                        castSphere,
+                        pyroblastMesh,
                         sounds,
-                    })) {
-                        activateGlobalCooldown();
-                        startSkillCooldown('ice-veins');
-                    }
+                        damage: PYROBLAST_DAMAGE,
+                    });
+                    break;
+                case "chaosbolt":
+                    castChaosBolt({
+                        playerId,
+                        castSpellImpl,
+                        igniteHands,
+                        castSphere,
+                        chaosBoltMesh,
+                        sounds,
+                        damage: CHAOSBOLT_DAMAGE,
+                    });
                     break;
             }
         }
@@ -1251,13 +1280,6 @@ export function Game({models, sounds, textures, matchId, character}) {
             }, SHIELD_DURATION * 1000);
         }
 
-        function activateIceVeins(playerId) {
-            applyIceVeinsEffect(playerId);
-            sendToSocket({
-                type: 'CAST_SPELL',
-                payload: {type: 'ice-veins'}
-            });
-        }
 
         function castSphere(model, sphereMesh, type, damage) {
             sphereMesh.rotation.copy(model.rotation);
@@ -1340,11 +1362,6 @@ export function Game({models, sounds, textures, matchId, character}) {
             }
             const {mixer, actions} = players.get(myPlayerId)
 
-            const buffs = players.get(playerId)?.buffs || [];
-            const iceVeins = buffs.find(b => b.type === 'ice-veins');
-            if (iceVeins) {
-                duration = duration * (1 - (iceVeins.percent || 0.4));
-            }
 
             const execute = () => {
                 soundCastEnd.volume = 0.5;
@@ -1937,34 +1954,6 @@ export function Game({models, sounds, textures, matchId, character}) {
             }, duration);
         }
 
-        function applyIceVeinsEffect(playerId, duration = 15000) {
-            const existing = activeIceVeins.get(playerId);
-            if (existing) {
-                existing.parent?.remove(existing);
-            }
-
-            const player = players.get(playerId)?.model;
-            if (!player) return;
-
-            const base = models['ice-veins'];
-            if (!base) return;
-
-            const effect = SkeletonUtils.clone(base);
-            effect.scale.set(0.5, 0.5, 0.5);
-            effect.traverse((child) => {
-                if (child.isMesh) {
-                    child.material = child.material.clone();
-                }
-            });
-
-            player.add(effect);
-            activeIceVeins.set(playerId, effect);
-
-            setTimeout(() => {
-                effect.parent?.remove(effect);
-                activeIceVeins.delete(playerId);
-            }, duration);
-        }
 
         function applyDamageRuneEffect(playerId, duration = 60000) {
             const existing = activeDamageEffects.get(playerId);
@@ -2214,18 +2203,9 @@ export function Game({models, sounds, textures, matchId, character}) {
                         mesh.position.y += 0.2;
                     });
 
-                    activeIceVeins.forEach((mesh) => {
-                        // Rotate around the vertical axis so the effect spins horizontally
-                        mesh.rotation.y += delta * ICE_VEINS_ROT_SPEED;
-                        mesh.children.forEach(c => {
-                            if (c.material?.map) {
-                                c.material.map.offset.x -= delta * 0.2;
-                            }
-                        });
-                    });
 
                     activeDamageEffects.forEach((mesh) => {
-                        mesh.rotation.y += delta * ICE_VEINS_ROT_SPEED;
+                        mesh.rotation.y += delta * EFFECT_ROT_SPEED;
                         mesh.children.forEach(c => {
                             if (c.material?.map) {
                                 c.material.map.offset.x -= delta * 0.2;
@@ -2615,13 +2595,13 @@ export function Game({models, sounds, textures, matchId, character}) {
                                 });
                             }
                             break;
-                        case "conflagrate":
-                            if (message.payload.targetId === myPlayerId) {
-                                takeDamage(message.payload.damage, message.id, 'conflagrate');
-                            }
+                        case "chaosbolt":
+                            igniteHands(message.id, 1000);
+                            castSphereOtherUser(message.payload, message.id);
                             break;
-                        case "ice-veins":
-                            applyIceVeinsEffect(message.id);
+                        case "pyroblast":
+                            igniteHands(message.id, 1000);
+                            castSphereOtherUser(message.payload, message.id);
                             break;
                     }
 
