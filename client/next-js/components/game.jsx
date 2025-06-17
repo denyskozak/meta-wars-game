@@ -203,8 +203,8 @@ export function Game({models, sounds, textures, matchId, character}) {
         };
 
         const fireballGeometry = new THREE.CapsuleGeometry(
-            0.15,   // radius  (0.12 → 0.15)
-            0.32,   // length  (0.25 → 0.32)
+            0.195,   // radius 30% larger
+            0.416,   // length 30% larger
             8,      // cap-seg (больше сегментов → плавнее)
             16      // radial-seg
         );
@@ -296,7 +296,7 @@ export function Game({models, sounds, textures, matchId, character}) {
             darkballMaterial
         );
 
-        const iceballGeometry = new THREE.SphereGeometry(0.1, 16, 16); // Ледяной шар
+        const iceballGeometry = new THREE.SphereGeometry(0.13, 16, 16); // Ледяной шар (увеличен на 30%)
 
         const iceTexture = textures.ice;
         iceTexture.wrapS = iceTexture.wrapT = THREE.RepeatWrapping;
@@ -481,7 +481,7 @@ export function Game({models, sounds, textures, matchId, character}) {
         const GRAVITY = 20;
 
         const NUM_SPHERES = 100;
-        const SPHERE_RADIUS = 0.2;
+        const SPHERE_RADIUS = 0.26;
 
         const FIREBLAST_RANGE = 20;
         const FIREBLAST_DAMAGE = 25;
@@ -558,25 +558,7 @@ export function Game({models, sounds, textures, matchId, character}) {
         const targetImage = document.getElementById("targetImage");
         let isFocused = false;
 
-        const getTrailMaterial = (sphereType) => {
-            const colors = {
-                'fireball': 0xff0000,
-                'darkball': 0x660066,
-                'iceball': 0x66ccff,
-            }
-
-            return new THREE.MeshBasicMaterial({
-                color: colors[sphereType],
-                transparent: true,
-                opacity: 0.3,
-                depthWrite: false,
-            })
-        }
-
-
-        const trailGeometry = new THREE.SphereGeometry(0.05, 8, 8); // Маленький шар
-        const TRAIL_INTERVAL = 1; // В мс, как часто добавлять точки
-        const TRAIL_LIFETIME = 250; // Сколько живет одна точка
+        // Хвосты отключены
 
         function adjustFOV(delta) {
             camera.fov = THREE.MathUtils.clamp(camera.fov + delta, minFOV, maxFOV);
@@ -1284,9 +1266,6 @@ export function Game({models, sounds, textures, matchId, character}) {
                 type,
                 damage,
                 ownerId: myPlayerId,
-
-                trail: [], // массив точек следа
-                lastTrailTime: performance.now(),
             };
 
             sphereIdx = (sphereIdx + 1) % spheres.length;
@@ -1488,14 +1467,6 @@ export function Game({models, sounds, textures, matchId, character}) {
 
         const removeSphere = (sphere, index) => {
             scene.remove(sphere.mesh); // Remove the fireball from the scene
-            if (sphere.trail) {
-                for (const point of sphere.trail) {
-                    scene.remove(point.mesh);
-                    point.mesh.geometry.dispose();
-                    point.mesh.material.dispose();
-                }
-                sphere.trail.length = 0;
-            }
             spheres.splice(index, 1); // Remove it from the array
             sphere.mesh = null;
         };
@@ -1535,28 +1506,7 @@ export function Game({models, sounds, textures, matchId, character}) {
                     continue;
                 }
 
-                if (now - sphere.lastTrailTime > TRAIL_INTERVAL) {
-                    const ghost = new THREE.Mesh(trailGeometry, getTrailMaterial(sphere.type).clone());
-                    ghost.position.copy(sphere.mesh.position);
-                    scene.add(ghost);
-
-                    sphere.trail.push({mesh: ghost, birth: now});
-                    sphere.lastTrailTime = now;
-                }
-
-                // Удаляем старые точки следа
-                for (let i = sphere.trail.length - 1; i >= 0; i--) {
-                    const age = now - sphere.trail[i].birth;
-                    const fade = 1 - age / TRAIL_LIFETIME;
-                    sphere.trail[i].mesh.material.opacity = 0.3 * fade;
-
-                    if (age > TRAIL_LIFETIME) {
-                        scene.remove(sphere.trail[i].mesh);
-                        sphere.trail[i].mesh.geometry.dispose();
-                        sphere.trail[i].mesh.material.dispose();
-                        sphere.trail.splice(i, 1);
-                    }
-                }
+                // Хвосты отключены
             }
 
             // spheresCollisions(); // Handle collisions between spheres
@@ -2534,8 +2484,6 @@ export function Game({models, sounds, textures, matchId, character}) {
                     new THREE.Vector3().copy(sphere.position),
                     SPHERE_RADIUS,
                 ),
-                trail: [], // массив точек следа
-                lastTrailTime: performance.now(),
                 velocity: new THREE.Vector3(
                     data.velocity.x,
                     data.velocity.y,
