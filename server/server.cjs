@@ -316,7 +316,7 @@ ws.on('connection', (socket) => {
         for (const match of matches.values()) {
             match.players.forEach((player, pid) => {
                 if (player.mana < 100) {
-                    player.mana = Math.min(100, player.mana + 2.1);
+                    player.mana = Math.min(100, player.mana + 1);
                 }
                 if (player.buffs.length) {
                     player.buffs = player.buffs.filter(b => b.expires > now);
