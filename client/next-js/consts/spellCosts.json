@@ -5,9 +5,9 @@
   "immolate": 35,
   "iceball": 50,
   "fireblast": 35,
-  "conflagrate": 35,
   "shield": 80,
   "blink": 35,
   "heal": 35,
-  "ice-veins": 60
+  "pyroblast": 70,
+  "chaosBolt": 70
 }

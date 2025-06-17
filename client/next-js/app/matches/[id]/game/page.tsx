@@ -51,7 +51,6 @@ export default function GamePage() {
         {id: 'mana_rune', path: 'mana_rune.glb'},
         {id: 'mage_staff', path: 'skins/items/mage-staff.glb'},
         {id: 'warlock_staff', path: 'skins/items/warlock-staff.glb'},
-        {id: 'ice-veins', path: 'ice-veins.glb'},
         {id: 'damage_effect', path: 'ice-veins.glb'},
     ];
 

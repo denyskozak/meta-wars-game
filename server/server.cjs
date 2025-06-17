@@ -557,12 +557,6 @@ ws.on('connection', (socket) => {
                     const player = match.players.get(id);
                     const cost = SPELL_COST[message.payload?.type] || 0;
                     if (player && player.mana >= cost) {
-                        if (message.payload.type === 'conflagrate' && message.payload.targetId) {
-                            const target = match.players.get(message.payload.targetId);
-                            if (!target || !Array.isArray(target.debuffs) || !target.debuffs.find(d => d.type === 'immolate')) {
-                                break;
-                            }
-                        }
 
                         player.mana -= cost;
                         if (message.payload.type === 'heal') {
@@ -577,21 +571,12 @@ ws.on('connection', (socket) => {
                             });
                         }
                         
-                        if (['fireball', 'darkball', 'corruption', 'conflagrate', 'iceball', 'shield', 'ice-veins', 'fireblast'].includes(message.payload.type)) {
+                        if (['fireball', 'darkball', 'corruption', 'chaosbolt', 'iceball', 'shield', 'pyroblast', 'fireblast'].includes(message.payload.type)) {
                             broadcastToMatch(match.id, {
                                 type: 'CAST_SPELL',
                                 payload: message.payload,
                                 id,
                             }, id);
-                        }
-
-                        if (message.payload.type === 'ice-veins') {
-                            player.buffs.push({
-                                type: 'ice-veins',
-                                percent: 0.4,
-                                expires: Date.now() + 15000,
-                                icon: '/icons/spell_veins.jpg',
-                            });
                         }
                         if (message.payload.type === 'corruption' && message.payload.targetId) {
                             const target = match.players.get(message.payload.targetId);
