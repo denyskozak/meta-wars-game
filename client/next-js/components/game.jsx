@@ -601,23 +601,26 @@ export function Game({models, sounds, textures, matchId, character}) {
         // Function to update the camera position and rotation
         function updateCameraPosition() {
             const playerPosition = new THREE.Vector3();
+            playerCollider.getCenter(playerPosition);
 
-            playerCollider.getCenter(playerPosition); // Assuming `getCenter` exists
-
-            // Calculate the offset from the player based on yaw and pitch
             const offset = new THREE.Vector3(
                 Math.sin(yaw) * Math.cos(pitch),
                 Math.sin(pitch),
                 Math.cos(yaw) * Math.cos(pitch),
-            ).multiplyScalar(1.2); // `distance` is the desired distance from the player
+            ).multiplyScalar(1.2);
 
-            // Set the camera's position relative to the player
-            camera.position.copy(playerPosition).add(offset);
+            const desiredPos = playerPosition.clone().add(offset);
 
-            // Set the cameraTarget position to player's position
+            const ray = new THREE.Ray(playerPosition, offset.clone().normalize());
+            const hit = worldOctree.rayIntersect(ray);
+
+            if (hit && hit.distance < offset.length()) {
+                camera.position.copy(ray.at(hit.distance - 0.1, new THREE.Vector3()));
+            } else {
+                camera.position.copy(desiredPos);
+            }
+
             cameraTarget.position.copy(playerPosition);
-
-            // Camera looks at the target object (which is at the player's position)
             camera.lookAt(cameraTarget.position);
         }
 
