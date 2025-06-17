@@ -46,7 +46,7 @@ const SPELL_ICONS = {
 const SPELL_SCALES = {
     fireball: 1.5,
     iceball: 1.5,
-    darkball: 1.5,
+    darkball: 2.0,
     pyroblast: 4.5,
     chaosBolt: 4.5,
 };
@@ -318,8 +318,8 @@ export function Game({models, sounds, textures, matchId, character}) {
             blending: THREE.AdditiveBlending,
             uniforms: {
                 time: {value: 0},
-                coreCol: {value: new THREE.Color(0x9b59b6)},
-                flameCol: {value: new THREE.Color(0x2c3e50)},
+                coreCol: {value: new THREE.Color(0xbf41ff)},
+                flameCol: {value: new THREE.Color(0x1a0a1e)},
                 fireTex: {value: fireTexture},
             },
             vertexShader: fireballMaterial.vertexShader,
@@ -550,8 +550,8 @@ export function Game({models, sounds, textures, matchId, character}) {
         const DARKBALL_DAMAGE = 30;
 
         // Медленнее пускаем сферы как настоящие заклинания
-        const MIN_SPHERE_IMPULSE = 12;
-        const MAX_SPHERE_IMPULSE = 24;
+        const MIN_SPHERE_IMPULSE = 8;
+        const MAX_SPHERE_IMPULSE = 16;
 
         // Maximum distance any sphere can travel
         // Use the same range as fireblast for consistency
@@ -2491,15 +2491,20 @@ export function Game({models, sounds, textures, matchId, character}) {
         }
 
         function castSphereOtherUser(data, ownerId) {
-            let material;
+            let sphere;
             if (data.type === "fireball") {
-                material = fireballMaterial;
+                sphere = fireballMesh.clone();
             } else if (data.type === "darkball") {
-                material = darkballMaterial;
+                sphere = darkballMesh.clone();
+            } else if (data.type === "pyroblast") {
+                sphere = pyroblastMesh.clone();
+            } else if (data.type === "chaosbolt") {
+                sphere = chaosBoltMesh.clone();
+            } else if (data.type === "iceball") {
+                sphere = iceballMesh.clone();
             } else {
-                material = iceballMaterial;
+                sphere = new THREE.Mesh(fireballGeometry, iceballMaterial.clone());
             }
-            const sphere = new THREE.Mesh(fireballGeometry, material.clone());
 
             sphere.position.set(
                 data.position.x,
