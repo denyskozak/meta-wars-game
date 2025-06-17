@@ -312,18 +312,23 @@ export function Game({models, sounds, textures, matchId, character}) {
             SPELL_SCALES.pyroblast,
         );
 
+        const darkballFragmentShader = fireballMaterial.fragmentShader.replace(
+            'gl_FragColor = vec4(col, alpha);',
+            'gl_FragColor = vec4(col, min(1.0, alpha * 1.5));'
+        );
+
         const darkballMaterial = new THREE.ShaderMaterial({
             transparent: true,
-            depthWrite: false,
-            blending: THREE.AdditiveBlending,
+            depthWrite: true,
+            blending: THREE.NormalBlending,
             uniforms: {
                 time: {value: 0},
-                coreCol: {value: new THREE.Color(0x8a2be2)},
-                flameCol: {value: new THREE.Color(0x160033)},
+                coreCol: {value: new THREE.Color(0xb84dff)},
+                flameCol: {value: new THREE.Color(0x220044)},
                 fireTex: {value: fireTexture},
             },
             vertexShader: fireballMaterial.vertexShader,
-            fragmentShader: fireballMaterial.fragmentShader,
+            fragmentShader: darkballFragmentShader,
         });
         const darkballMesh = new THREE.Mesh(
             fireballGeometry,
