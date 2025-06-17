@@ -260,8 +260,8 @@ export function Game({models, sounds, textures, matchId, character}) {
                   vUv  = uv;
                   float n = noise(position.xy * 4.0 + time*2.0);
                   vNoise = n;
-                  vec3 displaced = position + normal * (0.1 + 0.05 * n) * sin((position.z + time) * 8.0);
-                  gl_Position = projectionMatrix * modelViewMatrix * vec4(displaced,1.0);
+                  // keep sphere size static during flight
+                  gl_Position = projectionMatrix * modelViewMatrix * vec4(position,1.0);
                 }`,
             fragmentShader: /* glsl */`
                 uniform float time;
@@ -373,8 +373,8 @@ export function Game({models, sounds, textures, matchId, character}) {
       vUv = uv;
       float n = noise3(position*10.0 + time*2.0);
       vNoise = n;
-      vec3 displaced = position + normal * 0.05 * n;
-      gl_Position = projectionMatrix * modelViewMatrix * vec4(displaced,1.0);
+      // keep sphere size static during flight
+      gl_Position = projectionMatrix * modelViewMatrix * vec4(position,1.0);
     }
   `,
             fragmentShader: `
