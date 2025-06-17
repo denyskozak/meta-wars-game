@@ -10,15 +10,16 @@ const MANA_REGEN_AMOUNT = 1;
 const SPELL_COST = require('../client/next-js/consts/spellCosts.json');
 
 const RUNE_POSITIONS = [
-    {x: -26.961362434513486, y: 0.7993884353993412, z: -0.268686138846919},
-    {x: -32.88547372057093, y: 0.5548614346911126, z: -1.9131159173230734},
-    {x: -39.47561413327266, y: 0.7538531159428674, z: -10.744616926303822},
-    {x: -30.076992981582087, y: 0.6177495551124639, z: -14.986073510821335},
-    {x: -44.43392588602973, y: 2.2112576150178507, z: -32.25757912835155},
-    {x: -42.47044320677418, y: 2.399291997093152, z: -33.7951239015063},
-    {x: -25.37564692831615, y: 1.0044804300639103, z: -23.45307823737658},
-    {x: -20.378177289304933, y: 0.4233411483495825, z: -22.898503218682905},
-    {x: -14.943379506611887, y: 0.41016149148808506, z: -12.976100563215507},
+    {x: -36.33733552736014, y: 0.18650680579857343, z: -4.580323077732503},
+    {x: -29.58349902197933, y: 0.6628864165173389, z: -10.369847037430544},
+    {x: -25.167574279124512, y: 0.5165195417297067, z: -3.3432991165133714},
+    {x: -18.493116647242555, y: 0.28728750460708025, z: -4.877113888695841},
+    {x: -14.911321752520305, y: 0.41016146303941764, z: -13.070007161780007},
+    {x: -20.1146804178187, y: 0.4105227742982425, z: -22.33716834753485},
+    {x: -25.744417751903402, y: 1.0044804283178084, z: -23.458841928930575},
+    {x: -29.964839430431045, y: 0.6108334494970779, z: -15.49109184571351},
+    {x: -39.13481011432206, y: 0.7538530222210333, z: -11.053984725045723},
+    {x: -45.89200741704895, y: 0.519306096834576, z: -9.178415243309109},
 ];
 
 const SPAWN_POINTS = [
@@ -65,6 +66,23 @@ const matches = new Map(); // matchId => { id, players: Map, maxPlayers, isFull,
 const finishedMatches = new Map(); // store summary of finished matches
 let matchCounter = 1;
 
+function shuffle(arr) {
+    const a = arr.slice();
+    for (let i = a.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [a[i], a[j]] = [a[j], a[i]];
+    }
+    return a;
+}
+
+function generateRunes(matchId) {
+    return shuffle(RUNE_POSITIONS).slice(0, 6).map((pos, idx) => ({
+        id: `rune_${matchId}_${Date.now()}_${idx}`,
+        type: randomRuneType(),
+        position: pos,
+    }));
+}
+
 function createMatch({name, maxPlayers = 6, ownerId}) {
     const matchId = `match_${matchCounter++}`;
     const match = {
@@ -77,11 +95,7 @@ function createMatch({name, maxPlayers = 6, ownerId}) {
         isFull: false,
         finished: false,
         summary: null,
-        runes: RUNE_POSITIONS.map((pos, idx) => ({
-            id: `rune_${matchId}_${idx}`,
-            type: randomRuneType(),
-            position: pos,
-        })),
+        runes: generateRunes(matchId),
     };
     matches.set(matchId, match);
     playerMatchMap.set(ownerId, matchId);
@@ -333,6 +347,12 @@ ws.on('connection', (socket) => {
             });
         }
     }, MANA_REGEN_INTERVAL);
+
+    setInterval(() => {
+        for (const match of matches.values()) {
+            match.runes = generateRunes(match.id);
+        }
+    }, 60000);
 
     socket.on('message', (data) => {
         let message = {};
