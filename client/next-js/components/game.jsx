@@ -1,5 +1,6 @@
 import React, {useLayoutEffect, useRef, useState} from "react";
 import {MAX_HP} from "../consts";
+import { SPELL_COST } from '../consts';
 import * as THREE from "three";
 import * as SkeletonUtils from "three/examples/jsm/utils/SkeletonUtils";
 import Stats from "three/examples/jsm/libs/stats.module";
@@ -544,7 +545,7 @@ export function Game({models, sounds, textures, matchId, character}) {
         const maxFOV = 100;
 
         // Shield skill vars
-        const SHIELD_MANA_COST = 40; // Mana cost for the shield
+        const SHIELD_MANA_COST = SPELL_COST['shield'];
         const SHIELD_DURATION = 3; // Shield duration in seconds
         const DAMAGE_REDUCTION = 0.5; // Reduces damage by 50%
         const ICE_VEINS_ROT_SPEED = 1; // Rotation speed for Ice Veins effect (horizontal)
@@ -861,7 +862,7 @@ export function Game({models, sounds, textures, matchId, character}) {
 
         function castBlink() {
             const BLINK_DISTANCE = 5; // Distance to teleport forward
-            const BLINK_MANA_COST = 20; // Mana cost for blink
+            const BLINK_MANA_COST = SPELL_COST['blink'];
             const BLINK_COOLDOWN = 10000; // Cooldown in milliseconds
 
             if (!isFocused) {
@@ -932,7 +933,7 @@ export function Game({models, sounds, textures, matchId, character}) {
 
         function castHeal() {
             const HEAL_AMOUNT = 20; // Amount of HP restored
-            const HEAL_MANA_COST = 30; // Mana cost for healing
+            const HEAL_MANA_COST = SPELL_COST['heal'];
 
             if (!isFocused) {
                 handleRightClick();

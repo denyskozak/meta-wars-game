@@ -5,19 +5,9 @@ const http = require('http');
 
 const UPDATE_MATCH_INTERVAL = 33;
 const MAX_HP = 120;
-const SPELL_COST = {
-    'fireball': 25,
-    'darkball': 25,
-    'corruption': 30,
-    'immolate': 30,
-    'iceball': 35,
-    'fireblast': 30,
-    'conflagrate': 20,
-    'shield': 80,
-    'blink': 20,
-    'heal': 30,
-    'ice-veins': 50,
-};
+const MANA_REGEN_INTERVAL = 1000;
+const MANA_REGEN_AMOUNT = 1;
+const SPELL_COST = require('../client/next-js/consts/spellCosts.json');
 
 const RUNE_POSITIONS = [
     {x: -26.961362434513486, y: 0.7993884353993412, z: -0.268686138846919},
@@ -316,7 +306,7 @@ ws.on('connection', (socket) => {
         for (const match of matches.values()) {
             match.players.forEach((player, pid) => {
                 if (player.mana < 100) {
-                    player.mana = Math.min(100, player.mana + 1);
+                    player.mana = Math.min(100, player.mana + MANA_REGEN_AMOUNT);
                 }
                 if (player.buffs.length) {
                     player.buffs = player.buffs.filter(b => b.expires > now);
@@ -342,7 +332,7 @@ ws.on('connection', (socket) => {
                 }
             });
         }
-    }, 500);
+    }, MANA_REGEN_INTERVAL);
 
     socket.on('message', (data) => {
         let message = {};
