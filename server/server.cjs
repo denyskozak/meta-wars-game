@@ -236,7 +236,7 @@ function checkRunePickup(match, playerId) {
     }
 }
 
-function applyDamage(match, victimId, dealerId, damage) {
+function applyDamage(match, victimId, dealerId, damage, spellType) {
     const victim = match.players.get(victimId);
     if (!victim) return;
     const attacker = match.players.get(dealerId);
@@ -294,6 +294,7 @@ function applyDamage(match, victimId, dealerId, damage) {
         type: 'DAMAGE',
         targetId: victimId,
         amount: totalDamage,
+        spellType,
     });
 }
 
@@ -329,7 +330,7 @@ ws.on('connection', (socket) => {
                     player.debuffs = player.debuffs.filter(deb => {
                         if (deb.nextTick !== undefined && deb.nextTick <= now) {
                             deb.nextTick = now + deb.interval;
-                            applyDamage(match, pid, deb.casterId, deb.damage);
+                            applyDamage(match, pid, deb.casterId, deb.damage, deb.type);
                             deb.ticks--;
                         }
 
@@ -635,7 +636,7 @@ ws.on('connection', (socket) => {
 
             case 'TAKE_DAMAGE':
                 if (match) {
-                    applyDamage(match, id, message.damageDealerId, message.damage);
+                    applyDamage(match, id, message.damageDealerId, message.damage, message.spellType);
                     if (message.spellType === 'iceball') {
                         const target = match.players.get(id);
                         if (target) {

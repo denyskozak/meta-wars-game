@@ -35,7 +35,20 @@
     font-weight: 800;
     font-size: 16px;
     pointer-events: none;
+    display: flex;
+    align-items: center;
+    gap: 4px;
     animation: floatFade 1s ease-out forwards;
+}
+
+.damage-icon {
+    width: 16px;
+    height: 16px;
+}
+
+#selfDamage .damage-icon {
+    width: 24px;
+    height: 24px;
 }
 
 .damage-label-container {
