@@ -17,20 +17,31 @@ import {useWS} from "../hooks/useWS";
 import {world} from "../worlds/main/data";
 
 // spell implementations
-import castFireball from '../skills/mage/fireball';
-import castIceball from '../skills/mage/iceball';
-import castFireblast from '../skills/mage/fireblast';
-import castIceVeins from '../skills/mage/iceVeins';
-import castDarkball from '../skills/warlock/darkball';
-import castCorruption from '../skills/warlock/corruption';
-import castImmolate from '../skills/warlock/immolate';
-import castConflagrate from '../skills/warlock/conflagrate';
+import castFireball, { meta as fireballMeta } from '../skills/mage/fireball';
+import castIceball, { meta as iceballMeta } from '../skills/mage/iceball';
+import castFireblast, { meta as fireblastMeta } from '../skills/mage/fireblast';
+import castIceVeins, { meta as iceVeinsMeta } from '../skills/mage/iceVeins';
+import castDarkball, { meta as darkballMeta } from '../skills/warlock/darkball';
+import castCorruption, { meta as corruptionMeta } from '../skills/warlock/corruption';
+import castImmolate, { meta as immolateMeta } from '../skills/warlock/immolate';
+import castConflagrate, { meta as conflagrateMeta } from '../skills/warlock/conflagrate';
 
 
 import {Interface} from "@/components/layout/Interface";
 import * as iceShieldMesh from "three/examples/jsm/utils/SkeletonUtils";
 import {Loading} from "@/components/loading";
 import { Countdown } from "./parts/Countdown";
+
+const SPELL_ICONS = {
+    [fireballMeta.id]: fireballMeta.icon,
+    [iceballMeta.id]: iceballMeta.icon,
+    [fireblastMeta.id]: fireblastMeta.icon,
+    [iceVeinsMeta.id]: iceVeinsMeta.icon,
+    [darkballMeta.id]: darkballMeta.icon,
+    [corruptionMeta.id]: corruptionMeta.icon,
+    [immolateMeta.id]: immolateMeta.icon,
+    [conflagrateMeta.id]: conflagrateMeta.icon,
+};
 
 const USER_DEFAULT_POSITION = [
     -36.198117096583466, 0.22499999997500564, -11.704829764915257,
@@ -2399,7 +2410,7 @@ export function Game({models, sounds, textures, matchId, character}) {
             }
         }
 
-        function showDamage(playerId, amount) {
+        function showDamage(playerId, amount, spellType) {
             const player = players.get(playerId)?.model;
             if (!player) return;
 
@@ -2416,7 +2427,18 @@ export function Game({models, sounds, textures, matchId, character}) {
 
             const div = document.createElement('div');
             div.className = 'damage-label';
-            div.textContent = String(amount);
+
+            const iconSrc = SPELL_ICONS[spellType];
+            if (iconSrc) {
+                const img = document.createElement('img');
+                img.src = iconSrc;
+                img.className = 'damage-icon';
+                div.appendChild(img);
+            }
+
+            const span = document.createElement('span');
+            span.textContent = String(amount);
+            div.appendChild(span);
             record.container.prepend(div);
 
             if (record.container.childElementCount > 3) {
@@ -2600,7 +2622,7 @@ export function Game({models, sounds, textures, matchId, character}) {
                     break;
                 case "DAMAGE":
                     if (message.targetId) {
-                        showDamage(message.targetId, message.amount);
+                        showDamage(message.targetId, message.amount, message.spellType);
                         if (message.targetId === myPlayerId) {
                             showSelfDamage(message.amount);
                             sounds.damage.volume = 0.5;
