@@ -1446,6 +1446,8 @@ export function Game({models, sounds, textures, matchId, character}) {
                 }
                 takeDamage(damage, userIdTouched, sphere.type);
             }
+
+            return touchedPlayer;
         }
 
         // function spheresCollisions() {
@@ -1486,8 +1488,6 @@ export function Game({models, sounds, textures, matchId, character}) {
 
         const removeSphere = (sphere, index) => {
             scene.remove(sphere.mesh); // Remove the fireball from the scene
-            spheres.splice(index, 1); // Remove it from the array
-
             if (sphere.trail) {
                 for (const point of sphere.trail) {
                     scene.remove(point.mesh);
@@ -1496,13 +1496,16 @@ export function Game({models, sounds, textures, matchId, character}) {
                 }
                 sphere.trail.length = 0;
             }
+            spheres.splice(index, 1); // Remove it from the array
+            sphere.mesh = null;
         };
 
         function updateSpheres(deltaTime) {
             const now = performance.now();
 
-            spheres.forEach((sphere, index) => {
-                if (!sphere.mesh) return;
+            for (let index = spheres.length - 1; index >= 0; index--) {
+                const sphere = spheres[index];
+                if (!sphere.mesh) continue;
 
                 sphere.collider.center.addScaledVector(sphere.velocity, deltaTime);
 
@@ -1511,6 +1514,7 @@ export function Game({models, sounds, textures, matchId, character}) {
                 if (result) {
                     // Handle collision logic (e.g., explode fireball or bounce)
                     removeSphere(sphere, index);
+                    continue;
 
                     // sphere.velocity.addScaledVector(result.normal, -result.normal.dot(sphere.velocity) * 1.5);
                     // sphere.collider.center.add(result.normal.multiplyScalar(result.depth));
@@ -1523,10 +1527,13 @@ export function Game({models, sounds, textures, matchId, character}) {
                     );
                     if (traveledDistance > SPHERE_MAX_DISTANCE) {
                         removeSphere(sphere, index);
+                        continue;
                     }
                 }
 
-                playerSphereCollision(sphere, index);
+                if (playerSphereCollision(sphere, index)) {
+                    continue;
+                }
 
                 if (now - sphere.lastTrailTime > TRAIL_INTERVAL) {
                     const ghost = new THREE.Mesh(trailGeometry, getTrailMaterial(sphere.type).clone());
@@ -1550,7 +1557,7 @@ export function Game({models, sounds, textures, matchId, character}) {
                         sphere.trail.splice(i, 1);
                     }
                 }
-            });
+            }
 
             // spheresCollisions(); // Handle collisions between spheres
 
