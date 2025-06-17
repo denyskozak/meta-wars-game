@@ -723,7 +723,7 @@ export function Game({models, sounds, textures, matchId, character}) {
                             // }
                         });
                         setTimeout(() => {
-                            playerVelocity.y = 10;
+                            playerVelocity.y = 6; // Lower jump height
                         }, 150);
                     }
                     break;
@@ -1590,7 +1590,7 @@ export function Game({models, sounds, textures, matchId, character}) {
             if (!controlsEnabled) return;
             const model = players.get(myPlayerId).model;
             // Adjust walking and running speed
-            const baseWalkSpeed = 8; // Base walking speed
+            const baseWalkSpeed = 5; // Base walking speed reduced for slower movement
             const speedDelta =
                 deltaTime * (playerOnFloor ? baseWalkSpeed : 5) * movementSpeedModifier; // Apply speed modifier
 
@@ -2324,14 +2324,6 @@ export function Game({models, sounds, textures, matchId, character}) {
                 const castAction = mixer.clipAction(animations[1]);
                 const castEndAction = mixer.clipAction(animations[0]);
 
-                const staff = createStaffMesh();
-                console.log("player: ", player.children);
-                const spine = player.getObjectByName('mixamorig:Spine2') || player.getObjectByName('mixamorig:Spine1');
-                if (spine) {
-                    spine.add(staff);
-                } else {
-                    player.add(staff);
-                }
 
                 scene.add(player);
                 players.set(id, {
