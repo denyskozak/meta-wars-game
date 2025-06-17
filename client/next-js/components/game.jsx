@@ -43,6 +43,12 @@ const SPELL_ICONS = {
     [conflagrateMeta.id]: conflagrateMeta.icon,
 };
 
+const SPELL_SCALES = {
+    fireball: 1.5,
+    iceball: 1.5,
+    darkball: 1.5,
+};
+
 const USER_DEFAULT_POSITION = [
     -36.198117096583466, 0.22499999997500564, -11.704829764915257,
 ];
@@ -289,6 +295,11 @@ export function Game({models, sounds, textures, matchId, character}) {
             fireballGeometry,
             fireballMaterial     // own instance
         );
+        fireballMesh.scale.set(
+            SPELL_SCALES.fireball,
+            SPELL_SCALES.fireball,
+            SPELL_SCALES.fireball,
+        );
 
         const darkballMaterial = new THREE.ShaderMaterial({
             transparent: true,
@@ -306,6 +317,11 @@ export function Game({models, sounds, textures, matchId, character}) {
         const darkballMesh = new THREE.Mesh(
             fireballGeometry,
             darkballMaterial
+        );
+        darkballMesh.scale.set(
+            SPELL_SCALES.darkball,
+            SPELL_SCALES.darkball,
+            SPELL_SCALES.darkball,
         );
 
         const iceballGeometry = new THREE.SphereGeometry(0.13, 16, 16); // Ледяной шар (увеличен на 30%)
@@ -365,6 +381,11 @@ export function Game({models, sounds, textures, matchId, character}) {
         });
 
         const iceballMesh = new THREE.Mesh(iceballGeometry, iceballMaterial.clone());
+        iceballMesh.scale.set(
+            SPELL_SCALES.iceball,
+            SPELL_SCALES.iceball,
+            SPELL_SCALES.iceball,
+        );
 
 
         const labelRenderer = new CSS2DRenderer();
@@ -493,7 +514,8 @@ export function Game({models, sounds, textures, matchId, character}) {
         const GRAVITY = 20;
 
         const NUM_SPHERES = 100;
-        const SPHERE_RADIUS = 0.26;
+        const BASE_SPHERE_RADIUS = 0.26;
+        const SPHERE_RADIUS = BASE_SPHERE_RADIUS * SPELL_SCALES.fireball;
 
         const FIREBLAST_RANGE = 20;
         const FIREBLAST_DAMAGE = 25;
