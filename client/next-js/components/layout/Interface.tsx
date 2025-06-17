@@ -46,10 +46,10 @@ export const Interface = () => {
                     </div>
                 )}
                 <div className="w-40 space-y-1">
-                    <p className="text-medium font-semibold">HP: {(selfStats.hp / MAX_HP) * 100}</p>
-                    <Progress id="hpBar" aria-label="HP" value={(selfStats.hp / MAX_HP) * 100} color="secondary" disableAnimation />
-                    <p className="text-medium font-semibold">Mana: {selfStats.mana}</p>
-                    <Progress id="manaBar" aria-label="Mana" value={selfStats.mana} color="primary" disableAnimation />
+                    <p className="text-medium font-semibold">HP: {Math.round((selfStats.hp / MAX_HP) * 100)}</p>
+                    <Progress id="hpBar" aria-label="HP" value={Math.round((selfStats.hp / MAX_HP) * 100)} color="secondary" disableAnimation />
+                    <p className="text-medium font-semibold">Mana: {Math.round(selfStats.mana)}</p>
+                    <Progress id="manaBar" aria-label="Mana" value={Math.round(selfStats.mana)} color="primary" disableAnimation />
                 </div>
             </div>
 
@@ -62,10 +62,10 @@ export const Interface = () => {
                     )}
                     <div className="flex flex-col">
                         <div id="targetAddress" className="target-address">{target.address}</div>
-                        <p className="text-medium font-semibold">HP: {(target.hp / MAX_HP) * 100}</p>
-                        <Progress id="targetHpBar" aria-label="Target HP" value={(target.hp / MAX_HP) * 100} color="secondary" className="mb-1 w-40" disableAnimation />
-                        <p className="text-medium font-semibold">Mana: {target.mana}</p>
-                        <Progress id="targetManaBar" aria-label="Target Mana" value={target.mana} color="primary" className="w-40" disableAnimation />
+                        <p className="text-medium font-semibold">HP: {Math.round((target.hp / MAX_HP) * 100)}</p>
+                        <Progress id="targetHpBar" aria-label="Target HP" value={Math.round((target.hp / MAX_HP) * 100)} color="secondary" className="mb-1 w-40" disableAnimation />
+                        <p className="text-medium font-semibold">Mana: {Math.round(target.mana)}</p>
+                        <Progress id="targetManaBar" aria-label="Target Mana" value={Math.round(target.mana)} color="primary" className="w-40" disableAnimation />
                     </div>
                 </div>
             )}
