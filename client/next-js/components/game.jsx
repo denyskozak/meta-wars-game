@@ -318,8 +318,8 @@ export function Game({models, sounds, textures, matchId, character}) {
             blending: THREE.AdditiveBlending,
             uniforms: {
                 time: {value: 0},
-                coreCol: {value: new THREE.Color(0xbf41ff)},
-                flameCol: {value: new THREE.Color(0x1a0a1e)},
+                coreCol: {value: new THREE.Color(0x8a2be2)},
+                flameCol: {value: new THREE.Color(0x160033)},
                 fireTex: {value: fireTexture},
             },
             vertexShader: fireballMaterial.vertexShader,
@@ -524,8 +524,8 @@ export function Game({models, sounds, textures, matchId, character}) {
 
         preloadMesh(fireballMesh, 0xffaa33);
         preloadMesh(pyroblastMesh, 0xffaa33);
-        preloadMesh(chaosBoltMesh, 0x8844ff);
-        preloadMesh(darkballMesh, 0x8844ff);
+        preloadMesh(chaosBoltMesh, 0x8a2be2);
+        preloadMesh(darkballMesh, 0x8a2be2);
         preloadMesh(iceballMesh, 0x88ddff);
 
         const stats = new Stats();
@@ -1157,7 +1157,7 @@ export function Game({models, sounds, textures, matchId, character}) {
                     castDarkball({
                         playerId,
                         castSpellImpl,
-                        igniteHands,
+                        igniteHands: darkHands,
                         castSphere,
                         darkballMesh,
                         sounds,
@@ -1194,7 +1194,7 @@ export function Game({models, sounds, textures, matchId, character}) {
                     castChaosBolt({
                         playerId,
                         castSpellImpl,
-                        igniteHands,
+                        igniteHands: darkHands,
                         castSphere,
                         chaosBoltMesh,
                         sounds,
@@ -1202,7 +1202,7 @@ export function Game({models, sounds, textures, matchId, character}) {
                     });
                     break;
                 case "darkball":
-                    igniteHands(playerId, 1000);
+                    darkHands(playerId, 1000);
                     castSpellImpl(
                         playerId,
                         30,
@@ -1255,7 +1255,7 @@ export function Game({models, sounds, textures, matchId, character}) {
                     castChaosBolt({
                         playerId,
                         castSpellImpl,
-                        igniteHands,
+                        igniteHands: darkHands,
                         castSphere,
                         chaosBoltMesh,
                         sounds,
@@ -1948,6 +1948,16 @@ export function Game({models, sounds, textures, matchId, character}) {
             applyHandEffect(playerId, 'ice', () => {
                 const left = new THREE.Mesh(iceballGeometry, iceballMaterial.clone());
                 const right = new THREE.Mesh(iceballGeometry, iceballMaterial.clone());
+                left.scale.set(100, 100, 100);
+                right.scale.set(100, 100, 100);
+                return {left, right};
+            }, duration);
+        }
+
+        function darkHands(playerId, duration = 1000) {
+            applyHandEffect(playerId, 'shadow', () => {
+                const left = new THREE.Mesh(fireballGeometry, darkballMaterial.clone());
+                const right = new THREE.Mesh(fireballGeometry, darkballMaterial.clone());
                 left.scale.set(100, 100, 100);
                 right.scale.set(100, 100, 100);
                 return {left, right};
