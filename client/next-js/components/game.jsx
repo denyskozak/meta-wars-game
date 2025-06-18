@@ -44,11 +44,11 @@ const SPELL_ICONS = {
 };
 
 const SPELL_SCALES = {
-    fireball: 1.5,
-    iceball: 1.5,
-    darkball: 2.0,
-    pyroblast: 4.5,
-    chaosBolt: 4.5,
+    fireball: 1.8,
+    iceball: 1.8,
+    darkball: 2.4,
+    pyroblast: 5.4,
+    chaosBolt: 5.4,
 };
 
 const USER_DEFAULT_POSITION = [
@@ -231,7 +231,7 @@ export function Game({models, sounds, textures, matchId, character}) {
         const fireTexture = textures.fire;
         fireTexture.wrapS = fireTexture.wrapT = THREE.RepeatWrapping;
         const fireballMaterial = new THREE.ShaderMaterial({
-            transparent: true,
+            transparent: false,
             depthWrite: false,
             blending: THREE.AdditiveBlending,
             uniforms: {
@@ -318,7 +318,7 @@ export function Game({models, sounds, textures, matchId, character}) {
         );
 
         const darkballMaterial = new THREE.ShaderMaterial({
-            transparent: true,
+            transparent: false,
             depthWrite: true,
             blending: THREE.NormalBlending,
             uniforms: {
@@ -401,7 +401,7 @@ export function Game({models, sounds, textures, matchId, character}) {
       gl_FragColor = vec4(finalColor, alpha);
     }
   `,
-            transparent: true,
+            transparent: false,
             blending: THREE.AdditiveBlending,
             depthWrite: false,
         });
@@ -555,8 +555,8 @@ export function Game({models, sounds, textures, matchId, character}) {
         const DARKBALL_DAMAGE = 30;
 
         // Медленнее пускаем сферы как настоящие заклинания
-        const MIN_SPHERE_IMPULSE = 8;
-        const MAX_SPHERE_IMPULSE = 16;
+        const MIN_SPHERE_IMPULSE = 6;
+        const MAX_SPHERE_IMPULSE = 12;
 
         // Maximum distance any sphere can travel
         // Use the same range as fireblast for consistency
@@ -1615,7 +1615,7 @@ export function Game({models, sounds, textures, matchId, character}) {
             if (!controlsEnabled) return;
             const model = players.get(myPlayerId).model;
             // Adjust walking and running speed
-            const baseWalkSpeed = 5; // Base walking speed reduced for slower movement
+            const baseWalkSpeed = 6; // 20% faster walking speed
             const speedDelta =
                 deltaTime * (playerOnFloor ? baseWalkSpeed : 5) * movementSpeedModifier; // Apply speed modifier
 

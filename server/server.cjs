@@ -258,6 +258,8 @@ function applyDamage(match, victimId, dealerId, damage, spellType) {
     victim.hp = Math.max(0, victim.hp - totalDamage);
     if (victim.hp <= 0) {
         victim.deaths++;
+        victim.buffs = [];
+        victim.debuffs = [];
         if (attacker) {
             attacker.kills++;
             attacker.points += 100;
@@ -650,6 +652,8 @@ ws.on('connection', (socket) => {
                     if (p) {
                         p.hp = MAX_HP;
                         p.mana = 100;
+                        p.buffs = [];
+                        p.debuffs = [];
                         broadcastToMatch(match.id, {
                             type: 'UPDATE_STATS',
                             playerId: id,
