@@ -95,6 +95,7 @@ export function Game({models, sounds, textures, matchId, character}) {
         // Store other players
         const players = new Map();
         const runes = new Map();
+        const xpRunes = new Map();
         const damageLabels = new Map();
         let myPlayerId = null;
 
@@ -2412,6 +2413,33 @@ export function Game({models, sounds, textures, matchId, character}) {
             }
         }
 
+        function createXpRune(data) {
+            const modelId = 'mana_rune';
+            const base = models[modelId];
+            if (!base) return;
+            const rune = SkeletonUtils.clone(base);
+            rune.position.set(data.position.x, data.position.y, data.position.z);
+            rune.scale.multiplyScalar(0.2);
+            rune.traverse((child) => {
+                if (child.isMesh) {
+                    child.material = child.material.clone();
+                }
+            });
+            const glow = makeGlowSprite(0xffff00, 1.5);
+            glow.position.y = 0.2;
+            rune.add(glow);
+            scene.add(rune);
+            xpRunes.set(data.id, rune);
+        }
+
+        function removeXpRune(id) {
+            const rune = xpRunes.get(id);
+            if (rune) {
+                scene.remove(rune);
+                xpRunes.delete(id);
+            }
+        }
+
         // Function to remove a player from the scene
         function removePlayer(id) {
             if (players.has(id)) {
@@ -2651,7 +2679,11 @@ export function Game({models, sounds, textures, matchId, character}) {
                     }
                     break;
                 case "RUNE_PICKED":
-                    removeRune(message.runeId);
+                    if (message.runeType === 'xp') {
+                        removeXpRune(message.runeId);
+                    } else {
+                        removeRune(message.runeId);
+                    }
                     if (message.runeType === 'damage') {
                         applyDamageRuneEffect(message.playerId);
                     }
@@ -2666,6 +2698,9 @@ export function Game({models, sounds, textures, matchId, character}) {
                                 break;
                             case 'damage':
                                 text = 'Damage buff for 60s!';
+                                break;
+                            case 'xp':
+                                text = 'Gained experience!';
                                 break;
                         }
                         if (text) {
@@ -2707,10 +2742,12 @@ export function Game({models, sounds, textures, matchId, character}) {
                         id: Number(id),
                         kills: p.kills,
                         deaths: p.deaths,
+                        points: p.points,
                     }));
                     dispatch({type: 'SET_SCOREBOARD_DATA', payload: boardData});
 
                     const runeIds = new Set();
+                    const xpRuneIds = new Set();
                     if (Array.isArray(message.runes)) {
                         message.runes.forEach(r => {
                             runeIds.add(r.id);
@@ -2722,9 +2759,25 @@ export function Game({models, sounds, textures, matchId, character}) {
                             }
                         });
                     }
+                    if (Array.isArray(message.xpRunes)) {
+                        message.xpRunes.forEach(r => {
+                            xpRuneIds.add(r.id);
+                            if (!xpRunes.has(r.id)) {
+                                createXpRune(r);
+                            } else {
+                                const obj = xpRunes.get(r.id);
+                                obj.position.set(r.position.x, r.position.y, r.position.z);
+                            }
+                        });
+                    }
                     Array.from(runes.keys()).forEach(id => {
                         if (!runeIds.has(id)) {
                             removeRune(id);
+                        }
+                    });
+                    Array.from(xpRunes.keys()).forEach(id => {
+                        if (!xpRuneIds.has(id)) {
+                            removeXpRune(id);
                         }
                     });
 

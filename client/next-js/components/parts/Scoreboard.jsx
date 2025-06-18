@@ -14,6 +14,7 @@ export const Scoreboard = () => {
                     <th>Player</th>
                     <th>Kills</th>
                     <th>Deaths</th>
+                    <th>Points</th>
                 </tr>
                 </thead>
                 <tbody>
@@ -22,6 +23,7 @@ export const Scoreboard = () => {
                         <td>{`Player ${p.id}`}</td>
                         <td>{p.kills}</td>
                         <td>{p.deaths}</td>
+                        <td>{p.points}</td>
                     </tr>
                 ))}
                 </tbody>
