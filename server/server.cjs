@@ -5,12 +5,26 @@ const http = require('http');
 
 const UPDATE_MATCH_INTERVAL = 33;
 const MAX_HP = 120;
+const MAX_POINTS = 1000;
 const MANA_REGEN_INTERVAL = 1000;
 const MANA_REGEN_AMOUNT = 1.3; // 30% faster mana regeneration
 const SPELL_COST = require('../client/next-js/consts/spellCosts.json');
 const ICEBALL_ICON = '/icons/spell_frostbolt.jpg';
 
 const RUNE_POSITIONS = [
+    {x: -36.33733552736014, y: 0.18650680579857343, z: -4.580323077732503},
+    {x: -29.58349902197933, y: 0.6628864165173389, z: -10.369847037430544},
+    {x: -25.167574279124512, y: 0.5165195417297067, z: -3.3432991165133714},
+    {x: -18.493116647242555, y: 0.28728750460708025, z: -4.877113888695841},
+    {x: -14.911321752520305, y: 0.41016146303941764, z: -13.070007161780007},
+    {x: -20.1146804178187, y: 0.4105227742982425, z: -22.33716834753485},
+    {x: -25.744417751903402, y: 1.0044804283178084, z: -23.458841928930575},
+    {x: -29.964839430431045, y: 0.6108334494970779, z: -15.49109184571351},
+    {x: -39.13481011432206, y: 0.7538530222210333, z: -11.053984725045723},
+    {x: -45.89200741704895, y: 0.519306096834576, z: -9.178415243309109},
+];
+
+const XP_RUNE_POSITIONS = [
     {x: -36.33733552736014, y: 0.18650680579857343, z: -4.580323077732503},
     {x: -29.58349902197933, y: 0.6628864165173389, z: -10.369847037430544},
     {x: -25.167574279124512, y: 0.5165195417297067, z: -3.3432991165133714},
@@ -84,6 +98,14 @@ function generateRunes(matchId) {
     }));
 }
 
+function generateXpRunes(matchId) {
+    return shuffle(XP_RUNE_POSITIONS).slice(0, 6).map((pos, idx) => ({
+        id: `xprune_${matchId}_${Date.now()}_${idx}`,
+        type: 'xp',
+        position: pos,
+    }));
+}
+
 function createMatch({name, maxPlayers = 6, ownerId}) {
     const matchId = `match_${matchCounter++}`;
     const match = {
@@ -97,6 +119,7 @@ function createMatch({name, maxPlayers = 6, ownerId}) {
         finished: false,
         summary: null,
         runes: generateRunes(matchId),
+        xpRunes: generateXpRunes(matchId),
     };
     matches.set(matchId, match);
     playerMatchMap.set(ownerId, matchId);
@@ -237,6 +260,35 @@ function checkRunePickup(match, playerId) {
     }
 }
 
+function checkXpRunePickup(match, playerId) {
+    const player = match.players.get(playerId);
+    if (!player) return;
+
+    for (let i = 0; i < match.xpRunes.length; i++) {
+        const rune = match.xpRunes[i];
+        const dx = player.position.x - rune.position.x;
+        const dy = player.position.y - rune.position.y;
+        const dz = player.position.z - rune.position.z;
+        const dist = Math.sqrt(dx * dx + dy * dy + dz * dz);
+        if (dist < 1.5) {
+            match.xpRunes.splice(i, 1);
+            player.points += 50;
+
+            broadcastToMatch(match.id, {
+                type: 'RUNE_PICKED',
+                playerId,
+                runeId: rune.id,
+                runeType: rune.type,
+            });
+
+            if (player.points >= MAX_POINTS && !match.finished) {
+                finalizeMatch(match);
+            }
+            break;
+        }
+    }
+}
+
 function applyDamage(match, victimId, dealerId, damage, spellType) {
     const victim = match.players.get(victimId);
     if (!victim) return;
@@ -267,7 +319,7 @@ function applyDamage(match, victimId, dealerId, damage, spellType) {
                 type: 'KILL',
                 killerId: dealerId,
             });
-            if (attacker.kills >= 15 && !match.finished) {
+            if (attacker.points >= MAX_POINTS && !match.finished) {
                 finalizeMatch(match);
             }
         }
@@ -355,6 +407,7 @@ ws.on('connection', (socket) => {
     setInterval(() => {
         for (const match of matches.values()) {
             match.runes = generateRunes(match.id);
+            match.xpRunes = generateXpRunes(match.id);
         }
     }, 120000);
 
@@ -403,7 +456,7 @@ ws.on('connection', (socket) => {
                     killerPlayer.kills++;
                     killerPlayer.points += 100;
 
-                    if (killerPlayer.kills >= 15 && !match.finished) {
+                    if (killerPlayer.points >= MAX_POINTS && !match.finished) {
                         finalizeMatch(match);
                     }
                 }
@@ -487,6 +540,7 @@ ws.on('connection', (socket) => {
                             players: Array.from(matchToJoin.players),
                             isFull: matchToJoin.isFull,
                             runes: matchToJoin.runes,
+                            xpRunes: matchToJoin.xpRunes,
                         }));
                     }
                 });
@@ -552,6 +606,7 @@ ws.on('connection', (socket) => {
                         player.rotation = message.rotation;
                     }
                     checkRunePickup(match, id);
+                    checkXpRunePickup(match, id);
                 }
                 break;
 
