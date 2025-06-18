@@ -122,6 +122,7 @@ export default function GamePage() {
       noMana: new Audio("/sounds/no-mana.ogg"),
       noTarget: new Audio("/sounds/no-target.ogg"),
       cooldown: new Audio("/sounds/cooldown.ogg"),
+      xpRune: new Audio("/sounds/xp-rune.ogg"),
     };
 
     Promise.all([preloadModels(models), preloadTextures()]).then(

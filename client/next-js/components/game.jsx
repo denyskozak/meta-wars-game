@@ -2703,6 +2703,11 @@ export function Game({models, sounds, textures, matchId, character}) {
                                 text = 'Gained experience!';
                                 break;
                         }
+                        if (message.runeType === 'xp' && sounds?.xpRune) {
+                            sounds.xpRune.currentTime = 0;
+                            sounds.xpRune.volume = 0.5;
+                            sounds.xpRune.play();
+                        }
                         if (text) {
                             dispatch({type: 'SEND_CHAT_MESSAGE', payload: text});
                         }
