@@ -501,13 +501,6 @@ export function Game({models, sounds, textures, matchId, character}) {
         // directionalLight.shadow.bias = -0.00006;
         // scene.add(directionalLight);
 
-        // Create additional point lights around spawn points for a darker mood
-        spawns.forEach((pos) => {
-            const light = new THREE.PointLight(0xffaa88, 1.5, 15);
-            light.position.set(pos.x, pos.y + 2, pos.z);
-            scene.add(light);
-        });
-
         const renderer = new THREE.WebGLRenderer({antialias: true});
 
         renderer.setPixelRatio(Math.min(window.devicePixelRatio, 1.5));
@@ -611,7 +604,9 @@ export function Game({models, sounds, textures, matchId, character}) {
         const SHIELD_MANA_COST = SPELL_COST['shield'];
         const SHIELD_DURATION = 3; // Shield duration in seconds
         const DAMAGE_REDUCTION = 0.5; // Reduces damage by 50%
-        const EFFECT_ROT_SPEED = 1; // Rotation speed for floating effects
+        // Rotation speed for the damage rune effect attached to players
+        const DAMAGE_EFFECT_ROT_SPEED = 0.4;
+        const DAMAGE_EFFECT_MAP_SPEED = 0.1;
         // Activate shield
         let isShieldActive = false;
         let isChatActive = false;
@@ -1773,26 +1768,7 @@ export function Game({models, sounds, textures, matchId, character}) {
             USER_DEFAULT_POSITION[2],
         );
         playerCollider.radius = 0.35;
-        const torchPositions = [
-            {x: -43.52580547526639, y: 0.14420588534998963, z: -9.455423449249436},
-            {x: -39.05849469150937, y: 0.0421284753764084, z: -5.815063492803456},
-            {x: -21.797763613239496, y: 0.15059653596605488, z: -4.8172303222808806},
-            {x: -19.59879364156808, y: -0.0376956842439064, z: -13.855212475656389},
-            {x: -21.473298810186247, y: 0.171059096524247, z: -22.168549857112748},
-        ];
 
-        const TORCH_Y_OFFSET = -0.5;
-
-        torchPositions.forEach((pos) => {
-            const torch = SkeletonUtils.clone(models['torch']);
-            torch.scale.set(0.2, 0.2, 0.2);
-            torch.position.set(pos.x, pos.y + TORCH_Y_OFFSET, pos.z);
-            scene.add(torch);
-
-            const light = new THREE.PointLight(0xffaa33, 1.5, 10);
-            light.position.set(pos.x, pos.y + 0.5 + TORCH_Y_OFFSET, pos.z);
-            scene.add(light);
-        });
 
         function isAnyActionRunning(excludeActions = []) {
             const {mixer, actions} = players.get(myPlayerId)
@@ -2220,10 +2196,10 @@ export function Game({models, sounds, textures, matchId, character}) {
 
 
                     activeDamageEffects.forEach((mesh) => {
-                        mesh.rotation.y += delta * EFFECT_ROT_SPEED;
+                        mesh.rotation.y += delta * DAMAGE_EFFECT_ROT_SPEED;
                         mesh.children.forEach(c => {
                             if (c.material?.map) {
-                                c.material.map.offset.x -= delta * 0.2;
+                                c.material.map.offset.x -= delta * DAMAGE_EFFECT_MAP_SPEED;
                             }
                         });
                     });
@@ -2236,7 +2212,8 @@ export function Game({models, sounds, textures, matchId, character}) {
                     });
 
                     runes.forEach(r => {
-                        r.rotation.y += delta * 0.1;
+                        const speed = r.userData.type === 'damage' ? 0.05 : 0.1;
+                        r.rotation.y += delta * speed;
                     });
 
                     // renderCursor();
@@ -2407,6 +2384,7 @@ export function Game({models, sounds, textures, matchId, character}) {
             const rune = SkeletonUtils.clone(base);
             rune.position.set(data.position.x, data.position.y, data.position.z);
             rune.scale.multiplyScalar(0.2);
+            rune.userData.type = data.type;
 
             rune.traverse((child) => {
                 if (child.isMesh) {
