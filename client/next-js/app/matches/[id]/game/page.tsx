@@ -123,6 +123,9 @@ export default function GamePage() {
       noTarget: new Audio("/sounds/no-target.ogg"),
       cooldown: new Audio("/sounds/cooldown.ogg"),
       xpRune: new Audio("/sounds/xp-rune.ogg"),
+      healRune: new Audio("/sounds/heal-rune.ogg"),
+      manaRune: new Audio("/sounds/mana-rune.ogg"),
+      damageRune: new Audio("/sounds/damage-rune.ogg"),
     };
 
     Promise.all([preloadModels(models), preloadTextures()]).then(
