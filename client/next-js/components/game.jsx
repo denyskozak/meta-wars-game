@@ -2708,6 +2708,21 @@ export function Game({models, sounds, textures, matchId, character}) {
                             sounds.xpRune.volume = 0.5;
                             sounds.xpRune.play();
                         }
+                        if (message.runeType === 'heal' && sounds?.healRune) {
+                            sounds.healRune.currentTime = 0;
+                            sounds.healRune.volume = 0.5;
+                            sounds.healRune.play();
+                        }
+                        if (message.runeType === 'mana' && sounds?.manaRune) {
+                            sounds.manaRune.currentTime = 0;
+                            sounds.manaRune.volume = 0.5;
+                            sounds.manaRune.play();
+                        }
+                        if (message.runeType === 'damage' && sounds?.damageRune) {
+                            sounds.damageRune.currentTime = 0;
+                            sounds.damageRune.volume = 0.5;
+                            sounds.damageRune.play();
+                        }
                         if (text) {
                             dispatch({type: 'SEND_CHAT_MESSAGE', payload: text});
                         }
