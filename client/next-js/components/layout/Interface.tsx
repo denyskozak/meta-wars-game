@@ -31,7 +31,13 @@ export const Interface = () => {
 
     useEffect(() => {
         const handler = (e: CustomEvent) => {
-            setSelfStats(e.detail);
+            if (!e.detail) return;
+            setSelfStats(prev => {
+                if (prev.hp === e.detail.hp && prev.mana === e.detail.mana) {
+                    return prev;
+                }
+                return e.detail;
+            });
         };
         window.addEventListener('self-update', handler as EventListener);
         return () => window.removeEventListener('self-update', handler as EventListener);
