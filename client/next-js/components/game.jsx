@@ -1656,7 +1656,8 @@ export function Game({models, sounds, textures, matchId, character}) {
             if (!controlsEnabled) return;
             const model = players.get(myPlayerId).model;
             // Adjust walking and running speed
-            const baseWalkSpeed = 7.2; // Increased running speed by 20%
+            // Increase player's movement speed by 20%
+            const baseWalkSpeed = 8.64; // Previously 7.2
             const speedDelta =
                 deltaTime * (playerOnFloor ? baseWalkSpeed : 5) * movementSpeedModifier; // Apply speed modifier
 
