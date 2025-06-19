@@ -3,7 +3,7 @@
  "version": "0.0.1",
  "private": true,
  "scripts": {
-  "dev": "next dev --turbopack --port 4001",
+  "dev": "next dev --turbopack",
   "build": "next build",
   "start": "next start",
   "lint": "npx -y eslint@8 -c .eslintrc.json . --ext .ts,.tsx --fix"
