@@ -13,6 +13,7 @@ import { useWS } from "@/hooks/useWS";
 import { useInterface } from "@/context/inteface";
 import { Game } from "@/components/game";
 import { Loading } from "@/components/loading";
+import { DeveloperPanel } from "@/components/DeveloperPanel";
 
 THREE.Cache.enabled = true;
 
@@ -148,12 +149,15 @@ export default function GamePage() {
   }
 
   return (
-    <Game
-      character={character}
-      matchId={params?.id}
-      models={preloadedData.models}
-      sounds={preloadedData.sounds}
-      textures={preloadedData.textures}
-    />
+    <>
+      <Game
+        character={character}
+        matchId={params?.id}
+        models={preloadedData.models}
+        sounds={preloadedData.sounds}
+        textures={preloadedData.textures}
+      />
+      <DeveloperPanel models={preloadedData.models} />
+    </>
   );
 }
