@@ -744,6 +744,11 @@ export function Game({models, sounds, textures, matchId, character}) {
                     console.log(
                         `Player position: x=${currentPosition.x}, y=${currentPosition.y}, z=${currentPosition.z}`,
                     );
+                    const lookDir = new THREE.Vector3();
+                    camera.getWorldDirection(lookDir);
+                    console.log(
+                        `Looking direction: x=${lookDir.x}, y=${lookDir.y}, z=${lookDir.z}`,
+                    );
                     break;
                 case "KeyT":
                     dispatch({type: 'SET_SCOREBOARD_VISIBLE', payload: true});
