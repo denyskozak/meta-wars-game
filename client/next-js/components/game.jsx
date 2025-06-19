@@ -2262,6 +2262,10 @@ export function Game({models, sounds, textures, matchId, character}) {
                         r.rotation.y += delta * speed;
                     });
 
+                    xpRunes.forEach(r => {
+                        r.rotation.y += delta * 0.1;
+                    });
+
                     // renderCursor();
                     updateCameraPosition();
                     highlightCrosshair();
