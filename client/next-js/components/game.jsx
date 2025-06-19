@@ -59,12 +59,42 @@ const USER_DEFAULT_POSITION = [
 ];
 
 const spawns = [
-    {x: -31.533456476345865, y: -2.4026224958354563, z: -35.535650458003055},
-    {x: -32.55407928341656, y: -1.5039584129780783, z: 1.1829651180292098},
-    {x: -2.205966504124421, y: -1.908838848084411, z: 22.40594666056034},
-    {x: 6.5351778915154854, y: -0.9536854349901706, z: -5.300264692341613},
-    {x: -13.514131023893711, y: -2.425699580662904, z: -21.958818971727908},
-    {x: -17.715590278500294, y: 1.1694729985423553, z: 21.91448639608614},
+    {
+        x: -31.533456476345865,
+        y: -2.4026224958354563,
+        z: -35.535650458003055,
+        yaw: 0.5780367320510054,
+    },
+    {
+        x: -32.55407928341656,
+        y: -1.5039584129780783,
+        z: 1.1829651180292098,
+        yaw: 1.338036732051006,
+    },
+    {
+        x: -2.205966504124421,
+        y: -1.908838848084411,
+        z: 22.40594666056034,
+        yaw: -2.80714857512864,
+    },
+    {
+        x: 6.5351778915154854,
+        y: -0.9536854349901706,
+        z: -5.300264692341613,
+        yaw: -1.8271485751285905,
+    },
+    {
+        x: -13.514131023893711,
+        y: -2.425699580662904,
+        z: -21.958818971727908,
+        yaw: -0.021148575128611173,
+    },
+    {
+        x: -17.715590278500294,
+        y: 1.1694729985423553,
+        z: 21.91448639608614,
+        yaw: -3.048333882308307,
+    },
 ];
 
 function getRandomElement(array) {
@@ -1866,6 +1896,15 @@ export function Game({models, sounds, textures, matchId, character}) {
             // Update the model's position
             if (model) {
                 model.position.set(position.x, position.y - 0.5, position.z); // Adjust for model offset
+                const rotY =
+                    typeof position.yaw === "number"
+                        ? position.yaw
+                        : position.rotation?.y;
+                if (typeof rotY === "number") {
+                    yaw = rotY;
+                    pitch = 0;
+                    model.rotation.y = rotY;
+                }
             }
 
             console.log(
@@ -2781,8 +2820,15 @@ export function Game({models, sounds, textures, matchId, character}) {
                     if (players.has(message.playerId)) {
                         const p = players.get(message.playerId);
                         p.position = message.position;
+                        if (message.rotation) {
+                            p.rotation = message.rotation;
+                        }
                         if (message.playerId === myPlayerId) {
-                            respawnPlayer(message.position);
+                            const pos = {
+                                ...message.position,
+                                rotation: message.rotation,
+                            };
+                            respawnPlayer(pos);
                         }
                     }
                     break;

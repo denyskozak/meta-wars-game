@@ -33,12 +33,42 @@ const XP_RUNE_POSITIONS = [
 ];
 
 const SPAWN_POINTS = [
-    {x: -31.533456476345865, y: -2.4026224958354563, z: -35.535650458003055},
-    {x: -32.55407928341656, y: -1.5039584129780783, z: 1.1829651180292098},
-    {x: -2.205966504124421, y: -1.908838848084411, z: 22.40594666056034},
-    {x: 6.5351778915154854, y: -0.9536854349901706, z: -5.300264692341613},
-    {x: -13.514131023893711, y: -2.425699580662904, z: -21.958818971727908},
-    {x: -17.715590278500294, y: 1.1694729985423553, z: 21.91448639608614},
+    {
+        x: -31.533456476345865,
+        y: -2.4026224958354563,
+        z: -35.535650458003055,
+        yaw: 0.5780367320510054,
+    },
+    {
+        x: -32.55407928341656,
+        y: -1.5039584129780783,
+        z: 1.1829651180292098,
+        yaw: 1.338036732051006,
+    },
+    {
+        x: -2.205966504124421,
+        y: -1.908838848084411,
+        z: 22.40594666056034,
+        yaw: -2.80714857512864,
+    },
+    {
+        x: 6.5351778915154854,
+        y: -0.9536854349901706,
+        z: -5.300264692341613,
+        yaw: -1.8271485751285905,
+    },
+    {
+        x: -13.514131023893711,
+        y: -2.425699580662904,
+        z: -21.958818971727908,
+        yaw: -0.021148575128611173,
+    },
+    {
+        x: -17.715590278500294,
+        y: 1.1694729985423553,
+        z: 21.91448639608614,
+        yaw: -3.048333882308307,
+    },
 ];
 
 function randomSpawnPoint() {
@@ -157,7 +187,7 @@ function createPlayer(address, classType) {
         position: {...spawn},
         spawn_point: spawn,
         animationAction: 'idle',
-        rotation: {y: 0},
+        rotation: {y: spawn.yaw || 0},
         buffs: [],
         debuffs: [],
         kills: 0,
@@ -322,6 +352,7 @@ function applyDamage(match, victimId, dealerId, damage, spellType) {
         const spawn = randomSpawnPoint();
         victim.position = { ...spawn };
         victim.spawn_point = spawn;
+        victim.rotation = { y: spawn.yaw || 0 };
         victim.hp = MAX_HP;
         victim.mana = 100;
         victim.animationAction = 'idle';
@@ -330,6 +361,7 @@ function applyDamage(match, victimId, dealerId, damage, spellType) {
             type: 'PLAYER_RESPAWN',
             playerId: victimId,
             position: spawn,
+            rotation: { y: spawn.yaw || 0 },
         });
     }
 
@@ -435,6 +467,7 @@ ws.on('connection', (socket) => {
                                 type: 'PLAYER_RESPAWN',
                                 playerId: pid,
                                 position: p.position,
+                                rotation: { y: p.rotation?.y || p.position.yaw || 0 },
                             });
                         });
                     }
@@ -520,6 +553,7 @@ ws.on('connection', (socket) => {
                     type: 'PLAYER_RESPAWN',
                     playerId: id,
                     position: newPlayer.position,
+                    rotation: { y: newPlayer.rotation.y },
                 });
                 playerMatchMap.set(id, message.matchId);
                 if (matchToJoin.players.size >= matchToJoin.maxPlayers) {
