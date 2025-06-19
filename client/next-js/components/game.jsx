@@ -2414,12 +2414,12 @@ export function Game({models, sounds, textures, matchId, character}) {
         }
 
         function createXpRune(data) {
-            const modelId = 'mana_rune';
+            const modelId = 'xp_rune';
             const base = models[modelId];
             if (!base) return;
             const rune = SkeletonUtils.clone(base);
             rune.position.set(data.position.x, data.position.y, data.position.z);
-            rune.scale.multiplyScalar(0.2);
+            rune.scale.multiplyScalar(0.05);
             rune.traverse((child) => {
                 if (child.isMesh) {
                     child.material = child.material.clone();

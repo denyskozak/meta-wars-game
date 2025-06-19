@@ -47,6 +47,7 @@ export default function GamePage() {
         {id: 'damage_rune', path: 'damage_rune.glb'},
         {id: 'heal_rune', path: 'heal_rune.glb'},
         {id: 'mana_rune', path: 'mana_rune.glb'},
+        {id: 'xp_rune', path: 'xp_rune.glb'},
         {id: 'mage_staff', path: 'skins/items/mage-staff.glb'},
         {id: 'warlock_staff', path: 'skins/items/warlock-staff.glb'},
         {id: 'damage_effect', path: 'ice-veins.glb'},
