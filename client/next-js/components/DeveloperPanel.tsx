@@ -3,7 +3,12 @@
 import React, { useEffect, useState } from "react";
 
 interface DeveloperPanelProps {
-  models?: Record<string, any>;
+  /**
+   * List of available models. Can be provided either as an object of loaded
+   * models, an array of file paths, or an array of objects containing a `path`
+   * field.
+   */
+  models?: Record<string, any> | Array<{ path: string } | string>;
 }
 
 export const DeveloperPanel = ({ models = {} }: DeveloperPanelProps) => {
@@ -12,7 +17,13 @@ export const DeveloperPanel = ({ models = {} }: DeveloperPanelProps) => {
   const [model, setModel] = useState("");
 
   useEffect(() => {
-    if (models && Object.keys(models).length) {
+    if (Array.isArray(models) && models.length) {
+      const list = models
+        .map((m) => (typeof m === "string" ? m : m.path))
+        .filter(Boolean);
+
+      setModelList(list);
+    } else if (models && Object.keys(models).length) {
       setModelList(
         Object.keys(models).filter((key) => !key.endsWith("_animations")),
       );
