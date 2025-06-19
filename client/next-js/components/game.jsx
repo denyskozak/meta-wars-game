@@ -56,12 +56,12 @@ const USER_DEFAULT_POSITION = [
 ];
 
 const spawns = [
-    {x: -41.849391064557935, y: 1.3085525784595764, z: -0.7840938159276118},
-    {x: -46.42248289494676, y: 0.41527976194619626, z: -21.603091194083497},
-    {x: -30.74329645409973, y: 0.30453703672891463, z: -28.155936814794597},
-    {x: -13.000132445208342, y: 0.2797758251195597, z: -25.188257878192154},
-    {x: -13.490956800438346, y: 0.39571999597926, z: 1.1589954251604742},
-    {x: -41.95264509377698, y: 1.4702305560704132, z: 0.9677510383984183},
+    {x: -31.533456476345865, y: -2.4026224958354563, z: -35.535650458003055},
+    {x: -32.55407928341656, y: -1.5039584129780783, z: 1.1829651180292098},
+    {x: -2.205966504124421, y: -1.908838848084411, z: 22.40594666056034},
+    {x: 6.5351778915154854, y: -0.9536854349901706, z: -5.300264692341613},
+    {x: -13.514131023893711, y: -2.425699580662904, z: -21.958818971727908},
+    {x: -17.715590278500294, y: 1.1694729985423553, z: 21.91448639608614},
 ];
 
 function getRandomElement(array) {
@@ -1616,7 +1616,7 @@ export function Game({models, sounds, textures, matchId, character}) {
             if (!controlsEnabled) return;
             const model = players.get(myPlayerId).model;
             // Adjust walking and running speed
-            const baseWalkSpeed = 6; // 20% faster walking speed
+            const baseWalkSpeed = 7.2; // Increased running speed by 20%
             const speedDelta =
                 deltaTime * (playerOnFloor ? baseWalkSpeed : 5) * movementSpeedModifier; // Apply speed modifier
 
