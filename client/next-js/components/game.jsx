@@ -31,6 +31,9 @@ import {Interface} from "@/components/layout/Interface";
 import * as iceShieldMesh from "three/examples/jsm/utils/SkeletonUtils";
 import {Loading} from "@/components/loading";
 import { Countdown } from "./parts/Countdown";
+import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader";
+import { DRACOLoader } from "three/examples/jsm/loaders/DRACOLoader";
+import { MeshoptDecoder } from "three/examples/jsm/libs/meshopt_decoder.module.js";
 
 const SPELL_ICONS = {
     [fireballMeta.id]: fireballMeta.icon,
@@ -133,6 +136,43 @@ export function Game({models, sounds, textures, matchId, character}) {
         const damageBar = document.getElementById("damage");
         const selfDamage = document.getElementById("selfDamage");
         let targetedPlayerId = null;
+
+        // Developer panel helpers
+        const devDraco = new DRACOLoader();
+        devDraco.setDecoderPath('/libs/draco/');
+        const devLoader = new GLTFLoader().setPath('/models/');
+        devLoader.setDRACOLoader(devDraco);
+        devLoader.setMeshoptDecoder(MeshoptDecoder);
+        let currentScale = 0.4;
+
+        const handleScaleChange = (e) => {
+            currentScale = e.detail.scale;
+            if (players.has(myPlayerId)) {
+                const m = players.get(myPlayerId).model;
+                m.scale.set(currentScale, currentScale, currentScale);
+            }
+        };
+
+        const handleModelChange = (e) => {
+            const file = e.detail.model;
+            if (!file) return;
+            if (!players.has(myPlayerId)) return;
+            const playerData = players.get(myPlayerId);
+            devLoader.load(file, (gltf) => {
+                const newModel = SkeletonUtils.clone(gltf.scene);
+                const oldModel = playerData.model;
+                newModel.position.copy(oldModel.position);
+                newModel.rotation.copy(oldModel.rotation);
+                newModel.scale.set(currentScale, currentScale, currentScale);
+                newModel.traverse((obj) => { if (obj.isMesh) obj.castShadow = true; });
+                scene.remove(oldModel);
+                scene.add(newModel);
+                playerData.model = newModel;
+            });
+        };
+
+        window.addEventListener('DEV_SCALE_CHANGE', handleScaleChange);
+        window.addEventListener('DEV_MODEL_CHANGE', handleModelChange);
 
         const activeShields = new Map(); // key = playerId
         const activeHandEffects = new Map(); // key = playerId -> { effectKey: {left, right} }
@@ -2274,7 +2314,7 @@ export function Game({models, sounds, textures, matchId, character}) {
                 const player = SkeletonUtils.clone(models['character']);
                 player.position.set(...USER_DEFAULT_POSITION);
 
-                player.scale.set(0.4, 0.4, 0.4);
+                player.scale.set(currentScale, currentScale, currentScale);
                 player.rotation.set(0, 0, 0);
 
                 player.traverse((object) => {
@@ -2841,6 +2881,8 @@ export function Game({models, sounds, textures, matchId, character}) {
             type: 'READY_FOR_MATCH'
         });
         return () => {
+            window.removeEventListener('DEV_SCALE_CHANGE', handleScaleChange);
+            window.removeEventListener('DEV_MODEL_CHANGE', handleModelChange);
             socket.removeEventListener('message', handleMessage);
             if (countdownInterval) {
                 clearInterval(countdownInterval);
