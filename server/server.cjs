@@ -18,6 +18,11 @@ const RUNE_POSITIONS = [
     {x: -35.935269673262255, y: -0.9201681289833328, z: 17.958160345962828},
     {x: -51.74580125838502, y: 1.6693158257437584, z: -43.48305799953747},
     {x: -52.77988678180723, y: 0.9561725871391544, z: -19.019056260756873},
+    {x: -15.906002067072242, y: -2.3330959231418595, z: -21.411684820666476},
+    {x: -26.48075466996452, y: -1.777865573488649, z: -2.8313589521598326},
+    {x: -32.80106167843453, y: 1.3084035240328742, z: -7.0988156766733645},
+    {x: -34.33288863236902, y: -0.4213500678183642, z: -17.738746619320715},
+    {x: -42.07720168470141, y: -0.3428705721983756, z: -46.776695072771986},
 ];
 
 const XP_RUNE_POSITIONS = [
@@ -122,7 +127,7 @@ function shuffle(arr) {
 }
 
 function generateRunes(matchId) {
-    return shuffle(RUNE_POSITIONS).slice(0, 6).map((pos, idx) => ({
+    return shuffle(RUNE_POSITIONS).map((pos, idx) => ({
         id: `rune_${matchId}_${Date.now()}_${idx}`,
         type: randomRuneType(),
         position: pos,
@@ -442,7 +447,7 @@ ws.on('connection', (socket) => {
             match.runes = generateRunes(match.id);
             match.xpRunes = generateXpRunes(match.id);
         }
-    }, 180000);
+    }, 90000);
 
     socket.on('message', (data) => {
         let message = {};
