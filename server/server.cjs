@@ -6,10 +6,15 @@ const http = require('http');
 const UPDATE_MATCH_INTERVAL = 33;
 const MAX_HP = 120;
 const MAX_POINTS = 1000;
+const XP_PER_LEVEL = 1000;
 const MANA_REGEN_INTERVAL = 1000;
 const MANA_REGEN_AMOUNT = 1.3; // 30% faster mana regeneration
 const SPELL_COST = require('../client/next-js/consts/spellCosts.json');
 const ICEBALL_ICON = '/icons/spell_frostbolt.jpg';
+
+function updateLevel(player) {
+    player.level = Math.floor(player.points / XP_PER_LEVEL) + 1;
+}
 
 const RUNE_POSITIONS = [
     {x: -24.55270788467855, y: -2.2653316814013746, z: -29.33086680895419},
@@ -205,6 +210,7 @@ function createPlayer(address, classType) {
         deaths: 0,
         assists: 0,
         points: 0,
+        level: 1,
         hp: MAX_HP,
         mana: 100,
         chests: [],
@@ -308,7 +314,8 @@ function checkXpRunePickup(match, playerId) {
         const dist = Math.sqrt(dx * dx + dy * dy + dz * dz);
         if (dist < 1.5) {
             match.xpRunes.splice(i, 1);
-            player.points += 50;
+            player.points += 500;
+            updateLevel(player);
 
             broadcastToMatch(match.id, {
                 type: 'RUNE_PICKED',
@@ -350,7 +357,8 @@ function applyDamage(match, victimId, dealerId, damage, spellType) {
         victim.debuffs = [];
         if (attacker) {
             attacker.kills++;
-            attacker.points += 100;
+            attacker.points += 600;
+            updateLevel(attacker);
             broadcastToMatch(match.id, {
                 type: 'KILL',
                 killerId: dealerId,
@@ -493,7 +501,8 @@ ws.on('connection', (socket) => {
 
                 if (killerPlayer) {
                     killerPlayer.kills++;
-                    killerPlayer.points += 100;
+                    killerPlayer.points += 600;
+                    updateLevel(killerPlayer);
 
                     if (killerPlayer.points >= MAX_POINTS && !match.finished) {
                         finalizeMatch(match);

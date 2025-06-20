@@ -155,7 +155,9 @@ export function Game({models, sounds, textures, matchId, character}) {
         const animations = models["character_animations"];
 
         let hp = MAX_HP,
-            mana = 100;
+            mana = 100,
+            points = 0,
+            level = 1;
         let actions = [];
         let playerMixers = [];
         let settings;
@@ -246,12 +248,12 @@ export function Game({models, sounds, textures, matchId, character}) {
 
         // Function to update the HP bar width
         function updateHPBar() {
-            dispatchEvent('self-update', { hp, mana });
+            dispatchEvent('self-update', { hp, mana, points, level });
         }
 
         // Function to update the Mana bar width
         function updateManaBar() {
-            dispatchEvent('self-update', { hp, mana });
+            dispatchEvent('self-update', { hp, mana, points, level });
         }
 
         function dispatchTargetUpdate() {
@@ -2401,6 +2403,7 @@ export function Game({models, sounds, textures, matchId, character}) {
                     deaths: 0,
                     assists: 0,
                     points: 0,
+                    level: 1,
                     actions: {
                         idle: idleAction,
                         walk: walkAction,
@@ -2436,6 +2439,7 @@ export function Game({models, sounds, textures, matchId, character}) {
                 playerData.deaths = message.deaths;
                 playerData.assists = message.assists;
                 playerData.points = message.points;
+                playerData.level = message.level;
                 playerData.buffs = message.buffs;
                 playerData.hp = message.hp;
                 playerData.mana = message.mana;
@@ -2841,6 +2845,8 @@ export function Game({models, sounds, textures, matchId, character}) {
                         } else {
                             hp = player.hp;
                             mana = player.mana;
+                            points = player.points;
+                            level = player.level;
                             updateHPBar();
                             updateManaBar();
                             dispatch({type: 'SET_BUFFS', payload: player.buffs || []});
@@ -2858,6 +2864,7 @@ export function Game({models, sounds, textures, matchId, character}) {
                         kills: p.kills,
                         deaths: p.deaths,
                         points: p.points,
+                        level: p.level,
                     }));
                     dispatch({type: 'SET_SCOREBOARD_DATA', payload: boardData});
 
