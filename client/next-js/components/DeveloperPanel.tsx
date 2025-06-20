@@ -13,7 +13,7 @@ interface DeveloperPanelProps {
 
 export const DeveloperPanel = ({ models = {} }: DeveloperPanelProps) => {
   const [modelList, setModelList] = useState<string[]>([]);
-  const [scale, setScale] = useState(0.4);
+  const [scale, setScale] = useState(0.1);
   const [model, setModel] = useState("");
 
   useEffect(() => {
@@ -27,11 +27,6 @@ export const DeveloperPanel = ({ models = {} }: DeveloperPanelProps) => {
       setModelList(
         Object.keys(models).filter((key) => !key.endsWith("_animations")),
       );
-    } else {
-      fetch("/api/models")
-        .then((res) => res.json())
-        .then((data) => setModelList(data.models || []))
-        .catch(() => {});
     }
   }, [models]);
 
@@ -43,6 +38,7 @@ export const DeveloperPanel = ({ models = {} }: DeveloperPanelProps) => {
 
   useEffect(() => {
     if (model) {
+      console.log("model: ", model);
       window.dispatchEvent(
         new CustomEvent("DEV_MODEL_CHANGE", { detail: { model } }),
       );
@@ -68,14 +64,14 @@ export const DeveloperPanel = ({ models = {} }: DeveloperPanelProps) => {
         </label>
         <input
           id="dev-scale-slider"
-          max="2"
-          min="0.1"
-          step="0.1"
+          max="0.2"
+          min="0.00001"
+          step="0.00001"
           type="range"
           value={scale}
           onChange={(e) => setScale(parseFloat(e.target.value))}
         />
-        <span className="ml-2">{scale.toFixed(1)}</span>
+        <span className="ml-2">{scale}</span>
       </div>
       <div>
         <label className="mr-2" htmlFor="dev-model-select">

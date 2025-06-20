@@ -52,6 +52,7 @@ export default function GamePage() {
         {id: 'mage_staff', path: 'skins/items/mage-staff.glb'},
         {id: 'warlock_staff', path: 'skins/items/warlock-staff.glb'},
         {id: 'damage_effect', path: 'ice-veins.glb'},
+        {id: 'shaman_totem', path: 'shaman_totem.glb'},
     ];
 
   useLayoutEffect(() => {

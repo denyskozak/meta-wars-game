@@ -186,21 +186,20 @@ export function Game({models, sounds, textures, matchId, character}) {
         };
 
         const handleModelChange = (e) => {
-            const file = e.detail.model;
-            if (!file) return;
+            const newModelName = e.detail.model;
+            if (!newModelName) return;
             if (!players.has(myPlayerId)) return;
+            if (!models[newModelName]) return;
             const playerData = players.get(myPlayerId);
-            devLoader.load(file, (gltf) => {
-                const newModel = SkeletonUtils.clone(gltf.scene);
-                const oldModel = playerData.model;
-                newModel.position.copy(oldModel.position);
-                newModel.rotation.copy(oldModel.rotation);
-                newModel.scale.set(currentScale, currentScale, currentScale);
-                newModel.traverse((obj) => { if (obj.isMesh) obj.castShadow = true; });
-                scene.remove(oldModel);
-                scene.add(newModel);
-                playerData.model = newModel;
-            });
+            const oldModel = playerData.model;
+            const newModel = models[newModelName].clone();
+            newModel.position.copy(oldModel.position);
+            newModel.rotation.copy(oldModel.rotation);
+            newModel.scale.set(currentScale, currentScale, currentScale);
+            newModel.traverse((obj) => { if (obj.isMesh) obj.castShadow = true; });
+            scene.remove(oldModel);
+            scene.add(newModel);
+            playerData.model = newModel;
         };
 
         window.addEventListener('DEV_SCALE_CHANGE', handleScaleChange);
@@ -2508,7 +2507,8 @@ export function Game({models, sounds, textures, matchId, character}) {
             if (!base) return;
             const rune = SkeletonUtils.clone(base);
             rune.position.set(data.position.x, data.position.y, data.position.z);
-            rune.scale.multiplyScalar(0.05);
+            rune.scale.multiplyScalar(0.04);
+            rune.position.y -= 0.2;
             rune.traverse((child) => {
                 if (child.isMesh) {
                     child.material = child.material.clone();
