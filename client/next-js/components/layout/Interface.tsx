@@ -4,6 +4,7 @@ import {Chat} from "../parts/Chat";
 import {Coins} from "../parts/Coins";
 import {Scoreboard} from "../parts/Scoreboard";
 import {Buffs} from "../parts/Buffs";
+import {ExperienceBar} from "../parts/ExperienceBar";
 import {Progress} from "@heroui/react";
 
 import {useInterface} from "@/context/inteface";
@@ -19,7 +20,7 @@ export const Interface = () => {
         state: { character },
     } = useInterface() as { state: { character: { name?: string } | null } };
     const [target, setTarget] = useState<{id:number, hp:number, mana:number, address:string, classType?:string}|null>(null);
-    const [selfStats, setSelfStats] = useState<{hp:number, mana:number}>({hp: MAX_HP, mana: 100});
+    const [selfStats, setSelfStats] = useState<{hp:number, mana:number, points:number, level:number}>({hp: MAX_HP, mana: 100, points: 0, level: 1});
 
     useEffect(() => {
         const handler = (e: CustomEvent) => {
@@ -33,7 +34,12 @@ export const Interface = () => {
         const handler = (e: CustomEvent) => {
             if (!e.detail) return;
             setSelfStats(prev => {
-                if (prev.hp === e.detail.hp && prev.mana === e.detail.mana) {
+                if (
+                    prev.hp === e.detail.hp &&
+                    prev.mana === e.detail.mana &&
+                    prev.points === e.detail.points &&
+                    prev.level === e.detail.level
+                ) {
                     return prev;
                 }
                 return e.detail;
@@ -105,6 +111,7 @@ export const Interface = () => {
             <Buffs />
             <SkillBar/>
             <CastBar/>
+            <ExperienceBar />
             <Chat />
         </div>
     )
