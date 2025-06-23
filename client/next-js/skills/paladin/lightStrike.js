@@ -4,6 +4,7 @@ export const meta = {
   id: 'lightstrike',
   key: 'E',
   icon: '/icons/classes/paladin/crusaderstrike.jpg',
+  autoFocus: false,
 };
 
 export default function castLightStrike({ playerId, castSpellImpl, igniteHands, castSphere, fireballMesh, sounds, damage }) {

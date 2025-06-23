@@ -54,6 +54,21 @@ const SPELL_ICONS = {
     [lightWaveMeta.id]: lightWaveMeta.icon,
 };
 
+const SPELL_META = {
+    [fireballMeta.id]: fireballMeta,
+    [iceballMeta.id]: iceballMeta,
+    [fireblastMeta.id]: fireblastMeta,
+    [pyroblastMeta.id]: pyroblastMeta,
+    [darkballMeta.id]: darkballMeta,
+    [corruptionMeta.id]: corruptionMeta,
+    [immolateMeta.id]: immolateMeta,
+    [chaosBoltMeta.id]: chaosBoltMeta,
+    [lightStrikeMeta.id]: lightStrikeMeta,
+    [stunMeta.id]: stunMeta,
+    [paladinHealMeta.id]: paladinHealMeta,
+    [lightWaveMeta.id]: lightWaveMeta,
+};
+
 const SPELL_SCALES = {
     fireball: 1.8,
     iceball: 1.8,
@@ -1233,7 +1248,8 @@ export function Game({models, sounds, textures, matchId, character}) {
 
         function castSpell(spellType, playerId = myPlayerId) {
             dispatchEvent('skill-use', { skill: spellType });
-            if (!isFocused) {
+            const meta = SPELL_META[spellType];
+            if (!isFocused && meta?.autoFocus !== false) {
                 handleRightClick();
             }
 
