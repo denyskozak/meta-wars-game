@@ -650,7 +650,7 @@ ws.on('connection', (socket) => {
             case 'UPDATE_POSITION':
                 if (match) {
                     const player = match.players.get(id);
-                    if (message) {
+                    if (message && player) {
                         player.position = message.position;
                         player.rotation = message.rotation;
                     }

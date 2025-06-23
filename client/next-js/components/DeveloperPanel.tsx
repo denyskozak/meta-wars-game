@@ -13,7 +13,7 @@ interface DeveloperPanelProps {
 
 export const DeveloperPanel = ({ models = {} }: DeveloperPanelProps) => {
   const [modelList, setModelList] = useState<string[]>([]);
-  const [scale, setScale] = useState(0.1);
+  const [scale, setScale] = useState(0.5);
   const [model, setModel] = useState("");
 
   useEffect(() => {
@@ -64,7 +64,7 @@ export const DeveloperPanel = ({ models = {} }: DeveloperPanelProps) => {
         </label>
         <input
           id="dev-scale-slider"
-          max="0.2"
+          max="0.5"
           min="0.00001"
           step="0.00001"
           type="range"
