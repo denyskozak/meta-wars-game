@@ -626,7 +626,7 @@ export function Game({models, sounds, textures, matchId, character}) {
 
         // Maximum distance any sphere can travel
         // Use the same range as fireblast for consistency
-        const SPHERE_MAX_DISTANCE = FIREBLAST_RANGE;
+        const SPHERE_MAX_DISTANCE = FIREBLAST_RANGE / 2;
 
         const STEPS_PER_FRAME = 30;
 
@@ -634,7 +634,6 @@ export function Game({models, sounds, textures, matchId, character}) {
         const sphereMaterial = new THREE.MeshLambertMaterial({color: 0xdede8d});
 
         const spheres = [];
-        let sphereIdx = 0;
 
         // for (let i = 0; i < NUM_SPHERES; i++) {
         //
@@ -1408,7 +1407,7 @@ export function Game({models, sounds, textures, matchId, character}) {
             });
 
             // Store velocity and collider information for the fireball
-            spheres[sphereIdx] = {
+            spheres.push({
                 mesh: sphereMesh,
                 collider: new THREE.Sphere(
                     new THREE.Vector3().copy(sphereMesh.position),
@@ -1419,9 +1418,7 @@ export function Game({models, sounds, textures, matchId, character}) {
                 type,
                 damage,
                 ownerId: myPlayerId,
-            };
-
-            sphereIdx = (sphereIdx + 1) % spheres.length;
+            });
         }
 
         function castSpellImpl(playerId, manaCost, duration, onUsage = () => {
