@@ -9,5 +9,9 @@
   "blink": 35,
   "heal": 35,
   "pyroblast": 70,
-  "chaosbolt": 70
+  "chaosbolt": 70,
+  "lightstrike": 20,
+  "stun": 0,
+  "paladin-heal": 50,
+  "lightwave": 0
 }

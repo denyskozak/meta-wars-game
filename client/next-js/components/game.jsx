@@ -1,4 +1,4 @@
-import React, {useLayoutEffect, useRef, useState} from "react";
+import React, {useLayoutEffect, useRef, useState, useEffect} from "react";
 import {MAX_HP} from "../consts";
 import { SPELL_COST } from '../consts';
 import * as THREE from "three";
@@ -25,6 +25,10 @@ import castDarkball, { meta as darkballMeta } from '../skills/warlock/darkball';
 import castCorruption, { meta as corruptionMeta } from '../skills/warlock/corruption';
 import castImmolate, { meta as immolateMeta } from '../skills/warlock/immolate';
 import castChaosBolt, { meta as chaosBoltMeta } from '../skills/warlock/chaosBolt';
+import castLightStrike, { meta as lightStrikeMeta } from '../skills/paladin/lightStrike';
+import castStun, { meta as stunMeta } from '../skills/paladin/stun';
+import castPaladinHeal, { meta as paladinHealMeta } from '../skills/paladin/heal';
+import castLightWave, { meta as lightWaveMeta } from '../skills/paladin/lightWave';
 
 
 import {Interface} from "@/components/layout/Interface";
@@ -44,6 +48,10 @@ const SPELL_ICONS = {
     [corruptionMeta.id]: corruptionMeta.icon,
     [immolateMeta.id]: immolateMeta.icon,
     [chaosBoltMeta.id]: chaosBoltMeta.icon,
+    [lightStrikeMeta.id]: lightStrikeMeta.icon,
+    [stunMeta.id]: stunMeta.icon,
+    [paladinHealMeta.id]: paladinHealMeta.icon,
+    [lightWaveMeta.id]: lightWaveMeta.icon,
 };
 
 const SPELL_SCALES = {
@@ -115,7 +123,11 @@ function dispatchEvent(name = '', detail = {}) {
 export function Game({models, sounds, textures, matchId, character}) {
     const containerRef = useRef(null);
     const {refetch: refetchCoins} = useCoins();
-    const {dispatch} = useInterface();
+    const {state, dispatch} = useInterface();
+    const debuffsRef = useRef(state.debuffs);
+    useEffect(() => {
+        debuffsRef.current = state.debuffs;
+    }, [state.debuffs]);
     const {socket, sendToSocket} = useWS(matchId);
     const router = useRouter();
     const [isReadyToPlay, setIsReadyToPlay] = useState(false);
@@ -528,6 +540,10 @@ export function Game({models, sounds, textures, matchId, character}) {
             pyroblast: 6000,
             blink: 10000,
             heal: 0,
+            lightstrike: 0,
+            stun: 50000,
+            'paladin-heal': 30000,
+            lightwave: 120000,
         };
         const skillCooldownTimers = {};
 
@@ -618,6 +634,8 @@ export function Game({models, sounds, textures, matchId, character}) {
         const CHAOSBOLT_DAMAGE = FIREBALL_DAMAGE * 2;
         const ICEBALL_DAMAGE = 25;
         const DARKBALL_DAMAGE = 30;
+        const LIGHTSTRIKE_DAMAGE = 30;
+        const LIGHTWAVE_DAMAGE = 40;
 
         // Медленнее пускаем сферы как настоящие заклинания
         const MIN_SPHERE_IMPULSE = 6;
@@ -763,6 +781,91 @@ export function Game({models, sounds, textures, matchId, character}) {
         let jumpBlocked = false;
         const chatInputElement = document.getElementById("chat-input");
 
+        function handleKeyW() {
+            !isCasting && setAnimation("walk");
+        }
+        function handleKeyA() {
+            !isCasting && setAnimation("walk");
+        }
+        function handleKeyD() {
+            !isCasting && setAnimation("walk");
+        }
+        function handleKeyS() {
+            !isCasting && setAnimation("idle");
+        }
+        function handleKeyE() {
+            if (character?.name === 'warlock') castSpell('darkball');
+            else if (character?.name === 'paladin') castSpell('lightstrike');
+            else castSpell('fireball');
+        }
+        function handleKeyR() {
+            if (character?.name === 'warlock') castSpell('corruption');
+            else if (character?.name === 'paladin') castSpell('stun');
+            else castSpell('iceball');
+        }
+        function handleKeyF() {
+            if (character?.name === 'warlock') castSpell('chaosbolt');
+            else if (character?.name === 'paladin') castSpell('lightwave');
+            else castSpell('pyroblast');
+        }
+        function handleKeyG() {
+            leftMouseButtonClicked = true;
+        }
+        function handleKeyJ() {
+            const currentPosition = new THREE.Vector3();
+            playerCollider.getCenter(currentPosition);
+            console.log(
+                `Player position: x=${currentPosition.x}, y=${currentPosition.y}, z=${currentPosition.z}`,
+            );
+            const lookDir = new THREE.Vector3();
+            camera.getWorldDirection(lookDir);
+            console.log(
+                `Looking direction: x=${lookDir.x}, y=${lookDir.y}, z=${lookDir.z}`,
+            );
+        }
+        function handleKeyT() {
+            dispatch({type: 'SET_SCOREBOARD_VISIBLE', payload: true});
+        }
+        function handleSpace() {
+            if (playerOnFloor && !jumpBlocked) {
+                jumpBlocked = true;
+                const {mixer, actions} = players.get(myPlayerId);
+                const actionName = 'jump';
+                controlAction({
+                    action: actions[actionName],
+                    actionName,
+                    mixer: mixer,
+                    loop: THREE.LoopOnce,
+                    fadeIn: 0.1,
+                    reset: true,
+                    clampWhenFinished: true,
+                });
+                setTimeout(() => {
+                    playerVelocity.y = 6;
+                }, 150);
+            }
+        }
+        function handleKeyQ() {
+            if (character?.name === 'warlock') castSpell('immolate');
+            else if (character?.name === 'paladin') castSpell('paladin-heal');
+            else castSpell('fireblast');
+        }
+
+        const keyDownHandlers = {
+            KeyW: handleKeyW,
+            KeyA: handleKeyA,
+            KeyD: handleKeyD,
+            KeyS: handleKeyS,
+            KeyE: handleKeyE,
+            KeyR: handleKeyR,
+            KeyF: handleKeyF,
+            KeyG: handleKeyG,
+            KeyJ: handleKeyJ,
+            KeyT: handleKeyT,
+            Space: handleSpace,
+            KeyQ: handleKeyQ,
+        };
+
         document.addEventListener("keydown", (event) => {
             if (event.code === "Enter") {
                 if (!isChatActive) {
@@ -775,105 +878,41 @@ export function Game({models, sounds, textures, matchId, character}) {
 
             if (isChatActive) return;
 
-            if (!controlsEnabled) return;
+            if (!controlsEnabled || debuffsRef.current.some(d => d.type === 'stun')) return;
 
             keyStates[event.code] = true;
 
-            switch (event.code) {
-                // case "KeyR": // Blink Skill
-                //     castBlink();
-                //     break;
-                case "KeyW":
-                    // Start the walk animation immediately
-                    !isCasting && setAnimation("walk");
-                    break;
-                case "KeyA":
-                case "KeyD":
-                    // Optional: Handle strafing or side movement animations
-                    !isCasting && setAnimation("walk");
-                    break;
-                case "KeyS":
-                    // Optional: Set a backward movement animation
-                    !isCasting && setAnimation("idle");
-                    break;
-                case "KeyE":
-                    castSpell(character?.name === 'warlock' ? 'darkball' : 'fireball');
-                    break;
-                case "KeyR":
-                    castSpell(character?.name === 'warlock' ? 'corruption' : 'iceball');
-                    break;
-                case "KeyF":
-                    castSpell(character?.name === 'warlock' ? 'chaosbolt' : 'pyroblast');
-                    break;
-                case "KeyG":
-                    leftMouseButtonClicked = true;
-                    break;
-                case "KeyJ":
-                    const currentPosition = new THREE.Vector3();
-                    playerCollider.getCenter(currentPosition);
-                    console.log(
-                        `Player position: x=${currentPosition.x}, y=${currentPosition.y}, z=${currentPosition.z}`,
-                    );
-                    const lookDir = new THREE.Vector3();
-                    camera.getWorldDirection(lookDir);
-                    console.log(
-                        `Looking direction: x=${lookDir.x}, y=${lookDir.y}, z=${lookDir.z}`,
-                    );
-                    break;
-                case "KeyT":
-                    dispatch({type: 'SET_SCOREBOARD_VISIBLE', payload: true});
-                    break;
-                case "Space": // Press "Q" to cast shield
-                    // Space for jumping
-                    if (playerOnFloor && !jumpBlocked) {
-                        jumpBlocked = true;
-                        const {mixer, actions} = players.get(myPlayerId);
-                        const actionName = 'jump';
-                        controlAction({
-                            action: actions[actionName],
-                            actionName,
-                            mixer: mixer,
-                            loop: THREE.LoopOnce,
-                            fadeIn: 0.1,
-                            reset: true,
-                            clampWhenFinished: true,
-                            // onEnd: () => {
-                            //     console.log("Jump animation finished!");
-                            //     controlAction({action: idleAction, mixer: mixer, fadeIn: 0.5}); // Return to idle
-                            // }
-                        });
-                        setTimeout(() => {
-                            playerVelocity.y = 6; // Lower jump height
-                        }, 150);
-                    }
-                    break;
-                case "KeyQ":
-                    castSpell(character?.name === 'warlock' ? 'immolate' : 'fireblast');
-
-                    break;
-            }
+            const handler = keyDownHandlers[event.code];
+            if (handler) handler();
         });
+
+        function handleKeyUpG() {
+            leftMouseButtonClicked = false;
+        }
+        function handleKeyUpT() {
+            dispatch({type: 'SET_SCOREBOARD_VISIBLE', payload: false});
+        }
+        function handleKeyUpSpace() {
+            setTimeout(() => {
+                jumpBlocked = false;
+            }, 2000);
+        }
+
+        const keyUpHandlers = {
+            KeyG: handleKeyUpG,
+            KeyT: handleKeyUpT,
+            Space: handleKeyUpSpace,
+        };
 
         document.addEventListener("keyup", (event) => {
             if (isChatActive) return;
 
-            if (!controlsEnabled) return;
+            if (!controlsEnabled || debuffsRef.current.some(d => d.type === 'stun')) return;
 
             keyStates[event.code] = false;
 
-            switch (event.code) {
-                case "KeyG":
-                    leftMouseButtonClicked = false;
-                    break;
-                case "KeyT":
-                    dispatch({type: 'SET_SCOREBOARD_VISIBLE', payload: false});
-                    break;
-                case "Space": // Press "Q" to cast shield
-                    setTimeout(() => {
-                        jumpBlocked = false;
-                    }, 2000);
-                    break;
-            }
+            const handler = keyUpHandlers[event.code];
+            if (handler) handler();
 
             // // Check if no movement keys are active
             if (
@@ -902,7 +941,7 @@ export function Game({models, sounds, textures, matchId, character}) {
 
         // chatch even
         document.addEventListener("mousedown", (event) => {
-            if (!controlsEnabled) return;
+            if (!controlsEnabled || debuffsRef.current.some(d => d.type === 'stun')) return;
             if (event.button === 2) {
                 // Right mouse button
                 handleRightClick();
@@ -922,6 +961,7 @@ export function Game({models, sounds, textures, matchId, character}) {
 
         // block mouse
         containerRef.current.addEventListener("mousedown", () => {
+            if (debuffsRef.current.some(d => d.type === 'stun')) return;
             document.body.requestPointerLock();
             mouseTime = performance.now();
 
@@ -1338,6 +1378,52 @@ export function Game({models, sounds, textures, matchId, character}) {
                         damage: CHAOSBOLT_DAMAGE,
                     });
                     break;
+                case "lightstrike":
+                    castLightStrike({
+                        playerId,
+                        castSpellImpl,
+                        igniteHands,
+                        castSphere,
+                        fireballMesh,
+                        sounds,
+                        damage: LIGHTSTRIKE_DAMAGE,
+                    });
+                    break;
+                case "stun":
+                    castStun({
+                        playerId,
+                        globalSkillCooldown,
+                        isCasting,
+                        mana,
+                        getTargetPlayer,
+                        dispatch,
+                        sendToSocket,
+                        activateGlobalCooldown,
+                        startSkillCooldown,
+                        sounds,
+                    });
+                    break;
+                case "paladin-heal":
+                    castPaladinHeal({
+                        playerId,
+                        castSpellImpl,
+                        mana,
+                        getTargetPlayer,
+                        dispatch,
+                        sendToSocket,
+                        sounds,
+                    });
+                    break;
+                case "lightwave":
+                    castLightWave({
+                        playerId,
+                        globalSkillCooldown,
+                        isCasting,
+                        sendToSocket,
+                        activateGlobalCooldown,
+                        startSkillCooldown,
+                    });
+                    break;
             }
         }
 
@@ -1681,7 +1767,7 @@ export function Game({models, sounds, textures, matchId, character}) {
 
         function controls(deltaTime) {
             if (isChatActive) return;
-            if (!controlsEnabled) return;
+            if (!controlsEnabled || debuffsRef.current.some(d => d.type === 'stun')) return;
             const model = players.get(myPlayerId).model;
             // Adjust walking and running speed
             const baseWalkSpeed = 7.2; // Increased running speed by 20%
@@ -2086,6 +2172,7 @@ export function Game({models, sounds, textures, matchId, character}) {
                 setTimeout(() => (movementSpeedModifier = 1), duration);
             }
         }
+
 
 
         function toggleShieldOnPlayer(id, visible) {
@@ -2717,6 +2804,27 @@ export function Game({models, sounds, textures, matchId, character}) {
                         case "pyroblast":
                             igniteHands(message.id, 1000);
                             castSphereOtherUser(message.payload, message.id);
+                            break;
+                        case "lightstrike":
+                            igniteHands(message.id, 500);
+                            castSphereOtherUser(message.payload, message.id);
+                            break;
+                        case "paladin-heal":
+                            if (message.payload.targetId === myPlayerId) {
+                                dispatch({ type: "SEND_CHAT_MESSAGE", payload: "You are healed!" });
+                            }
+                            break;
+                        case "lightwave":
+                            if (message.id !== myPlayerId) {
+                                const caster = players.get(message.id);
+                                if (caster) {
+                                    const myPos = players.get(myPlayerId)?.model.position.clone();
+                                    const casterPos = caster.model.position.clone();
+                                    if (myPos && casterPos && myPos.distanceTo(casterPos) < FIREBLAST_RANGE) {
+                                        takeDamage(LIGHTWAVE_DAMAGE, message.id, 'lightwave');
+                                    }
+                                }
+                            }
                             break;
                     }
 
