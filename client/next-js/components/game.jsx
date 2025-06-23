@@ -794,18 +794,21 @@ export function Game({models, sounds, textures, matchId, character}) {
             !isCasting && setAnimation("idle");
         }
         function handleKeyE() {
-            if (character?.name === 'warlock') castSpell('darkball');
-            else if (character?.name === 'paladin') castSpell('lightstrike');
+            const className = character?.name?.toLowerCase();
+            if (className === 'warlock') castSpell('darkball');
+            else if (className === 'paladin') castSpell('lightstrike');
             else castSpell('fireball');
         }
         function handleKeyR() {
-            if (character?.name === 'warlock') castSpell('corruption');
-            else if (character?.name === 'paladin') castSpell('stun');
+            const className = character?.name?.toLowerCase();
+            if (className === 'warlock') castSpell('corruption');
+            else if (className === 'paladin') castSpell('stun');
             else castSpell('iceball');
         }
         function handleKeyF() {
-            if (character?.name === 'warlock') castSpell('chaosbolt');
-            else if (character?.name === 'paladin') castSpell('lightwave');
+            const className = character?.name?.toLowerCase();
+            if (className === 'warlock') castSpell('chaosbolt');
+            else if (className === 'paladin') castSpell('lightwave');
             else castSpell('pyroblast');
         }
         function handleKeyG() {
@@ -846,8 +849,9 @@ export function Game({models, sounds, textures, matchId, character}) {
             }
         }
         function handleKeyQ() {
-            if (character?.name === 'warlock') castSpell('immolate');
-            else if (character?.name === 'paladin') castSpell('paladin-heal');
+            const className = character?.name?.toLowerCase();
+            if (className === 'warlock') castSpell('immolate');
+            else if (className === 'paladin') castSpell('paladin-heal');
             else castSpell('fireblast');
         }
 

@@ -40,20 +40,23 @@ export default function GamePage() {
     state: { character },
   } = useInterface();
 
-    const models = [
-        {id: 'zone', path: 'zone7.glb'},
-        {id: 'character', path: 'skins/vampir.glb'},
-        {id: 'heal-effect', path: 'heal-effect.glb'},
-        {id: 'bottle_magic', path: 'bottle_magic.glb'},
-        {id: 'damage_rune', path: 'damage_rune.glb'},
-        {id: 'heal_rune', path: 'heal_rune.glb'},
-        {id: 'mana_rune', path: 'mana_rune.glb'},
-        {id: 'xp_rune', path: 'xp_rune.glb'},
-        {id: 'mage_staff', path: 'skins/items/mage-staff.glb'},
-        {id: 'warlock_staff', path: 'skins/items/warlock-staff.glb'},
-        {id: 'damage_effect', path: 'ice-veins.glb'},
-        {id: 'shaman_totem', path: 'shaman_totem.glb'},
-    ];
+  const models = [
+    { id: "zone", path: "zone7.glb" },
+    {
+      id: "character",
+      path: character?.name === "paladin" ? "bolvar.glb" : "skins/vampir.glb",
+    },
+    { id: "heal-effect", path: "heal-effect.glb" },
+    { id: "bottle_magic", path: "bottle_magic.glb" },
+    { id: "damage_rune", path: "damage_rune.glb" },
+    { id: "heal_rune", path: "heal_rune.glb" },
+    { id: "mana_rune", path: "mana_rune.glb" },
+    { id: "xp_rune", path: "xp_rune.glb" },
+    { id: "mage_staff", path: "skins/items/mage-staff.glb" },
+    { id: "warlock_staff", path: "skins/items/warlock-staff.glb" },
+    { id: "damage_effect", path: "ice-veins.glb" },
+    { id: "shaman_totem", path: "shaman_totem.glb" },
+  ];
 
   useLayoutEffect(() => {
     function preloadModels(modelPaths: any[]) {
