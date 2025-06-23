@@ -1553,7 +1553,7 @@ export function Game({models, sounds, textures, matchId, character}) {
 
             isCasting = true;
 
-            const actionName = 'cast';
+            const actionName = 'casting';
             controlAction({
                 action: actions[actionName],
                 actionName,
@@ -2469,13 +2469,15 @@ export function Game({models, sounds, textures, matchId, character}) {
                 mixer.timeScale = 40;
                 // const idle = mixer.clipAction(animations[2]).play();
                 // const walk = mixer.clipAction(animations[6]);
-
-                const idleAction = mixer.clipAction(animations[2]);
-                const walkAction = mixer.clipAction(animations[5]);
-                const runAction = mixer.clipAction(animations[5]);
-                const jumpAction = mixer.clipAction(animations[3]);
-                const castAction = mixer.clipAction(animations[1]);
-                const castEndAction = mixer.clipAction(animations[0]);
+                console.log("animations: ", animations);
+                const idleAction = mixer.clipAction(animations[4]);
+                const walkAction = mixer.clipAction(animations[8]);
+                const runAction = mixer.clipAction(animations[8]);
+                const jumpAction = mixer.clipAction(animations[5]);
+                const castingAction = mixer.clipAction(animations[2]);
+                const castEndAction = mixer.clipAction(animations[1]);
+                const castAction = mixer.clipAction(animations[0]);
+                const dyingAction = mixer.clipAction(animations[3]);
 
 
                 scene.add(player);
@@ -2496,7 +2498,7 @@ export function Game({models, sounds, textures, matchId, character}) {
                         walk: walkAction,
                         run: runAction,
                         jump: jumpAction,
-                        cast: castAction,
+                        casting: castingAction,
                         castEnd: castEndAction,
                     },
                     prevPos: new THREE.Vector3().copy(player.position),

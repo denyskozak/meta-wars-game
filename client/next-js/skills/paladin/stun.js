@@ -3,7 +3,7 @@ import { SPELL_COST } from '../../consts';
 export const meta = {
   id: 'stun',
   key: 'R',
-  icon: '/icons/classes/paladin/searinglight.jpg',
+  icon: '/icons/classes/paladin/sealofmight.jpg',
 };
 
 export default function castStun({ playerId, globalSkillCooldown, isCasting, mana, getTargetPlayer, dispatch, sendToSocket, activateGlobalCooldown, startSkillCooldown, sounds }) {

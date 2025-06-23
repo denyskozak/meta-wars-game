@@ -89,7 +89,7 @@ export default function MatchesPage() {
         if (!joined && classType) {
             sendToSocket({type: 'JOIN_MATCH', classType});
         }
-        dispatch({type: 'SET_CHARACTER', payload: {name: classType, skin}});
+        dispatch({type: 'SET_CHARACTER', payload: {name: classType.toLowerCase(), skin}});
         router.push(`/matches/${params?.id}/game`);
     };
 

@@ -3,7 +3,7 @@ import { SPELL_COST } from '../../consts';
 export const meta = {
   id: 'paladin-heal',
   key: 'Q',
-  icon: '/icons/classes/paladin/sealofmight.jpg',
+  icon: '/icons/classes/paladin/searinglight.jpg',
 };
 
 export default function castPaladinHeal({ playerId, castSpellImpl, mana, getTargetPlayer, dispatch, sendToSocket, sounds }) {
