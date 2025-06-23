@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { Input } from "@heroui/input";
 import { Button } from "@heroui/react";
+import { useRouter } from "next/navigation";
 
 import { useTransaction } from "@/hooks";
 
@@ -12,6 +13,7 @@ export interface ProfileFormProps {
 export function ProfileForm({ onCreated }: ProfileFormProps) {
   const [nickname, setNickname] = useState("");
   const { createProfile } = useTransaction();
+  const router = useRouter();
 
   const handleCreate = async () => {
     if (!nickname) return;
@@ -30,6 +32,7 @@ export function ProfileForm({ onCreated }: ProfileFormProps) {
       <Button color="primary" isDisabled={!nickname} onPress={handleCreate}>
         Create Profile
       </Button>
+      <Button variant="light" onPress={() => router.push("/matches")}>Skip</Button>
     </div>
   );
 }
