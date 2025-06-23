@@ -26,14 +26,15 @@ export default function MatchesPage() {
         mage: {
             label: 'Mage',
             icon: '/icons/mage.png'
-        }
-        ,
-        warlock:
-            {
-                label: 'Warlock',
-                icon: '/icons/warlock.webp'
-            }
-        ,
+        },
+        warlock: {
+            label: 'Warlock',
+            icon: '/icons/warlock.webp'
+        },
+        paladin: {
+            label: 'Paladin',
+            icon: '/icons/paladin.webp'
+        },
     };
 
     console.log("players: ", players);
@@ -111,8 +112,8 @@ export default function MatchesPage() {
                                         <TableRow key={p.id}>
                                             <TableCell>{p.address}</TableCell>
                                             <TableCell>{p.classType}
-                                                <Image src={classOptions[p.classType].icon || ''} alt={classOptions[p.classType].label || ''} title={classOptions[p.classType].label || ''} width={48}
-                                                       height={48}/>
+                                                <Image src={classOptions[p.classType].icon || ''} alt={classOptions[p.classType].label || ''} title={classOptions[p.classType].label || ''} width={34}
+                                                       height={34}/>
                                             </TableCell>
                                         </TableRow>
                                     ))}
@@ -138,7 +139,7 @@ export default function MatchesPage() {
                                         onClick={() => setClassType(value)}
                                         className={`flex flex-col items-center p-2`}
                                     >
-                                        <Image src={opt.icon} alt={opt.label} width={256} height={256}/>
+                                        <Image src={opt.icon} alt={opt.label} width={180} height={180}/>
                                         <span className="text-xs mt-1">{opt.label}</span>
                                     </button>
                                 ))}
