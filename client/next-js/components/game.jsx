@@ -25,7 +25,7 @@ import castDarkball, { meta as darkballMeta } from '../skills/warlock/darkball';
 import castCorruption, { meta as corruptionMeta } from '../skills/warlock/corruption';
 import castImmolate, { meta as immolateMeta } from '../skills/warlock/immolate';
 import castChaosBolt, { meta as chaosBoltMeta } from '../skills/warlock/chaosBolt';
-import castLightStrike, { meta as lightStrikeMeta } from '../skills/paladin/lightStrike';
+import { meta as lightStrikeMeta } from '../skills/paladin/lightStrike';
 import castStun, { meta as stunMeta } from '../skills/paladin/stun';
 import castPaladinHeal, { meta as paladinHealMeta } from '../skills/paladin/heal';
 import castLightWave, { meta as lightWaveMeta } from '../skills/paladin/lightWave';
@@ -540,7 +540,7 @@ export function Game({models, sounds, textures, matchId, character}) {
             pyroblast: 6000,
             blink: 10000,
             heal: 0,
-            lightstrike: 0,
+            lightstrike: 1000,
             stun: 50000,
             'paladin-heal': 30000,
             lightwave: 120000,
@@ -634,7 +634,9 @@ export function Game({models, sounds, textures, matchId, character}) {
         const CHAOSBOLT_DAMAGE = FIREBALL_DAMAGE * 2;
         const ICEBALL_DAMAGE = 25;
         const DARKBALL_DAMAGE = 30;
-        const LIGHTSTRIKE_DAMAGE = 30;
+        const LIGHTSTRIKE_DAMAGE = 40;
+        const LIGHTSTRIKE_RANGE = 4;
+        const LIGHTSTRIKE_ANGLE = Math.PI / 4;
         const LIGHTWAVE_DAMAGE = 40;
 
         // Медленнее пускаем сферы как настоящие заклинания
@@ -1383,15 +1385,7 @@ export function Game({models, sounds, textures, matchId, character}) {
                     });
                     break;
                 case "lightstrike":
-                    castLightStrike({
-                        playerId,
-                        castSpellImpl,
-                        igniteHands,
-                        castSphere,
-                        fireballMesh,
-                        sounds,
-                        damage: LIGHTSTRIKE_DAMAGE,
-                    });
+                    performLightStrike();
                     break;
                 case "stun":
                     castStun({
@@ -1444,6 +1438,28 @@ export function Game({models, sounds, textures, matchId, character}) {
             setTimeout(() => {
                 isShieldActive = false; // Deactivate shield
             }, SHIELD_DURATION * 1000);
+        }
+
+        function performLightStrike() {
+            const playerData = players.get(myPlayerId);
+            if (!playerData) return;
+            const { mixer, actions } = playerData;
+
+            lightSword(myPlayerId, 500);
+
+            controlAction({
+                action: actions['attack'],
+                actionName: 'attack',
+                mixer,
+                loop: THREE.LoopOnce,
+                fadeIn: 0.1,
+                reset: true,
+                clampWhenFinished: true,
+            });
+
+            sendToSocket({ type: 'CAST_SPELL', payload: { type: 'lightstrike' } });
+            activateGlobalCooldown();
+            startSkillCooldown('lightstrike');
         }
 
 
@@ -2115,6 +2131,31 @@ export function Game({models, sounds, textures, matchId, character}) {
                 left.scale.set(100, 100, 100);
                 right.scale.set(100, 100, 100);
                 return {left, right};
+            }, duration);
+        }
+
+        const activeSwordEffects = new Map();
+
+        function lightSword(playerId, duration = 500) {
+            const existing = activeSwordEffects.get(playerId);
+            if (existing) {
+                existing.parent?.remove(existing);
+            }
+
+            const player = players.get(playerId)?.model;
+            if (!player) return;
+
+            const hand = player.getObjectByName('mixamorigRightHand');
+            if (!hand) return;
+
+            const mesh = new THREE.Mesh(fireballGeometry, fireballMaterial.clone());
+            mesh.scale.set(150, 150, 150);
+            hand.add(mesh);
+            activeSwordEffects.set(playerId, mesh);
+
+            setTimeout(() => {
+                hand.remove(mesh);
+                activeSwordEffects.delete(playerId);
             }, duration);
         }
 
@@ -2821,10 +2862,6 @@ export function Game({models, sounds, textures, matchId, character}) {
                             igniteHands(message.id, 1000);
                             castSphereOtherUser(message.payload, message.id);
                             break;
-                        case "lightstrike":
-                            igniteHands(message.id, 500);
-                            castSphereOtherUser(message.payload, message.id);
-                            break;
                         case "paladin-heal":
                             if (message.payload.targetId === myPlayerId) {
                                 dispatch({ type: "SEND_CHAT_MESSAGE", payload: "You are healed!" });
@@ -2840,6 +2877,22 @@ export function Game({models, sounds, textures, matchId, character}) {
                                         takeDamage(LIGHTWAVE_DAMAGE, message.id, 'lightwave');
                                     }
                                 }
+                            }
+                            break;
+                        case "lightstrike":
+                            if (message.id !== myPlayerId) {
+                                const caster = players.get(message.id);
+                                const me = players.get(myPlayerId);
+                                if (caster && me) {
+                                    const origin = caster.model.position.clone();
+                                    const forward = new THREE.Vector3(0, 0, 1).applyQuaternion(caster.model.quaternion);
+                                    const toMe = me.model.position.clone().sub(origin);
+                                    const distance = toMe.length();
+                                    if (distance < LIGHTSTRIKE_RANGE && forward.angleTo(toMe.normalize()) < LIGHTSTRIKE_ANGLE) {
+                                        takeDamage(LIGHTSTRIKE_DAMAGE, message.id, 'lightstrike');
+                                    }
+                                }
+                                lightSword(message.id, 500);
                             }
                             break;
                     }
