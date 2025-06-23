@@ -2,29 +2,23 @@
 import React, { useRef, useEffect, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Button } from "@heroui/react";
-import { Link } from "@heroui/link";
 import { useRouter } from "next/navigation";
-import { useCurrentAccount } from "@mysten/dapp-kit";
-
-import { ConnectionButton } from "./connection-button";
 
 import { title as getTitle, subtitle } from "@/components/primitives";
-import { siteConfig } from "@/config/site";
-import { DiscordIcon } from "@/components/icons";
 
 // Sui JS SDK
 
 export default function General() {
   const container = useRef(null);
   const router = useRouter();
-  const account = useCurrentAccount();
+
   const slides = [
     {
-      titles: ["Arcane Warfare", "Meets Precision Shooting"],
+      titles: ["New Epoch Game", "Browser Magic Shooting"],
       subtitle: "Spell-slinging PvP with the thrill of FPS combat.",
     },
     {
-      titles: ["Win Battles,", "Earn Real Rewards"],
+      titles: ["Win Battles", "Earn Real Rewards"],
       subtitle: "Claim $MetaWars tokens, loot, and rare gear — fully tradable.",
     },
     {
@@ -32,7 +26,7 @@ export default function General() {
       subtitle: "The first MMORPG built by players, not publishers.",
     },
     {
-      titles: ["Climb the Ladder,", "Control the Game"],
+      titles: ["Climb the Ladder", "Control the Game"],
       subtitle: "Top players shape balance, economy, and the future of Meta Wars.",
     },
   ];
