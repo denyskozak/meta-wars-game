@@ -5,7 +5,7 @@ const http = require('http');
 
 const UPDATE_MATCH_INTERVAL = 33;
 const MAX_HP = 120;
-const MAX_POINTS = 1000;
+const MAX_POINTS = 10000;
 const XP_PER_LEVEL = 1000;
 const MANA_REGEN_INTERVAL = 1000;
 const MANA_REGEN_AMOUNT = 1.3; // 30% faster mana regeneration
@@ -13,7 +13,7 @@ const SPELL_COST = require('../client/next-js/consts/spellCosts.json');
 const ICEBALL_ICON = '/icons/spell_frostbolt.jpg';
 
 function updateLevel(player) {
-    player.level = Math.floor(player.points / XP_PER_LEVEL) + 1;
+    player.level = Math.min(10, Math.floor(player.points / XP_PER_LEVEL) + 1);
 }
 
 const RUNE_POSITIONS = [
