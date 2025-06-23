@@ -2441,6 +2441,30 @@ export function Game({models, sounds, textures, matchId, character}) {
         }
 
         // Function to create a new player in the scene
+        function buildActions(mixer, animations) {
+            const get = (...names) => {
+                const lowerNames = names.map(n => n.toLowerCase());
+                const clip = animations.find(c => lowerNames.includes(c.name.toLowerCase()));
+                return clip ? mixer.clipAction(clip) : null;
+            };
+
+            const actions = {
+                idle: get('idle'),
+                walk: get('walk', 'walk.001'),
+                run: get('run', 'walk', 'walk.001'),
+                jump: get('jump', 'jumping'),
+                casting: get('casting'),
+                castEnd: get('cast_end', 'castEnd'),
+                cast: get('cast'),
+                dying: get('dying'),
+                hitReaction: get('hit_reaction'),
+                attack: get('attack'),
+                attack360: get('attack_360'),
+            };
+
+            return actions;
+        }
+
         function createPlayer(id, name = "", address = "", classType = "") {
             if (models['character']) {
                 const player = SkeletonUtils.clone(models['character']);
@@ -2469,15 +2493,7 @@ export function Game({models, sounds, textures, matchId, character}) {
                 mixer.timeScale = 40;
                 // const idle = mixer.clipAction(animations[2]).play();
                 // const walk = mixer.clipAction(animations[6]);
-                console.log("animations: ", animations);
-                const idleAction = mixer.clipAction(animations[4]);
-                const walkAction = mixer.clipAction(animations[8]);
-                const runAction = mixer.clipAction(animations[8]);
-                const jumpAction = mixer.clipAction(animations[5]);
-                const castingAction = mixer.clipAction(animations[2]);
-                const castEndAction = mixer.clipAction(animations[1]);
-                const castAction = mixer.clipAction(animations[0]);
-                const dyingAction = mixer.clipAction(animations[3]);
+                const actions = buildActions(mixer, animations);
 
 
                 scene.add(player);
@@ -2493,20 +2509,13 @@ export function Game({models, sounds, textures, matchId, character}) {
                     assists: 0,
                     points: 0,
                     level: 1,
-                    actions: {
-                        idle: idleAction,
-                        walk: walkAction,
-                        run: runAction,
-                        jump: jumpAction,
-                        casting: castingAction,
-                        castEnd: castEndAction,
-                    },
+                    actions,
                     prevPos: new THREE.Vector3().copy(player.position),
                     buffs: [],
                     address,
                     classType,
                 });
-                idleAction.play();
+                if (actions.idle) actions.idle.play();
                 playerMixers.push(mixer);   // массив всех чужих миксеров
                 const pData = players.get(id);
                 if (pData) {
