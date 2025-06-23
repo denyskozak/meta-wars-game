@@ -669,6 +669,12 @@ ws.on('connection', (socket) => {
                         if (message.payload.type === 'heal') {
                             player.hp = Math.min(MAX_HP, player.hp + 50);
                         }
+                        if (message.payload.type === 'paladin-heal') {
+                            const target = match.players.get(message.payload.targetId || id);
+                            if (target) {
+                                target.hp = Math.min(MAX_HP, target.hp + 50);
+                            }
+                        }
 
                         if (['immolate'].includes(message.payload.type)) {
                             broadcastToMatch(match.id, {
@@ -678,7 +684,7 @@ ws.on('connection', (socket) => {
                             });
                         }
                         
-                        if (['fireball', 'darkball', 'corruption', 'chaosbolt', 'iceball', 'shield', 'pyroblast', 'fireblast'].includes(message.payload.type)) {
+                        if (['fireball', 'darkball', 'corruption', 'chaosbolt', 'iceball', 'shield', 'pyroblast', 'fireblast', 'lightstrike', 'lightwave', 'stun', 'paladin-heal'].includes(message.payload.type)) {
                             broadcastToMatch(match.id, {
                                 type: 'CAST_SPELL',
                                 payload: message.payload,
@@ -712,6 +718,17 @@ ws.on('connection', (socket) => {
                                     nextTick: Date.now() + 1000,
                                     ticks: 5,
                                     icon: '/icons/spell_immolation.jpg',
+                                });
+                            }
+                        }
+                        if (message.payload.type === 'stun' && message.payload.targetId) {
+                            const target = match.players.get(message.payload.targetId);
+                            if (target) {
+                                target.debuffs = target.debuffs || [];
+                                target.debuffs.push({
+                                    type: 'stun',
+                                    expires: Date.now() + 3000,
+                                    icon: '/icons/shield.png'
                                 });
                             }
                         }

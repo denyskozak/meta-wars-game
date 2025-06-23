@@ -3,6 +3,7 @@ import {useInterface} from '@/context/inteface';
 import './SkillBar.css';
 import * as mageSkills from '../../skills/mage';
 import * as warlockSkills from '../../skills/warlock';
+import * as paladinSkills from '../../skills/paladin';
 
 const DEFAULT_SKILLS = [
     mageSkills.fireball,
@@ -18,9 +19,18 @@ const WARLOCK_SKILLS = [
     warlockSkills.chaosbolt,
 ];
 
+const PALADIN_SKILLS = [
+    paladinSkills.lightstrike,
+    paladinSkills.stun,
+    paladinSkills.paladinHeal,
+    paladinSkills.lightwave,
+];
+
 export const SkillBar = () => {
     const {state: {character}} = useInterface();
-    const skills = character?.name === 'warlock' ? WARLOCK_SKILLS : DEFAULT_SKILLS;
+    let skills = DEFAULT_SKILLS;
+    if (character?.name === 'warlock') skills = WARLOCK_SKILLS;
+    else if (character?.name === 'paladin') skills = PALADIN_SKILLS;
 
     const [cooldowns, setCooldowns] = useState({});
     const [pressed, setPressed] = useState({});
