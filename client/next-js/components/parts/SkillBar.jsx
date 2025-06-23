@@ -21,8 +21,8 @@ const WARLOCK_SKILLS = [
 
 const PALADIN_SKILLS = [
     paladinSkills.lightstrike,
-    paladinSkills.stun,
     paladinSkills.paladinHeal,
+    paladinSkills.stun,
     paladinSkills.lightwave,
 ];
 

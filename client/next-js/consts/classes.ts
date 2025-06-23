@@ -1,5 +1,5 @@
 export const CLASS_ICONS: Record<string, string> = {
-  mage: '/icons/mage.png',
-  warlock: '/icons/warlock.webp',
-  paladin: '/icons/shield.png',
+  mage: "/icons/mage.png",
+  warlock: "/icons/warlock.webp",
+  paladin: "/icons/classes/paladin.webp",
 };
