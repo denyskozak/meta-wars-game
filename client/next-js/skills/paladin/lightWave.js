@@ -1,6 +1,10 @@
 import { SPELL_COST } from '../../consts';
 
-export const meta = { id: 'lightwave', key: 'F', icon: '/icons/shield.png' };
+export const meta = {
+  id: 'lightwave',
+  key: 'F',
+  icon: '/icons/classes/paladin/divinestorm.jpg',
+};
 
 export default function castLightWave({ playerId, globalSkillCooldown, isCasting, sendToSocket, activateGlobalCooldown, startSkillCooldown }) {
   if (globalSkillCooldown || isCasting) return;

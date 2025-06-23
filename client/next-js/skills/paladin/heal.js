@@ -1,6 +1,10 @@
 import { SPELL_COST } from '../../consts';
 
-export const meta = { id: 'paladin-heal', key: 'Q', icon: '/icons/shield.png' };
+export const meta = {
+  id: 'paladin-heal',
+  key: 'Q',
+  icon: '/icons/classes/paladin/sealofmight.jpg',
+};
 
 export default function castPaladinHeal({ playerId, castSpellImpl, mana, getTargetPlayer, dispatch, sendToSocket, sounds }) {
   if (mana < SPELL_COST['paladin-heal']) {
