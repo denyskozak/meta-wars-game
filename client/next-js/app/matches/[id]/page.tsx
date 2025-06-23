@@ -37,11 +37,11 @@ export default function MatchesPage() {
         },
         rogue: {
             label: 'Rogue',
-            icon: ''
+            icon:  '/icons/rogue.webp'
         },
         warrior: {
             label: 'Warrior',
-            icon: ''
+            icon:  '/icons/warrior.webp'
         },
     };
 

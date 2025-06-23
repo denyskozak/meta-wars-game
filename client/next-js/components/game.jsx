@@ -2450,9 +2450,9 @@ export function Game({models, sounds, textures, matchId, character}) {
 
             const actions = {
                 idle: get('idle'),
-                walk: get('walk', 'walk.001'),
-                run: get('run', 'walk', 'walk.001'),
-                jump: get('jump', 'jumping'),
+                walk: get('walk'),
+                run: get('run', 'walk'),
+                jump: get('jump'),
                 casting: get('casting'),
                 castEnd: get('cast_end', 'castEnd'),
                 cast: get('cast'),
@@ -2493,6 +2493,7 @@ export function Game({models, sounds, textures, matchId, character}) {
                 mixer.timeScale = 40;
                 // const idle = mixer.clipAction(animations[2]).play();
                 // const walk = mixer.clipAction(animations[6]);
+                console.log("animations: ", animations);
                 const actions = buildActions(mixer, animations);
 
 
