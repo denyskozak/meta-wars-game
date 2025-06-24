@@ -21,6 +21,8 @@ import castFireball, { meta as fireballMeta } from '../skills/mage/fireball';
 import castIceball, { meta as iceballMeta } from '../skills/mage/iceball';
 import castFireblast, { meta as fireblastMeta } from '../skills/mage/fireblast';
 import castPyroblast, { meta as pyroblastMeta } from '../skills/mage/pyroblast';
+import castFrostNova, { meta as frostNovaMeta } from '../skills/mage/frostNova';
+import castBlink, { meta as blinkMeta } from '../skills/mage/blink';
 import castDarkball, { meta as darkballMeta } from '../skills/warlock/darkball';
 import castCorruption, { meta as corruptionMeta } from '../skills/warlock/corruption';
 import castImmolate, { meta as immolateMeta } from '../skills/warlock/immolate';
@@ -52,6 +54,8 @@ const SPELL_ICONS = {
     [stunMeta.id]: stunMeta.icon,
     [paladinHealMeta.id]: paladinHealMeta.icon,
     [lightWaveMeta.id]: lightWaveMeta.icon,
+    [frostNovaMeta.id]: frostNovaMeta.icon,
+    [blinkMeta.id]: blinkMeta.icon,
 };
 
 const SPELL_META = {
@@ -67,6 +71,8 @@ const SPELL_META = {
     [stunMeta.id]: stunMeta,
     [paladinHealMeta.id]: paladinHealMeta,
     [lightWaveMeta.id]: lightWaveMeta,
+    [frostNovaMeta.id]: frostNovaMeta,
+    [blinkMeta.id]: blinkMeta,
 };
 
 const SPELL_SCALES = {
@@ -559,6 +565,7 @@ export function Game({models, sounds, textures, matchId, character}) {
             stun: 50000,
             'paladin-heal': 30000,
             lightwave: 120000,
+            frostnova: 15000,
         };
         const skillCooldownTimers = {};
 
@@ -649,6 +656,8 @@ export function Game({models, sounds, textures, matchId, character}) {
         const CHAOSBOLT_DAMAGE = FIREBALL_DAMAGE * 2;
         const ICEBALL_DAMAGE = 25;
         const DARKBALL_DAMAGE = 30;
+        const FROSTNOVA_DAMAGE = 20;
+        const FROSTNOVA_RANGE = FIREBLAST_RANGE / 2;
         const LIGHTSTRIKE_DAMAGE = 40;
         const LIGHTSTRIKE_RANGE = 4;
         const LIGHTSTRIKE_ANGLE = Math.PI / 4;
@@ -828,6 +837,14 @@ export function Game({models, sounds, textures, matchId, character}) {
             else if (className === 'paladin') castSpell('lightwave');
             else castSpell('pyroblast');
         }
+        function handleKeyC() {
+            const className = character?.name?.toLowerCase();
+            if (className === 'mage') castSpell('frostnova');
+        }
+        function handleKeyZ() {
+            const className = character?.name?.toLowerCase();
+            if (className === 'mage') castSpell('blink');
+        }
         function handleKeyG() {
             leftMouseButtonClicked = true;
         }
@@ -880,6 +897,8 @@ export function Game({models, sounds, textures, matchId, character}) {
             KeyE: handleKeyE,
             KeyR: handleKeyR,
             KeyF: handleKeyF,
+            KeyC: handleKeyC,
+            KeyZ: handleKeyZ,
             KeyG: handleKeyG,
             KeyJ: handleKeyJ,
             KeyT: handleKeyT,
@@ -1040,76 +1059,6 @@ export function Game({models, sounds, textures, matchId, character}) {
         }
 
 
-        function castBlink() {
-            const BLINK_DISTANCE = 5; // Distance to teleport forward
-            const BLINK_MANA_COST = SPELL_COST['blink'];
-            const BLINK_COOLDOWN = 10000; // Cooldown in milliseconds
-
-            if (!isFocused) {
-                handleRightClick();
-            }
-
-            if (globalSkillCooldown || isCasting || isSkillOnCooldown('blink')) {
-                return;
-            }
-
-            if (mana < BLINK_MANA_COST) {
-                console.log("Not enough mana to blink!");
-                if (sounds.noMana) {
-                    sounds.noMana.currentTime = 0;
-                    sounds.noMana.volume = 0.5;
-                    sounds.noMana.play();
-                }
-
-                return;
-            }
-
-            sendToSocket({
-                type: 'CAST_SPELL',
-                payload: {type: 'blink'}
-            });
-
-            sounds.blink.volume = 0.5;
-            sounds.blink.play();
-
-            startSkillCooldown('blink');
-
-            const playerPosition = new THREE.Vector3();
-
-            playerCollider.getCenter(playerPosition);
-
-            // Teleport the player forward
-            const forwardDirection = new THREE.Vector3();
-
-            camera.getWorldDirection(forwardDirection);
-            forwardDirection.y = 0; // Keep movement in the horizontal plane
-            forwardDirection.normalize();
-
-            const blinkTarget = playerPosition.addScaledVector(
-                forwardDirection,
-                BLINK_DISTANCE,
-            );
-
-            // Ensure no collisions at the blink target
-            const result = worldOctree.capsuleIntersect(
-                new Capsule(
-                    blinkTarget,
-                    blinkTarget.clone().add(new THREE.Vector3(0, 0.75, 0)),
-                    0.35,
-                ),
-            );
-
-            if (!result) {
-                // If the target position is valid, teleport the player
-                teleportTo(blinkTarget);
-            } else {
-                console.log("Blink target is obstructed!");
-            }
-
-            // Activate cooldown
-            activateGlobalCooldown();
-            startSkillCooldown('blink');
-        }
 
         function castHeal() {
             const HEAL_AMOUNT = 20; // Amount of HP restored
@@ -1387,6 +1336,34 @@ export function Game({models, sounds, textures, matchId, character}) {
                         pyroblastMesh,
                         sounds,
                         damage: PYROBLAST_DAMAGE,
+                    });
+                    break;
+                case "frostnova":
+                    castFrostNova({
+                        playerId,
+                        globalSkillCooldown,
+                        isCasting,
+                        mana,
+                        sendToSocket,
+                        activateGlobalCooldown,
+                        startSkillCooldown,
+                        sounds,
+                    });
+                    break;
+                case "blink":
+                    castBlink({
+                        globalSkillCooldown,
+                        isCasting,
+                        mana,
+                        sendToSocket,
+                        activateGlobalCooldown,
+                        startSkillCooldown,
+                        sounds,
+                        teleportTo,
+                        playerCollider,
+                        worldOctree,
+                        camera,
+                        FIREBLAST_RANGE,
                     });
                     break;
                 case "chaosbolt":
@@ -2236,6 +2213,15 @@ export function Game({models, sounds, textures, matchId, character}) {
             }
         }
 
+        function applyRootEffect(playerId, duration = 3000) {
+            if (playerId === myPlayerId) {
+                movementSpeedModifier = 0;
+                playerVelocity.x = 0;
+                playerVelocity.z = 0;
+                setTimeout(() => (movementSpeedModifier = 1), duration);
+            }
+        }
+
 
 
         function toggleShieldOnPlayer(id, visible) {
@@ -2880,6 +2866,19 @@ export function Game({models, sounds, textures, matchId, character}) {
                         case "pyroblast":
                             igniteHands(message.id, 1000);
                             castSphereOtherUser(message.payload, message.id);
+                            break;
+                        case "frostnova":
+                            if (message.id !== myPlayerId) {
+                                const caster = players.get(message.id);
+                                if (caster) {
+                                    const myPos = players.get(myPlayerId)?.model.position.clone();
+                                    const casterPos = caster.model.position.clone();
+                                    if (myPos && casterPos && myPos.distanceTo(casterPos) < FROSTNOVA_RANGE) {
+                                        applyRootEffect(myPlayerId, 3000);
+                                        takeDamage(FROSTNOVA_DAMAGE, message.id, 'frostnova');
+                                    }
+                                }
+                            }
                             break;
                         case "paladin-heal":
                             if (message.payload.targetId === myPlayerId) {

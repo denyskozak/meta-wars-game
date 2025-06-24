@@ -11,6 +11,7 @@ const MANA_REGEN_INTERVAL = 1000;
 const MANA_REGEN_AMOUNT = 1.3; // 30% faster mana regeneration
 const SPELL_COST = require('../client/next-js/consts/spellCosts.json');
 const ICEBALL_ICON = '/icons/spell_frostbolt.jpg';
+const FROSTNOVA_ICON = '/icons/frostnova.jpg';
 
 function updateLevel(player) {
     player.level = Math.min(10, Math.floor(player.points / XP_PER_LEVEL) + 1);
@@ -684,7 +685,7 @@ ws.on('connection', (socket) => {
                             });
                         }
                         
-                        if (['fireball', 'darkball', 'corruption', 'chaosbolt', 'iceball', 'shield', 'pyroblast', 'fireblast', 'lightstrike', 'lightwave', 'stun', 'paladin-heal'].includes(message.payload.type)) {
+                        if (['fireball', 'darkball', 'corruption', 'chaosbolt', 'iceball', 'shield', 'pyroblast', 'fireblast', 'lightstrike', 'lightwave', 'stun', 'paladin-heal', 'frostnova', 'blink'].includes(message.payload.type)) {
                             broadcastToMatch(match.id, {
                                 type: 'CAST_SPELL',
                                 payload: message.payload,
@@ -761,6 +762,17 @@ ws.on('connection', (socket) => {
                                 type: 'CAST_SPELL',
                                 payload: { type: 'iceball-hit', targetId: id },
                                 id: message.damageDealerId,
+                            });
+                        }
+                    }
+                    if (message.spellType === 'frostnova') {
+                        const target = match.players.get(id);
+                        if (target) {
+                            target.debuffs = target.debuffs || [];
+                            target.debuffs.push({
+                                type: 'root',
+                                expires: Date.now() + 3000,
+                                icon: FROSTNOVA_ICON,
                             });
                         }
                     }
