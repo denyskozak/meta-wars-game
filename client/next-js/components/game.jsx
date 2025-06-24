@@ -2772,7 +2772,8 @@ export function Game({models, sounds, textures, matchId, character}) {
             if (!base) return;
             const rune = SkeletonUtils.clone(base);
             rune.position.set(data.position.x, data.position.y, data.position.z);
-            rune.scale.multiplyScalar(0.2);
+            // Scale runes down by 30%
+            rune.scale.multiplyScalar(0.14);
             // lower the rune slightly so it sits closer to the ground
             rune.position.y -= 0.2;
             rune.userData.type = data.type;
@@ -2809,7 +2810,8 @@ export function Game({models, sounds, textures, matchId, character}) {
             if (!base) return;
             const rune = SkeletonUtils.clone(base);
             rune.position.set(data.position.x, data.position.y, data.position.z);
-            rune.scale.multiplyScalar(0.04);
+            // Scale XP runes down by 30%
+            rune.scale.multiplyScalar(0.028);
             rune.position.y -= 0.2;
             rune.traverse((child) => {
                 if (child.isMesh) {
