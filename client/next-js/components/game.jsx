@@ -33,6 +33,8 @@ import { meta as lightStrikeMeta } from '../skills/paladin/lightStrike';
 import castStun, { meta as stunMeta } from '../skills/paladin/stun';
 import castPaladinHeal, { meta as paladinHealMeta } from '../skills/paladin/heal';
 import castLightWave, { meta as lightWaveMeta } from '../skills/paladin/lightWave';
+import castHandOfFreedom, { meta as handOfFreedomMeta } from '../skills/paladin/handFreedom';
+import castDivineSpeed, { meta as divineSpeedMeta } from '../skills/paladin/divineSpeed';
 
 
 import {Interface} from "@/components/layout/Interface";
@@ -58,6 +60,8 @@ const SPELL_ICONS = {
     [stunMeta.id]: stunMeta.icon,
     [paladinHealMeta.id]: paladinHealMeta.icon,
     [lightWaveMeta.id]: lightWaveMeta.icon,
+    [handOfFreedomMeta.id]: handOfFreedomMeta.icon,
+    [divineSpeedMeta.id]: divineSpeedMeta.icon,
     [frostNovaMeta.id]: frostNovaMeta.icon,
     [blinkMeta.id]: blinkMeta.icon,
 };
@@ -77,6 +81,8 @@ const SPELL_META = {
     [stunMeta.id]: stunMeta,
     [paladinHealMeta.id]: paladinHealMeta,
     [lightWaveMeta.id]: lightWaveMeta,
+    [handOfFreedomMeta.id]: handOfFreedomMeta,
+    [divineSpeedMeta.id]: divineSpeedMeta,
     [frostNovaMeta.id]: frostNovaMeta,
     [blinkMeta.id]: blinkMeta,
 };
@@ -574,6 +580,8 @@ export function Game({models, sounds, textures, matchId, character}) {
             'paladin-heal': 30000,
             lightwave: 120000,
             frostnova: 15000,
+            'hand-of-freedom': 15000,
+            'divine-speed': 30000,
         };
         const skillCooldownTimers = {};
 
@@ -848,13 +856,17 @@ export function Game({models, sounds, textures, matchId, character}) {
         }
         function handleDigit3() {
             const className = character?.name?.toLowerCase();
-            if (className === 'mage') castSpell('fireblast');
+            if (className === 'mage') castSpell('frostnova');
+            else if (className === 'paladin') castSpell('hand-of-freedom');
             else if (className === 'warlock') castSpell('fear');
+
         }
         function handleDigit2() {
             const className = character?.name?.toLowerCase();
-            if (className === 'mage') castSpell('pyroblast');
+            if (className === 'mage') castSpell('blink');
+            else if (className === 'paladin') castSpell('divine-speed');
             else if (className === 'warlock') castSpell('lifedrain');
+
         }
         function handleKeyG() {
             leftMouseButtonClicked = true;
@@ -1426,6 +1438,32 @@ export function Game({models, sounds, textures, matchId, character}) {
                         startSkillCooldown,
                         sounds,
                     });
+                    break;
+                case "hand-of-freedom":
+                    castHandOfFreedom({
+                        playerId,
+                        globalSkillCooldown,
+                        isCasting,
+                        mana,
+                        sendToSocket,
+                        activateGlobalCooldown,
+                        startSkillCooldown,
+                        sounds,
+                    });
+                    applyFreedomEffect(playerId, 5000);
+                    break;
+                case "divine-speed":
+                    castDivineSpeed({
+                        playerId,
+                        globalSkillCooldown,
+                        isCasting,
+                        mana,
+                        sendToSocket,
+                        activateGlobalCooldown,
+                        startSkillCooldown,
+                        sounds,
+                    });
+                    applySpeedEffect(playerId, 5000);
                     break;
                 case "paladin-heal":
                     castPaladinHeal({
@@ -2241,6 +2279,7 @@ export function Game({models, sounds, textures, matchId, character}) {
 
         function applySlowEffect(playerId, duration = 3000) {
             if (playerId === myPlayerId) {
+                if (freedomActive) return;
                 movementSpeedModifier = 0.6;
                 setTimeout(() => (movementSpeedModifier = 1), duration);
             }
@@ -2248,9 +2287,27 @@ export function Game({models, sounds, textures, matchId, character}) {
 
         function applyRootEffect(playerId, duration = 3000) {
             if (playerId === myPlayerId) {
+                if (freedomActive) return;
                 movementSpeedModifier = 0;
                 playerVelocity.x = 0;
                 playerVelocity.z = 0;
+                setTimeout(() => (movementSpeedModifier = 1), duration);
+            }
+        }
+
+        let freedomActive = false;
+
+        function applyFreedomEffect(playerId, duration = 5000) {
+            if (playerId === myPlayerId) {
+                freedomActive = true;
+                movementSpeedModifier = 1;
+                setTimeout(() => (freedomActive = false), duration);
+            }
+        }
+
+        function applySpeedEffect(playerId, duration = 5000) {
+            if (playerId === myPlayerId) {
+                movementSpeedModifier = 1.4;
                 setTimeout(() => (movementSpeedModifier = 1), duration);
             }
         }
@@ -2930,6 +2987,16 @@ export function Game({models, sounds, textures, matchId, character}) {
                         case "paladin-heal":
                             if (message.payload.targetId === myPlayerId) {
                                 dispatch({ type: "SEND_CHAT_MESSAGE", payload: "You are healed!" });
+                            }
+                            break;
+                        case "hand-of-freedom":
+                            if (message.id === myPlayerId) {
+                                applyFreedomEffect(myPlayerId, 5000);
+                            }
+                            break;
+                        case "divine-speed":
+                            if (message.id === myPlayerId) {
+                                applySpeedEffect(myPlayerId, 5000);
                             }
                             break;
                         case "lightwave":

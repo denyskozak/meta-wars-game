@@ -12,6 +12,8 @@ const MANA_REGEN_AMOUNT = 1.3; // 30% faster mana regeneration
 const SPELL_COST = require('../client/next-js/consts/spellCosts.json');
 const ICEBALL_ICON = '/icons/spell_frostbolt.jpg';
 const FROSTNOVA_ICON = '/icons/frostnova.jpg';
+const FREEDOM_ICON = '/icons/classes/paladin/searinglight.jpg';
+const DIVINE_SPEED_ICON = '/icons/classes/paladin/crusaderstrike.jpg';
 
 function updateLevel(player) {
     player.level = Math.min(10, Math.floor(player.points / XP_PER_LEVEL) + 1);
@@ -290,6 +292,8 @@ function checkRunePickup(match, playerId) {
                 playerId,
                 hp: player.hp,
                 mana: player.mana,
+                buffs: player.buffs,
+                debuffs: player.debuffs,
             });
 
             broadcastToMatch(match.id, {
@@ -390,6 +394,8 @@ function applyDamage(match, victimId, dealerId, damage, spellType) {
         playerId: victimId,
         hp: victim.hp,
         mana: victim.mana,
+        buffs: victim.buffs,
+        debuffs: victim.debuffs,
     });
 
     broadcastToMatch(match.id, {
@@ -685,7 +691,8 @@ ws.on('connection', (socket) => {
                             });
                         }
                         
-                        if (['fireball', 'darkball', 'corruption', 'chaosbolt', 'iceball', 'shield', 'pyroblast', 'fireblast', 'lightstrike', 'lightwave', 'stun', 'paladin-heal', 'frostnova', 'blink', 'lifedrain', 'fear'].includes(message.payload.type)) {
+
+                        if (['fireball', 'darkball', 'corruption', 'chaosbolt', 'iceball', 'shield', 'pyroblast', 'fireblast', 'lightstrike', 'lightwave', 'stun', 'paladin-heal', 'frostnova', 'blink', 'hand-of-freedom', 'divine-speed', 'lifedrain', 'fear'].includes(message.payload.type)) {
                             broadcastToMatch(match.id, {
                                 type: 'CAST_SPELL',
                                 payload: message.payload,
@@ -733,6 +740,22 @@ ws.on('connection', (socket) => {
                                 });
                             }
                         }
+
+                        if (message.payload.type === 'hand-of-freedom') {
+                            player.debuffs = player.debuffs?.filter(d => d.type !== 'slow' && d.type !== 'root') || [];
+                            player.buffs.push({
+                                type: 'freedom',
+                                expires: Date.now() + 5000,
+                                icon: FREEDOM_ICON,
+                            });
+                        }
+                        if (message.payload.type === 'divine-speed') {
+                            player.buffs.push({
+                                type: 'speed',
+                                expires: Date.now() + 5000,
+                                icon: DIVINE_SPEED_ICON,
+                            });
+
                         if (message.payload.type === 'fear' && message.payload.targetId) {
                             const target = match.players.get(message.payload.targetId);
                             if (target) {
@@ -751,6 +774,7 @@ ws.on('connection', (socket) => {
                                 applyDamage(match, target.id, id, 30, 'lifedrain');
                                 caster.hp = Math.min(MAX_HP, caster.hp + 30);
                             }
+
                         }
 
                         broadcastToMatch(match.id, {
@@ -758,6 +782,8 @@ ws.on('connection', (socket) => {
                             playerId: id,
                             hp: player.hp,
                             mana: player.mana,
+                            buffs: player.buffs,
+                            debuffs: player.debuffs,
                         });
                     }
                 }
@@ -811,6 +837,8 @@ ws.on('connection', (socket) => {
                             playerId: id,
                             hp: p.hp,
                             mana: p.mana,
+                            buffs: p.buffs,
+                            debuffs: p.debuffs,
                         });
                     }
                 }

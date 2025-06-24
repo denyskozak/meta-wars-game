@@ -25,9 +25,11 @@ const WARLOCK_SKILLS = [
 
 const PALADIN_SKILLS = [
     paladinSkills.lightstrike,
-    paladinSkills.paladinHeal,
     paladinSkills.stun,
+    paladinSkills.paladinHeal,
     paladinSkills.lightwave,
+    paladinSkills.handOfFreedom,
+    paladinSkills.divineSpeed,
 ];
 
 export const SkillBar = () => {
