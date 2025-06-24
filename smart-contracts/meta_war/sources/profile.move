@@ -15,6 +15,20 @@ module meta_war::profile {
         Profile { id: object::new(ctx), nickname, rank: 0 }
     }
 
+    /// Mint a new profile and transfer it to the recipient. The resulting
+    /// `Profile` object does not have the `store` ability and therefore cannot
+    /// be transferred outside of this module, effectively making it soul bound
+    /// to the recipient.
+    #[allow(lint(self_transfer))]
+    public entry fun mint_profile(
+        nickname: vector<u8>,
+        recipient: address,
+        ctx: &mut TxContext,
+    ) {
+        let prof = create(nickname, ctx);
+        transfer::transfer(prof, recipient);
+    }
+
     /// Update nickname
     public fun set_nickname(profile: &mut Profile, nickname: vector<u8>) {
         profile.nickname = nickname
