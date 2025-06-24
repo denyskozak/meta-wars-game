@@ -1546,8 +1546,12 @@ export function Game({models, sounds, textures, matchId, character}) {
         }
 
 
-        function castSphere(model, sphereMesh, type, damage) {
+       function castSphere(model, sphereMesh, type, damage) {
             sphereMesh.rotation.copy(model.rotation);
+
+            if (sphereMesh instanceof Fire) {
+                sphereMesh.lookAt(camera.position);
+            }
 
             scene.add(sphereMesh); // Add the sphereMesh to the scene
 
@@ -1844,8 +1848,11 @@ export function Game({models, sounds, textures, matchId, character}) {
 
             // spheresCollisions(); // Handle collisions between spheres
 
-            for (let sphere of spheres) {
+           for (let sphere of spheres) {
                 sphere.mesh?.position.copy(sphere.collider?.center); // TODO fix
+                if (sphere.type === 'pyroblast') {
+                    sphere.mesh.lookAt(camera.position);
+                }
             }
         }
 
