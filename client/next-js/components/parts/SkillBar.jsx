@@ -1,5 +1,6 @@
 import {useEffect, useState} from 'react';
 import {useInterface} from '@/context/inteface';
+import { SPELL_COST } from '@/consts';
 import './SkillBar.css';
 import * as mageSkills from '../../skills/mage';
 import * as warlockSkills from '../../skills/warlock';
@@ -32,7 +33,7 @@ const PALADIN_SKILLS = [
     paladinSkills.divineSpeed,
 ];
 
-export const SkillBar = () => {
+export const SkillBar = ({ mana = 0 }) => {
     const {state: {character}} = useInterface();
     let skills = DEFAULT_SKILLS;
     if (character?.name === 'warlock') skills = WARLOCK_SKILLS;
@@ -93,8 +94,9 @@ export const SkillBar = () => {
                     const remaining = data.end - Date.now();
                     text = Math.ceil(remaining / 1000);
                 }
+                const insufficientMana = mana < (SPELL_COST[skill.id] || 0);
                 return (
-                    <div className={`skill-button${pressed[skill.id] ? ' pressed' : ''}`} key={skill.id}>
+                    <div className={`skill-button${pressed[skill.id] ? ' pressed' : ''}${insufficientMana ? ' no-mana' : ''}`} key={skill.id}>
                         <div className="skill-icon" style={{backgroundImage: `url('${skill.icon}')`}}></div>
                         {data && (
                             <div className="cooldown-overlay">

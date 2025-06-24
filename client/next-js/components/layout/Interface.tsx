@@ -111,7 +111,7 @@ export const Interface = () => {
             <Scoreboard />
             <GameMenu />
             <Buffs />
-            <SkillBar/>
+            <SkillBar mana={selfStats.mana}/>
             <CastBar/>
             <ExperienceBar />
             <Chat />
