@@ -2,9 +2,28 @@ import * as THREE from 'three';
 import { Capsule } from 'three/examples/jsm/math/Capsule';
 import { SPELL_COST } from '../../consts';
 
-export const meta = { id: 'blink', key: 'F', icon: '/icons/classes/mage/blink.jpg' };
+export const meta = {
+  id: 'blink',
+  key: 'F',
+  icon: '/icons/classes/mage/blink.jpg',
+  autoFocus: false,
+};
 
-export default function castBlink({ globalSkillCooldown, isCasting, mana, sendToSocket, activateGlobalCooldown, startSkillCooldown, sounds, teleportTo, playerCollider, worldOctree, camera, FIREBLAST_RANGE }) {
+export default function castBlink({
+  globalSkillCooldown,
+  isCasting,
+  mana,
+  sendToSocket,
+  activateGlobalCooldown,
+  startSkillCooldown,
+  sounds,
+  teleportTo,
+  playerCollider,
+  worldOctree,
+  camera,
+  FIREBLAST_RANGE,
+  rotationY,
+}) {
   if (globalSkillCooldown || isCasting) return;
   if (mana < SPELL_COST['blink']) {
     if (sounds?.noMana) {
@@ -20,8 +39,12 @@ export default function castBlink({ globalSkillCooldown, isCasting, mana, sendTo
   const start = new THREE.Vector3();
   playerCollider.getCenter(start);
   const dir = new THREE.Vector3();
-  camera.getWorldDirection(dir);
-  dir.y = 0;
+  if (typeof rotationY === 'number') {
+    dir.set(Math.sin(rotationY), 0, Math.cos(rotationY));
+  } else {
+    camera.getWorldDirection(dir);
+    dir.y = 0;
+  }
   dir.normalize();
 
   const ray = new THREE.Ray(start, dir);
