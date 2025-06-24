@@ -3,7 +3,8 @@ import { SPELL_COST } from '../../consts';
 export const meta = {
   id: 'divine-speed',
   key: '2',
-  icon: '/icons/classes/paladin/crusaderstrike.jpg',
+  icon: '/icons/classes/paladin/divinestorm.jpg',
+  autoFocus: false,
 };
 
 export default function castDivineSpeed({ playerId, globalSkillCooldown, isCasting, mana, sendToSocket, activateGlobalCooldown, startSkillCooldown, sounds }) {
