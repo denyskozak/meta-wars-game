@@ -259,6 +259,7 @@ export function Game({models, sounds, textures, matchId, character}) {
         const activeHandEffects = new Map(); // key = playerId -> { effectKey: {left, right} }
         const activeDamageEffects = new Map(); // key = playerId -> effect mesh
         const activeImmolation = new Map(); // key = playerId -> effect mesh
+        const activeStunEffects = new Map(); // key = playerId -> {group, timeout}
 
         const glowTexture = (() => {
             const size = 64;
@@ -285,6 +286,50 @@ export function Game({models, sounds, textures, matchId, character}) {
             const material = new THREE.SpriteMaterial({
                 map: glowTexture,
                 color,
+                transparent: true,
+                depthWrite: false,
+                blending: THREE.AdditiveBlending,
+            });
+            const sprite = new THREE.Sprite(material);
+            sprite.scale.set(size, size, 1);
+            sprite.renderOrder = 999;
+            return sprite;
+        }
+
+        const starTexture = (() => {
+            const size = 64;
+            const canvas = document.createElement('canvas');
+            canvas.width = canvas.height = size;
+            const ctx = canvas.getContext('2d');
+            const spikes = 5;
+            const outerRadius = size / 2;
+            const innerRadius = size / 4;
+            let rot = Math.PI / 2 * 3;
+            const step = Math.PI / spikes;
+            ctx.beginPath();
+            ctx.moveTo(size / 2, size / 2 - outerRadius);
+            for (let i = 0; i < spikes; i++) {
+                ctx.lineTo(
+                    size / 2 + Math.cos(rot) * outerRadius,
+                    size / 2 + Math.sin(rot) * outerRadius
+                );
+                rot += step;
+                ctx.lineTo(
+                    size / 2 + Math.cos(rot) * innerRadius,
+                    size / 2 + Math.sin(rot) * innerRadius
+                );
+                rot += step;
+            }
+            ctx.lineTo(size / 2, size / 2 - outerRadius);
+            ctx.closePath();
+            ctx.fillStyle = 'rgba(255,255,0,1)';
+            ctx.fill();
+            return new THREE.CanvasTexture(canvas);
+        })();
+
+        function makeStarSprite(size = 0.5) {
+            const material = new THREE.SpriteMaterial({
+                map: starTexture,
                 transparent: true,
                 depthWrite: false,
                 blending: THREE.AdditiveBlending,
@@ -689,6 +734,7 @@ export function Game({models, sounds, textures, matchId, character}) {
         const LIGHTSTRIKE_RANGE = 4;
         const LIGHTSTRIKE_ANGLE = Math.PI / 4;
         const LIGHTWAVE_DAMAGE = 40;
+        const STUN_SPIN_SPEED = 2;
 
         // Медленнее пускаем сферы как настоящие заклинания
         const MIN_SPHERE_IMPULSE = 6;
@@ -1447,7 +1493,7 @@ export function Game({models, sounds, textures, matchId, character}) {
                     performLightStrike();
                     break;
                 case "stun":
-                    castStun({
+                    const target = castStun({
                         playerId,
                         globalSkillCooldown,
                         isCasting,
@@ -1459,6 +1505,7 @@ export function Game({models, sounds, textures, matchId, character}) {
                         startSkillCooldown,
                         sounds,
                     });
+                    if (target) applyStunEffect(target, 3000);
                     break;
                 case "hand-of-freedom":
                     castHandOfFreedom({
@@ -2353,6 +2400,32 @@ export function Game({models, sounds, textures, matchId, character}) {
             }
         }
 
+        function applyStunEffect(playerId, duration = 3000) {
+            const existing = activeStunEffects.get(playerId);
+            if (existing) {
+                existing.group.parent?.remove(existing.group);
+                clearTimeout(existing.timeout);
+            }
+
+            const group = new THREE.Group();
+            const count = 5;
+            for (let i = 0; i < count; i++) {
+                const sprite = makeStarSprite(0.4);
+                const angle = (i / count) * Math.PI * 2;
+                sprite.position.set(Math.cos(angle) * 0.6, 0, Math.sin(angle) * 0.6);
+                group.add(sprite);
+            }
+
+            scene.add(group);
+
+            const timeout = setTimeout(() => {
+                group.parent?.remove(group);
+                activeStunEffects.delete(playerId);
+            }, duration);
+
+            activeStunEffects.set(playerId, { group, timeout });
+        }
+
         function spawnFrostNovaRing(playerId, duration = FROSTNOVA_RING_DURATION) {
             const player = players.get(playerId)?.model;
             if (!player) return;
@@ -2606,6 +2679,14 @@ export function Game({models, sounds, textures, matchId, character}) {
                         if (!target) return;
                         target.getWorldPosition(mesh.position);
                         mesh.position.y += 0.5;
+                    });
+
+                    activeStunEffects.forEach((obj, id) => {
+                        const target = players.get(id)?.model;
+                        if (!target) return;
+                        target.getWorldPosition(obj.group.position);
+                        obj.group.position.y += 1.8;
+                        obj.group.rotation.y += delta * STUN_SPIN_SPEED;
                     });
 
                     for (let i = frostNovaRings.length - 1; i >= 0; i--) {
@@ -3114,6 +3195,11 @@ export function Game({models, sounds, textures, matchId, character}) {
                         case "divine-speed":
                             if (message.id === myPlayerId) {
                                 applySpeedEffect(myPlayerId, 5000);
+                            }
+                            break;
+                        case "stun":
+                            if (message.payload.targetId) {
+                                applyStunEffect(message.payload.targetId, 3000);
                             }
                             break;
                         case "lightwave":
