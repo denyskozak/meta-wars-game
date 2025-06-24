@@ -136,8 +136,25 @@ async function mintItemWithOptions(recipientAddress, itemType, opts = {}) {
         const { signature, bytes: signed } = await keypair.signTransaction(bytes);
         await client.executeTransactionBlock({ transactionBlock: signed, signature });
     } catch (error) {
-        console.error('mintItemWithOptions failed:', error);
+    console.error('mintItemWithOptions failed:', error);
+}
+
+async function createProfile(recipientAddress, nickname) {
+    try {
+        const tx = new Transaction();
+        tx.moveCall({
+            target: `${PACKAGE_ID}::profile::mint_profile`,
+            arguments: [tx.pure.string(nickname), tx.pure.address(recipientAddress)],
+        });
+        tx.setGasBudget(10000000);
+        tx.setSender(keypair.toSuiAddress());
+        const bytes = await tx.build({ client });
+        const { signature, bytes: signed } = await keypair.signTransaction(bytes);
+        await client.executeTransactionBlock({ transactionBlock: signed, signature });
+    } catch (error) {
+        console.error('createProfile failed:', error);
     }
+}
 }
 
 module.exports = {
@@ -145,4 +162,5 @@ module.exports = {
     mintChest,
     mintItem,
     mintItemWithOptions,
+    createProfile,
 };
