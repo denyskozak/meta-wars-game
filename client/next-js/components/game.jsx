@@ -727,8 +727,8 @@ export function Game({models, sounds, textures, matchId, character}) {
         const FROSTNOVA_RANGE = FIREBLAST_RANGE / 2;
         const FROSTNOVA_RING_DURATION = 1000; // ms
         const LIGHTWAVE_RING_DURATION = 1000; // ms
-        const LIGHTSTRIKE_DAMAGE = 40;
-        const LIGHTSTRIKE_RANGE = 4;
+        const LIGHTSTRIKE_DAMAGE = 28; // 30% less damage
+        const LIGHTSTRIKE_RANGE = 0.8; // melee range
         const LIGHTSTRIKE_ANGLE = Math.PI / 4;
         const LIGHTWAVE_DAMAGE = 40;
         const STUN_SPIN_SPEED = 2;
@@ -2454,16 +2454,20 @@ export function Game({models, sounds, textures, matchId, character}) {
             player.getWorldPosition(position);
             position.y += 0.1;
 
-            const geometry = new THREE.RingGeometry(1.2, 2.4, 32);
+            // Start very close to the player so the wave visually grows outwards
+            const geometry = new THREE.RingGeometry(0.5, 1.5, 64);
             const material = new THREE.MeshBasicMaterial({
-                color: 0xffffaa,
+                color: 0xfff8e8,
                 transparent: true,
-                opacity: 0.8,
+                opacity: 0.9,
                 side: THREE.DoubleSide,
+                blending: THREE.AdditiveBlending,
             });
             const mesh = new THREE.Mesh(geometry, material);
             mesh.rotation.x = -Math.PI / 2;
             mesh.position.copy(position);
+            // spawn small and let the update loop scale it outward
+            mesh.scale.setScalar(0.1);
 
             scene.add(mesh);
             lightWaveRings.push({ mesh, start: performance.now(), duration });
@@ -2702,8 +2706,8 @@ export function Game({models, sounds, textures, matchId, character}) {
                         const effect = lightWaveRings[i];
                         const elapsed = performance.now() - effect.start;
                         const progress = elapsed / effect.duration;
-                        effect.mesh.scale.setScalar(1 + progress * 3);
-                        effect.mesh.material.opacity = 0.8 * (1 - progress);
+                        effect.mesh.scale.setScalar(0.1 + progress * 3);
+                        effect.mesh.material.opacity = 0.9 * (1 - progress);
                         effect.mesh.rotation.z += delta * 2;
                         if (progress >= 1) {
                             scene.remove(effect.mesh);
