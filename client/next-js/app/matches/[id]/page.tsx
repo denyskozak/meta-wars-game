@@ -35,14 +35,14 @@ export default function MatchesPage() {
             label: 'Paladin',
             icon: '/icons/paladin.webp'
         },
-        rogue: {
-            label: 'Rogue',
-            icon:  '/icons/rogue.webp'
-        },
-        warrior: {
-            label: 'Warrior',
-            icon:  '/icons/warrior.webp'
-        },
+        // rogue: {
+        //     label: 'Rogue',
+        //     icon:  '/icons/rogue.webp'
+        // },
+        // warrior: {
+        //     label: 'Warrior',
+        //     icon:  '/icons/warrior.webp'
+        // },
     };
 
     console.log("players: ", players);
