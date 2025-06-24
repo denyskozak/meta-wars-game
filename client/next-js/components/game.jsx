@@ -33,7 +33,7 @@ import castFear, { meta as fearMeta } from '../skills/warlock/fear';
 import { meta as lightStrikeMeta } from '../skills/paladin/lightStrike';
 import castStun, { meta as stunMeta } from '../skills/paladin/stun';
 import castPaladinHeal, { meta as paladinHealMeta } from '../skills/paladin/heal';
-import castLightWave, { meta as lightWaveMeta } from '../skills/paladin/lightWave';
+import { meta as lightWaveMeta } from '../skills/paladin/lightWave';
 import castHandOfFreedom, { meta as handOfFreedomMeta } from '../skills/paladin/handFreedom';
 import castDivineSpeed, { meta as divineSpeedMeta } from '../skills/paladin/divineSpeed';
 
@@ -684,6 +684,7 @@ export function Game({models, sounds, textures, matchId, character}) {
         const FROSTNOVA_DAMAGE = 20;
         const FROSTNOVA_RANGE = FIREBLAST_RANGE / 2;
         const FROSTNOVA_RING_DURATION = 1000; // ms
+        const LIGHTWAVE_RING_DURATION = 1000; // ms
         const LIGHTSTRIKE_DAMAGE = 40;
         const LIGHTSTRIKE_RANGE = 4;
         const LIGHTSTRIKE_ANGLE = Math.PI / 4;
@@ -753,6 +754,7 @@ export function Game({models, sounds, textures, matchId, character}) {
         let isChatActive = false;
         let isHealActive = false;
         const frostNovaRings = [];
+        const lightWaveRings = [];
 
         // Crosshair elements
         const target = document.getElementById("target");
@@ -1496,14 +1498,7 @@ export function Game({models, sounds, textures, matchId, character}) {
                     });
                     break;
                 case "lightwave":
-                    castLightWave({
-                        playerId,
-                        globalSkillCooldown,
-                        isCasting,
-                        sendToSocket,
-                        activateGlobalCooldown,
-                        startSkillCooldown,
-                    });
+                    performLightWave();
                     break;
             }
         }
@@ -1543,6 +1538,28 @@ export function Game({models, sounds, textures, matchId, character}) {
             sendToSocket({ type: 'CAST_SPELL', payload: { type: 'lightstrike' } });
             activateGlobalCooldown();
             startSkillCooldown('lightstrike');
+        }
+
+        function performLightWave() {
+            const playerData = players.get(myPlayerId);
+            if (!playerData) return;
+            const { mixer, actions } = playerData;
+
+            spawnLightWaveRing(myPlayerId);
+
+            controlAction({
+                action: actions['attack360'] || actions['attack'],
+                actionName: 'attack_360',
+                mixer,
+                loop: THREE.LoopOnce,
+                fadeIn: 0.1,
+                reset: true,
+                clampWhenFinished: true,
+            });
+
+            sendToSocket({ type: 'CAST_SPELL', payload: { type: 'lightwave' } });
+            activateGlobalCooldown();
+            startSkillCooldown('lightwave');
         }
 
 
@@ -2361,6 +2378,29 @@ export function Game({models, sounds, textures, matchId, character}) {
             frostNovaRings.push({ mesh, start: performance.now(), duration });
         }
 
+        function spawnLightWaveRing(playerId, duration = LIGHTWAVE_RING_DURATION) {
+            const player = players.get(playerId)?.model;
+            if (!player) return;
+
+            const position = new THREE.Vector3();
+            player.getWorldPosition(position);
+            position.y += 0.1;
+
+            const geometry = new THREE.RingGeometry(1.2, 2.4, 32);
+            const material = new THREE.MeshBasicMaterial({
+                color: 0xffffaa,
+                transparent: true,
+                opacity: 0.8,
+                side: THREE.DoubleSide,
+            });
+            const mesh = new THREE.Mesh(geometry, material);
+            mesh.rotation.x = -Math.PI / 2;
+            mesh.position.copy(position);
+
+            scene.add(mesh);
+            lightWaveRings.push({ mesh, start: performance.now(), duration });
+        }
+
 
 
         function toggleShieldOnPlayer(id, visible) {
@@ -2579,6 +2619,19 @@ export function Game({models, sounds, textures, matchId, character}) {
                         if (progress >= 1) {
                             scene.remove(effect.mesh);
                             frostNovaRings.splice(i, 1);
+                        }
+                    }
+
+                    for (let i = lightWaveRings.length - 1; i >= 0; i--) {
+                        const effect = lightWaveRings[i];
+                        const elapsed = performance.now() - effect.start;
+                        const progress = elapsed / effect.duration;
+                        effect.mesh.scale.setScalar(1 + progress * 3);
+                        effect.mesh.material.opacity = 0.8 * (1 - progress);
+                        effect.mesh.rotation.z += delta * 2;
+                        if (progress >= 1) {
+                            scene.remove(effect.mesh);
+                            lightWaveRings.splice(i, 1);
                         }
                     }
 
@@ -3069,6 +3122,7 @@ export function Game({models, sounds, textures, matchId, character}) {
                             if (message.id !== myPlayerId) {
                                 const caster = players.get(message.id);
                                 if (caster) {
+                                    spawnLightWaveRing(message.id);
                                     const myPos = players.get(myPlayerId)?.model.position.clone();
                                     const casterPos = caster.model.position.clone();
                                     if (myPos && casterPos && myPos.distanceTo(casterPos) < FIREBLAST_RANGE) {
