@@ -3,7 +3,8 @@ import { SPELL_COST } from '../../consts';
 export const meta = {
   id: 'hand-of-freedom',
   key: '3',
-  icon: '/icons/classes/paladin/searinglight.jpg',
+  icon: '/icons/classes/paladin/sealofmight.jpg',
+  autoFocus: false,
 };
 
 export default function castHandOfFreedom({ playerId, globalSkillCooldown, isCasting, mana, sendToSocket, activateGlobalCooldown, startSkillCooldown, sounds }) {
