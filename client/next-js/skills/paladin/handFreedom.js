@@ -2,7 +2,7 @@ import { SPELL_COST } from '../../consts';
 
 export const meta = {
   id: 'hand-of-freedom',
-  key: 'C',
+  key: '3',
   icon: '/icons/classes/paladin/searinglight.jpg',
 };
 

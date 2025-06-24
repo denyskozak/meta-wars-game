@@ -2,7 +2,7 @@ import { SPELL_COST } from '../../consts';
 
 export const meta = {
   id: 'divine-speed',
-  key: 'Z',
+  key: '2',
   icon: '/icons/classes/paladin/crusaderstrike.jpg',
 };
 
