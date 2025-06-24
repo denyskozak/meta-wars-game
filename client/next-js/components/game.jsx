@@ -159,9 +159,13 @@ export function Game({models, sounds, textures, matchId, character}) {
     const {refetch: refetchCoins} = useCoins();
     const {state, dispatch} = useInterface();
     const debuffsRef = useRef(state.debuffs);
+    const menuVisibleRef = useRef(state.menuVisible);
     useEffect(() => {
         debuffsRef.current = state.debuffs;
     }, [state.debuffs]);
+    useEffect(() => {
+        menuVisibleRef.current = state.menuVisible;
+    }, [state.menuVisible]);
     const {socket, sendToSocket} = useWS(matchId);
     const router = useRouter();
     const [isReadyToPlay, setIsReadyToPlay] = useState(false);
@@ -917,6 +921,9 @@ export function Game({models, sounds, textures, matchId, character}) {
             else if (className === 'paladin') castSpell('paladin-heal');
             else castSpell('frostnova');
         }
+        function handleEscape() {
+            dispatch({type: 'SET_MENU_VISIBLE', payload: !menuVisibleRef.current});
+        }
 
         const keyDownHandlers = {
             KeyW: handleKeyW,
@@ -936,6 +943,10 @@ export function Game({models, sounds, textures, matchId, character}) {
         };
 
         document.addEventListener("keydown", (event) => {
+            if (event.code === "Escape") {
+                handleEscape();
+                return;
+            }
             if (event.code === "Enter") {
                 if (!isChatActive) {
                     chatInputElement.focus();
@@ -947,7 +958,7 @@ export function Game({models, sounds, textures, matchId, character}) {
 
             if (isChatActive) return;
 
-            if (!controlsEnabled || debuffsRef.current.some(d => d.type === 'stun')) return;
+            if (!controlsEnabled || debuffsRef.current.some(d => d.type === 'stun') || menuVisibleRef.current) return;
 
             keyStates[event.code] = true;
 
@@ -976,7 +987,7 @@ export function Game({models, sounds, textures, matchId, character}) {
         document.addEventListener("keyup", (event) => {
             if (isChatActive) return;
 
-            if (!controlsEnabled || debuffsRef.current.some(d => d.type === 'stun')) return;
+            if (!controlsEnabled || debuffsRef.current.some(d => d.type === 'stun') || menuVisibleRef.current) return;
 
             keyStates[event.code] = false;
 
