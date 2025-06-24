@@ -206,6 +206,7 @@ const CLASS_MODELS = {
     paladin: 'bolvar',
     mage: 'vampir',
     warlock: 'vampir',
+    rogue: 'vampir',
 };
 
 function createPlayer(address, classType, character) {
@@ -225,6 +226,8 @@ function createPlayer(address, classType, character) {
         level: 1,
         hp: MAX_HP,
         mana: MAX_MANA,
+        comboPoints: 0,
+        comboTarget: null,
         chests: [],
         address,
         classType,
@@ -706,7 +709,7 @@ ws.on('connection', (socket) => {
                         }
 
 
-                        if (['fireball', 'darkball', 'corruption', 'chaosbolt', 'iceball', 'shield', 'pyroblast', 'fireblast', 'lightstrike', 'lightwave', 'stun', 'paladin-heal', 'frostnova', 'blink', 'hand-of-freedom', 'divine-speed', 'lifedrain', 'fear'].includes(message.payload.type)) {
+                        if (['fireball', 'darkball', 'corruption', 'chaosbolt', 'iceball', 'shield', 'pyroblast', 'fireblast', 'lightstrike', 'lightwave', 'stun', 'paladin-heal', 'frostnova', 'blink', 'hand-of-freedom', 'divine-speed', 'lifedrain', 'fear', 'blood-strike', 'eviscerate', 'kidney-strike', 'adrenaline-rush', 'sprint', 'shadow-leap'].includes(message.payload.type)) {
                             broadcastToMatch(match.id, {
                                 type: 'CAST_SPELL',
                                 payload: message.payload,
@@ -770,10 +773,63 @@ ws.on('connection', (socket) => {
                                 icon: DIVINE_SPEED_ICON,
                             });
 
-                            if (message.payload.type === 'fear' && message.payload.targetId) {
-                                const target = match.players.get(message.payload.targetId);
-                                if (target) {
-                                    target.debuffs = target.debuffs || [];
+                        }
+                        if (message.payload.type === 'blood-strike') {
+                            if (player.comboTarget && player.comboTarget !== message.payload.targetId) {
+                                player.comboPoints = 0;
+                            }
+                            player.comboTarget = message.payload.targetId || player.comboTarget;
+                            player.comboPoints = Math.min(5, (player.comboPoints || 0) + 1);
+                        }
+                        if (message.payload.type === 'eviscerate' && message.payload.targetId) {
+                            const target = match.players.get(message.payload.targetId);
+                            if (target) {
+                                const damage = 28 * (player.comboPoints || 0);
+                                if (damage > 0) {
+                                    applyDamage(match, target.id, id, damage, 'eviscerate');
+                                }
+                                player.comboPoints = 0;
+                                player.comboTarget = null;
+                            }
+                        }
+                        if (message.payload.type === 'shadow-leap') {
+                            player.comboPoints = Math.min(5, (player.comboPoints || 0) + 1);
+                            player.comboTarget = message.payload.targetId || player.comboTarget;
+                        }
+                        if (message.payload.type === 'kidney-strike' && message.payload.targetId) {
+                            const target = match.players.get(message.payload.targetId);
+                            if (target) {
+                                target.debuffs = target.debuffs || [];
+                                const duration = 2000 + (player.comboPoints * 500);
+                                target.debuffs.push({
+                                    type: 'stun',
+                                    expires: Date.now() + duration,
+                                    icon: '/icons/classes/paladin/sealofmight.jpg'
+                                });
+                                player.comboPoints = 0;
+                                player.comboTarget = null;
+                            }
+                        }
+                        if (message.payload.type === 'adrenaline-rush') {
+                            player.buffs.push({
+                                type: 'speed',
+                                expires: Date.now() + 8000,
+                                icon: DIVINE_SPEED_ICON,
+                            });
+                        }
+                        if (message.payload.type === 'sprint') {
+                            player.debuffs = player.debuffs?.filter(d => d.type !== 'slow' && d.type !== 'root') || [];
+                            player.buffs.push({
+                                type: 'speed',
+                                expires: Date.now() + 6000,
+                                icon: DIVINE_SPEED_ICON,
+                            });
+                        
+                        }
+                        if (message.payload.type === 'fear' && message.payload.targetId) {
+                            const target = match.players.get(message.payload.targetId);
+                            if (target) {
+                                target.debuffs = target.debuffs || [];
                                     target.debuffs.push({
                                         type: 'root',
                                         expires: Date.now() + 3000,
