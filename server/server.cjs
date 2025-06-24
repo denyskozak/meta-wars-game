@@ -691,7 +691,8 @@ ws.on('connection', (socket) => {
                             });
                         }
                         
-                        if (['fireball', 'darkball', 'corruption', 'chaosbolt', 'iceball', 'shield', 'pyroblast', 'fireblast', 'lightstrike', 'lightwave', 'stun', 'paladin-heal', 'frostnova', 'blink', 'hand-of-freedom', 'divine-speed'].includes(message.payload.type)) {
+
+                        if (['fireball', 'darkball', 'corruption', 'chaosbolt', 'iceball', 'shield', 'pyroblast', 'fireblast', 'lightstrike', 'lightwave', 'stun', 'paladin-heal', 'frostnova', 'blink', 'hand-of-freedom', 'divine-speed', 'lifedrain', 'fear'].includes(message.payload.type)) {
                             broadcastToMatch(match.id, {
                                 type: 'CAST_SPELL',
                                 payload: message.payload,
@@ -739,6 +740,7 @@ ws.on('connection', (socket) => {
                                 });
                             }
                         }
+
                         if (message.payload.type === 'hand-of-freedom') {
                             player.debuffs = player.debuffs?.filter(d => d.type !== 'slow' && d.type !== 'root') || [];
                             player.buffs.push({
@@ -753,6 +755,26 @@ ws.on('connection', (socket) => {
                                 expires: Date.now() + 5000,
                                 icon: DIVINE_SPEED_ICON,
                             });
+
+                        if (message.payload.type === 'fear' && message.payload.targetId) {
+                            const target = match.players.get(message.payload.targetId);
+                            if (target) {
+                                target.debuffs = target.debuffs || [];
+                                target.debuffs.push({
+                                    type: 'root',
+                                    expires: Date.now() + 3000,
+                                    icon: '/icons/fear.jpg'
+                                });
+                            }
+                        }
+                        if (message.payload.type === 'lifedrain' && message.payload.targetId) {
+                            const target = match.players.get(message.payload.targetId);
+                            const caster = match.players.get(id);
+                            if (target && caster) {
+                                applyDamage(match, target.id, id, 30, 'lifedrain');
+                                caster.hp = Math.min(MAX_HP, caster.hp + 30);
+                            }
+
                         }
 
                         broadcastToMatch(match.id, {

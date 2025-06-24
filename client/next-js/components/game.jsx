@@ -27,6 +27,8 @@ import castDarkball, { meta as darkballMeta } from '../skills/warlock/darkball';
 import castCorruption, { meta as corruptionMeta } from '../skills/warlock/corruption';
 import castImmolate, { meta as immolateMeta } from '../skills/warlock/immolate';
 import castChaosBolt, { meta as chaosBoltMeta } from '../skills/warlock/chaosBolt';
+import castLifeDrain, { meta as lifeDrainMeta } from '../skills/warlock/lifeDrain';
+import castFear, { meta as fearMeta } from '../skills/warlock/fear';
 import { meta as lightStrikeMeta } from '../skills/paladin/lightStrike';
 import castStun, { meta as stunMeta } from '../skills/paladin/stun';
 import castPaladinHeal, { meta as paladinHealMeta } from '../skills/paladin/heal';
@@ -52,6 +54,8 @@ const SPELL_ICONS = {
     [corruptionMeta.id]: corruptionMeta.icon,
     [immolateMeta.id]: immolateMeta.icon,
     [chaosBoltMeta.id]: chaosBoltMeta.icon,
+    [lifeDrainMeta.id]: lifeDrainMeta.icon,
+    [fearMeta.id]: fearMeta.icon,
     [lightStrikeMeta.id]: lightStrikeMeta.icon,
     [stunMeta.id]: stunMeta.icon,
     [paladinHealMeta.id]: paladinHealMeta.icon,
@@ -71,6 +75,8 @@ const SPELL_META = {
     [corruptionMeta.id]: corruptionMeta,
     [immolateMeta.id]: immolateMeta,
     [chaosBoltMeta.id]: chaosBoltMeta,
+    [lifeDrainMeta.id]: lifeDrainMeta,
+    [fearMeta.id]: fearMeta,
     [lightStrikeMeta.id]: lightStrikeMeta,
     [stunMeta.id]: stunMeta,
     [paladinHealMeta.id]: paladinHealMeta,
@@ -563,6 +569,8 @@ export function Game({models, sounds, textures, matchId, character}) {
             iceball: 5000,
             fireblast: 5000,
             chaosbolt: 6000,
+            lifedrain: 0,
+            fear: 40000,
             'ice-shield': 30000,
             pyroblast: 6000,
             blink: 10000,
@@ -664,6 +672,7 @@ export function Game({models, sounds, textures, matchId, character}) {
         const CHAOSBOLT_DAMAGE = FIREBALL_DAMAGE * 2;
         const ICEBALL_DAMAGE = 25;
         const DARKBALL_DAMAGE = 30;
+        const LIFEDRAIN_DAMAGE = 30;
         const FROSTNOVA_DAMAGE = 20;
         const FROSTNOVA_RANGE = FIREBLAST_RANGE / 2;
         const LIGHTSTRIKE_DAMAGE = 40;
@@ -843,17 +852,21 @@ export function Game({models, sounds, textures, matchId, character}) {
             const className = character?.name?.toLowerCase();
             if (className === 'warlock') castSpell('chaosbolt');
             else if (className === 'paladin') castSpell('lightwave');
-            else castSpell('pyroblast');
+            else castSpell('blink');
         }
-        function handleKeyC() {
+        function handleDigit3() {
             const className = character?.name?.toLowerCase();
             if (className === 'mage') castSpell('frostnova');
             else if (className === 'paladin') castSpell('hand-of-freedom');
+            else if (className === 'warlock') castSpell('fear');
+
         }
-        function handleKeyZ() {
+        function handleDigit2() {
             const className = character?.name?.toLowerCase();
             if (className === 'mage') castSpell('blink');
             else if (className === 'paladin') castSpell('divine-speed');
+            else if (className === 'warlock') castSpell('lifedrain');
+
         }
         function handleKeyG() {
             leftMouseButtonClicked = true;
@@ -896,7 +909,7 @@ export function Game({models, sounds, textures, matchId, character}) {
             const className = character?.name?.toLowerCase();
             if (className === 'warlock') castSpell('immolate');
             else if (className === 'paladin') castSpell('paladin-heal');
-            else castSpell('fireblast');
+            else castSpell('frostnova');
         }
 
         const keyDownHandlers = {
@@ -907,8 +920,8 @@ export function Game({models, sounds, textures, matchId, character}) {
             KeyE: handleKeyE,
             KeyR: handleKeyR,
             KeyF: handleKeyF,
-            KeyC: handleKeyC,
-            KeyZ: handleKeyZ,
+            Digit3: handleDigit3,
+            Digit2: handleDigit2,
             KeyG: handleKeyG,
             KeyJ: handleKeyJ,
             KeyT: handleKeyT,
@@ -1296,6 +1309,28 @@ export function Game({models, sounds, textures, matchId, character}) {
                         chaosBoltMesh,
                         sounds,
                         damage: CHAOSBOLT_DAMAGE,
+                    });
+                    break;
+                case "fear":
+                    castFear({
+                        playerId,
+                        castSpellImpl,
+                        mana,
+                        getTargetPlayer,
+                        dispatch,
+                        sendToSocket,
+                        sounds,
+                    });
+                    break;
+                case "lifedrain":
+                    castLifeDrain({
+                        playerId,
+                        castSpellImpl,
+                        mana,
+                        getTargetPlayer,
+                        dispatch,
+                        sendToSocket,
+                        sounds,
                     });
                     break;
                 case "darkball":
@@ -2912,6 +2947,20 @@ export function Game({models, sounds, textures, matchId, character}) {
                                     type: "SEND_CHAT_MESSAGE",
                                     payload: "You are burning!",
                                 });
+                            }
+                            break;
+                        case "fear":
+                            if (message.payload.targetId === myPlayerId) {
+                                applyRootEffect(myPlayerId, 3000);
+                            }
+                            break;
+                        case "lifedrain":
+                            if (message.payload.targetId === myPlayerId) {
+                                takeDamage(LIFEDRAIN_DAMAGE, message.id, 'lifedrain');
+                            }
+                            if (message.id === myPlayerId) {
+                                hp = Math.min(MAX_HP, hp + LIFEDRAIN_DAMAGE);
+                                updateHPBar();
                             }
                             break;
                         case "chaosbolt":
