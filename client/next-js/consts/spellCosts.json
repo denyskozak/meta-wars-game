@@ -14,5 +14,7 @@
   "stun": 0,
   "paladin-heal": 50,
   "lightwave": 0,
-  "frostnova": 30
+  "frostnova": 30,
+  "lifedrain": 30,
+  "fear": 40
 }

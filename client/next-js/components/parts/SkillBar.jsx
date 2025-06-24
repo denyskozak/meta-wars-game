@@ -19,6 +19,8 @@ const WARLOCK_SKILLS = [
     warlockSkills.corruption,
     warlockSkills.immolate,
     warlockSkills.chaosbolt,
+    warlockSkills.fear,
+    warlockSkills.lifedrain,
 ];
 
 const PALADIN_SKILLS = [
