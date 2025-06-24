@@ -1,6 +1,6 @@
 import { SPELL_COST } from '../../consts';
 
-export const meta = { id: 'fear', key: '3', icon: '/icons/fear.jpg' };
+export const meta = { id: 'fear', key: '3', icon: '/icons/classes/warlock/fear.jpg' };
 
 export default function castFear({ playerId, castSpellImpl, mana, getTargetPlayer, dispatch, sendToSocket, sounds }) {
   if (mana < SPELL_COST['fear']) {

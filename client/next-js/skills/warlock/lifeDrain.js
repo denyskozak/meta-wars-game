@@ -1,6 +1,6 @@
 import { SPELL_COST } from '../../consts';
 
-export const meta = { id: 'lifedrain', key: '2', icon: '/icons/lifedrain.jpg' };
+export const meta = { id: 'lifedrain', key: '2', icon: '/icons/classes/warlock/lifedrain.jpg' };
 
 export default function castLifeDrain({ playerId, castSpellImpl, mana, getTargetPlayer, dispatch, sendToSocket, sounds }) {
   if (mana < SPELL_COST['lifedrain']) {

@@ -1,6 +1,6 @@
 import { SPELL_COST } from '../../consts';
 
-export const meta = { id: 'corruption', key: 'R', icon: '/icons/spell_corruption.jpg' };
+export const meta = { id: 'corruption', key: 'R', icon: '/icons/classes/warlock/spell_corruption.jpg' };
 
 export default function castCorruption({ playerId, globalSkillCooldown, isCasting, mana, getTargetPlayer, dispatch, sendToSocket, activateGlobalCooldown, startSkillCooldown, sounds }) {
   if (globalSkillCooldown || isCasting) return;

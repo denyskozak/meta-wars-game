@@ -1,6 +1,6 @@
 import { SPELL_COST } from '../../consts';
 
-export const meta = { id: 'chaosbolt', key: 'F', icon: '/icons/chaosbolt.jpg' };
+export const meta = { id: 'chaosbolt', key: 'F', icon: '/icons/classes/warlock/chaosbolt.jpg' };
 
 export default function castChaosBolt({ playerId, castSpellImpl, igniteHands, castSphere, chaosBoltMesh, sounds, damage }) {
   igniteHands(playerId, 1000);

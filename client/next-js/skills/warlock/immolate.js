@@ -1,6 +1,6 @@
 import { SPELL_COST } from '../../consts';
 
-export const meta = { id: 'immolate', key: 'Q', icon: '/icons/spell_immolation.jpg' };
+export const meta = { id: 'immolate', key: 'Q', icon: '/icons/classes/warlock/spell_immolation.jpg' };
 
 export default function castImmolate({
   playerId,
