@@ -2791,9 +2791,10 @@ export function Game({models, sounds, textures, matchId, character}) {
             return actions;
         }
 
-        function createPlayer(id, name = "", address = "", classType = "") {
-            if (models['character']) {
-                const player = SkeletonUtils.clone(models['character']);
+        function createPlayer(id, name = "", address = "", classType = "", characterModel = "vampir") {
+            const baseModel = models[characterModel] || models['character'];
+            if (baseModel) {
+                const player = SkeletonUtils.clone(baseModel);
                 player.position.set(...USER_DEFAULT_POSITION);
 
                 player.scale.set(currentScale, currentScale, currentScale);
@@ -2841,6 +2842,7 @@ export function Game({models, sounds, textures, matchId, character}) {
                     buffs: [],
                     address,
                     classType,
+                    character: characterModel,
                 });
                 if (actions.idle) actions.idle.play();
                 playerMixers.push(mixer);   // массив всех чужих миксеров
@@ -2871,6 +2873,9 @@ export function Game({models, sounds, textures, matchId, character}) {
                 playerData.address = message.address || playerData.address;
                 if (message.classType) {
                     playerData.classType = message.classType;
+                }
+                if (message.character) {
+                    playerData.character = message.character;
                 }
 
                 const action = actions?.[message.animationAction];
@@ -3093,8 +3098,9 @@ export function Game({models, sounds, textures, matchId, character}) {
                             const id = Number(pid);
                             if (players.has(id)) {
                                 players.get(id).classType = pdata.classType;
+                                players.get(id).character = pdata.character;
                             } else {
-                                players.set(id, { classType: pdata.classType });
+                                players.set(id, { classType: pdata.classType, character: pdata.character });
                             }
                         });
                     }
@@ -3428,8 +3434,10 @@ export function Game({models, sounds, textures, matchId, character}) {
                     console.log("MATCH_READY: ", message);
                     myPlayerId = message.myPlayerId;
                     message.players.forEach((playerId) => {
-                        const cls = players.get(Number(playerId))?.classType || "";
-                        createPlayer(Number(playerId), String(playerId), String(playerId), cls);
+                        const p = players.get(Number(playerId));
+                        const cls = p?.classType || "";
+                        const charModel = p?.character || (cls === 'paladin' ? 'bolvar' : 'vampir');
+                        createPlayer(Number(playerId), String(playerId), String(playerId), cls, charModel);
                     })
                     startCountdown();
                     break;

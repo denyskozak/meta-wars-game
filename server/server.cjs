@@ -202,8 +202,15 @@ function broadcastMatchesToWaitingClients() {
     }
 }
 
-function createPlayer(address, classType) {
+const CLASS_MODELS = {
+    paladin: 'bolvar',
+    mage: 'vampir',
+    warlock: 'vampir',
+};
+
+function createPlayer(address, classType, character) {
     const spawn = randomSpawnPoint();
+    const charName = character || CLASS_MODELS[classType] || 'vampir';
     return {
         position: {...spawn},
         spawn_point: spawn,
@@ -220,7 +227,8 @@ function createPlayer(address, classType) {
         mana: MAX_MANA,
         chests: [],
         address,
-        classType
+        classType,
+        character: charName,
     };
 }
 
@@ -582,7 +590,8 @@ ws.on('connection', (socket) => {
                     break;
                 }
 
-                const newPlayer = createPlayer(message.address, message.classType || message.character?.name);
+                const char = typeof message.character === 'string' ? message.character : null;
+                const newPlayer = createPlayer(message.address, message.classType, char);
                 matchToJoin.players.set(id, newPlayer);
                 broadcastToMatch(matchToJoin.id, {
                     type: 'PLAYER_RESPAWN',
