@@ -768,7 +768,7 @@ ws.on('connection', (socket) => {
                                     target.debuffs.push({
                                         type: 'root',
                                         expires: Date.now() + 3000,
-                                        icon: '/icons/fear.jpg'
+                                        icon: '/icons/classes/warlock/possession.jpg'
                                     });
                                 }
                             }
