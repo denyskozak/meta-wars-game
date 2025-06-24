@@ -36,6 +36,12 @@ import castPaladinHeal, { meta as paladinHealMeta } from '../skills/paladin/heal
 import { meta as lightWaveMeta } from '../skills/paladin/lightWave';
 import castHandOfFreedom, { meta as handOfFreedomMeta } from '../skills/paladin/handFreedom';
 import castDivineSpeed, { meta as divineSpeedMeta } from '../skills/paladin/divineSpeed';
+import castBloodStrike, { meta as bloodStrikeMeta } from '../skills/rogue/bloodStrike';
+import castEviscerate, { meta as eviscerateMeta } from '../skills/rogue/eviscerate';
+import castKidneyStrike, { meta as kidneyStrikeMeta } from '../skills/rogue/kidneyStrike';
+import castAdrenalineRush, { meta as adrenalineRushMeta } from '../skills/rogue/adrenalineRush';
+import castSprint, { meta as sprintMeta } from '../skills/rogue/sprint';
+import castShadowLeap, { meta as shadowLeapMeta } from '../skills/rogue/shadowLeap';
 
 
 import {Interface} from "@/components/layout/Interface";
@@ -63,6 +69,12 @@ const SPELL_ICONS = {
     [lightWaveMeta.id]: lightWaveMeta.icon,
     [handOfFreedomMeta.id]: handOfFreedomMeta.icon,
     [divineSpeedMeta.id]: divineSpeedMeta.icon,
+    [bloodStrikeMeta.id]: bloodStrikeMeta.icon,
+    [eviscerateMeta.id]: eviscerateMeta.icon,
+    [kidneyStrikeMeta.id]: kidneyStrikeMeta.icon,
+    [adrenalineRushMeta.id]: adrenalineRushMeta.icon,
+    [sprintMeta.id]: sprintMeta.icon,
+    [shadowLeapMeta.id]: shadowLeapMeta.icon,
     [frostNovaMeta.id]: frostNovaMeta.icon,
     [blinkMeta.id]: blinkMeta.icon,
 };
@@ -84,6 +96,12 @@ const SPELL_META = {
     [lightWaveMeta.id]: lightWaveMeta,
     [handOfFreedomMeta.id]: handOfFreedomMeta,
     [divineSpeedMeta.id]: divineSpeedMeta,
+    [bloodStrikeMeta.id]: bloodStrikeMeta,
+    [eviscerateMeta.id]: eviscerateMeta,
+    [kidneyStrikeMeta.id]: kidneyStrikeMeta,
+    [adrenalineRushMeta.id]: adrenalineRushMeta,
+    [sprintMeta.id]: sprintMeta,
+    [shadowLeapMeta.id]: shadowLeapMeta,
     [frostNovaMeta.id]: frostNovaMeta,
     [blinkMeta.id]: blinkMeta,
 };
@@ -634,6 +652,12 @@ export function Game({models, sounds, textures, matchId, character}) {
             frostnova: 15000,
             'hand-of-freedom': 15000,
             'divine-speed': 30000,
+            'blood-strike': 5000,
+            eviscerate: 10000,
+            'kidney-strike': 20000,
+            'adrenaline-rush': 45000,
+            sprint: 30000,
+            'shadow-leap': 12000,
         };
         const skillCooldownTimers = {};
 
@@ -897,18 +921,21 @@ export function Game({models, sounds, textures, matchId, character}) {
             const className = character?.name?.toLowerCase();
             if (className === 'warlock') castSpell('darkball');
             else if (className === 'paladin') castSpell('lightstrike');
+            else if (className === 'rogue') castSpell('blood-strike');
             else castSpell('fireball');
         }
         function handleKeyR() {
             const className = character?.name?.toLowerCase();
             if (className === 'warlock') castSpell('corruption');
             else if (className === 'paladin') castSpell('stun');
+            else if (className === 'rogue') castSpell('eviscerate');
             else castSpell('iceball');
         }
         function handleKeyF() {
             const className = character?.name?.toLowerCase();
             if (className === 'warlock') castSpell('chaosbolt');
             else if (className === 'paladin') castSpell('lightwave');
+            else if (className === 'rogue') castSpell('kidney-strike');
             else castSpell('blink');
         }
         function handleDigit3() {
@@ -916,6 +943,7 @@ export function Game({models, sounds, textures, matchId, character}) {
             if (className === 'mage') castSpell('fireblast');
             else if (className === 'paladin') castSpell('hand-of-freedom');
             else if (className === 'warlock') castSpell('fear');
+            else if (className === 'rogue') castSpell('sprint');
 
         }
         function handleDigit2() {
@@ -923,6 +951,7 @@ export function Game({models, sounds, textures, matchId, character}) {
             if (className === 'mage') castSpell('pyroblast');
             else if (className === 'paladin') castSpell('divine-speed');
             else if (className === 'warlock') castSpell('lifedrain');
+            else if (className === 'rogue') castSpell('adrenaline-rush');
 
         }
         function handleKeyG() {
@@ -966,6 +995,7 @@ export function Game({models, sounds, textures, matchId, character}) {
             const className = character?.name?.toLowerCase();
             if (className === 'warlock') castSpell('immolate');
             else if (className === 'paladin') castSpell('paladin-heal');
+            else if (className === 'rogue') castSpell('shadow-leap');
             else castSpell('frostnova');
         }
         function handleEscape() {
@@ -1538,6 +1568,83 @@ export function Game({models, sounds, textures, matchId, character}) {
                         castSpellImpl,
                         mana,
                         sendToSocket,
+                        sounds,
+                    });
+                    break;
+                case "blood-strike":
+                    castBloodStrike({
+                        globalSkillCooldown,
+                        isCasting,
+                        mana,
+                        sendToSocket,
+                        activateGlobalCooldown,
+                        startSkillCooldown,
+                        sounds,
+                    });
+                    break;
+                case "eviscerate":
+                    castEviscerate({
+                        globalSkillCooldown,
+                        isCasting,
+                        mana,
+                        playerId,
+                        getTargetPlayer,
+                        dispatch,
+                        sendToSocket,
+                        activateGlobalCooldown,
+                        startSkillCooldown,
+                        sounds,
+                    });
+                    break;
+                case "kidney-strike":
+                    const targetKidney = castKidneyStrike({
+                        playerId,
+                        globalSkillCooldown,
+                        isCasting,
+                        mana,
+                        getTargetPlayer,
+                        dispatch,
+                        sendToSocket,
+                        activateGlobalCooldown,
+                        startSkillCooldown,
+                        sounds,
+                    });
+                    if (targetKidney) applyStunEffect(targetKidney, 2000);
+                    break;
+                case "adrenaline-rush":
+                    castAdrenalineRush({
+                        globalSkillCooldown,
+                        isCasting,
+                        mana,
+                        sendToSocket,
+                        activateGlobalCooldown,
+                        startSkillCooldown,
+                        sounds,
+                    });
+                    break;
+                case "sprint":
+                    castSprint({
+                        globalSkillCooldown,
+                        isCasting,
+                        mana,
+                        sendToSocket,
+                        activateGlobalCooldown,
+                        startSkillCooldown,
+                        sounds,
+                    });
+                    applySpeedEffect(playerId, 6000);
+                    break;
+                case "shadow-leap":
+                    castShadowLeap({
+                        playerId,
+                        globalSkillCooldown,
+                        isCasting,
+                        mana,
+                        getTargetPlayer,
+                        dispatch,
+                        sendToSocket,
+                        activateGlobalCooldown,
+                        startSkillCooldown,
                         sounds,
                     });
                     break;
@@ -3240,6 +3347,28 @@ export function Game({models, sounds, textures, matchId, character}) {
                             if (message.id === myPlayerId) {
                                 applySpeedEffect(myPlayerId, 5000);
                             }
+                            break;
+                        case "blood-strike":
+                            // melee swing effect placeholder
+                            break;
+                        case "eviscerate":
+                            break;
+                        case "kidney-strike":
+                            if (message.payload.targetId) {
+                                applyStunEffect(message.payload.targetId, 2000);
+                            }
+                            break;
+                        case "adrenaline-rush":
+                            if (message.id === myPlayerId) {
+                                applySpeedEffect(myPlayerId, 8000);
+                            }
+                            break;
+                        case "sprint":
+                            if (message.id === myPlayerId) {
+                                applySpeedEffect(myPlayerId, 6000);
+                            }
+                            break;
+                        case "shadow-leap":
                             break;
                         case "stun":
                             if (message.payload.targetId) {

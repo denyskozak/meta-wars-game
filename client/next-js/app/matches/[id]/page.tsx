@@ -35,10 +35,10 @@ export default function MatchesPage() {
             label: 'Paladin',
             icon: '/icons/paladin.webp'
         },
-        // rogue: {
-        //     label: 'Rogue',
-        //     icon:  '/icons/rogue.webp'
-        // },
+        rogue: {
+            label: 'Rogue',
+            icon:  '/icons/rogue.webp'
+        },
         // warrior: {
         //     label: 'Warrior',
         //     icon:  '/icons/warrior.webp'

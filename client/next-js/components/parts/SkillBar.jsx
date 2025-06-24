@@ -5,6 +5,7 @@ import './SkillBar.css';
 import * as mageSkills from '../../skills/mage';
 import * as warlockSkills from '../../skills/warlock';
 import * as paladinSkills from '../../skills/paladin';
+import * as rogueSkills from '../../skills/rogue';
 
 const DEFAULT_SKILLS = [
     mageSkills.fireball,
@@ -33,11 +34,21 @@ const PALADIN_SKILLS = [
     paladinSkills.divineSpeed,
 ];
 
+const ROGUE_SKILLS = [
+    rogueSkills.bloodStrike,
+    rogueSkills.eviscerate,
+    rogueSkills.shadowLeap,
+    rogueSkills.kidneyStrike,
+    rogueSkills.sprint,
+    rogueSkills.adrenalineRush,
+];
+
 export const SkillBar = ({ mana = 0 }) => {
     const {state: {character}} = useInterface();
     let skills = DEFAULT_SKILLS;
     if (character?.name === 'warlock') skills = WARLOCK_SKILLS;
     else if (character?.name === 'paladin') skills = PALADIN_SKILLS;
+    else if (character?.name === 'rogue') skills = ROGUE_SKILLS;
 
     const [cooldowns, setCooldowns] = useState({});
     const [pressed, setPressed] = useState({});
