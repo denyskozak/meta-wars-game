@@ -3,7 +3,7 @@ import { SPELL_COST } from '../../consts';
 export const meta = {
   id: 'hand-of-freedom',
   key: '3',
-  icon: '/icons/classes/paladin/sealofmight.jpg',
+  icon: '/icons/classes/paladin/sealofvalor.jpg',
   autoFocus: false,
 };
 
