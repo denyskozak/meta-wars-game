@@ -2025,7 +2025,7 @@ export function Game({models, sounds, textures, matchId, character}) {
 
             console.log("error check actions: ", actions);
             return Object.values(actions).some(
-                (action) => action.isRunning() && !excludeActions.includes(action),
+                (action) => action && action.isRunning() && !excludeActions.includes(action),
             );
         }
 
