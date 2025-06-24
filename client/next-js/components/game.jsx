@@ -675,6 +675,7 @@ export function Game({models, sounds, textures, matchId, character}) {
         const LIFEDRAIN_DAMAGE = 30;
         const FROSTNOVA_DAMAGE = 20;
         const FROSTNOVA_RANGE = FIREBLAST_RANGE / 2;
+        const FROSTNOVA_RING_DURATION = 1000; // ms
         const LIGHTSTRIKE_DAMAGE = 40;
         const LIGHTSTRIKE_RANGE = 4;
         const LIGHTSTRIKE_ANGLE = Math.PI / 4;
@@ -743,6 +744,7 @@ export function Game({models, sounds, textures, matchId, character}) {
         let isShieldActive = false;
         let isChatActive = false;
         let isHealActive = false;
+        const frostNovaRings = [];
 
         // Crosshair elements
         const target = document.getElementById("target");
@@ -1394,6 +1396,7 @@ export function Game({models, sounds, textures, matchId, character}) {
                         startSkillCooldown,
                         sounds,
                     });
+                    spawnFrostNovaRing(playerId);
                     break;
                 case "blink":
                     castBlink({
@@ -2312,6 +2315,29 @@ export function Game({models, sounds, textures, matchId, character}) {
             }
         }
 
+        function spawnFrostNovaRing(playerId, duration = FROSTNOVA_RING_DURATION) {
+            const player = players.get(playerId)?.model;
+            if (!player) return;
+
+            const position = new THREE.Vector3();
+            player.getWorldPosition(position);
+            position.y += 0.1;
+
+            const geometry = new THREE.RingGeometry(1, 1.5, 32);
+            const material = new THREE.MeshBasicMaterial({
+                map: textures.ice,
+                transparent: true,
+                opacity: 0.8,
+                side: THREE.DoubleSide,
+            });
+            const mesh = new THREE.Mesh(geometry, material);
+            mesh.rotation.x = -Math.PI / 2;
+            mesh.position.copy(position);
+
+            scene.add(mesh);
+            frostNovaRings.push({ mesh, start: performance.now(), duration });
+        }
+
 
 
         function toggleShieldOnPlayer(id, visible) {
@@ -2520,6 +2546,18 @@ export function Game({models, sounds, textures, matchId, character}) {
                         target.getWorldPosition(mesh.position);
                         mesh.position.y += 0.5;
                     });
+
+                    for (let i = frostNovaRings.length - 1; i >= 0; i--) {
+                        const effect = frostNovaRings[i];
+                        const elapsed = performance.now() - effect.start;
+                        const progress = elapsed / effect.duration;
+                        effect.mesh.scale.setScalar(1 + progress * 2);
+                        effect.mesh.material.opacity = 0.8 * (1 - progress);
+                        if (progress >= 1) {
+                            scene.remove(effect.mesh);
+                            frostNovaRings.splice(i, 1);
+                        }
+                    }
 
                     runes.forEach(r => {
                         const speed = r.userData.type === 'damage' ? 0.05 : 0.1;
@@ -2972,6 +3010,7 @@ export function Game({models, sounds, textures, matchId, character}) {
                             castSphereOtherUser(message.payload, message.id);
                             break;
                         case "frostnova":
+                            spawnFrostNovaRing(message.id);
                             if (message.id !== myPlayerId) {
                                 const caster = players.get(message.id);
                                 if (caster) {
