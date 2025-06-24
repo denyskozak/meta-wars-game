@@ -8,7 +8,7 @@ import {
 	NearestFilter,
 	NoToneMapping,
 	OrthographicCamera,
-	PlaneBufferGeometry,
+       PlaneGeometry,
 	RGBAFormat,
 	Scene,
 	ShaderMaterial,
@@ -177,7 +177,7 @@ var Fire = function ( geometry, options ) {
 	this.orthoCamera = new OrthographicCamera( textureWidth / - 2, textureWidth / 2, textureHeight / 2, textureHeight / - 2, 1, 2 );
 	this.orthoCamera.position.z = 1;
 
-	this.fieldGeometry = new PlaneBufferGeometry( textureWidth, textureHeight );
+       this.fieldGeometry = new PlaneGeometry( textureWidth, textureHeight );
 
 	this.internalSource = new DataTexture( this.sourceData, textureWidth, textureHeight, RGBAFormat );
 
