@@ -2766,6 +2766,8 @@ export function Game({models, sounds, textures, matchId, character}) {
             const rune = SkeletonUtils.clone(base);
             rune.position.set(data.position.x, data.position.y, data.position.z);
             rune.scale.multiplyScalar(0.2);
+            // lower the rune slightly so it sits closer to the ground
+            rune.position.y -= 0.2;
             rune.userData.type = data.type;
 
             rune.traverse((child) => {
