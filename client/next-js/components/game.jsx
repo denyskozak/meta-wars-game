@@ -2016,7 +2016,8 @@ export function Game({models, sounds, textures, matchId, character}) {
             const model = players.get(myPlayerId).model;
             // Update the model's position
             if (model) {
-                model.position.set(position.x, position.y - 0.5, position.z); // Adjust for model offset
+                // Adjust for model offset so it doesn't hover above ground
+                model.position.set(position.x, position.y - 0.7, position.z);
                 const rotY =
                     typeof position.yaw === "number"
                         ? position.yaw
@@ -2262,7 +2263,8 @@ export function Game({models, sounds, textures, matchId, character}) {
                 // Update model position and height
                 model.position.copy(playerPosition);
                 // model.position.y += 0.5; // Adjust the height to keep the model slightly above ground
-                model.position.y -= 0.5;
+                // Lower the model slightly so the feet touch the ground
+                model.position.y -= 0.7;
                 // Get the camera's forward direction
                 const cameraDirection = new THREE.Vector3();
 
