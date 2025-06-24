@@ -3,6 +3,7 @@ import {CastBar} from "../parts/CastBar";
 import {Chat} from "../parts/Chat";
 import {Coins} from "../parts/Coins";
 import {Scoreboard} from "../parts/Scoreboard";
+import {GameMenu} from "../parts/Menu";
 import {Buffs} from "../parts/Buffs";
 import {ExperienceBar} from "../parts/ExperienceBar";
 import {Progress} from "@heroui/react";
@@ -108,6 +109,7 @@ export const Interface = () => {
 
 
             <Scoreboard />
+            <GameMenu />
             <Buffs />
             <SkillBar/>
             <CastBar/>
