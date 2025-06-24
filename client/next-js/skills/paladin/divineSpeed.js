@@ -3,7 +3,7 @@ import { SPELL_COST } from '../../consts';
 export const meta = {
   id: 'divine-speed',
   key: '2',
-  icon: '/icons/classes/paladin/divinestorm.jpg',
+  icon: '/icons/classes/paladin/speedoflight.jpg',
   autoFocus: false,
 };
 

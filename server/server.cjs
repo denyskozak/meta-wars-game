@@ -13,7 +13,7 @@ const SPELL_COST = require('../client/next-js/consts/spellCosts.json');
 const ICEBALL_ICON = '/icons/spell_frostbolt.jpg';
 const FROSTNOVA_ICON = '/icons/frostnova.jpg';
 const FREEDOM_ICON = '/icons/classes/paladin/sealofmight.jpg';
-const DIVINE_SPEED_ICON = '/icons/classes/paladin/divinestorm.jpg';
+const DIVINE_SPEED_ICON = '/icons/classes/paladin/speedoflight.jpg';
 
 function updateLevel(player) {
     player.level = Math.min(10, Math.floor(player.points / XP_PER_LEVEL) + 1);
