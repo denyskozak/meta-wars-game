@@ -734,7 +734,7 @@ ws.on('connection', (socket) => {
                                 target.debuffs.push({
                                     type: 'stun',
                                     expires: Date.now() + 3000,
-                                    icon: '/icons/classes/paladin/searinglight.jpg'
+                                    icon: '/icons/classes/paladin/sealofmight.jpg'
                                 });
                             }
                         }
