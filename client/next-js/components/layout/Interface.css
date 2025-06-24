@@ -87,6 +87,9 @@
     gap: 4px;
     color: #fff;
     z-index: 1000;
+    background-color: rgba(0, 0, 0, 0.7);
+    padding: 8px;
+    border-radius: 8px;
 }
 
 
