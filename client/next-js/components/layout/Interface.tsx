@@ -14,14 +14,14 @@ import {CLASS_ICONS} from "@/consts/classes";
 import './Interface.css';
 import Image from "next/image";
 import React, {useEffect, useState} from "react";
-import {MAX_HP} from "../../consts";
+import {MAX_HP, MAX_MANA} from "../../consts";
 
 export const Interface = () => {
     const {
         state: { character },
     } = useInterface() as { state: { character: { name?: string } | null } };
     const [target, setTarget] = useState<{id:number, hp:number, mana:number, address:string, classType?:string}|null>(null);
-    const [selfStats, setSelfStats] = useState<{hp:number, mana:number, points:number, level:number}>({hp: MAX_HP, mana: 100, points: 0, level: 1});
+    const [selfStats, setSelfStats] = useState<{hp:number, mana:number, points:number, level:number}>({hp: MAX_HP, mana: MAX_MANA, points: 0, level: 1});
 
     useEffect(() => {
         const handler = (e: CustomEvent) => {
@@ -62,7 +62,7 @@ export const Interface = () => {
                     <p className="text-medium font-semibold">HP: {Math.round((selfStats.hp / MAX_HP) * 100)}</p>
                     <Progress id="hpBar" aria-label="HP" value={Math.round((selfStats.hp / MAX_HP) * 100)} color="secondary" disableAnimation />
                     <p className="text-medium font-semibold">Mana: {Math.round(selfStats.mana)}</p>
-                    <Progress id="manaBar" aria-label="Mana" value={Math.round(selfStats.mana)} color="primary" disableAnimation />
+                    <Progress id="manaBar" aria-label="Mana" value={Math.round((selfStats.mana / MAX_MANA) * 100)} color="primary" disableAnimation />
                 </div>
             </div>
 
@@ -78,7 +78,7 @@ export const Interface = () => {
                         <p className="text-medium font-semibold">HP: {Math.round((target.hp / MAX_HP) * 100)}</p>
                         <Progress id="targetHpBar" aria-label="Target HP" value={Math.round((target.hp / MAX_HP) * 100)} color="secondary" className="mb-1 w-40" disableAnimation />
                         <p className="text-medium font-semibold">Mana: {Math.round(target.mana)}</p>
-                        <Progress id="targetManaBar" aria-label="Target Mana" value={Math.round(target.mana)} color="primary" className="w-40" disableAnimation />
+                        <Progress id="targetManaBar" aria-label="Target Mana" value={Math.round((target.mana / MAX_MANA) * 100)} color="primary" className="w-40" disableAnimation />
                     </div>
                 </div>
             )}

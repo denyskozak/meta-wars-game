@@ -1,5 +1,5 @@
 import React, {useLayoutEffect, useRef, useState, useEffect} from "react";
-import {MAX_HP} from "../consts";
+import {MAX_HP, MAX_MANA} from "../consts";
 import { SPELL_COST } from '../consts';
 import * as THREE from "three";
 import { Fire } from "../three/Fire";
@@ -205,7 +205,7 @@ export function Game({models, sounds, textures, matchId, character}) {
         const animations = models["character_animations"];
 
         let hp = MAX_HP,
-            mana = 100,
+            mana = MAX_MANA,
             points = 0,
             level = 1;
         let actions = [];
@@ -585,7 +585,7 @@ export function Game({models, sounds, textures, matchId, character}) {
             heal: 0,
             lightstrike: 1000,
             stun: 50000,
-            'paladin-heal': 30000,
+            'paladin-heal': 20000,
             lightwave: 120000,
             frostnova: 15000,
             'hand-of-freedom': 15000,
@@ -1491,8 +1491,6 @@ export function Game({models, sounds, textures, matchId, character}) {
                         playerId,
                         castSpellImpl,
                         mana,
-                        getTargetPlayer,
-                        dispatch,
                         sendToSocket,
                         sounds,
                     });
@@ -3104,7 +3102,7 @@ export function Game({models, sounds, textures, matchId, character}) {
                             }
                             break;
                         case "paladin-heal":
-                            if (message.payload.targetId === myPlayerId) {
+                            if (message.id === myPlayerId) {
                                 dispatch({ type: "SEND_CHAT_MESSAGE", payload: "You are healed!" });
                             }
                             break;

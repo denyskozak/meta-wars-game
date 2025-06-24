@@ -5,6 +5,7 @@ const http = require('http');
 
 const UPDATE_MATCH_INTERVAL = 33;
 const MAX_HP = 120;
+const MAX_MANA = 130;
 const MAX_POINTS = 10000;
 const XP_PER_LEVEL = 1000;
 const MANA_REGEN_INTERVAL = 1000;
@@ -215,7 +216,7 @@ function createPlayer(address, classType) {
         points: 0,
         level: 1,
         hp: MAX_HP,
-        mana: 100,
+        mana: MAX_MANA,
         chests: [],
         address,
         classType
@@ -275,7 +276,7 @@ function checkRunePickup(match, playerId) {
                     player.hp = Math.min(MAX_HP, player.hp + 100);
                     break;
                 case 'mana':
-                    player.mana = Math.min(100, player.mana + 100);
+                    player.mana = Math.min(MAX_MANA, player.mana + 100);
                     break;
                 case 'damage':
                     player.buffs.push({
@@ -378,7 +379,7 @@ function applyDamage(match, victimId, dealerId, damage, spellType) {
         victim.spawn_point = spawn;
         victim.rotation = { y: spawn.yaw || 0 };
         victim.hp = MAX_HP;
-        victim.mana = 100;
+        victim.mana = MAX_MANA;
         victim.animationAction = 'idle';
 
         broadcastToMatch(match.id, {
@@ -428,8 +429,8 @@ ws.on('connection', (socket) => {
         const now = Date.now();
         for (const match of matches.values()) {
             match.players.forEach((player, pid) => {
-                if (player.mana < 100) {
-                    player.mana = Math.min(100, player.mana + MANA_REGEN_AMOUNT);
+                if (player.mana < MAX_MANA) {
+                    player.mana = Math.min(MAX_MANA, player.mana + MANA_REGEN_AMOUNT);
                 }
                 if (player.buffs.length) {
                     player.buffs = player.buffs.filter(b => b.expires > now);
@@ -677,10 +678,7 @@ ws.on('connection', (socket) => {
                             player.hp = Math.min(MAX_HP, player.hp + 50);
                         }
                         if (message.payload.type === 'paladin-heal') {
-                            const target = match.players.get(message.payload.targetId || id);
-                            if (target) {
-                                target.hp = Math.min(MAX_HP, target.hp + 50);
-                            }
+                            player.hp = Math.min(MAX_HP, player.hp + 50);
                         }
 
                         if (['immolate'].includes(message.payload.type)) {
@@ -830,7 +828,7 @@ ws.on('connection', (socket) => {
                     const p = match.players.get(id);
                     if (p) {
                         p.hp = MAX_HP;
-                        p.mana = 100;
+                        p.mana = MAX_MANA;
                         p.buffs = [];
                         p.debuffs = [];
                         broadcastToMatch(match.id, {
