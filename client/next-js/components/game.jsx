@@ -92,7 +92,7 @@ const SPELL_SCALES = {
     fireball: 2.34, // increased by 30%
     iceball: 1.8,
     darkball: 2.4,
-    pyroblast: 5.4,
+    pyroblast: 5,
     chaosBolt: 5.4,
 };
 
@@ -469,13 +469,10 @@ export function Game({models, sounds, textures, matchId, character}) {
             SPELL_SCALES.fireball,
         );
 
-        const pyroblastMesh = new Fire(new THREE.PlaneGeometry(20, 20), {
-            textureWidth: 512,
-            textureHeight: 512,
-        });
-        pyroblastMesh.clearSources();
-        pyroblastMesh.addSource(0.45, 0.1, 0.1, 0.5, 0.0, 1.0);
-        pyroblastMesh.addSource(0.55, 0.1, 0.1, 0.5, 0.0, 1.0);
+        const pyroblastMesh = new THREE.Mesh(
+            fireballGeometry,
+            fireballMaterial.clone()
+        );
         pyroblastMesh.scale.set(
             SPELL_SCALES.pyroblast,
             SPELL_SCALES.pyroblast,
@@ -625,7 +622,7 @@ export function Game({models, sounds, textures, matchId, character}) {
             lifedrain: 0,
             fear: 40000,
             'ice-shield': 30000,
-            pyroblast: 6000,
+            pyroblast: 15000,
             blink: 10000,
             heal: 0,
             lightstrike: 1000,
@@ -721,7 +718,7 @@ export function Game({models, sounds, textures, matchId, character}) {
         const FIREBLAST_DAMAGE = 25;
 
         const FIREBALL_DAMAGE = 40;
-        const PYROBLAST_DAMAGE = FIREBALL_DAMAGE * 2;
+        const PYROBLAST_DAMAGE = FIREBALL_DAMAGE * 1.4;
         const CHAOSBOLT_DAMAGE = FIREBALL_DAMAGE * 2;
         const ICEBALL_DAMAGE = 25;
         const DARKBALL_DAMAGE = 30;
