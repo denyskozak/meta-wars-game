@@ -862,14 +862,14 @@ export function Game({models, sounds, textures, matchId, character}) {
         }
         function handleDigit3() {
             const className = character?.name?.toLowerCase();
-            if (className === 'mage') castSpell('frostnova');
+            if (className === 'mage') castSpell('fireblast');
             else if (className === 'paladin') castSpell('hand-of-freedom');
             else if (className === 'warlock') castSpell('fear');
 
         }
         function handleDigit2() {
             const className = character?.name?.toLowerCase();
-            if (className === 'mage') castSpell('blink');
+            if (className === 'mage') castSpell('pyroblast');
             else if (className === 'paladin') castSpell('divine-speed');
             else if (className === 'warlock') castSpell('lifedrain');
 
