@@ -835,15 +835,15 @@ export function Game({models, sounds, textures, matchId, character}) {
             const className = character?.name?.toLowerCase();
             if (className === 'warlock') castSpell('chaosbolt');
             else if (className === 'paladin') castSpell('lightwave');
-            else castSpell('pyroblast');
+            else castSpell('blink');
         }
-        function handleKeyC() {
+        function handleDigit3() {
             const className = character?.name?.toLowerCase();
-            if (className === 'mage') castSpell('frostnova');
+            if (className === 'mage') castSpell('fireblast');
         }
-        function handleKeyZ() {
+        function handleDigit2() {
             const className = character?.name?.toLowerCase();
-            if (className === 'mage') castSpell('blink');
+            if (className === 'mage') castSpell('pyroblast');
         }
         function handleKeyG() {
             leftMouseButtonClicked = true;
@@ -886,7 +886,7 @@ export function Game({models, sounds, textures, matchId, character}) {
             const className = character?.name?.toLowerCase();
             if (className === 'warlock') castSpell('immolate');
             else if (className === 'paladin') castSpell('paladin-heal');
-            else castSpell('fireblast');
+            else castSpell('frostnova');
         }
 
         const keyDownHandlers = {
@@ -897,8 +897,8 @@ export function Game({models, sounds, textures, matchId, character}) {
             KeyE: handleKeyE,
             KeyR: handleKeyR,
             KeyF: handleKeyF,
-            KeyC: handleKeyC,
-            KeyZ: handleKeyZ,
+            Digit3: handleDigit3,
+            Digit2: handleDigit2,
             KeyG: handleKeyG,
             KeyJ: handleKeyJ,
             KeyT: handleKeyT,
