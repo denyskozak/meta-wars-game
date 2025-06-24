@@ -21,9 +21,10 @@ import {
  *
  */
 
-var Fire = function ( geometry, options ) {
+class Fire extends Mesh {
+       constructor( geometry, options ) {
 
-	Mesh.call( this, geometry );
+               super( geometry );
 
 	this.type = 'Fire';
 
@@ -507,13 +508,12 @@ var Fire = function ( geometry, options ) {
 
 		this.restoreRenderState( renderer );
 
-	};
+       };
 
-};
+       }
+}
 
 
-Fire.prototype = Object.create( Mesh.prototype );
-Fire.prototype.constructor = Fire;
 
 Fire.SourceShader = {
 
