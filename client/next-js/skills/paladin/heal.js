@@ -6,7 +6,7 @@ export const meta = {
   icon: '/icons/classes/paladin/searinglight.jpg',
 };
 
-export default function castPaladinHeal({ playerId, castSpellImpl, mana, getTargetPlayer, dispatch, sendToSocket, sounds }) {
+export default function castPaladinHeal({ playerId, castSpellImpl, mana, sendToSocket, sounds }) {
   if (mana < SPELL_COST['paladin-heal']) {
     if (sounds?.noMana) {
       sounds.noMana.currentTime = 0;
@@ -15,12 +15,11 @@ export default function castPaladinHeal({ playerId, castSpellImpl, mana, getTarg
     }
     return;
   }
-  const targetId = getTargetPlayer() || playerId;
   castSpellImpl(
     playerId,
     SPELL_COST['paladin-heal'],
     2000,
-    () => sendToSocket({ type: 'CAST_SPELL', payload: { type: 'paladin-heal', targetId } }),
+    () => sendToSocket({ type: 'CAST_SPELL', payload: { type: 'paladin-heal' } }),
     sounds.spellCast,
     sounds.heal,
     meta.id,
