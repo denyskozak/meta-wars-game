@@ -89,7 +89,7 @@ const SPELL_META = {
 };
 
 const SPELL_SCALES = {
-    fireball: 1.8,
+    fireball: 2.34, // increased by 30%
     iceball: 1.8,
     darkball: 2.4,
     pyroblast: 5.4,
