@@ -4,6 +4,9 @@ export const meta = {
   id: 'paladin-heal',
   key: 'Q',
   icon: '/icons/classes/paladin/searinglight.jpg',
+  autoFocus: false,
+
+
 };
 
 export default function castPaladinHeal({ playerId, castSpellImpl, mana, sendToSocket, sounds }) {
