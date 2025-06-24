@@ -804,7 +804,7 @@ ws.on('connection', (socket) => {
                                 target.debuffs.push({
                                     type: 'stun',
                                     expires: Date.now() + duration,
-                                    icon: '/icons/classes/paladin/sealofmight.jpg'
+                                    icon: '/icons/classes/rogue/kidneyshot.jpg'
                                 });
                                 player.comboPoints = 0;
                                 player.comboTarget = null;

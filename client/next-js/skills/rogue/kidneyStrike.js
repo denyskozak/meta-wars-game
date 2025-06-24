@@ -3,7 +3,7 @@ import { SPELL_COST } from '../../consts';
 export const meta = {
   id: 'kidney-strike',
   key: 'F',
-  icon: '/icons/classes/paladin/sealofmight.jpg',
+  icon: '/icons/classes/rogue/kidneyshot.jpg',
 };
 
 export default function castKidneyStrike({ playerId, globalSkillCooldown, isCasting, mana, getTargetPlayer, dispatch, sendToSocket, activateGlobalCooldown, startSkillCooldown, sounds }) {

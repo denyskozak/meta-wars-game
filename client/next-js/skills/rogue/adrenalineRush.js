@@ -3,7 +3,7 @@ import { SPELL_COST } from '../../consts';
 export const meta = {
   id: 'adrenaline-rush',
   key: '2',
-  icon: '/icons/classes/paladin/divinestorm.jpg',
+  icon: '/icons/classes/rogue/adrenalinerush.jpg',
   autoFocus: false,
 };
 

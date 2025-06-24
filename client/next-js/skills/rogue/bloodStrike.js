@@ -3,7 +3,7 @@ import { SPELL_COST } from '../../consts';
 export const meta = {
   id: 'blood-strike',
   key: 'E',
-  icon: '/icons/classes/paladin/crusaderstrike.jpg',
+  icon: '/icons/classes/rogue/sinister_strike.jpg',
   autoFocus: false,
 };
 
