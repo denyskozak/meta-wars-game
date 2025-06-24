@@ -3,7 +3,7 @@ import { SPELL_COST } from '../../consts';
 export const meta = {
   id: 'eviscerate',
   key: 'R',
-  icon: '/icons/classes/warrior/savageblow.jpg',
+  icon: '/icons/classes/rogue/eviscerate.jpg',
   autoFocus: false,
 };
 

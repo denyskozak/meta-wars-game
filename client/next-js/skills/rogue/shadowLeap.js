@@ -3,7 +3,7 @@ import { SPELL_COST } from '../../consts';
 export const meta = {
   id: 'shadow-leap',
   key: 'Q',
-  icon: '/icons/classes/mage/blink.jpg',
+  icon: '/icons/classes/rogue/shadowstep.jpg',
 };
 
 export default function castShadowLeap({ playerId, globalSkillCooldown, isCasting, mana, getTargetPlayer, dispatch, sendToSocket, activateGlobalCooldown, startSkillCooldown, sounds }) {

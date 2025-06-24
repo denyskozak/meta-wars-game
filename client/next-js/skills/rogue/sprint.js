@@ -3,7 +3,7 @@ import { SPELL_COST } from '../../consts';
 export const meta = {
   id: 'sprint',
   key: '3',
-  icon: '/icons/classes/paladin/speedoflight.jpg',
+  icon: '/icons/classes/rogue/sprint.jpg',
   autoFocus: false,
 };
 
