@@ -91,7 +91,7 @@ const SPELL_META = {
 const SPELL_SCALES = {
     fireball: 2.34, // increased by 30%
     iceball: 1.8,
-    darkball: 2.4,
+    darkball: 1.68,
     pyroblast: 5,
     chaosBolt: 5.4,
 };
@@ -260,6 +260,8 @@ export function Game({models, sounds, textures, matchId, character}) {
         const activeDamageEffects = new Map(); // key = playerId -> effect mesh
         const activeImmolation = new Map(); // key = playerId -> effect mesh
         const activeStunEffects = new Map(); // key = playerId -> {group, timeout}
+        const activeFearEffects = new Map(); // key = playerId -> {sprite, timeout}
+        const fearTexture = new THREE.TextureLoader().load('/icons/classes/warlock/possession.jpg');
 
         const glowTexture = (() => {
             const size = 64;
@@ -2423,6 +2425,31 @@ export function Game({models, sounds, textures, matchId, character}) {
             activeStunEffects.set(playerId, { group, timeout });
         }
 
+        function applyFearEffect(playerId, duration = 3000) {
+            const existing = activeFearEffects.get(playerId);
+            if (existing) {
+                existing.sprite.parent?.remove(existing.sprite);
+                clearTimeout(existing.timeout);
+            }
+
+            const material = new THREE.SpriteMaterial({
+                map: fearTexture,
+                transparent: true,
+                depthWrite: false,
+            });
+            const sprite = new THREE.Sprite(material);
+            sprite.scale.set(1, 1, 1);
+            sprite.renderOrder = 999;
+            scene.add(sprite);
+
+            const timeout = setTimeout(() => {
+                sprite.parent?.remove(sprite);
+                activeFearEffects.delete(playerId);
+            }, duration);
+
+            activeFearEffects.set(playerId, { sprite, timeout });
+        }
+
         function spawnFrostNovaRing(playerId, duration = FROSTNOVA_RING_DURATION) {
             const player = players.get(playerId)?.model;
             if (!player) return;
@@ -2682,12 +2709,19 @@ export function Game({models, sounds, textures, matchId, character}) {
                         mesh.position.y += 0.5;
                     });
 
-                    activeStunEffects.forEach((obj, id) => {
+                   activeStunEffects.forEach((obj, id) => {
+                       const target = players.get(id)?.model;
+                       if (!target) return;
+                       target.getWorldPosition(obj.group.position);
+                       obj.group.position.y += 1.8;
+                       obj.group.rotation.y += delta * STUN_SPIN_SPEED;
+                   });
+
+                    activeFearEffects.forEach((obj, id) => {
                         const target = players.get(id)?.model;
                         if (!target) return;
-                        target.getWorldPosition(obj.group.position);
-                        obj.group.position.y += 1.8;
-                        obj.group.rotation.y += delta * STUN_SPIN_SPEED;
+                        target.getWorldPosition(obj.sprite.position);
+                        obj.sprite.position.y += 2;
                     });
 
                     for (let i = frostNovaRings.length - 1; i >= 0; i--) {
@@ -3156,6 +3190,9 @@ export function Game({models, sounds, textures, matchId, character}) {
                         case "fear":
                             if (message.payload.targetId === myPlayerId) {
                                 applyRootEffect(myPlayerId, 3000);
+                            }
+                            if (message.payload.targetId) {
+                                applyFearEffect(message.payload.targetId, 3000);
                             }
                             break;
                         case "lifedrain":

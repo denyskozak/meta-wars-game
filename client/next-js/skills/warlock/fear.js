@@ -1,5 +1,7 @@
 import { SPELL_COST } from '../../consts';
 
+const FEAR_CAST_TIME = 2000; // ms
+
 export const meta = { id: 'fear', key: '3', icon: '/icons/classes/warlock/possession.jpg' };
 
 export default function castFear({ playerId, castSpellImpl, mana, getTargetPlayer, dispatch, sendToSocket, sounds }) {
@@ -20,7 +22,7 @@ export default function castFear({ playerId, castSpellImpl, mana, getTargetPlaye
   castSpellImpl(
     playerId,
     SPELL_COST['fear'],
-    2000,
+    FEAR_CAST_TIME,
     () => sendToSocket({ type: 'CAST_SPELL', payload: { type: 'fear', targetId } }),
     sounds.spellCast,
     sounds.spellCast,
