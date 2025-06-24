@@ -1416,6 +1416,7 @@ export function Game({models, sounds, textures, matchId, character}) {
                         worldOctree,
                         camera,
                         FIREBLAST_RANGE,
+                        rotationY: players.get(playerId)?.model.rotation.y,
                     });
                     break;
                 case "chaosbolt":
