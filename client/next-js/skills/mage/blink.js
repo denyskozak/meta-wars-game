@@ -2,7 +2,7 @@ import * as THREE from 'three';
 import { Capsule } from 'three/examples/jsm/math/Capsule';
 import { SPELL_COST } from '../../consts';
 
-export const meta = { id: 'blink', key: 'Z', icon: '/icons/blink.jpg' };
+export const meta = { id: 'blink', key: 'F', icon: '/icons/classes/mage/blink.jpg' };
 
 export default function castBlink({ globalSkillCooldown, isCasting, mana, sendToSocket, activateGlobalCooldown, startSkillCooldown, sounds, teleportTo, playerCollider, worldOctree, camera, FIREBLAST_RANGE }) {
   if (globalSkillCooldown || isCasting) return;

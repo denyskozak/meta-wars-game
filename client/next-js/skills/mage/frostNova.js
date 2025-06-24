@@ -1,6 +1,6 @@
 import { SPELL_COST } from '../../consts';
 
-export const meta = { id: 'frostnova', key: 'C', icon: '/icons/frostnova.jpg' };
+export const meta = { id: 'frostnova', key: 'Q', icon: '/icons/classes/mage/frostnova.jpg' };
 
 export default function castFrostNova({ playerId, globalSkillCooldown, isCasting, mana, sendToSocket, activateGlobalCooldown, startSkillCooldown, sounds }) {
   if (globalSkillCooldown || isCasting) return;

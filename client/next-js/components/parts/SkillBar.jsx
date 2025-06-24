@@ -8,6 +8,8 @@ import * as paladinSkills from '../../skills/paladin';
 const DEFAULT_SKILLS = [
     mageSkills.fireball,
     mageSkills.iceball,
+    mageSkills.frostnova,
+    mageSkills.blink,
     mageSkills.fireblast,
     mageSkills.pyroblast,
 ];
