@@ -52,7 +52,7 @@ export const Interface = () => {
 
     return (
         <div className="interface-container">
-            <div className="absolute top-24 left-5 flex items-center gap-2">
+            <div className="absolute top-24 left-5 flex items-center gap-2 bg-black/70 p-2 rounded">
                 {character?.name && (
                     <div className="w-20 h-20 rounded-full overflow-hidden bg-black/50 flex items-center justify-center">
                         <Image src={CLASS_ICONS[character.name] || ''} alt={character.name} width={250} height={250}/>
