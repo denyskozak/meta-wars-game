@@ -2,16 +2,19 @@ import {useInterface} from '@/context/inteface';
 import {useEffect, useState} from 'react';
 import './Buffs.css';
 
-export const Buffs = () => {
+export const Buffs = ({buffs: propBuffs, debuffs: propDebuffs, className = 'buffs-container'}) => {
     const {state: {buffs = [], debuffs = []}} = useInterface();
     const [now, setNow] = useState(Date.now());
+
+    const finalBuffs = propBuffs !== undefined ? propBuffs : buffs;
+    const finalDebuffs = propDebuffs !== undefined ? propDebuffs : debuffs;
 
     useEffect(() => {
         const id = setInterval(() => setNow(Date.now()), 1000);
         return () => clearInterval(id);
     }, []);
 
-    if (!buffs.length && !debuffs.length) return null;
+    if (!finalBuffs.length && !finalDebuffs.length) return null;
 
     const formatTime = (ms) => {
         const total = Math.max(0, Math.ceil(ms / 1000));
@@ -45,9 +48,9 @@ export const Buffs = () => {
     };
 
     return (
-        <div className="buffs-container">
-            {buffs.map((b, idx) => renderIcon(b, idx, 'buff'))}
-            {debuffs.map((d, idx) => renderIcon(d, idx, 'debuff'))}
+        <div className={className}>
+            {finalBuffs.map((b, idx) => renderIcon(b, idx, 'buff'))}
+            {finalDebuffs.map((d, idx) => renderIcon(d, idx, 'debuff'))}
         </div>
     );
 };
