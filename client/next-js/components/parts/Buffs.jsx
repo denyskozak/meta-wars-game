@@ -2,7 +2,12 @@ import {useInterface} from '@/context/inteface';
 import {useEffect, useState} from 'react';
 import './Buffs.css';
 
-export const Buffs = ({buffs: propBuffs, debuffs: propDebuffs, className = 'buffs-container'}) => {
+/**
+ * @param {{buffs?: any[], debuffs?: any[], className?: string}} [props]
+ */
+export const Buffs = (
+    {buffs: propBuffs, debuffs: propDebuffs, className = 'buffs-container'} = {}
+) => {
     const {state: {buffs = [], debuffs = []}} = useInterface();
     const [now, setNow] = useState(Date.now());
 
