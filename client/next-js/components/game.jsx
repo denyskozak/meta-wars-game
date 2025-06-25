@@ -794,7 +794,8 @@ export function Game({models, sounds, textures, matchId, character}) {
         const FROSTNOVA_RING_DURATION = 1000; // ms
         const LIGHTWAVE_RING_DURATION = 1000; // ms
         const LIGHTSTRIKE_DAMAGE = 28; // 30% less damage
-        const LIGHTSTRIKE_RANGE = 0.8; // melee range
+        // Slightly increased to improve melee reliability
+        const LIGHTSTRIKE_RANGE = 1.5; // melee range
         const LIGHTSTRIKE_ANGLE = Math.PI / 4;
         const LIGHTWAVE_DAMAGE = 40;
         const STUN_SPIN_SPEED = 2;
