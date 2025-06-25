@@ -857,7 +857,6 @@ ws.on('connection', (socket) => {
                             });
                         }
                     }
-                }
                 break;
 
             case 'TAKE_DAMAGE':
