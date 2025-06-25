@@ -16,6 +16,9 @@ const ICEBALL_ICON = '/icons/spell_frostbolt.jpg';
 const FROSTNOVA_ICON = '/icons/frostnova.jpg';
 const FREEDOM_ICON = '/icons/classes/paladin/sealofvalor.jpg';
 const DIVINE_SPEED_ICON = '/icons/classes/paladin/speedoflight.jpg';
+const COMBO_ICON = '/icons/classes/rogue/sinister_strike.jpg';
+const ROGUE_SPRINT_ICON = '/icons/classes/rogue/sprint.jpg';
+const ADRENALINE_RUSH_ICON = '/icons/classes/rogue/adrenalinerush.jpg';
 
 function updateLevel(player) {
     player.level = Math.min(10, Math.floor(player.points / XP_PER_LEVEL) + 1);
@@ -778,9 +781,13 @@ ws.on('connection', (socket) => {
                         if (message.payload.type === 'blood-strike') {
                             if (player.comboTarget && player.comboTarget !== message.payload.targetId) {
                                 player.comboPoints = 0;
+                                player.buffs = player.buffs.filter(b => b.type !== 'combo');
                             }
                             player.comboTarget = message.payload.targetId || player.comboTarget;
                             player.comboPoints = Math.min(5, (player.comboPoints || 0) + 1);
+                            const comboBuff = player.buffs.find(b => b.type === 'combo');
+                            if (comboBuff) comboBuff.stacks = player.comboPoints;
+                            else player.buffs.push({ type: 'combo', stacks: player.comboPoints, icon: COMBO_ICON });
                         }
                         if (message.payload.type === 'eviscerate' && message.payload.targetId) {
                             const target = match.players.get(message.payload.targetId);
@@ -791,11 +798,15 @@ ws.on('connection', (socket) => {
                                 }
                                 player.comboPoints = 0;
                                 player.comboTarget = null;
+                                player.buffs = player.buffs.filter(b => b.type !== 'combo');
                             }
                         }
                         if (message.payload.type === 'shadow-leap') {
                             player.comboPoints = Math.min(5, (player.comboPoints || 0) + 1);
                             player.comboTarget = message.payload.targetId || player.comboTarget;
+                            const comboBuff = player.buffs.find(b => b.type === 'combo');
+                            if (comboBuff) comboBuff.stacks = player.comboPoints;
+                            else player.buffs.push({ type: 'combo', stacks: player.comboPoints, icon: COMBO_ICON });
                         }
                         if (message.payload.type === 'kidney-strike' && message.payload.targetId) {
                             const target = match.players.get(message.payload.targetId);
@@ -809,13 +820,14 @@ ws.on('connection', (socket) => {
                                 });
                                 player.comboPoints = 0;
                                 player.comboTarget = null;
+                                player.buffs = player.buffs.filter(b => b.type !== 'combo');
                             }
                         }
                         if (message.payload.type === 'adrenaline-rush') {
                             player.buffs.push({
                                 type: 'speed',
                                 expires: Date.now() + 8000,
-                                icon: DIVINE_SPEED_ICON,
+                                icon: ADRENALINE_RUSH_ICON,
                             });
                         }
                         if (message.payload.type === 'sprint') {
@@ -823,7 +835,7 @@ ws.on('connection', (socket) => {
                             player.buffs.push({
                                 type: 'speed',
                                 expires: Date.now() + 6000,
-                                icon: DIVINE_SPEED_ICON,
+                                icon: ROGUE_SPRINT_ICON,
                             });
                         
                         }

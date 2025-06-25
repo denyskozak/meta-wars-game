@@ -38,7 +38,8 @@ export const Buffs = () => {
         return (
             <div key={`${type}-${idx}`} className="buff-icon">
                 <img src={item.icon || '/icons/shield.png'} alt={item.type} />
-                <span>{formatTime(timeLeft)}</span>
+                {item.stacks && <span className="stack-count">{item.stacks}</span>}
+                {timeLeft > 0 && <span className="time">{formatTime(timeLeft)}</span>}
             </div>
         );
     };

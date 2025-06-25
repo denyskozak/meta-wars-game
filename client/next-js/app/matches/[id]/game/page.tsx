@@ -134,6 +134,7 @@ export default function GamePage() {
       healRune: new Audio("/sounds/heal-rune.ogg"),
       manaRune: new Audio("/sounds/mana-rune.ogg"),
       damageRune: new Audio("/sounds/damage-rune.ogg"),
+      sinisterStrike: new Audio("/sounds/sinister-strike.ogg"),
       mortalStrike: new Audio("/sounds/mortal-strike.ogg"),
     };
 
