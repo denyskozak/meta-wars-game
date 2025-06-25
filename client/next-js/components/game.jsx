@@ -1795,7 +1795,7 @@ export function Game({models, sounds, textures, matchId, character}) {
             if (!playerData) return;
             const { mixer, actions } = playerData;
 
-            spawnMeleeRangeIndicator(myPlayerId, MELEE_RANGE_ATTACK, 500, true);
+            spawnMeleeRangeIndicator(myPlayerId, MELEE_RANGE_ATTACK, 700, true);
 
             lightSword(myPlayerId, 500);
 
@@ -1841,7 +1841,7 @@ export function Game({models, sounds, textures, matchId, character}) {
             if (!playerData) return;
             const { mixer, actions } = playerData;
 
-            spawnMeleeRangeIndicator(myPlayerId, MELEE_RANGE_ATTACK, 500, true);
+            spawnMeleeRangeIndicator(myPlayerId, MELEE_RANGE_ATTACK, 700, true);
 
             lightSword(myPlayerId, 500);
 
@@ -1871,7 +1871,7 @@ export function Game({models, sounds, textures, matchId, character}) {
             if (!playerData) return;
             const { mixer, actions } = playerData;
 
-            spawnMeleeRangeIndicator(myPlayerId, MELEE_RANGE_ATTACK, 500, true);
+            spawnMeleeRangeIndicator(myPlayerId, MELEE_RANGE_ATTACK, 700, true);
 
             lightSword(myPlayerId, 500);
 
@@ -2857,11 +2857,12 @@ export function Game({models, sounds, textures, matchId, character}) {
         function spawnMeleeRangeIndicator(
             playerId,
             range = MELEE_RANGE_ATTACK,
-            duration = 500,
+            duration = 700,
             arc = false,
             angle = LIGHTSTRIKE_ANGLE * 2,
         ) {
-            const player = players.get(playerId)?.model;
+            const playerData = players.get(playerId);
+            const player = playerData?.model;
             if (!player) return;
 
             const innerRadius = Math.max(range - 0.1, 0);
@@ -2879,8 +2880,24 @@ export function Game({models, sounds, textures, matchId, character}) {
             // Create a simple radial color gradient
             const pos = geometry.attributes.position;
             const colors = [];
-            const startColor = new THREE.Color(0xff6666);
-            const endColor = new THREE.Color(0xff0000);
+
+            let startColor = new THREE.Color(0xff6666);
+            let endColor = new THREE.Color(0xff0000);
+            switch (playerData?.classType) {
+                case 'paladin':
+                    startColor = new THREE.Color(0xffe599);
+                    endColor = new THREE.Color(0xffcc33);
+                    break;
+                case 'warrior':
+                    startColor = new THREE.Color(0xff6666);
+                    endColor = new THREE.Color(0xff0000);
+                    break;
+                case 'rogue':
+                    startColor = new THREE.Color(0xcc66ff);
+                    endColor = new THREE.Color(0x9900ff);
+                    break;
+            }
+
             for (let i = 0; i < pos.count; i++) {
                 const x = pos.getX(i);
                 const y = pos.getY(i);
@@ -2901,17 +2918,15 @@ export function Game({models, sounds, textures, matchId, character}) {
             });
             const mesh = new THREE.Mesh(geometry, material);
             mesh.rotation.x = -Math.PI / 2;
-            // Align indicator so the arc faces forward
-            mesh.rotation.y = Math.PI / 2;
 
-            // Keep world size when attached to a scaled player
-            const invScale = 1 / player.scale.x;
-            mesh.scale.setScalar(invScale);
-            // Position slightly above the player's feet
-            mesh.position.set(0, 0.05 * invScale, 0);
+            const posWorld = new THREE.Vector3();
+            player.getWorldPosition(posWorld);
+            mesh.position.copy(posWorld);
+            mesh.position.y += 0.05;
 
-            // Attach to player so it follows movement and rotation
-            player.add(mesh);
+            mesh.rotation.y = player.rotation.y;
+
+            scene.add(mesh);
 
             meleeRangeIndicators.push({ mesh, start: performance.now(), duration });
         }
@@ -3696,7 +3711,7 @@ export function Game({models, sounds, textures, matchId, character}) {
                             break;
                         case "blood-strike":
                             if (message.id !== myPlayerId) {
-                                spawnMeleeRangeIndicator(message.id, MELEE_RANGE_ATTACK, 500, true);
+                                spawnMeleeRangeIndicator(message.id, MELEE_RANGE_ATTACK, 700, true);
                                 const caster = players.get(message.id);
                                 const me = players.get(myPlayerId);
                                 if (caster && me) {
@@ -3756,7 +3771,7 @@ export function Game({models, sounds, textures, matchId, character}) {
                             break;
                         case "savage-blow":
                             if (message.id !== myPlayerId) {
-                                spawnMeleeRangeIndicator(message.id, MELEE_RANGE_ATTACK, 500, true);
+                                spawnMeleeRangeIndicator(message.id, MELEE_RANGE_ATTACK, 700, true);
                                 const caster = players.get(message.id);
                                 const me = players.get(myPlayerId);
                                 if (caster && me) {
@@ -3815,7 +3830,7 @@ export function Game({models, sounds, textures, matchId, character}) {
                             break;
                         case "lightstrike":
                             if (message.id !== myPlayerId) {
-                                spawnMeleeRangeIndicator(message.id, MELEE_RANGE_ATTACK, 500, true);
+                                spawnMeleeRangeIndicator(message.id, MELEE_RANGE_ATTACK, 700, true);
                                 const caster = players.get(message.id);
                                 const me = players.get(myPlayerId);
                                 if (caster && me) {
