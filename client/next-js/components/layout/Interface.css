@@ -34,7 +34,7 @@
     padding: 2px 4px;
     border-radius: 3px;
     font-weight: 800;
-    font-size: 24px;
+    font-size: 32px;
     pointer-events: none;
     display: flex;
     align-items: center;
@@ -44,14 +44,14 @@
 
 
 .damage-icon {
-    width: 24px;
-    height: 24px;
+    width: 32px;
+    height: 32px;
 }
 
 
 #selfDamage .damage-icon {
-    width: 32px;
-    height: 32px;
+    width: 48px;
+    height: 48px;
 }
 
 .damage-label-container {
@@ -75,7 +75,7 @@
 }
 
 #selfDamage .damage-label {
-    font-size: 32px;
+    font-size: 48px;
 }
 
 #targetPanel {
