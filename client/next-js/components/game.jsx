@@ -1739,10 +1739,10 @@ export function Game({models, sounds, textures, matchId, character}) {
                 clampWhenFinished: true,
             });
 
-            if (sounds.autoAttack) {
-                sounds.autoAttack.currentTime = 0;
-                sounds.autoAttack.volume = 0.5;
-                sounds.autoAttack.play();
+            if (sounds.sinisterStrike) {
+                sounds.sinisterStrike.currentTime = 0;
+                sounds.sinisterStrike.volume = 0.5;
+                sounds.sinisterStrike.play();
             }
 
             sendToSocket({ type: 'CAST_SPELL', payload: { type: 'blood-strike' } });
@@ -3431,10 +3431,10 @@ export function Game({models, sounds, textures, matchId, character}) {
                         case "blood-strike":
                             if (message.id !== myPlayerId) {
                                 lightSword(message.id, 500);
-                                if (sounds.autoAttack) {
-                                    sounds.autoAttack.currentTime = 0;
-                                    sounds.autoAttack.volume = 0.5;
-                                    sounds.autoAttack.play();
+                                if (sounds.sinisterStrike) {
+                                    sounds.sinisterStrike.currentTime = 0;
+                                    sounds.sinisterStrike.volume = 0.5;
+                                    sounds.sinisterStrike.play();
                                 }
                             }
                             break;

@@ -134,7 +134,7 @@ export default function GamePage() {
       healRune: new Audio("/sounds/heal-rune.ogg"),
       manaRune: new Audio("/sounds/mana-rune.ogg"),
       damageRune: new Audio("/sounds/damage-rune.ogg"),
-      autoAttack: new Audio("/sounds/auto-attack.ogg"),
+      sinisterStrike: new Audio("/sounds/sinister-strike.ogg"),
     };
 
     Promise.all([preloadModels(models), preloadTextures()]).then(
