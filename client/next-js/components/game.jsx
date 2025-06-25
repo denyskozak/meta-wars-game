@@ -421,7 +421,9 @@ export function Game({models, sounds, textures, matchId, character}) {
                 hp: p.hp,
                 mana: p.mana,
                 address: p.address || `Player ${targetedPlayerId}`,
-                classType: p.classType
+                classType: p.classType,
+                buffs: p.buffs || [],
+                debuffs: p.debuffs || [],
             });
         }
 
@@ -3205,6 +3207,7 @@ export function Game({models, sounds, textures, matchId, character}) {
                 playerData.points = message.points;
                 playerData.level = message.level;
                 playerData.buffs = message.buffs;
+                playerData.debuffs = message.debuffs;
                 playerData.hp = message.hp;
                 playerData.mana = message.mana;
                 playerData.address = message.address || playerData.address;
@@ -3682,6 +3685,8 @@ export function Game({models, sounds, textures, matchId, character}) {
                         mana = message.mana;
                         updateHPBar();
                         updateManaBar();
+                        dispatch({type: 'SET_BUFFS', payload: message.buffs || []});
+                        dispatch({type: 'SET_DEBUFFS', payload: message.debuffs || []});
                         if (hp <= 0) {
                             // waiting for server respawn
                         }
@@ -3689,6 +3694,8 @@ export function Game({models, sounds, textures, matchId, character}) {
                         const p = players.get(message.playerId);
                         p.hp = message.hp;
                         p.mana = message.mana;
+                        p.buffs = message.buffs || [];
+                        p.debuffs = message.debuffs || [];
                         if (message.playerId === targetedPlayerId) {
                             dispatchTargetUpdate();
                         }
