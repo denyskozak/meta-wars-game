@@ -1795,7 +1795,7 @@ export function Game({models, sounds, textures, matchId, character}) {
             if (!playerData) return;
             const { mixer, actions } = playerData;
 
-            spawnMeleeRangeIndicator(myPlayerId);
+            spawnMeleeRangeIndicator(myPlayerId, MELEE_RANGE_ATTACK, 500, true);
 
             lightSword(myPlayerId, 500);
 
@@ -1841,7 +1841,7 @@ export function Game({models, sounds, textures, matchId, character}) {
             if (!playerData) return;
             const { mixer, actions } = playerData;
 
-            spawnMeleeRangeIndicator(myPlayerId);
+            spawnMeleeRangeIndicator(myPlayerId, MELEE_RANGE_ATTACK, 500, true);
 
             lightSword(myPlayerId, 500);
 
@@ -1871,7 +1871,7 @@ export function Game({models, sounds, textures, matchId, character}) {
             if (!playerData) return;
             const { mixer, actions } = playerData;
 
-            spawnMeleeRangeIndicator(myPlayerId);
+            spawnMeleeRangeIndicator(myPlayerId, MELEE_RANGE_ATTACK, 500, true);
 
             lightSword(myPlayerId, 500);
 
@@ -2854,7 +2854,13 @@ export function Game({models, sounds, textures, matchId, character}) {
             activeSprintTrails.set(playerId, { mesh, start: performance.now(), duration, timeout });
         }
 
-        function spawnMeleeRangeIndicator(playerId, range = MELEE_RANGE_ATTACK, duration = 500) {
+        function spawnMeleeRangeIndicator(
+            playerId,
+            range = MELEE_RANGE_ATTACK,
+            duration = 500,
+            arc = false,
+            angle = LIGHTSTRIKE_ANGLE * 2,
+        ) {
             const player = players.get(playerId)?.model;
             if (!player) return;
 
@@ -2862,7 +2868,16 @@ export function Game({models, sounds, textures, matchId, character}) {
             player.getWorldPosition(position);
             position.y += 0.05;
 
-            const geometry = new THREE.RingGeometry(Math.max(range - 0.1, 0), range, 32);
+            const geometry = arc
+                ? new THREE.RingGeometry(
+                      Math.max(range - 0.1, 0),
+                      range,
+                      32,
+                      1,
+                      -angle / 2,
+                      angle,
+                  )
+                : new THREE.RingGeometry(Math.max(range - 0.1, 0), range, 32);
             const material = new THREE.MeshBasicMaterial({
                 color: 0x00ff00,
                 transparent: true,
@@ -2871,6 +2886,9 @@ export function Game({models, sounds, textures, matchId, character}) {
             });
             const mesh = new THREE.Mesh(geometry, material);
             mesh.rotation.x = -Math.PI / 2;
+            if (arc) {
+                mesh.rotation.y = player.rotation.y;
+            }
             mesh.position.copy(position);
 
             scene.add(mesh);
@@ -3657,6 +3675,7 @@ export function Game({models, sounds, textures, matchId, character}) {
                             break;
                         case "blood-strike":
                             if (message.id !== myPlayerId) {
+                                spawnMeleeRangeIndicator(message.id, MELEE_RANGE_ATTACK, 500, true);
                                 const caster = players.get(message.id);
                                 const me = players.get(myPlayerId);
                                 if (caster && me) {
@@ -3716,6 +3735,7 @@ export function Game({models, sounds, textures, matchId, character}) {
                             break;
                         case "savage-blow":
                             if (message.id !== myPlayerId) {
+                                spawnMeleeRangeIndicator(message.id, MELEE_RANGE_ATTACK, 500, true);
                                 const caster = players.get(message.id);
                                 const me = players.get(myPlayerId);
                                 if (caster && me) {
@@ -3774,6 +3794,7 @@ export function Game({models, sounds, textures, matchId, character}) {
                             break;
                         case "lightstrike":
                             if (message.id !== myPlayerId) {
+                                spawnMeleeRangeIndicator(message.id, MELEE_RANGE_ATTACK, 500, true);
                                 const caster = players.get(message.id);
                                 const me = players.get(myPlayerId);
                                 if (caster && me) {
