@@ -3,5 +3,5 @@ export const CLASS_ICONS: Record<string, string> = {
   warlock: "/icons/warlock.webp",
   paladin: "/icons/paladin.webp",
   rogue: "",
-  warrior: "",
+  warrior: "/icons/warrior.webp",
 };

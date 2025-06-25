@@ -36,6 +36,12 @@ import castPaladinHeal, { meta as paladinHealMeta } from '../skills/paladin/heal
 import { meta as lightWaveMeta } from '../skills/paladin/lightWave';
 import castHandOfFreedom, { meta as handOfFreedomMeta } from '../skills/paladin/handFreedom';
 import castDivineSpeed, { meta as divineSpeedMeta } from '../skills/paladin/divineSpeed';
+import castDash, { meta as dashMeta } from '../skills/warrior/dash';
+import castDeathBlow, { meta as deathBlowMeta } from '../skills/warrior/deathBlow';
+import castSlowStrike, { meta as slowStrikeMeta } from '../skills/warrior/slowStrike';
+import castWhirlwind, { meta as whirlwindMeta } from '../skills/warrior/whirlwind';
+import castBattleFrenzy, { meta as battleFrenzyMeta } from '../skills/warrior/battleFrenzy';
+import castBloodthirst, { meta as bloodthirstMeta } from '../skills/warrior/bloodthirst';
 
 
 import {Interface} from "@/components/layout/Interface";
@@ -65,6 +71,12 @@ const SPELL_ICONS = {
     [divineSpeedMeta.id]: divineSpeedMeta.icon,
     [frostNovaMeta.id]: frostNovaMeta.icon,
     [blinkMeta.id]: blinkMeta.icon,
+    [dashMeta.id]: dashMeta.icon,
+    [deathBlowMeta.id]: deathBlowMeta.icon,
+    [slowStrikeMeta.id]: slowStrikeMeta.icon,
+    [whirlwindMeta.id]: whirlwindMeta.icon,
+    [battleFrenzyMeta.id]: battleFrenzyMeta.icon,
+    [bloodthirstMeta.id]: bloodthirstMeta.icon,
 };
 
 const SPELL_META = {
@@ -86,6 +98,12 @@ const SPELL_META = {
     [divineSpeedMeta.id]: divineSpeedMeta,
     [frostNovaMeta.id]: frostNovaMeta,
     [blinkMeta.id]: blinkMeta,
+    [dashMeta.id]: dashMeta,
+    [deathBlowMeta.id]: deathBlowMeta,
+    [slowStrikeMeta.id]: slowStrikeMeta,
+    [whirlwindMeta.id]: whirlwindMeta,
+    [battleFrenzyMeta.id]: battleFrenzyMeta,
+    [bloodthirstMeta.id]: bloodthirstMeta,
 };
 
 const SPELL_SCALES = {
@@ -632,6 +650,12 @@ export function Game({models, sounds, textures, matchId, character}) {
             frostnova: 15000,
             'hand-of-freedom': 15000,
             'divine-speed': 30000,
+            dash: 10000,
+            'death-blow': 2000,
+            'slow-strike': 5000,
+            whirlwind: 40000,
+            'battle-frenzy': 45000,
+            bloodthirst: 0,
         };
         const skillCooldownTimers = {};
 
@@ -731,6 +755,7 @@ export function Game({models, sounds, textures, matchId, character}) {
         const LIGHTSTRIKE_RANGE = 0.8; // melee range
         const LIGHTSTRIKE_ANGLE = Math.PI / 4;
         const LIGHTWAVE_DAMAGE = 40;
+        const BLOODTHIRST_DAMAGE = 100;
         const STUN_SPIN_SPEED = 2;
 
         // Медленнее пускаем сферы как настоящие заклинания
@@ -895,18 +920,21 @@ export function Game({models, sounds, textures, matchId, character}) {
             const className = character?.name?.toLowerCase();
             if (className === 'warlock') castSpell('darkball');
             else if (className === 'paladin') castSpell('lightstrike');
+            else if (className === 'warrior') castSpell('death-blow');
             else castSpell('fireball');
         }
         function handleKeyR() {
             const className = character?.name?.toLowerCase();
             if (className === 'warlock') castSpell('corruption');
             else if (className === 'paladin') castSpell('stun');
+            else if (className === 'warrior') castSpell('slow-strike');
             else castSpell('iceball');
         }
         function handleKeyF() {
             const className = character?.name?.toLowerCase();
             if (className === 'warlock') castSpell('chaosbolt');
             else if (className === 'paladin') castSpell('lightwave');
+            else if (className === 'warrior') castSpell('dash');
             else castSpell('blink');
         }
         function handleDigit3() {
@@ -914,6 +942,7 @@ export function Game({models, sounds, textures, matchId, character}) {
             if (className === 'mage') castSpell('fireblast');
             else if (className === 'paladin') castSpell('hand-of-freedom');
             else if (className === 'warlock') castSpell('fear');
+            else if (className === 'warrior') castSpell('battle-frenzy');
 
         }
         function handleDigit2() {
@@ -921,7 +950,12 @@ export function Game({models, sounds, textures, matchId, character}) {
             if (className === 'mage') castSpell('pyroblast');
             else if (className === 'paladin') castSpell('divine-speed');
             else if (className === 'warlock') castSpell('lifedrain');
+            else if (className === 'warrior') castSpell('whirlwind');
 
+        }
+        function handleDigit4() {
+            const className = character?.name?.toLowerCase();
+            if (className === 'warrior') castSpell('bloodthirst');
         }
         function handleKeyG() {
             leftMouseButtonClicked = true;
@@ -980,6 +1014,7 @@ export function Game({models, sounds, textures, matchId, character}) {
             KeyF: handleKeyF,
             Digit3: handleDigit3,
             Digit2: handleDigit2,
+            Digit4: handleDigit4,
             KeyG: handleKeyG,
             KeyJ: handleKeyJ,
             KeyT: handleKeyT,
@@ -1475,6 +1510,22 @@ export function Game({models, sounds, textures, matchId, character}) {
                         rotationY: players.get(playerId)?.model.rotation.y,
                     });
                     break;
+                case "dash":
+                    castDash({
+                        globalSkillCooldown,
+                        isCasting,
+                        mana,
+                        sendToSocket,
+                        activateGlobalCooldown,
+                        startSkillCooldown,
+                        teleportTo,
+                        playerCollider,
+                        worldOctree,
+                        camera,
+                        FIREBLAST_RANGE,
+                        rotationY: players.get(playerId)?.model.rotation.y,
+                    });
+                    break;
                 case "chaosbolt":
                     castChaosBolt({
                         playerId,
@@ -1542,6 +1593,21 @@ export function Game({models, sounds, textures, matchId, character}) {
                 case "lightwave":
                     performLightWave();
                     break;
+                case "death-blow":
+                    performDeathBlow();
+                    break;
+                case "slow-strike":
+                    performSlowStrike();
+                    break;
+                case "whirlwind":
+                    performWhirlwind();
+                    break;
+                case "battle-frenzy":
+                    performBattleFrenzy();
+                    break;
+                case "bloodthirst":
+                    performBloodthirst();
+                    break;
             }
         }
 
@@ -1602,6 +1668,95 @@ export function Game({models, sounds, textures, matchId, character}) {
             sendToSocket({ type: 'CAST_SPELL', payload: { type: 'lightwave' } });
             activateGlobalCooldown();
             startSkillCooldown('lightwave');
+        }
+
+        function performDeathBlow() {
+            const playerData = players.get(myPlayerId);
+            if (!playerData) return;
+            const { mixer, actions } = playerData;
+
+            controlAction({
+                action: actions['attack'],
+                actionName: 'attack',
+                mixer,
+                loop: THREE.LoopOnce,
+                fadeIn: 0.1,
+                reset: true,
+                clampWhenFinished: true,
+            });
+
+            sendToSocket({ type: 'CAST_SPELL', payload: { type: 'death-blow' } });
+            activateGlobalCooldown();
+            startSkillCooldown('death-blow');
+        }
+
+        function performSlowStrike() {
+            const playerData = players.get(myPlayerId);
+            if (!playerData) return;
+            const { mixer, actions } = playerData;
+
+            controlAction({
+                action: actions['attack'],
+                actionName: 'attack',
+                mixer,
+                loop: THREE.LoopOnce,
+                fadeIn: 0.1,
+                reset: true,
+                clampWhenFinished: true,
+            });
+
+            sendToSocket({ type: 'CAST_SPELL', payload: { type: 'slow-strike' } });
+            activateGlobalCooldown();
+            startSkillCooldown('slow-strike');
+        }
+
+        function performWhirlwind() {
+            const playerData = players.get(myPlayerId);
+            if (!playerData) return;
+            const { mixer, actions } = playerData;
+
+            controlAction({
+                action: actions['attack360'] || actions['attack'],
+                actionName: 'attack_360',
+                mixer,
+                loop: THREE.LoopOnce,
+                fadeIn: 0.1,
+                reset: true,
+                clampWhenFinished: true,
+            });
+
+            sendToSocket({ type: 'CAST_SPELL', payload: { type: 'whirlwind' } });
+            activateGlobalCooldown();
+            startSkillCooldown('whirlwind');
+        }
+
+        function performBattleFrenzy() {
+            const playerData = players.get(myPlayerId);
+            if (!playerData) return;
+
+            sendToSocket({ type: 'CAST_SPELL', payload: { type: 'battle-frenzy' } });
+            activateGlobalCooldown();
+            startSkillCooldown('battle-frenzy');
+        }
+
+        function performBloodthirst() {
+            const playerData = players.get(myPlayerId);
+            if (!playerData) return;
+            const { mixer, actions } = playerData;
+
+            controlAction({
+                action: actions['attack'],
+                actionName: 'attack',
+                mixer,
+                loop: THREE.LoopOnce,
+                fadeIn: 0.1,
+                reset: true,
+                clampWhenFinished: true,
+            });
+
+            sendToSocket({ type: 'CAST_SPELL', payload: { type: 'bloodthirst' } });
+            activateGlobalCooldown();
+            startSkillCooldown('bloodthirst');
         }
 
 
@@ -3222,6 +3377,18 @@ export function Game({models, sounds, textures, matchId, character}) {
                                 }
                             }
                             break;
+                        case "whirlwind":
+                            if (message.id !== myPlayerId) {
+                                const caster = players.get(message.id);
+                                if (caster) {
+                                    const myPos = players.get(myPlayerId)?.model.position.clone();
+                                    const casterPos = caster.model.position.clone();
+                                    if (myPos && casterPos && myPos.distanceTo(casterPos) < FIREBLAST_RANGE) {
+                                        takeDamage(LIGHTWAVE_DAMAGE, message.id, 'whirlwind');
+                                    }
+                                }
+                            }
+                            break;
                         case "lightstrike":
                             if (message.id !== myPlayerId) {
                                 const caster = players.get(message.id);
@@ -3236,6 +3403,54 @@ export function Game({models, sounds, textures, matchId, character}) {
                                     }
                                 }
                                 lightSword(message.id, 500);
+                            }
+                            break;
+                        case "death-blow":
+                            if (message.id !== myPlayerId) {
+                                const caster = players.get(message.id);
+                                const me = players.get(myPlayerId);
+                                if (caster && me) {
+                                    const origin = caster.model.position.clone();
+                                    const forward = new THREE.Vector3(0, 0, 1).applyQuaternion(caster.model.quaternion);
+                                    const toMe = me.model.position.clone().sub(origin);
+                                    const distance = toMe.length();
+                                    if (distance < LIGHTSTRIKE_RANGE && forward.angleTo(toMe.normalize()) < LIGHTSTRIKE_ANGLE) {
+                                        takeDamage(LIGHTSTRIKE_DAMAGE, message.id, 'death-blow');
+                                    }
+                                }
+                            }
+                            break;
+                        case "slow-strike":
+                            if (message.id !== myPlayerId) {
+                                const caster = players.get(message.id);
+                                const me = players.get(myPlayerId);
+                                if (caster && me) {
+                                    const origin = caster.model.position.clone();
+                                    const forward = new THREE.Vector3(0, 0, 1).applyQuaternion(caster.model.quaternion);
+                                    const toMe = me.model.position.clone().sub(origin);
+                                    const distance = toMe.length();
+                                    if (distance < LIGHTSTRIKE_RANGE && forward.angleTo(toMe.normalize()) < LIGHTSTRIKE_ANGLE) {
+                                        applySlowEffect(myPlayerId, 2000);
+                                    }
+                                }
+                            }
+                            break;
+                        case "battle-frenzy":
+                            applyDamageRuneEffect(message.id, 5000);
+                            break;
+                        case "bloodthirst":
+                            if (message.id !== myPlayerId) {
+                                const caster = players.get(message.id);
+                                const me = players.get(myPlayerId);
+                                if (caster && me) {
+                                    const origin = caster.model.position.clone();
+                                    const forward = new THREE.Vector3(0, 0, 1).applyQuaternion(caster.model.quaternion);
+                                    const toMe = me.model.position.clone().sub(origin);
+                                    const distance = toMe.length();
+                                    if (distance < LIGHTSTRIKE_RANGE && forward.angleTo(toMe.normalize()) < LIGHTSTRIKE_ANGLE) {
+                                        takeDamage(BLOODTHIRST_DAMAGE, message.id, 'bloodthirst');
+                                    }
+                                }
                             }
                             break;
                     }
@@ -3440,7 +3655,9 @@ export function Game({models, sounds, textures, matchId, character}) {
                     message.players.forEach((playerId) => {
                         const p = players.get(Number(playerId));
                         const cls = p?.classType || "";
-                        const charModel = p?.character || (cls === 'paladin' ? 'bolvar' : 'vampir');
+                        const charModel =
+                            p?.character ||
+                            (cls === 'paladin' || cls === 'warrior' ? 'bolvar' : 'vampir');
                         createPlayer(Number(playerId), String(playerId), String(playerId), cls, charModel);
                     })
                     startCountdown();

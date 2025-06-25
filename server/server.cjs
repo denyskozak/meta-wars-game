@@ -206,6 +206,7 @@ const CLASS_MODELS = {
     paladin: 'bolvar',
     mage: 'vampir',
     warlock: 'vampir',
+    warrior: 'bolvar',
 };
 
 function createPlayer(address, classType, character) {
@@ -355,7 +356,7 @@ function applyDamage(match, victimId, dealerId, damage, spellType) {
     if (attacker && attacker.buffs.length) {
         const now = Date.now();
         attacker.buffs.forEach(buff => {
-            if (buff.type === 'damage' && buff.expires > now) {
+            if ((buff.type === 'damage' || buff.type === 'rage') && buff.expires > now) {
                 if (typeof buff.percent === 'number') {
                     totalDamage += totalDamage * buff.percent;
                 } else if (typeof buff.bonus === 'number') {
@@ -414,6 +415,28 @@ function applyDamage(match, victimId, dealerId, damage, spellType) {
         amount: totalDamage,
         spellType,
     });
+
+    if (attacker && ['death-blow', 'slow-strike'].includes(spellType)) {
+        if (Math.random() < 0.1) {
+            const stacks = attacker.buffs.filter(b => b.type === 'rage').length;
+            if (stacks < 5) {
+                attacker.buffs.push({
+                    type: 'rage',
+                    percent: 0.05,
+                    expires: Date.now() + 15000,
+                    icon: '/icons/rune_power.jpg'
+                });
+                broadcastToMatch(match.id, {
+                    type: 'UPDATE_STATS',
+                    playerId: dealerId,
+                    hp: attacker.hp,
+                    mana: attacker.mana,
+                    buffs: attacker.buffs,
+                    debuffs: attacker.debuffs,
+                });
+            }
+        }
+    }
 }
 
 ws.on('connection', (socket) => {
@@ -706,7 +729,7 @@ ws.on('connection', (socket) => {
                         }
 
 
-                        if (['fireball', 'darkball', 'corruption', 'chaosbolt', 'iceball', 'shield', 'pyroblast', 'fireblast', 'lightstrike', 'lightwave', 'stun', 'paladin-heal', 'frostnova', 'blink', 'hand-of-freedom', 'divine-speed', 'lifedrain', 'fear'].includes(message.payload.type)) {
+                        if (['fireball', 'darkball', 'corruption', 'chaosbolt', 'iceball', 'shield', 'pyroblast', 'fireblast', 'lightstrike', 'lightwave', 'stun', 'paladin-heal', 'frostnova', 'blink', 'hand-of-freedom', 'divine-speed', 'lifedrain', 'fear', 'dash', 'death-blow', 'slow-strike', 'whirlwind', 'battle-frenzy', 'bloodthirst'].includes(message.payload.type)) {
                             broadcastToMatch(match.id, {
                                 type: 'CAST_SPELL',
                                 payload: message.payload,
@@ -769,36 +792,59 @@ ws.on('connection', (socket) => {
                                 expires: Date.now() + 5000,
                                 icon: DIVINE_SPEED_ICON,
                             });
-
-                            if (message.payload.type === 'fear' && message.payload.targetId) {
-                                const target = match.players.get(message.payload.targetId);
-                                if (target) {
-                                    target.debuffs = target.debuffs || [];
-                                    target.debuffs.push({
-                                        type: 'root',
-                                        expires: Date.now() + 3000,
-                                        icon: '/icons/classes/warlock/possession.jpg'
-                                    });
-                                }
-                            }
-                            if (message.payload.type === 'lifedrain' && message.payload.targetId) {
-                                const target = match.players.get(message.payload.targetId);
-                                const caster = match.players.get(id);
-                                if (target && caster) {
-                                    applyDamage(match, target.id, id, 30, 'lifedrain');
-                                    caster.hp = Math.min(MAX_HP, caster.hp + 30);
-                                }
-
-                            }
-
-                            broadcastToMatch(match.id, {
-                                type: 'UPDATE_STATS',
-                                playerId: id,
-                                hp: player.hp,
-                                mana: player.mana,
-                                buffs: player.buffs,
-                                debuffs: player.debuffs,
+                        }
+                        if (message.payload.type === 'battle-frenzy') {
+                            player.buffs.push({
+                                type: 'damage',
+                                percent: 0.4,
+                                expires: Date.now() + 5000,
+                                icon: '/icons/classes/warrior/warbringer.jpg'
                             });
+                        }
+                        if (message.payload.type === 'bloodthirst') {
+                            const rageBuffs = player.buffs.filter(b => b.type === 'rage');
+                            if (rageBuffs.length < 5) {
+                                player.mana += SPELL_COST['bloodthirst'] || 0;
+                                break;
+                            }
+                            let remove = 5;
+                            player.buffs = player.buffs.filter(b => {
+                                if (b.type === 'rage' && remove > 0) {
+                                    remove--;
+                                    return false;
+                                }
+                                return true;
+                            });
+                        }
+                        if (message.payload.type === 'fear' && message.payload.targetId) {
+                            const target = match.players.get(message.payload.targetId);
+                            if (target) {
+                                target.debuffs = target.debuffs || [];
+                                target.debuffs.push({
+                                    type: 'root',
+                                    expires: Date.now() + 3000,
+                                    icon: '/icons/classes/warlock/possession.jpg'
+                                });
+                            }
+                        }
+                        if (message.payload.type === 'lifedrain' && message.payload.targetId) {
+                            const target = match.players.get(message.payload.targetId);
+                            const caster = match.players.get(id);
+                            if (target && caster) {
+                                applyDamage(match, target.id, id, 30, 'lifedrain');
+                                caster.hp = Math.min(MAX_HP, caster.hp + 30);
+                            }
+
+                        }
+
+                        broadcastToMatch(match.id, {
+                            type: 'UPDATE_STATS',
+                            playerId: id,
+                            hp: player.hp,
+                            mana: player.mana,
+                            buffs: player.buffs,
+                            debuffs: player.debuffs,
+                        });
                         }
                     }
                 }

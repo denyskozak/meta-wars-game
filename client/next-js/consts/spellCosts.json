@@ -18,5 +18,11 @@
   "hand-of-freedom": 50,
   "divine-speed": 50,
   "lifedrain": 30,
-  "fear": 40
+  "fear": 40,
+  "dash": 30,
+  "death-blow": 20,
+  "slow-strike": 40,
+  "whirlwind": 50
+  ,"battle-frenzy": 30
+  ,"bloodthirst": 0
 }

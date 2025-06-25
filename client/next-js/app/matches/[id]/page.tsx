@@ -39,10 +39,10 @@ export default function MatchesPage() {
         //     label: 'Rogue',
         //     icon:  '/icons/rogue.webp'
         // },
-        // warrior: {
-        //     label: 'Warrior',
-        //     icon:  '/icons/warrior.webp'
-        // },
+        warrior: {
+            label: 'Warrior',
+            icon: '/icons/warrior.webp'
+        },
     };
 
     console.log("players: ", players);
@@ -87,7 +87,10 @@ export default function MatchesPage() {
 
     useEffect(() => {
         if (classType && !joined) {
-            const charModel = classType === 'paladin' ? 'bolvar' : 'vampir';
+            const charModel =
+                classType === 'paladin' || classType === 'warrior'
+                    ? 'bolvar'
+                    : 'vampir';
             sendToSocket({type: 'JOIN_MATCH', classType, character: charModel});
             sendToSocket({type: 'GET_MATCH'});
             setJoined(true);
@@ -96,7 +99,10 @@ export default function MatchesPage() {
 
     const handleReady = () => {
         if (!joined && classType) {
-            const charModel = classType === 'paladin' ? 'bolvar' : 'vampir';
+            const charModel =
+                classType === 'paladin' || classType === 'warrior'
+                    ? 'bolvar'
+                    : 'vampir';
             sendToSocket({type: 'JOIN_MATCH', classType, character: charModel});
         }
         dispatch({type: 'SET_CHARACTER', payload: {name: classType.toLowerCase(), skin}});

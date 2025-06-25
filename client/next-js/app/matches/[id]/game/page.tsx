@@ -46,7 +46,10 @@ export default function GamePage() {
     { id: "vampir", path: "skins/vampir.glb" },
     {
       id: "character",
-      path: character?.name === "paladin" ? "skins/bolvar.glb" : "skins/vampir.glb",
+      path:
+        character?.name === "paladin" || character?.name === "warrior"
+          ? "skins/bolvar.glb"
+          : "skins/vampir.glb",
     },
     { id: "heal-effect", path: "heal-effect.glb" },
     { id: "bottle_magic", path: "bottle_magic.glb" },
