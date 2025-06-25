@@ -52,6 +52,7 @@ export interface Championship {
 export interface PlayerData {
   address: string;
   classType: string;
+  character?: string;
 }
 
 export interface MatchDetail {

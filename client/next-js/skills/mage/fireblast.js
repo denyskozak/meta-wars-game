@@ -1,6 +1,6 @@
 import { SPELL_COST } from '../../consts';
 
-export const meta = { id: 'fireblast', key: 'Q', icon: '/icons/spell_fire_fireball.jpg' };
+export const meta = { id: 'fireblast', key: '3', icon: '/icons/classes/mage/spell_fire_fireball.jpg' };
 
 export default function castFireblast({ playerId, globalSkillCooldown, isCasting, mana, getTargetPlayer, dispatch, sendToSocket, activateGlobalCooldown, startSkillCooldown, FIREBLAST_DAMAGE, sounds }) {
   if (globalSkillCooldown || isCasting) return;

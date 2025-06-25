@@ -2,15 +2,20 @@ const WebSocket = require('ws');
 const http = require('http');
 // const { mintChest } = require('./sui.cjs');
 // const { mintCoins, mintItemWithOptions } = require('./sui.cjs');
+// const { createProfile } = require('./sui.cjs');
 
 const UPDATE_MATCH_INTERVAL = 33;
 const MAX_HP = 120;
+const MAX_MANA = 130;
 const MAX_POINTS = 10000;
 const XP_PER_LEVEL = 1000;
 const MANA_REGEN_INTERVAL = 1000;
 const MANA_REGEN_AMOUNT = 1.3; // 30% faster mana regeneration
 const SPELL_COST = require('../client/next-js/consts/spellCosts.json');
 const ICEBALL_ICON = '/icons/spell_frostbolt.jpg';
+const FROSTNOVA_ICON = '/icons/frostnova.jpg';
+const FREEDOM_ICON = '/icons/classes/paladin/sealofvalor.jpg';
+const DIVINE_SPEED_ICON = '/icons/classes/paladin/speedoflight.jpg';
 
 function updateLevel(player) {
     player.level = Math.min(10, Math.floor(player.points / XP_PER_LEVEL) + 1);
@@ -197,8 +202,16 @@ function broadcastMatchesToWaitingClients() {
     }
 }
 
-function createPlayer(address, classType) {
+const CLASS_MODELS = {
+    paladin: 'bolvar',
+    mage: 'vampir',
+    warlock: 'vampir',
+    rogue: 'vampir',
+};
+
+function createPlayer(address, classType, character) {
     const spawn = randomSpawnPoint();
+    const charName = character || CLASS_MODELS[classType] || 'vampir';
     return {
         position: {...spawn},
         spawn_point: spawn,
@@ -212,10 +225,13 @@ function createPlayer(address, classType) {
         points: 0,
         level: 1,
         hp: MAX_HP,
-        mana: 100,
+        mana: MAX_MANA,
+        comboPoints: 0,
+        comboTarget: null,
         chests: [],
         address,
-        classType
+        classType,
+        character: charName,
     };
 }
 
@@ -272,7 +288,7 @@ function checkRunePickup(match, playerId) {
                     player.hp = Math.min(MAX_HP, player.hp + 100);
                     break;
                 case 'mana':
-                    player.mana = Math.min(100, player.mana + 100);
+                    player.mana = Math.min(MAX_MANA, player.mana + 100);
                     break;
                 case 'damage':
                     player.buffs.push({
@@ -289,6 +305,8 @@ function checkRunePickup(match, playerId) {
                 playerId,
                 hp: player.hp,
                 mana: player.mana,
+                buffs: player.buffs,
+                debuffs: player.debuffs,
             });
 
             broadcastToMatch(match.id, {
@@ -373,7 +391,7 @@ function applyDamage(match, victimId, dealerId, damage, spellType) {
         victim.spawn_point = spawn;
         victim.rotation = { y: spawn.yaw || 0 };
         victim.hp = MAX_HP;
-        victim.mana = 100;
+        victim.mana = MAX_MANA;
         victim.animationAction = 'idle';
 
         broadcastToMatch(match.id, {
@@ -389,6 +407,8 @@ function applyDamage(match, victimId, dealerId, damage, spellType) {
         playerId: victimId,
         hp: victim.hp,
         mana: victim.mana,
+        buffs: victim.buffs,
+        debuffs: victim.debuffs,
     });
 
     broadcastToMatch(match.id, {
@@ -421,8 +441,8 @@ ws.on('connection', (socket) => {
         const now = Date.now();
         for (const match of matches.values()) {
             match.players.forEach((player, pid) => {
-                if (player.mana < 100) {
-                    player.mana = Math.min(100, player.mana + MANA_REGEN_AMOUNT);
+                if (player.mana < MAX_MANA) {
+                    player.mana = Math.min(MAX_MANA, player.mana + MANA_REGEN_AMOUNT);
                 }
                 if (player.buffs.length) {
                     player.buffs = player.buffs.filter(b => b.expires > now);
@@ -551,6 +571,12 @@ ws.on('connection', (socket) => {
                 }
                 break;
 
+            case 'CREATE_PROFILE':
+                if (message.address && message.nickname) {
+                    // createProfile(message.address, message.nickname);
+                }
+                break;
+
             case 'CREATE_MATCH':
                 createMatch({
                     maxPlayers: message.maxPlayers,
@@ -567,7 +593,8 @@ ws.on('connection', (socket) => {
                     break;
                 }
 
-                const newPlayer = createPlayer(message.address, message.classType || message.character?.name);
+                const char = typeof message.character === 'string' ? message.character : null;
+                const newPlayer = createPlayer(message.address, message.classType, char);
                 matchToJoin.players.set(id, newPlayer);
                 broadcastToMatch(matchToJoin.id, {
                     type: 'PLAYER_RESPAWN',
@@ -670,10 +697,7 @@ ws.on('connection', (socket) => {
                             player.hp = Math.min(MAX_HP, player.hp + 50);
                         }
                         if (message.payload.type === 'paladin-heal') {
-                            const target = match.players.get(message.payload.targetId || id);
-                            if (target) {
-                                target.hp = Math.min(MAX_HP, target.hp + 50);
-                            }
+                            player.hp = Math.min(MAX_HP, player.hp + 50);
                         }
 
                         if (['immolate'].includes(message.payload.type)) {
@@ -683,8 +707,9 @@ ws.on('connection', (socket) => {
                                 id,
                             });
                         }
-                        
-                        if (['fireball', 'darkball', 'corruption', 'chaosbolt', 'iceball', 'shield', 'pyroblast', 'fireblast', 'lightstrike', 'lightwave', 'stun', 'paladin-heal'].includes(message.payload.type)) {
+
+
+                        if (['fireball', 'darkball', 'corruption', 'chaosbolt', 'iceball', 'shield', 'pyroblast', 'fireblast', 'lightstrike', 'lightwave', 'stun', 'paladin-heal', 'frostnova', 'blink', 'hand-of-freedom', 'divine-speed', 'lifedrain', 'fear', 'blood-strike', 'eviscerate', 'kidney-strike', 'adrenaline-rush', 'sprint', 'shadow-leap'].includes(message.payload.type)) {
                             broadcastToMatch(match.id, {
                                 type: 'CAST_SPELL',
                                 payload: message.payload,
@@ -728,17 +753,109 @@ ws.on('connection', (socket) => {
                                 target.debuffs.push({
                                     type: 'stun',
                                     expires: Date.now() + 3000,
-                                    icon: '/icons/classes/paladin/searinglight.jpg'
+                                    icon: '/icons/classes/paladin/sealofmight.jpg'
                                 });
                             }
                         }
 
-                        broadcastToMatch(match.id, {
-                            type: 'UPDATE_STATS',
-                            playerId: id,
-                            hp: player.hp,
-                            mana: player.mana,
-                        });
+                        if (message.payload.type === 'hand-of-freedom') {
+                            player.debuffs = player.debuffs?.filter(d => d.type !== 'slow' && d.type !== 'root') || [];
+                            player.buffs.push({
+                                type: 'freedom',
+                                expires: Date.now() + 5000,
+                                icon: FREEDOM_ICON,
+                            });
+                        }
+                        if (message.payload.type === 'divine-speed') {
+                            player.buffs.push({
+                                type: 'speed',
+                                expires: Date.now() + 5000,
+                                icon: DIVINE_SPEED_ICON,
+                            });
+
+                        }
+                        if (message.payload.type === 'blood-strike') {
+                            if (player.comboTarget && player.comboTarget !== message.payload.targetId) {
+                                player.comboPoints = 0;
+                            }
+                            player.comboTarget = message.payload.targetId || player.comboTarget;
+                            player.comboPoints = Math.min(5, (player.comboPoints || 0) + 1);
+                        }
+                        if (message.payload.type === 'eviscerate' && message.payload.targetId) {
+                            const target = match.players.get(message.payload.targetId);
+                            if (target) {
+                                const damage = 28 * (player.comboPoints || 0);
+                                if (damage > 0) {
+                                    applyDamage(match, target.id, id, damage, 'eviscerate');
+                                }
+                                player.comboPoints = 0;
+                                player.comboTarget = null;
+                            }
+                        }
+                        if (message.payload.type === 'shadow-leap') {
+                            player.comboPoints = Math.min(5, (player.comboPoints || 0) + 1);
+                            player.comboTarget = message.payload.targetId || player.comboTarget;
+                        }
+                        if (message.payload.type === 'kidney-strike' && message.payload.targetId) {
+                            const target = match.players.get(message.payload.targetId);
+                            if (target) {
+                                target.debuffs = target.debuffs || [];
+                                const duration = 2000 + (player.comboPoints * 500);
+                                target.debuffs.push({
+                                    type: 'stun',
+                                    expires: Date.now() + duration,
+                                    icon: '/icons/classes/rogue/kidneyshot.jpg'
+                                });
+                                player.comboPoints = 0;
+                                player.comboTarget = null;
+                            }
+                        }
+                        if (message.payload.type === 'adrenaline-rush') {
+                            player.buffs.push({
+                                type: 'speed',
+                                expires: Date.now() + 8000,
+                                icon: DIVINE_SPEED_ICON,
+                            });
+                        }
+                        if (message.payload.type === 'sprint') {
+                            player.debuffs = player.debuffs?.filter(d => d.type !== 'slow' && d.type !== 'root') || [];
+                            player.buffs.push({
+                                type: 'speed',
+                                expires: Date.now() + 6000,
+                                icon: DIVINE_SPEED_ICON,
+                            });
+                        
+                        }
+                        if (message.payload.type === 'fear' && message.payload.targetId) {
+                            const target = match.players.get(message.payload.targetId);
+                            if (target) {
+                                target.debuffs = target.debuffs || [];
+                                    target.debuffs.push({
+                                        type: 'root',
+                                        expires: Date.now() + 3000,
+                                        icon: '/icons/classes/warlock/possession.jpg'
+                                    });
+                                }
+                            }
+                            if (message.payload.type === 'lifedrain' && message.payload.targetId) {
+                                const target = match.players.get(message.payload.targetId);
+                                const caster = match.players.get(id);
+                                if (target && caster) {
+                                    applyDamage(match, target.id, id, 30, 'lifedrain');
+                                    caster.hp = Math.min(MAX_HP, caster.hp + 30);
+                                }
+
+                            }
+
+                            broadcastToMatch(match.id, {
+                                type: 'UPDATE_STATS',
+                                playerId: id,
+                                hp: player.hp,
+                                mana: player.mana,
+                                buffs: player.buffs,
+                                debuffs: player.debuffs,
+                            });
+                        }
                     }
                 }
                 break;
@@ -764,6 +881,17 @@ ws.on('connection', (socket) => {
                             });
                         }
                     }
+                    if (message.spellType === 'frostnova') {
+                        const target = match.players.get(id);
+                        if (target) {
+                            target.debuffs = target.debuffs || [];
+                            target.debuffs.push({
+                                type: 'root',
+                                expires: Date.now() + 3000,
+                                icon: FROSTNOVA_ICON,
+                            });
+                        }
+                    }
                 }
                 break;
 
@@ -772,7 +900,7 @@ ws.on('connection', (socket) => {
                     const p = match.players.get(id);
                     if (p) {
                         p.hp = MAX_HP;
-                        p.mana = 100;
+                        p.mana = MAX_MANA;
                         p.buffs = [];
                         p.debuffs = [];
                         broadcastToMatch(match.id, {
@@ -780,6 +908,8 @@ ws.on('connection', (socket) => {
                             playerId: id,
                             hp: p.hp,
                             mana: p.mana,
+                            buffs: p.buffs,
+                            debuffs: p.debuffs,
                         });
                     }
                 }

@@ -41,7 +41,9 @@ export default function GamePage() {
   } = useInterface();
 
   const models = [
-    { id: "zone", path: "zone7.glb" },
+    { id: "zone", path: "zone.glb" },
+    { id: "bolvar", path: "skins/bolvar.glb" },
+    { id: "vampir", path: "skins/vampir.glb" },
     {
       id: "character",
       path: character?.name === "paladin" ? "skins/bolvar.glb" : "skins/vampir.glb",

@@ -26,6 +26,10 @@
     transition-duration: 0.1s;
 }
 
+.skill-button.no-mana .skill-icon {
+    filter: brightness(0.4) grayscale(50%);
+}
+
 .skill-icon {
     width: 80%;
     height: 80%;

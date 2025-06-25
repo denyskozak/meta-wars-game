@@ -46,7 +46,7 @@ export const CastBar = () => {
     if (!isCasting) return null;
 
     return (
-        <div className="fixed bottom-24 left-1/2 transform -translate-x-1/2 w-64 z-50">
+        <div className="fixed bottom-40 left-1/2 transform -translate-x-1/2 w-64 z-50">
             <Progress disableAnimation aria-label="Casting..." value={progress} color="warning" />
         </div>
     );

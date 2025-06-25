@@ -7,6 +7,7 @@ export const initInterfaceState = {
     character: null,
     scoreboardData: [],
     scoreboardVisible: false,
+    menuVisible: false,
     buffs: [],
     debuffs: [],
 };
@@ -28,6 +29,9 @@ export const interfaceReducer = (state, action) => {
         }
         case 'SET_SCOREBOARD_VISIBLE': {
             return {...state, scoreboardVisible: action.payload};
+        }
+        case 'SET_MENU_VISIBLE': {
+            return {...state, menuVisible: action.payload};
         }
         case 'SET_BUFFS': {
             return {...state, buffs: action.payload};

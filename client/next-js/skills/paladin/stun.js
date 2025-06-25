@@ -25,4 +25,5 @@ export default function castStun({ playerId, globalSkillCooldown, isCasting, man
   sendToSocket({ type: 'CAST_SPELL', payload: { type: 'stun', targetId } });
   activateGlobalCooldown();
   startSkillCooldown('stun');
+  return targetId;
 }

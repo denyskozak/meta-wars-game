@@ -1,7 +1,8 @@
 import React, {useLayoutEffect, useRef, useState, useEffect} from "react";
-import {MAX_HP} from "../consts";
+import {MAX_HP, MAX_MANA} from "../consts";
 import { SPELL_COST } from '../consts';
 import * as THREE from "three";
+import { Fire } from "../three/Fire";
 import * as SkeletonUtils from "three/examples/jsm/utils/SkeletonUtils";
 import Stats from "three/examples/jsm/libs/stats.module";
 import {Octree} from "three/examples/jsm/math/Octree";
@@ -21,14 +22,26 @@ import castFireball, { meta as fireballMeta } from '../skills/mage/fireball';
 import castIceball, { meta as iceballMeta } from '../skills/mage/iceball';
 import castFireblast, { meta as fireblastMeta } from '../skills/mage/fireblast';
 import castPyroblast, { meta as pyroblastMeta } from '../skills/mage/pyroblast';
+import castFrostNova, { meta as frostNovaMeta } from '../skills/mage/frostNova';
+import castBlink, { meta as blinkMeta } from '../skills/mage/blink';
 import castDarkball, { meta as darkballMeta } from '../skills/warlock/darkball';
 import castCorruption, { meta as corruptionMeta } from '../skills/warlock/corruption';
 import castImmolate, { meta as immolateMeta } from '../skills/warlock/immolate';
 import castChaosBolt, { meta as chaosBoltMeta } from '../skills/warlock/chaosBolt';
+import castLifeDrain, { meta as lifeDrainMeta } from '../skills/warlock/lifeDrain';
+import castFear, { meta as fearMeta } from '../skills/warlock/fear';
 import { meta as lightStrikeMeta } from '../skills/paladin/lightStrike';
 import castStun, { meta as stunMeta } from '../skills/paladin/stun';
 import castPaladinHeal, { meta as paladinHealMeta } from '../skills/paladin/heal';
-import castLightWave, { meta as lightWaveMeta } from '../skills/paladin/lightWave';
+import { meta as lightWaveMeta } from '../skills/paladin/lightWave';
+import castHandOfFreedom, { meta as handOfFreedomMeta } from '../skills/paladin/handFreedom';
+import castDivineSpeed, { meta as divineSpeedMeta } from '../skills/paladin/divineSpeed';
+import castBloodStrike, { meta as bloodStrikeMeta } from '../skills/rogue/bloodStrike';
+import castEviscerate, { meta as eviscerateMeta } from '../skills/rogue/eviscerate';
+import castKidneyStrike, { meta as kidneyStrikeMeta } from '../skills/rogue/kidneyStrike';
+import castAdrenalineRush, { meta as adrenalineRushMeta } from '../skills/rogue/adrenalineRush';
+import castSprint, { meta as sprintMeta } from '../skills/rogue/sprint';
+import castShadowLeap, { meta as shadowLeapMeta } from '../skills/rogue/shadowLeap';
 
 
 import {Interface} from "@/components/layout/Interface";
@@ -48,10 +61,22 @@ const SPELL_ICONS = {
     [corruptionMeta.id]: corruptionMeta.icon,
     [immolateMeta.id]: immolateMeta.icon,
     [chaosBoltMeta.id]: chaosBoltMeta.icon,
+    [lifeDrainMeta.id]: lifeDrainMeta.icon,
+    [fearMeta.id]: fearMeta.icon,
     [lightStrikeMeta.id]: lightStrikeMeta.icon,
     [stunMeta.id]: stunMeta.icon,
     [paladinHealMeta.id]: paladinHealMeta.icon,
     [lightWaveMeta.id]: lightWaveMeta.icon,
+    [handOfFreedomMeta.id]: handOfFreedomMeta.icon,
+    [divineSpeedMeta.id]: divineSpeedMeta.icon,
+    [bloodStrikeMeta.id]: bloodStrikeMeta.icon,
+    [eviscerateMeta.id]: eviscerateMeta.icon,
+    [kidneyStrikeMeta.id]: kidneyStrikeMeta.icon,
+    [adrenalineRushMeta.id]: adrenalineRushMeta.icon,
+    [sprintMeta.id]: sprintMeta.icon,
+    [shadowLeapMeta.id]: shadowLeapMeta.icon,
+    [frostNovaMeta.id]: frostNovaMeta.icon,
+    [blinkMeta.id]: blinkMeta.icon,
 };
 
 const SPELL_META = {
@@ -63,17 +88,29 @@ const SPELL_META = {
     [corruptionMeta.id]: corruptionMeta,
     [immolateMeta.id]: immolateMeta,
     [chaosBoltMeta.id]: chaosBoltMeta,
+    [lifeDrainMeta.id]: lifeDrainMeta,
+    [fearMeta.id]: fearMeta,
     [lightStrikeMeta.id]: lightStrikeMeta,
     [stunMeta.id]: stunMeta,
     [paladinHealMeta.id]: paladinHealMeta,
     [lightWaveMeta.id]: lightWaveMeta,
+    [handOfFreedomMeta.id]: handOfFreedomMeta,
+    [divineSpeedMeta.id]: divineSpeedMeta,
+    [bloodStrikeMeta.id]: bloodStrikeMeta,
+    [eviscerateMeta.id]: eviscerateMeta,
+    [kidneyStrikeMeta.id]: kidneyStrikeMeta,
+    [adrenalineRushMeta.id]: adrenalineRushMeta,
+    [sprintMeta.id]: sprintMeta,
+    [shadowLeapMeta.id]: shadowLeapMeta,
+    [frostNovaMeta.id]: frostNovaMeta,
+    [blinkMeta.id]: blinkMeta,
 };
 
 const SPELL_SCALES = {
-    fireball: 1.8,
+    fireball: 2.34, // increased by 30%
     iceball: 1.8,
-    darkball: 2.4,
-    pyroblast: 5.4,
+    darkball: 1.68,
+    pyroblast: 5,
     chaosBolt: 5.4,
 };
 
@@ -140,9 +177,13 @@ export function Game({models, sounds, textures, matchId, character}) {
     const {refetch: refetchCoins} = useCoins();
     const {state, dispatch} = useInterface();
     const debuffsRef = useRef(state.debuffs);
+    const menuVisibleRef = useRef(state.menuVisible);
     useEffect(() => {
         debuffsRef.current = state.debuffs;
     }, [state.debuffs]);
+    useEffect(() => {
+        menuVisibleRef.current = state.menuVisible;
+    }, [state.menuVisible]);
     const {socket, sendToSocket} = useWS(matchId);
     const router = useRouter();
     const [isReadyToPlay, setIsReadyToPlay] = useState(false);
@@ -182,7 +223,7 @@ export function Game({models, sounds, textures, matchId, character}) {
         const animations = models["character_animations"];
 
         let hp = MAX_HP,
-            mana = 100,
+            mana = MAX_MANA,
             points = 0,
             level = 1;
         let actions = [];
@@ -236,6 +277,9 @@ export function Game({models, sounds, textures, matchId, character}) {
         const activeHandEffects = new Map(); // key = playerId -> { effectKey: {left, right} }
         const activeDamageEffects = new Map(); // key = playerId -> effect mesh
         const activeImmolation = new Map(); // key = playerId -> effect mesh
+        const activeStunEffects = new Map(); // key = playerId -> {group, timeout}
+        const activeFearEffects = new Map(); // key = playerId -> {sprite, timeout}
+        const fearTexture = new THREE.TextureLoader().load('/icons/classes/warlock/possession.jpg');
 
         const glowTexture = (() => {
             const size = 64;
@@ -262,6 +306,50 @@ export function Game({models, sounds, textures, matchId, character}) {
             const material = new THREE.SpriteMaterial({
                 map: glowTexture,
                 color,
+                transparent: true,
+                depthWrite: false,
+                blending: THREE.AdditiveBlending,
+            });
+            const sprite = new THREE.Sprite(material);
+            sprite.scale.set(size, size, 1);
+            sprite.renderOrder = 999;
+            return sprite;
+        }
+
+        const starTexture = (() => {
+            const size = 64;
+            const canvas = document.createElement('canvas');
+            canvas.width = canvas.height = size;
+            const ctx = canvas.getContext('2d');
+            const spikes = 5;
+            const outerRadius = size / 2;
+            const innerRadius = size / 4;
+            let rot = Math.PI / 2 * 3;
+            const step = Math.PI / spikes;
+            ctx.beginPath();
+            ctx.moveTo(size / 2, size / 2 - outerRadius);
+            for (let i = 0; i < spikes; i++) {
+                ctx.lineTo(
+                    size / 2 + Math.cos(rot) * outerRadius,
+                    size / 2 + Math.sin(rot) * outerRadius
+                );
+                rot += step;
+                ctx.lineTo(
+                    size / 2 + Math.cos(rot) * innerRadius,
+                    size / 2 + Math.sin(rot) * innerRadius
+                );
+                rot += step;
+            }
+            ctx.lineTo(size / 2, size / 2 - outerRadius);
+            ctx.closePath();
+            ctx.fillStyle = 'rgba(255,255,0,1)';
+            ctx.fill();
+            return new THREE.CanvasTexture(canvas);
+        })();
+
+        function makeStarSprite(size = 0.5) {
+            const material = new THREE.SpriteMaterial({
+                map: starTexture,
                 transparent: true,
                 depthWrite: false,
                 blending: THREE.AdditiveBlending,
@@ -551,14 +639,25 @@ export function Game({models, sounds, textures, matchId, character}) {
             iceball: 5000,
             fireblast: 5000,
             chaosbolt: 6000,
+            lifedrain: 0,
+            fear: 40000,
             'ice-shield': 30000,
-            pyroblast: 6000,
+            pyroblast: 15000,
             blink: 10000,
             heal: 0,
-            lightstrike: 1000,
+            lightstrike: 2000,
             stun: 50000,
-            'paladin-heal': 30000,
-            lightwave: 120000,
+            'paladin-heal': 20000,
+            lightwave: 5000,
+            frostnova: 15000,
+            'hand-of-freedom': 15000,
+            'divine-speed': 30000,
+            'blood-strike': 5000,
+            eviscerate: 10000,
+            'kidney-strike': 20000,
+            'adrenaline-rush': 45000,
+            sprint: 30000,
+            'shadow-leap': 12000,
         };
         const skillCooldownTimers = {};
 
@@ -645,14 +744,20 @@ export function Game({models, sounds, textures, matchId, character}) {
         const FIREBLAST_DAMAGE = 25;
 
         const FIREBALL_DAMAGE = 40;
-        const PYROBLAST_DAMAGE = FIREBALL_DAMAGE * 2;
+        const PYROBLAST_DAMAGE = FIREBALL_DAMAGE * 1.4;
         const CHAOSBOLT_DAMAGE = FIREBALL_DAMAGE * 2;
         const ICEBALL_DAMAGE = 25;
         const DARKBALL_DAMAGE = 30;
-        const LIGHTSTRIKE_DAMAGE = 40;
-        const LIGHTSTRIKE_RANGE = 4;
+        const LIFEDRAIN_DAMAGE = 30;
+        const FROSTNOVA_DAMAGE = 20;
+        const FROSTNOVA_RANGE = FIREBLAST_RANGE / 2;
+        const FROSTNOVA_RING_DURATION = 1000; // ms
+        const LIGHTWAVE_RING_DURATION = 1000; // ms
+        const LIGHTSTRIKE_DAMAGE = 28; // 30% less damage
+        const LIGHTSTRIKE_RANGE = 0.8; // melee range
         const LIGHTSTRIKE_ANGLE = Math.PI / 4;
         const LIGHTWAVE_DAMAGE = 40;
+        const STUN_SPIN_SPEED = 2;
 
         // Медленнее пускаем сферы как настоящие заклинания
         const MIN_SPHERE_IMPULSE = 6;
@@ -717,6 +822,8 @@ export function Game({models, sounds, textures, matchId, character}) {
         let isShieldActive = false;
         let isChatActive = false;
         let isHealActive = false;
+        const frostNovaRings = [];
+        const lightWaveRings = [];
 
         // Crosshair elements
         const target = document.getElementById("target");
@@ -814,19 +921,38 @@ export function Game({models, sounds, textures, matchId, character}) {
             const className = character?.name?.toLowerCase();
             if (className === 'warlock') castSpell('darkball');
             else if (className === 'paladin') castSpell('lightstrike');
+            else if (className === 'rogue') castSpell('blood-strike');
             else castSpell('fireball');
         }
         function handleKeyR() {
             const className = character?.name?.toLowerCase();
             if (className === 'warlock') castSpell('corruption');
             else if (className === 'paladin') castSpell('stun');
+            else if (className === 'rogue') castSpell('eviscerate');
             else castSpell('iceball');
         }
         function handleKeyF() {
             const className = character?.name?.toLowerCase();
             if (className === 'warlock') castSpell('chaosbolt');
             else if (className === 'paladin') castSpell('lightwave');
-            else castSpell('pyroblast');
+            else if (className === 'rogue') castSpell('kidney-strike');
+            else castSpell('blink');
+        }
+        function handleDigit3() {
+            const className = character?.name?.toLowerCase();
+            if (className === 'mage') castSpell('fireblast');
+            else if (className === 'paladin') castSpell('hand-of-freedom');
+            else if (className === 'warlock') castSpell('fear');
+            else if (className === 'rogue') castSpell('sprint');
+
+        }
+        function handleDigit2() {
+            const className = character?.name?.toLowerCase();
+            if (className === 'mage') castSpell('pyroblast');
+            else if (className === 'paladin') castSpell('divine-speed');
+            else if (className === 'warlock') castSpell('lifedrain');
+            else if (className === 'rogue') castSpell('adrenaline-rush');
+
         }
         function handleKeyG() {
             leftMouseButtonClicked = true;
@@ -869,7 +995,11 @@ export function Game({models, sounds, textures, matchId, character}) {
             const className = character?.name?.toLowerCase();
             if (className === 'warlock') castSpell('immolate');
             else if (className === 'paladin') castSpell('paladin-heal');
-            else castSpell('fireblast');
+            else if (className === 'rogue') castSpell('shadow-leap');
+            else castSpell('frostnova');
+        }
+        function handleEscape() {
+            dispatch({type: 'SET_MENU_VISIBLE', payload: !menuVisibleRef.current});
         }
 
         const keyDownHandlers = {
@@ -880,6 +1010,8 @@ export function Game({models, sounds, textures, matchId, character}) {
             KeyE: handleKeyE,
             KeyR: handleKeyR,
             KeyF: handleKeyF,
+            Digit3: handleDigit3,
+            Digit2: handleDigit2,
             KeyG: handleKeyG,
             KeyJ: handleKeyJ,
             KeyT: handleKeyT,
@@ -888,6 +1020,10 @@ export function Game({models, sounds, textures, matchId, character}) {
         };
 
         document.addEventListener("keydown", (event) => {
+            if (event.code === "Escape") {
+                handleEscape();
+                return;
+            }
             if (event.code === "Enter") {
                 if (!isChatActive) {
                     chatInputElement.focus();
@@ -899,7 +1035,7 @@ export function Game({models, sounds, textures, matchId, character}) {
 
             if (isChatActive) return;
 
-            if (!controlsEnabled || debuffsRef.current.some(d => d.type === 'stun')) return;
+            if (!controlsEnabled || debuffsRef.current.some(d => d.type === 'stun') || menuVisibleRef.current) return;
 
             keyStates[event.code] = true;
 
@@ -928,7 +1064,7 @@ export function Game({models, sounds, textures, matchId, character}) {
         document.addEventListener("keyup", (event) => {
             if (isChatActive) return;
 
-            if (!controlsEnabled || debuffsRef.current.some(d => d.type === 'stun')) return;
+            if (!controlsEnabled || debuffsRef.current.some(d => d.type === 'stun') || menuVisibleRef.current) return;
 
             keyStates[event.code] = false;
 
@@ -1040,76 +1176,6 @@ export function Game({models, sounds, textures, matchId, character}) {
         }
 
 
-        function castBlink() {
-            const BLINK_DISTANCE = 5; // Distance to teleport forward
-            const BLINK_MANA_COST = SPELL_COST['blink'];
-            const BLINK_COOLDOWN = 10000; // Cooldown in milliseconds
-
-            if (!isFocused) {
-                handleRightClick();
-            }
-
-            if (globalSkillCooldown || isCasting || isSkillOnCooldown('blink')) {
-                return;
-            }
-
-            if (mana < BLINK_MANA_COST) {
-                console.log("Not enough mana to blink!");
-                if (sounds.noMana) {
-                    sounds.noMana.currentTime = 0;
-                    sounds.noMana.volume = 0.5;
-                    sounds.noMana.play();
-                }
-
-                return;
-            }
-
-            sendToSocket({
-                type: 'CAST_SPELL',
-                payload: {type: 'blink'}
-            });
-
-            sounds.blink.volume = 0.5;
-            sounds.blink.play();
-
-            startSkillCooldown('blink');
-
-            const playerPosition = new THREE.Vector3();
-
-            playerCollider.getCenter(playerPosition);
-
-            // Teleport the player forward
-            const forwardDirection = new THREE.Vector3();
-
-            camera.getWorldDirection(forwardDirection);
-            forwardDirection.y = 0; // Keep movement in the horizontal plane
-            forwardDirection.normalize();
-
-            const blinkTarget = playerPosition.addScaledVector(
-                forwardDirection,
-                BLINK_DISTANCE,
-            );
-
-            // Ensure no collisions at the blink target
-            const result = worldOctree.capsuleIntersect(
-                new Capsule(
-                    blinkTarget,
-                    blinkTarget.clone().add(new THREE.Vector3(0, 0.75, 0)),
-                    0.35,
-                ),
-            );
-
-            if (!result) {
-                // If the target position is valid, teleport the player
-                teleportTo(blinkTarget);
-            } else {
-                console.log("Blink target is obstructed!");
-            }
-
-            // Activate cooldown
-            activateGlobalCooldown();
-            startSkillCooldown('blink');
-        }
 
         function castHeal() {
             const HEAL_AMOUNT = 20; // Amount of HP restored
@@ -1339,6 +1405,28 @@ export function Game({models, sounds, textures, matchId, character}) {
                         damage: CHAOSBOLT_DAMAGE,
                     });
                     break;
+                case "fear":
+                    castFear({
+                        playerId,
+                        castSpellImpl,
+                        mana,
+                        getTargetPlayer,
+                        dispatch,
+                        sendToSocket,
+                        sounds,
+                    });
+                    break;
+                case "lifedrain":
+                    castLifeDrain({
+                        playerId,
+                        castSpellImpl,
+                        mana,
+                        getTargetPlayer,
+                        dispatch,
+                        sendToSocket,
+                        sounds,
+                    });
+                    break;
                 case "darkball":
                     darkHands(playerId, 1000);
                     castSpellImpl(
@@ -1389,6 +1477,36 @@ export function Game({models, sounds, textures, matchId, character}) {
                         damage: PYROBLAST_DAMAGE,
                     });
                     break;
+                case "frostnova":
+                    castFrostNova({
+                        playerId,
+                        globalSkillCooldown,
+                        isCasting,
+                        mana,
+                        sendToSocket,
+                        activateGlobalCooldown,
+                        startSkillCooldown,
+                        sounds,
+                    });
+                    spawnFrostNovaRing(playerId);
+                    break;
+                case "blink":
+                    castBlink({
+                        globalSkillCooldown,
+                        isCasting,
+                        mana,
+                        sendToSocket,
+                        activateGlobalCooldown,
+                        startSkillCooldown,
+                        sounds,
+                        teleportTo,
+                        playerCollider,
+                        worldOctree,
+                        camera,
+                        FIREBLAST_RANGE,
+                        rotationY: players.get(playerId)?.model.rotation.y,
+                    });
+                    break;
                 case "chaosbolt":
                     castChaosBolt({
                         playerId,
@@ -1404,7 +1522,7 @@ export function Game({models, sounds, textures, matchId, character}) {
                     performLightStrike();
                     break;
                 case "stun":
-                    castStun({
+                    const target = castStun({
                         playerId,
                         globalSkillCooldown,
                         isCasting,
@@ -1416,27 +1534,122 @@ export function Game({models, sounds, textures, matchId, character}) {
                         startSkillCooldown,
                         sounds,
                     });
+                    if (target) applyStunEffect(target, 3000);
+                    break;
+                case "hand-of-freedom":
+                    castHandOfFreedom({
+                        playerId,
+                        globalSkillCooldown,
+                        isCasting,
+                        mana,
+                        sendToSocket,
+                        activateGlobalCooldown,
+                        startSkillCooldown,
+                        sounds,
+                    });
+                    applyFreedomEffect(playerId, 5000);
+                    break;
+                case "divine-speed":
+                    castDivineSpeed({
+                        playerId,
+                        globalSkillCooldown,
+                        isCasting,
+                        mana,
+                        sendToSocket,
+                        activateGlobalCooldown,
+                        startSkillCooldown,
+                        sounds,
+                    });
+                    applySpeedEffect(playerId, 5000);
                     break;
                 case "paladin-heal":
                     castPaladinHeal({
                         playerId,
                         castSpellImpl,
                         mana,
-                        getTargetPlayer,
-                        dispatch,
                         sendToSocket,
                         sounds,
                     });
                     break;
-                case "lightwave":
-                    castLightWave({
-                        playerId,
+                case "blood-strike":
+                    castBloodStrike({
                         globalSkillCooldown,
                         isCasting,
+                        mana,
                         sendToSocket,
                         activateGlobalCooldown,
                         startSkillCooldown,
+                        sounds,
                     });
+                    break;
+                case "eviscerate":
+                    castEviscerate({
+                        globalSkillCooldown,
+                        isCasting,
+                        mana,
+                        playerId,
+                        getTargetPlayer,
+                        dispatch,
+                        sendToSocket,
+                        activateGlobalCooldown,
+                        startSkillCooldown,
+                        sounds,
+                    });
+                    break;
+                case "kidney-strike":
+                    const targetKidney = castKidneyStrike({
+                        playerId,
+                        globalSkillCooldown,
+                        isCasting,
+                        mana,
+                        getTargetPlayer,
+                        dispatch,
+                        sendToSocket,
+                        activateGlobalCooldown,
+                        startSkillCooldown,
+                        sounds,
+                    });
+                    if (targetKidney) applyStunEffect(targetKidney, 2000);
+                    break;
+                case "adrenaline-rush":
+                    castAdrenalineRush({
+                        globalSkillCooldown,
+                        isCasting,
+                        mana,
+                        sendToSocket,
+                        activateGlobalCooldown,
+                        startSkillCooldown,
+                        sounds,
+                    });
+                    break;
+                case "sprint":
+                    castSprint({
+                        globalSkillCooldown,
+                        isCasting,
+                        mana,
+                        sendToSocket,
+                        activateGlobalCooldown,
+                        startSkillCooldown,
+                        sounds,
+                    });
+                    applySpeedEffect(playerId, 6000);
+                    break;
+                case "shadow-leap":
+                    castShadowLeap({
+                        playerId,
+                        globalSkillCooldown,
+                        isCasting,
+                        mana,
+                        getTargetPlayer,
+                        dispatch,
+                        sendToSocket,
+                        activateGlobalCooldown,
+                        startSkillCooldown,
+                        sounds,
+                    });
+                    break;
+                case "lightwave":
+                    performLightWave();
                     break;
             }
         }
@@ -1478,9 +1691,35 @@ export function Game({models, sounds, textures, matchId, character}) {
             startSkillCooldown('lightstrike');
         }
 
+        function performLightWave() {
+            const playerData = players.get(myPlayerId);
+            if (!playerData) return;
+            const { mixer, actions } = playerData;
 
-        function castSphere(model, sphereMesh, type, damage) {
+            spawnLightWaveRing(myPlayerId);
+
+            controlAction({
+                action: actions['attack360'] || actions['attack'],
+                actionName: 'attack_360',
+                mixer,
+                loop: THREE.LoopOnce,
+                fadeIn: 0.1,
+                reset: true,
+                clampWhenFinished: true,
+            });
+
+            sendToSocket({ type: 'CAST_SPELL', payload: { type: 'lightwave' } });
+            activateGlobalCooldown();
+            startSkillCooldown('lightwave');
+        }
+
+
+       function castSphere(model, sphereMesh, type, damage) {
             sphereMesh.rotation.copy(model.rotation);
+
+            if (sphereMesh instanceof Fire) {
+                sphereMesh.lookAt(camera.position);
+            }
 
             scene.add(sphereMesh); // Add the sphereMesh to the scene
 
@@ -1777,8 +2016,11 @@ export function Game({models, sounds, textures, matchId, character}) {
 
             // spheresCollisions(); // Handle collisions between spheres
 
-            for (let sphere of spheres) {
+           for (let sphere of spheres) {
                 sphere.mesh?.position.copy(sphere.collider?.center); // TODO fix
+                if (sphere.type === 'pyroblast') {
+                    sphere.mesh.lookAt(camera.position);
+                }
             }
         }
 
@@ -1973,7 +2215,7 @@ export function Game({models, sounds, textures, matchId, character}) {
 
             console.log("error check actions: ", actions);
             return Object.values(actions).some(
-                (action) => action.isRunning() && !excludeActions.includes(action),
+                (action) => action && action.isRunning() && !excludeActions.includes(action),
             );
         }
 
@@ -2016,7 +2258,8 @@ export function Game({models, sounds, textures, matchId, character}) {
             const model = players.get(myPlayerId).model;
             // Update the model's position
             if (model) {
-                model.position.set(position.x, position.y - 0.5, position.z); // Adjust for model offset
+                // Adjust for model offset so it doesn't hover above ground
+                model.position.set(position.x, position.y - 0.7, position.z);
                 const rotY =
                     typeof position.yaw === "number"
                         ? position.yaw
@@ -2230,9 +2473,138 @@ export function Game({models, sounds, textures, matchId, character}) {
 
         function applySlowEffect(playerId, duration = 3000) {
             if (playerId === myPlayerId) {
+                if (freedomActive) return;
                 movementSpeedModifier = 0.6;
                 setTimeout(() => (movementSpeedModifier = 1), duration);
             }
+        }
+
+        function applyRootEffect(playerId, duration = 3000) {
+            if (playerId === myPlayerId) {
+                if (freedomActive) return;
+                movementSpeedModifier = 0;
+                playerVelocity.x = 0;
+                playerVelocity.z = 0;
+                setTimeout(() => (movementSpeedModifier = 1), duration);
+            }
+        }
+
+        let freedomActive = false;
+
+        function applyFreedomEffect(playerId, duration = 5000) {
+            if (playerId === myPlayerId) {
+                freedomActive = true;
+                movementSpeedModifier = 1;
+                setTimeout(() => (freedomActive = false), duration);
+            }
+        }
+
+        function applySpeedEffect(playerId, duration = 5000) {
+            if (playerId === myPlayerId) {
+                movementSpeedModifier = 1.4;
+                setTimeout(() => (movementSpeedModifier = 1), duration);
+            }
+        }
+
+        function applyStunEffect(playerId, duration = 3000) {
+            const existing = activeStunEffects.get(playerId);
+            if (existing) {
+                existing.group.parent?.remove(existing.group);
+                clearTimeout(existing.timeout);
+            }
+
+            const group = new THREE.Group();
+            const count = 5;
+            for (let i = 0; i < count; i++) {
+                const sprite = makeStarSprite(0.4);
+                const angle = (i / count) * Math.PI * 2;
+                sprite.position.set(Math.cos(angle) * 0.6, 0, Math.sin(angle) * 0.6);
+                group.add(sprite);
+            }
+
+            scene.add(group);
+
+            const timeout = setTimeout(() => {
+                group.parent?.remove(group);
+                activeStunEffects.delete(playerId);
+            }, duration);
+
+            activeStunEffects.set(playerId, { group, timeout });
+        }
+
+        function applyFearEffect(playerId, duration = 3000) {
+            const existing = activeFearEffects.get(playerId);
+            if (existing) {
+                existing.sprite.parent?.remove(existing.sprite);
+                clearTimeout(existing.timeout);
+            }
+
+            const material = new THREE.SpriteMaterial({
+                map: fearTexture,
+                transparent: true,
+                depthWrite: false,
+            });
+            const sprite = new THREE.Sprite(material);
+            sprite.scale.set(1, 1, 1);
+            sprite.renderOrder = 999;
+            scene.add(sprite);
+
+            const timeout = setTimeout(() => {
+                sprite.parent?.remove(sprite);
+                activeFearEffects.delete(playerId);
+            }, duration);
+
+            activeFearEffects.set(playerId, { sprite, timeout });
+        }
+
+        function spawnFrostNovaRing(playerId, duration = FROSTNOVA_RING_DURATION) {
+            const player = players.get(playerId)?.model;
+            if (!player) return;
+
+            const position = new THREE.Vector3();
+            player.getWorldPosition(position);
+            position.y += 0.1;
+
+            const geometry = new THREE.RingGeometry(1, 1.5, 32);
+            const material = new THREE.MeshBasicMaterial({
+                map: textures.ice,
+                transparent: true,
+                opacity: 0.8,
+                side: THREE.DoubleSide,
+            });
+            const mesh = new THREE.Mesh(geometry, material);
+            mesh.rotation.x = -Math.PI / 2;
+            mesh.position.copy(position);
+
+            scene.add(mesh);
+            frostNovaRings.push({ mesh, start: performance.now(), duration });
+        }
+
+        function spawnLightWaveRing(playerId, duration = LIGHTWAVE_RING_DURATION) {
+            const player = players.get(playerId)?.model;
+            if (!player) return;
+
+            const position = new THREE.Vector3();
+            player.getWorldPosition(position);
+            position.y += 0.1;
+
+            // Start very close to the player so the wave visually grows outwards
+            const geometry = new THREE.RingGeometry(0.5, 1.5, 64);
+            const material = new THREE.MeshBasicMaterial({
+                color: 0xfff8e8,
+                transparent: true,
+                opacity: 0.9,
+                side: THREE.DoubleSide,
+                blending: THREE.AdditiveBlending,
+            });
+            const mesh = new THREE.Mesh(geometry, material);
+            mesh.rotation.x = -Math.PI / 2;
+            mesh.position.copy(position);
+            // spawn small and let the update loop scale it outward
+            mesh.scale.setScalar(0.1);
+
+            scene.add(mesh);
+            lightWaveRings.push({ mesh, start: performance.now(), duration });
         }
 
 
@@ -2262,7 +2634,8 @@ export function Game({models, sounds, textures, matchId, character}) {
                 // Update model position and height
                 model.position.copy(playerPosition);
                 // model.position.y += 0.5; // Adjust the height to keep the model slightly above ground
-                model.position.y -= 0.5;
+                // Lower the model slightly so the feet touch the ground
+                model.position.y -= 0.7;
                 // Get the camera's forward direction
                 const cameraDirection = new THREE.Vector3();
 
@@ -2443,6 +2816,46 @@ export function Game({models, sounds, textures, matchId, character}) {
                         mesh.position.y += 0.5;
                     });
 
+                   activeStunEffects.forEach((obj, id) => {
+                       const target = players.get(id)?.model;
+                       if (!target) return;
+                       target.getWorldPosition(obj.group.position);
+                       obj.group.position.y += 1.8;
+                       obj.group.rotation.y += delta * STUN_SPIN_SPEED;
+                   });
+
+                    activeFearEffects.forEach((obj, id) => {
+                        const target = players.get(id)?.model;
+                        if (!target) return;
+                        target.getWorldPosition(obj.sprite.position);
+                        obj.sprite.position.y += 2;
+                    });
+
+                    for (let i = frostNovaRings.length - 1; i >= 0; i--) {
+                        const effect = frostNovaRings[i];
+                        const elapsed = performance.now() - effect.start;
+                        const progress = elapsed / effect.duration;
+                        effect.mesh.scale.setScalar(1 + progress * 2);
+                        effect.mesh.material.opacity = 0.8 * (1 - progress);
+                        if (progress >= 1) {
+                            scene.remove(effect.mesh);
+                            frostNovaRings.splice(i, 1);
+                        }
+                    }
+
+                    for (let i = lightWaveRings.length - 1; i >= 0; i--) {
+                        const effect = lightWaveRings[i];
+                        const elapsed = performance.now() - effect.start;
+                        const progress = elapsed / effect.duration;
+                        effect.mesh.scale.setScalar(0.1 + progress * 3);
+                        effect.mesh.material.opacity = 0.9 * (1 - progress);
+                        effect.mesh.rotation.z += delta * 2;
+                        if (progress >= 1) {
+                            scene.remove(effect.mesh);
+                            lightWaveRings.splice(i, 1);
+                        }
+                    }
+
                     runes.forEach(r => {
                         const speed = r.userData.type === 'damage' ? 0.05 : 0.1;
                         r.rotation.y += delta * speed;
@@ -2523,9 +2936,10 @@ export function Game({models, sounds, textures, matchId, character}) {
             return actions;
         }
 
-        function createPlayer(id, name = "", address = "", classType = "") {
-            if (models['character']) {
-                const player = SkeletonUtils.clone(models['character']);
+        function createPlayer(id, name = "", address = "", classType = "", characterModel = "vampir") {
+            const baseModel = models[characterModel] || models['character'];
+            if (baseModel) {
+                const player = SkeletonUtils.clone(baseModel);
                 player.position.set(...USER_DEFAULT_POSITION);
 
                 player.scale.set(currentScale, currentScale, currentScale);
@@ -2573,6 +2987,7 @@ export function Game({models, sounds, textures, matchId, character}) {
                     buffs: [],
                     address,
                     classType,
+                    character: characterModel,
                 });
                 if (actions.idle) actions.idle.play();
                 playerMixers.push(mixer);   // массив всех чужих миксеров
@@ -2604,6 +3019,9 @@ export function Game({models, sounds, textures, matchId, character}) {
                 if (message.classType) {
                     playerData.classType = message.classType;
                 }
+                if (message.character) {
+                    playerData.character = message.character;
+                }
 
                 const action = actions?.[message.animationAction];
                 if (action && message.animationAction !== playerData.currentAction) {
@@ -2633,7 +3051,10 @@ export function Game({models, sounds, textures, matchId, character}) {
             if (!base) return;
             const rune = SkeletonUtils.clone(base);
             rune.position.set(data.position.x, data.position.y, data.position.z);
-            rune.scale.multiplyScalar(0.2);
+            // Scale runes down by 30%
+            rune.scale.multiplyScalar(0.14);
+            // lower the rune slightly so it sits closer to the ground
+            rune.position.y -= 0.2;
             rune.userData.type = data.type;
 
             rune.traverse((child) => {
@@ -2668,7 +3089,8 @@ export function Game({models, sounds, textures, matchId, character}) {
             if (!base) return;
             const rune = SkeletonUtils.clone(base);
             rune.position.set(data.position.x, data.position.y, data.position.z);
-            rune.scale.multiplyScalar(0.04);
+            // Scale XP runes down by 30%
+            rune.scale.multiplyScalar(0.028);
             rune.position.y -= 0.2;
             rune.traverse((child) => {
                 if (child.isMesh) {
@@ -2821,8 +3243,9 @@ export function Game({models, sounds, textures, matchId, character}) {
                             const id = Number(pid);
                             if (players.has(id)) {
                                 players.get(id).classType = pdata.classType;
+                                players.get(id).character = pdata.character;
                             } else {
-                                players.set(id, { classType: pdata.classType });
+                                players.set(id, { classType: pdata.classType, character: pdata.character });
                             }
                         });
                     }
@@ -2871,6 +3294,23 @@ export function Game({models, sounds, textures, matchId, character}) {
                                 });
                             }
                             break;
+                        case "fear":
+                            if (message.payload.targetId === myPlayerId) {
+                                applyRootEffect(myPlayerId, 3000);
+                            }
+                            if (message.payload.targetId) {
+                                applyFearEffect(message.payload.targetId, 3000);
+                            }
+                            break;
+                        case "lifedrain":
+                            if (message.payload.targetId === myPlayerId) {
+                                takeDamage(LIFEDRAIN_DAMAGE, message.id, 'lifedrain');
+                            }
+                            if (message.id === myPlayerId) {
+                                hp = Math.min(MAX_HP, hp + LIFEDRAIN_DAMAGE);
+                                updateHPBar();
+                            }
+                            break;
                         case "chaosbolt":
                             igniteHands(message.id, 1000);
                             castSphereOtherUser(message.payload, message.id);
@@ -2879,15 +3319,67 @@ export function Game({models, sounds, textures, matchId, character}) {
                             igniteHands(message.id, 1000);
                             castSphereOtherUser(message.payload, message.id);
                             break;
+                        case "frostnova":
+                            spawnFrostNovaRing(message.id);
+                            if (message.id !== myPlayerId) {
+                                const caster = players.get(message.id);
+                                if (caster) {
+                                    const myPos = players.get(myPlayerId)?.model.position.clone();
+                                    const casterPos = caster.model.position.clone();
+                                    if (myPos && casterPos && myPos.distanceTo(casterPos) < FROSTNOVA_RANGE) {
+                                        applyRootEffect(myPlayerId, 3000);
+                                        takeDamage(FROSTNOVA_DAMAGE, message.id, 'frostnova');
+                                    }
+                                }
+                            }
+                            break;
                         case "paladin-heal":
-                            if (message.payload.targetId === myPlayerId) {
+                            if (message.id === myPlayerId) {
                                 dispatch({ type: "SEND_CHAT_MESSAGE", payload: "You are healed!" });
+                            }
+                            break;
+                        case "hand-of-freedom":
+                            if (message.id === myPlayerId) {
+                                applyFreedomEffect(myPlayerId, 5000);
+                            }
+                            break;
+                        case "divine-speed":
+                            if (message.id === myPlayerId) {
+                                applySpeedEffect(myPlayerId, 5000);
+                            }
+                            break;
+                        case "blood-strike":
+                            // melee swing effect placeholder
+                            break;
+                        case "eviscerate":
+                            break;
+                        case "kidney-strike":
+                            if (message.payload.targetId) {
+                                applyStunEffect(message.payload.targetId, 2000);
+                            }
+                            break;
+                        case "adrenaline-rush":
+                            if (message.id === myPlayerId) {
+                                applySpeedEffect(myPlayerId, 8000);
+                            }
+                            break;
+                        case "sprint":
+                            if (message.id === myPlayerId) {
+                                applySpeedEffect(myPlayerId, 6000);
+                            }
+                            break;
+                        case "shadow-leap":
+                            break;
+                        case "stun":
+                            if (message.payload.targetId) {
+                                applyStunEffect(message.payload.targetId, 3000);
                             }
                             break;
                         case "lightwave":
                             if (message.id !== myPlayerId) {
                                 const caster = players.get(message.id);
                                 if (caster) {
+                                    spawnLightWaveRing(message.id);
                                     const myPos = players.get(myPlayerId)?.model.position.clone();
                                     const casterPos = caster.model.position.clone();
                                     if (myPos && casterPos && myPos.distanceTo(casterPos) < FIREBLAST_RANGE) {
@@ -3112,8 +3604,10 @@ export function Game({models, sounds, textures, matchId, character}) {
                     console.log("MATCH_READY: ", message);
                     myPlayerId = message.myPlayerId;
                     message.players.forEach((playerId) => {
-                        const cls = players.get(Number(playerId))?.classType || "";
-                        createPlayer(Number(playerId), String(playerId), String(playerId), cls);
+                        const p = players.get(Number(playerId));
+                        const cls = p?.classType || "";
+                        const charModel = p?.character || (cls === 'paladin' ? 'bolvar' : 'vampir');
+                        createPlayer(Number(playerId), String(playerId), String(playerId), cls, charModel);
                     })
                     startCountdown();
                     break;

@@ -8,7 +8,7 @@
 /* Styles for the skills bar */
 #skills-bar {
     position: absolute;
-    bottom: 20px;
+    bottom: 50px;
     left: 50%;
     transform: translateX(-50%);
     display: flex;
@@ -87,6 +87,9 @@
     gap: 4px;
     color: #fff;
     z-index: 1000;
+    background-color: rgba(0, 0, 0, 0.7);
+    padding: 8px;
+    border-radius: 8px;
 }
 
 

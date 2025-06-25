@@ -1,13 +1,17 @@
 import {useEffect, useState} from 'react';
 import {useInterface} from '@/context/inteface';
+import { SPELL_COST } from '@/consts';
 import './SkillBar.css';
 import * as mageSkills from '../../skills/mage';
 import * as warlockSkills from '../../skills/warlock';
 import * as paladinSkills from '../../skills/paladin';
+import * as rogueSkills from '../../skills/rogue';
 
 const DEFAULT_SKILLS = [
     mageSkills.fireball,
     mageSkills.iceball,
+    mageSkills.frostnova,
+    mageSkills.blink,
     mageSkills.fireblast,
     mageSkills.pyroblast,
 ];
@@ -17,20 +21,34 @@ const WARLOCK_SKILLS = [
     warlockSkills.corruption,
     warlockSkills.immolate,
     warlockSkills.chaosbolt,
+    warlockSkills.fear,
+    warlockSkills.lifedrain,
 ];
 
 const PALADIN_SKILLS = [
     paladinSkills.lightstrike,
-    paladinSkills.paladinHeal,
     paladinSkills.stun,
+    paladinSkills.paladinHeal,
     paladinSkills.lightwave,
+    paladinSkills.handOfFreedom,
+    paladinSkills.divineSpeed,
 ];
 
-export const SkillBar = () => {
+const ROGUE_SKILLS = [
+    rogueSkills.bloodStrike,
+    rogueSkills.eviscerate,
+    rogueSkills.shadowLeap,
+    rogueSkills.kidneyStrike,
+    rogueSkills.sprint,
+    rogueSkills.adrenalineRush,
+];
+
+export const SkillBar = ({ mana = 0 }) => {
     const {state: {character}} = useInterface();
     let skills = DEFAULT_SKILLS;
     if (character?.name === 'warlock') skills = WARLOCK_SKILLS;
     else if (character?.name === 'paladin') skills = PALADIN_SKILLS;
+    else if (character?.name === 'rogue') skills = ROGUE_SKILLS;
 
     const [cooldowns, setCooldowns] = useState({});
     const [pressed, setPressed] = useState({});
@@ -87,8 +105,9 @@ export const SkillBar = () => {
                     const remaining = data.end - Date.now();
                     text = Math.ceil(remaining / 1000);
                 }
+                const insufficientMana = mana < (SPELL_COST[skill.id] || 0);
                 return (
-                    <div className={`skill-button${pressed[skill.id] ? ' pressed' : ''}`} key={skill.id}>
+                    <div className={`skill-button${pressed[skill.id] ? ' pressed' : ''}${insufficientMana ? ' no-mana' : ''}`} key={skill.id}>
                         <div className="skill-icon" style={{backgroundImage: `url('${skill.icon}')`}}></div>
                         {data && (
                             <div className="cooldown-overlay">

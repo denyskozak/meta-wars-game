@@ -1,6 +1,6 @@
 import { SPELL_COST } from '../../consts';
 
-export const meta = { id: 'darkball', key: 'E', icon: '/icons/spell_shadowbolt.jpg' };
+export const meta = { id: 'darkball', key: 'E', icon: '/icons/classes/warlock/spell_shadowbolt.jpg' };
 
 export default function castDarkball({ playerId, castSpellImpl, igniteHands, castSphere, darkballMesh, sounds, damage }) {
   igniteHands(playerId, 1000);

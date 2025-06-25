@@ -8,10 +8,21 @@
   "shield": 80,
   "blink": 35,
   "heal": 35,
-  "pyroblast": 70,
+  "pyroblast": 60,
   "chaosbolt": 70,
   "lightstrike": 20,
   "stun": 0,
   "paladin-heal": 50,
-  "lightwave": 0
+  "lightwave": 0,
+  "frostnova": 30,
+  "hand-of-freedom": 50,
+  "divine-speed": 50,
+  "lifedrain": 30,
+  "fear": 40,
+  "blood-strike": 20,
+  "eviscerate": 35,
+  "kidney-strike": 40,
+  "adrenaline-rush": 0,
+  "sprint": 20,
+  "shadow-leap": 25
 }

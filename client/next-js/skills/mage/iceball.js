@@ -1,6 +1,6 @@
 import { SPELL_COST } from '../../consts';
 
-export const meta = { id: 'iceball', key: 'R', icon: '/icons/spell_frostbolt.jpg' };
+export const meta = { id: 'iceball', key: 'R', icon: '/icons/classes/mage/spell_frostbolt.jpg' };
 
 export default function castIceball({ playerId, castSpellImpl, freezeHands, castSphere, iceballMesh, sounds, damage }) {
   freezeHands(playerId, 1000);
