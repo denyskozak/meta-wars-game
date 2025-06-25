@@ -870,6 +870,7 @@ export function Game({models, sounds, textures, matchId, character}) {
         let isHealActive = false;
         const frostNovaRings = [];
         const lightWaveRings = [];
+        const meleeRangeIndicators = [];
 
         // Crosshair elements
         const target = document.getElementById("target");
@@ -1577,6 +1578,7 @@ export function Game({models, sounds, textures, matchId, character}) {
                     performLightStrike();
                     break;
                 case "stun":
+                    spawnMeleeRangeIndicator(playerId);
                     const target = castStun({
                         playerId,
                         globalSkillCooldown,
@@ -1644,6 +1646,7 @@ export function Game({models, sounds, textures, matchId, character}) {
                     });
                     break;
                 case "kidney-strike":
+                    spawnMeleeRangeIndicator(playerId);
                     const targetKidney = castKidneyStrike({
                         playerId,
                         globalSkillCooldown,
@@ -1722,6 +1725,7 @@ export function Game({models, sounds, textures, matchId, character}) {
                     performSavageBlow();
                     break;
                 case "hamstring":
+                    spawnMeleeRangeIndicator(playerId);
                     castHamstring({
                         playerId,
                         globalSkillCooldown,
@@ -1756,6 +1760,7 @@ export function Game({models, sounds, textures, matchId, character}) {
                     });
                     break;
                 case "bloodthirst":
+                    spawnMeleeRangeIndicator(playerId);
                     castBloodthirst({
                         globalSkillCooldown,
                         isCasting,
@@ -1789,6 +1794,8 @@ export function Game({models, sounds, textures, matchId, character}) {
             const playerData = players.get(myPlayerId);
             if (!playerData) return;
             const { mixer, actions } = playerData;
+
+            spawnMeleeRangeIndicator(myPlayerId);
 
             lightSword(myPlayerId, 500);
 
@@ -1834,6 +1841,8 @@ export function Game({models, sounds, textures, matchId, character}) {
             if (!playerData) return;
             const { mixer, actions } = playerData;
 
+            spawnMeleeRangeIndicator(myPlayerId);
+
             lightSword(myPlayerId, 500);
 
             controlAction({
@@ -1861,6 +1870,8 @@ export function Game({models, sounds, textures, matchId, character}) {
             const playerData = players.get(myPlayerId);
             if (!playerData) return;
             const { mixer, actions } = playerData;
+
+            spawnMeleeRangeIndicator(myPlayerId);
 
             lightSword(myPlayerId, 500);
 
@@ -2843,6 +2854,29 @@ export function Game({models, sounds, textures, matchId, character}) {
             activeSprintTrails.set(playerId, { mesh, start: performance.now(), duration, timeout });
         }
 
+        function spawnMeleeRangeIndicator(playerId, range = MELEE_RANGE_ATTACK, duration = 500) {
+            const player = players.get(playerId)?.model;
+            if (!player) return;
+
+            const position = new THREE.Vector3();
+            player.getWorldPosition(position);
+            position.y += 0.05;
+
+            const geometry = new THREE.RingGeometry(Math.max(range - 0.1, 0), range, 32);
+            const material = new THREE.MeshBasicMaterial({
+                color: 0x00ff00,
+                transparent: true,
+                opacity: 0.4,
+                side: THREE.DoubleSide,
+            });
+            const mesh = new THREE.Mesh(geometry, material);
+            mesh.rotation.x = -Math.PI / 2;
+            mesh.position.copy(position);
+
+            scene.add(mesh);
+            meleeRangeIndicators.push({ mesh, start: performance.now(), duration });
+        }
+
 
 
         function toggleShieldOnPlayer(id, visible) {
@@ -3089,6 +3123,17 @@ export function Game({models, sounds, textures, matchId, character}) {
                         if (progress >= 1) {
                             scene.remove(effect.mesh);
                             lightWaveRings.splice(i, 1);
+                        }
+                    }
+
+                    for (let i = meleeRangeIndicators.length - 1; i >= 0; i--) {
+                        const effect = meleeRangeIndicators[i];
+                        const elapsed = performance.now() - effect.start;
+                        const progress = elapsed / effect.duration;
+                        effect.mesh.material.opacity = 0.4 * (1 - progress);
+                        if (progress >= 1) {
+                            scene.remove(effect.mesh);
+                            meleeRangeIndicators.splice(i, 1);
                         }
                     }
 
