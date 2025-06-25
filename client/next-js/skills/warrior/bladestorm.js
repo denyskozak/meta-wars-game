@@ -3,7 +3,7 @@ import { SPELL_COST } from '../../consts';
 export const meta = {
   id: 'bladestorm',
   key: 'Q',
-  icon: '/icons/classes/paladin/divinestorm.jpg',
+  icon: '/icons/classes/warrior/bladestorm.jpg',
   autoFocus: false,
 };
 

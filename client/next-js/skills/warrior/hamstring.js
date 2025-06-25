@@ -3,7 +3,7 @@ import { SPELL_COST } from '../../consts';
 export const meta = {
   id: 'hamstring',
   key: 'F',
-  icon: '/icons/classes/paladin/sealofvalor.jpg',
+  icon: '/icons/classes/warrior/hamstring.jpg',
   autoFocus: false,
 };
 

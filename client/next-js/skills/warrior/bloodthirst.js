@@ -1,7 +1,7 @@
 export const meta = {
   id: 'bloodthirst',
   key: '3',
-  icon: '/icons/classes/paladin/crusaderstrike.jpg',
+  icon: '/icons/classes/warrior/bloodthirst.jpg',
   autoFocus: false,
 };
 

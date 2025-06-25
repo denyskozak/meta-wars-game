@@ -3,7 +3,7 @@ import { SPELL_COST } from '../../consts';
 export const meta = {
   id: 'berserk',
   key: '2',
-  icon: '/icons/rune_power.jpg',
+  icon: '/icons/classes/warrior/berserk.jpg',
   autoFocus: false,
 };
 
