@@ -1,4 +1,5 @@
 import React, {useLayoutEffect, useRef, useState, useEffect} from "react";
+import gsap from "gsap";
 import { MAX_HP, MAX_MANA, CLASS_MODELS } from "../consts";
 import { SPELL_COST } from '../consts';
 import * as THREE from "three";
@@ -2242,10 +2243,43 @@ export function Game({models, sounds, textures, matchId, character}) {
         //     actions.forEach(action => settings.play ? action.play() : action.stop());
         // }
 
-        // Show or hide model
+        // Show or hide model with fade animation
         function showModel(visibility) {
-            if (players.has(myPlayerId)) {
-                players.get(myPlayerId).model.visible = visibility;
+            if (!players.has(myPlayerId)) return;
+            const model = players.get(myPlayerId).model;
+            const fadeDuration = 0.3;
+
+            const applyToMaterials = (mesh, fn) => {
+                if (Array.isArray(mesh.material)) {
+                    mesh.material.forEach(fn);
+                } else if (mesh.material) {
+                    fn(mesh.material);
+                }
+            };
+
+            if (visibility) {
+                model.visible = true;
+                model.traverse((obj) => {
+                    if (obj.isMesh) {
+                        applyToMaterials(obj, (mat) => {
+                            mat.transparent = true;
+                            mat.opacity = 0;
+                            gsap.to(mat, { opacity: 1, duration: fadeDuration });
+                        });
+                    }
+                });
+            } else {
+                model.traverse((obj) => {
+                    if (obj.isMesh) {
+                        applyToMaterials(obj, (mat) => {
+                            mat.transparent = true;
+                            gsap.to(mat, { opacity: 0, duration: fadeDuration });
+                        });
+                    }
+                });
+                gsap.delayedCall(fadeDuration, () => {
+                    model.visible = false;
+                });
             }
         }
 
