@@ -60,7 +60,17 @@ export default function castWarbringer({
   );
 
   if (!intersect) {
-    teleportTo(target);
+    const startPos = start.clone();
+    const delta = new THREE.Vector3().subVectors(target, startPos);
+    const startTime = performance.now();
+    const duration = 200; // ms
+    function step() {
+      const t = Math.min(1, (performance.now() - startTime) / duration);
+      const pos = startPos.clone().addScaledVector(delta, t);
+      teleportTo({ x: pos.x, y: pos.y, z: pos.z });
+      if (t < 1) requestAnimationFrame(step);
+    }
+    requestAnimationFrame(step);
   }
 
   sendToSocket({ type: 'CAST_SPELL', payload: { type: 'warbringer' } });
