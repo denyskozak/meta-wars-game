@@ -44,7 +44,7 @@ import castAdrenalineRush, { meta as adrenalineRushMeta } from '../skills/rogue/
 import castSprint, { meta as sprintMeta } from '../skills/rogue/sprint';
 import castShadowLeap, { meta as shadowLeapMeta } from '../skills/rogue/shadowLeap';
 import castWarbringer, { meta as warbringerMeta } from '../skills/warrior/warbringer';
-import castSavageBlow, { meta as savageBlowMeta } from '../skills/warrior/savageBlow';
+import { meta as savageBlowMeta } from '../skills/warrior/savageBlow';
 import castHamstring, { meta as hamstringMeta } from '../skills/warrior/hamstring';
 import castBladestorm, { meta as bladestormMeta } from '../skills/warrior/bladestorm';
 import castBerserk, { meta as berserkMeta } from '../skills/warrior/berserk';
@@ -1719,15 +1719,7 @@ export function Game({models, sounds, textures, matchId, character}) {
                     });
                     break;
                 case "savage-blow":
-                    castSavageBlow({
-                        globalSkillCooldown,
-                        isCasting,
-                        mana,
-                        sendToSocket,
-                        activateGlobalCooldown,
-                        startSkillCooldown,
-                        sounds,
-                    });
+                    performSavageBlow();
                     break;
                 case "hamstring":
                     castHamstring({
@@ -1863,6 +1855,34 @@ export function Game({models, sounds, textures, matchId, character}) {
             sendToSocket({ type: 'CAST_SPELL', payload: { type: 'blood-strike' } });
             activateGlobalCooldown();
             startSkillCooldown('blood-strike');
+        }
+
+        function performSavageBlow() {
+            const playerData = players.get(myPlayerId);
+            if (!playerData) return;
+            const { mixer, actions } = playerData;
+
+            lightSword(myPlayerId, 500);
+
+            controlAction({
+                action: actions['attack'],
+                actionName: 'attack',
+                mixer,
+                loop: THREE.LoopOnce,
+                fadeIn: 0.1,
+                reset: true,
+                clampWhenFinished: true,
+            });
+
+            if (sounds.mortalStrike) {
+                sounds.mortalStrike.currentTime = 0;
+                sounds.mortalStrike.volume = 0.5;
+                sounds.mortalStrike.play();
+            }
+
+            sendToSocket({ type: 'CAST_SPELL', payload: { type: 'savage-blow' } });
+            activateGlobalCooldown();
+            startSkillCooldown('savage-blow');
         }
 
 
@@ -3651,6 +3671,12 @@ export function Game({models, sounds, textures, matchId, character}) {
                                     if (distance < MELEE_RANGE_ATTACK && forward.angleTo(toMe.normalize()) < LIGHTSTRIKE_ANGLE) {
                                         takeDamage(LIGHTSTRIKE_DAMAGE, message.id, 'savage-blow');
                                     }
+                                }
+                                lightSword(message.id, 500);
+                                if (sounds.mortalStrike) {
+                                    sounds.mortalStrike.currentTime = 0;
+                                    sounds.mortalStrike.volume = 0.5;
+                                    sounds.mortalStrike.play();
                                 }
                             }
                             break;
