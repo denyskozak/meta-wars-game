@@ -105,7 +105,14 @@ export default function MatchesPage() {
             sendToSocket({type: 'JOIN_MATCH', classType, character: charModel});
             setSkin(charModel);
         }
-        dispatch({type: 'SET_CHARACTER', payload: {name: classType.toLowerCase(), skin}});
+        dispatch({
+            type: 'SET_CHARACTER',
+            payload: {
+                name: classType.toLowerCase(),
+                classType: classType.toLowerCase(),
+                skin,
+            },
+        });
         router.push(`/matches/${params?.id}/game`);
     };
 
