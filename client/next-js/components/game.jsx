@@ -2882,13 +2882,16 @@ export function Game({models, sounds, textures, matchId, character}) {
             });
             const mesh = new THREE.Mesh(geometry, material);
             mesh.rotation.x = -Math.PI / 2;
-            // Position slightly above the ground relative to the player
-            player.getWorldPosition(mesh.position);
-            mesh.position.y += 0.05;
-            mesh.rotation.y = player.rotation.y;
 
-            // Add to scene so scale of player does not affect size
-            scene.add(mesh);
+            // Keep world size when attached to a scaled player
+            const invScale = 1 / player.scale.x;
+            mesh.scale.setScalar(invScale);
+            // Position slightly above the player's feet
+            mesh.position.set(0, 0.05 * invScale, 0);
+            mesh.rotation.y = 0;
+
+            // Attach to player so it follows movement and rotation
+            player.add(mesh);
 
             meleeRangeIndicators.push({ mesh, start: performance.now(), duration });
         }
