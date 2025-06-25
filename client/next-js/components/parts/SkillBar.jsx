@@ -157,7 +157,7 @@ export const SkillBar = ({ mana = 0, level = 1, skillPoints = 0, learnedSkills =
                 return (
                     <div className={`skill-button${pressed[skill.id] ? ' pressed' : ''}${insufficientMana ? ' no-mana' : ''}${locked ? ' locked' : ''}`} key={skill.id}>
                         <div className="skill-icon" style={{backgroundImage: `url('${skill.icon}')`}}></div>
-                        {locked && points > 0 && <div className="skill-triangle" />}
+                        {locked && points > 0 && <div className="skill-plus">+</div>}
                         {data && (
                             <div className="cooldown-overlay">
                                 {text}
