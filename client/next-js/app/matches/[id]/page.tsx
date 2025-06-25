@@ -7,6 +7,7 @@ import {useParams, useRouter} from "next/navigation";
 import {Navbar} from "@/components/navbar";
 import {useInterface} from "@/context/inteface";
 import {InterfaceContextValue, MatchDetail, PlayerData} from "@/types";
+import { CLASS_MODELS } from "@/consts";
 
 
 type Match = MatchDetail;
@@ -22,7 +23,7 @@ export default function MatchesPage() {
     const [match, setMatch] = useState<Match | null>(null);
     const [players, setPlayers] = useState<{ id: number, address: string, classType: string }[]>([]);
     const [classType, setClassType] = useState('');
-    const [skin, setSkin] = useState('mad');
+    const [skin, setSkin] = useState('bolvar');
     const [joined, setJoined] = useState(false);
     const classOptions = {
         mage: {
@@ -90,17 +91,19 @@ export default function MatchesPage() {
 
     useEffect(() => {
         if (classType && !joined) {
-            const charModel = classType === 'paladin' ? 'bolvar' : 'vampir';
+            const charModel = CLASS_MODELS[classType] || 'vampir';
             sendToSocket({type: 'JOIN_MATCH', classType, character: charModel});
             sendToSocket({type: 'GET_MATCH'});
             setJoined(true);
+            setSkin(charModel);
         }
     }, [classType, joined]);
 
     const handleReady = () => {
         if (!joined && classType) {
-            const charModel = classType === 'paladin' ? 'bolvar' : 'vampir';
+            const charModel = CLASS_MODELS[classType] || 'vampir';
             sendToSocket({type: 'JOIN_MATCH', classType, character: charModel});
+            setSkin(charModel);
         }
         dispatch({type: 'SET_CHARACTER', payload: {name: classType.toLowerCase(), skin}});
         router.push(`/matches/${params?.id}/game`);
