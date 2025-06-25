@@ -42,6 +42,12 @@ import castKidneyStrike, { meta as kidneyStrikeMeta } from '../skills/rogue/kidn
 import castAdrenalineRush, { meta as adrenalineRushMeta } from '../skills/rogue/adrenalineRush';
 import castSprint, { meta as sprintMeta } from '../skills/rogue/sprint';
 import castShadowLeap, { meta as shadowLeapMeta } from '../skills/rogue/shadowLeap';
+import castWarbringer, { meta as warbringerMeta } from '../skills/warrior/warbringer';
+import castSavageBlow, { meta as savageBlowMeta } from '../skills/warrior/savageBlow';
+import castHamstring, { meta as hamstringMeta } from '../skills/warrior/hamstring';
+import castBladestorm, { meta as bladestormMeta } from '../skills/warrior/bladestorm';
+import castBerserk, { meta as berserkMeta } from '../skills/warrior/berserk';
+import castBloodthirst, { meta as bloodthirstMeta } from '../skills/warrior/bloodthirst';
 
 
 import {Interface} from "@/components/layout/Interface";
@@ -75,6 +81,12 @@ const SPELL_ICONS = {
     [adrenalineRushMeta.id]: adrenalineRushMeta.icon,
     [sprintMeta.id]: sprintMeta.icon,
     [shadowLeapMeta.id]: shadowLeapMeta.icon,
+    [warbringerMeta.id]: warbringerMeta.icon,
+    [savageBlowMeta.id]: savageBlowMeta.icon,
+    [hamstringMeta.id]: hamstringMeta.icon,
+    [bladestormMeta.id]: bladestormMeta.icon,
+    [berserkMeta.id]: berserkMeta.icon,
+    [bloodthirstMeta.id]: bloodthirstMeta.icon,
     [frostNovaMeta.id]: frostNovaMeta.icon,
     [blinkMeta.id]: blinkMeta.icon,
 };
@@ -102,6 +114,12 @@ const SPELL_META = {
     [adrenalineRushMeta.id]: adrenalineRushMeta,
     [sprintMeta.id]: sprintMeta,
     [shadowLeapMeta.id]: shadowLeapMeta,
+    [warbringerMeta.id]: warbringerMeta,
+    [savageBlowMeta.id]: savageBlowMeta,
+    [hamstringMeta.id]: hamstringMeta,
+    [bladestormMeta.id]: bladestormMeta,
+    [berserkMeta.id]: berserkMeta,
+    [bloodthirstMeta.id]: bloodthirstMeta,
     [frostNovaMeta.id]: frostNovaMeta,
     [blinkMeta.id]: blinkMeta,
 };
@@ -674,6 +692,12 @@ export function Game({models, sounds, textures, matchId, character}) {
             'adrenaline-rush': 45000,
             sprint: 30000,
             'shadow-leap': 12000,
+            'warbringer': 10000,
+            'savage-blow': 10000,
+            'hamstring': 5000,
+            'bladestorm': 40000,
+            'berserk': 45000,
+            'bloodthirst': 30000,
         };
         const skillCooldownTimers = {};
 
@@ -938,6 +962,7 @@ export function Game({models, sounds, textures, matchId, character}) {
             if (className === 'warlock') castSpell('darkball');
             else if (className === 'paladin') castSpell('lightstrike');
             else if (className === 'rogue') castSpell('blood-strike');
+            else if (className === 'warrior') castSpell('warbringer');
             else castSpell('fireball');
         }
         function handleKeyR() {
@@ -945,6 +970,7 @@ export function Game({models, sounds, textures, matchId, character}) {
             if (className === 'warlock') castSpell('corruption');
             else if (className === 'paladin') castSpell('stun');
             else if (className === 'rogue') castSpell('eviscerate');
+            else if (className === 'warrior') castSpell('savage-blow');
             else castSpell('iceball');
         }
         function handleKeyF() {
@@ -952,6 +978,7 @@ export function Game({models, sounds, textures, matchId, character}) {
             if (className === 'warlock') castSpell('chaosbolt');
             else if (className === 'paladin') castSpell('lightwave');
             else if (className === 'rogue') castSpell('kidney-strike');
+            else if (className === 'warrior') castSpell('hamstring');
             else castSpell('blink');
         }
         function handleDigit3() {
@@ -960,6 +987,7 @@ export function Game({models, sounds, textures, matchId, character}) {
             else if (className === 'paladin') castSpell('hand-of-freedom');
             else if (className === 'warlock') castSpell('fear');
             else if (className === 'rogue') castSpell('sprint');
+            else if (className === 'warrior') castSpell('bloodthirst');
 
         }
         function handleDigit2() {
@@ -968,6 +996,7 @@ export function Game({models, sounds, textures, matchId, character}) {
             else if (className === 'paladin') castSpell('divine-speed');
             else if (className === 'warlock') castSpell('lifedrain');
             else if (className === 'rogue') castSpell('adrenaline-rush');
+            else if (className === 'warrior') castSpell('berserk');
 
         }
         function handleKeyG() {
@@ -1012,6 +1041,7 @@ export function Game({models, sounds, textures, matchId, character}) {
             if (className === 'warlock') castSpell('immolate');
             else if (className === 'paladin') castSpell('paladin-heal');
             else if (className === 'rogue') castSpell('shadow-leap');
+            else if (className === 'warrior') castSpell('bladestorm');
             else castSpell('frostnova');
         }
         function handleEscape() {
@@ -1655,6 +1685,77 @@ export function Game({models, sounds, textures, matchId, character}) {
                         activateGlobalCooldown,
                         startSkillCooldown,
                         sounds,
+                    });
+                    break;
+                case "warbringer":
+                    castWarbringer({
+                        globalSkillCooldown,
+                        isCasting,
+                        mana,
+                        sendToSocket,
+                        activateGlobalCooldown,
+                        startSkillCooldown,
+                        sounds,
+                        teleportTo,
+                        playerCollider,
+                        worldOctree,
+                        camera,
+                        FIREBLAST_RANGE,
+                        rotationY: players.get(playerId)?.model.rotation.y,
+                    });
+                    break;
+                case "savage-blow":
+                    castSavageBlow({
+                        globalSkillCooldown,
+                        isCasting,
+                        mana,
+                        sendToSocket,
+                        activateGlobalCooldown,
+                        startSkillCooldown,
+                        sounds,
+                    });
+                    break;
+                case "hamstring":
+                    castHamstring({
+                        playerId,
+                        globalSkillCooldown,
+                        isCasting,
+                        mana,
+                        sendToSocket,
+                        activateGlobalCooldown,
+                        startSkillCooldown,
+                        sounds,
+                    });
+                    break;
+                case "bladestorm":
+                    castBladestorm({
+                        globalSkillCooldown,
+                        isCasting,
+                        mana,
+                        sendToSocket,
+                        activateGlobalCooldown,
+                        startSkillCooldown,
+                        sounds,
+                    });
+                    break;
+                case "berserk":
+                    castBerserk({
+                        globalSkillCooldown,
+                        isCasting,
+                        mana,
+                        sendToSocket,
+                        activateGlobalCooldown,
+                        startSkillCooldown,
+                        sounds,
+                    });
+                    break;
+                case "bloodthirst":
+                    castBloodthirst({
+                        globalSkillCooldown,
+                        isCasting,
+                        sendToSocket,
+                        activateGlobalCooldown,
+                        startSkillCooldown,
                     });
                     break;
                 case "lightwave":
@@ -3462,6 +3563,47 @@ export function Game({models, sounds, textures, matchId, character}) {
                             if (message.payload.targetId) {
                                 applyStunEffect(message.payload.targetId, 3000);
                             }
+                            break;
+                        case "warbringer":
+                            break;
+                        case "savage-blow":
+                            if (message.id !== myPlayerId) {
+                                const caster = players.get(message.id);
+                                const me = players.get(myPlayerId);
+                                if (caster && me) {
+                                    const origin = caster.model.position.clone();
+                                    const forward = new THREE.Vector3(0, 0, 1).applyQuaternion(caster.model.quaternion);
+                                    const toMe = me.model.position.clone().sub(origin);
+                                    const distance = toMe.length();
+                                    if (distance < LIGHTSTRIKE_RANGE && forward.angleTo(toMe.normalize()) < LIGHTSTRIKE_ANGLE) {
+                                        takeDamage(LIGHTSTRIKE_DAMAGE, message.id, 'savage-blow');
+                                    }
+                                }
+                            }
+                            break;
+                        case "hamstring":
+                            if (message.id !== myPlayerId) {
+                                const caster = players.get(message.id);
+                                const me = players.get(myPlayerId);
+                                if (caster && me) {
+                                    const origin = caster.model.position.clone();
+                                    const forward = new THREE.Vector3(0, 0, 1).applyQuaternion(caster.model.quaternion);
+                                    const toMe = me.model.position.clone().sub(origin);
+                                    const distance = toMe.length();
+                                    if (distance < LIGHTSTRIKE_RANGE && forward.angleTo(toMe.normalize()) < LIGHTSTRIKE_ANGLE) {
+                                        applySlowEffect(myPlayerId, 2000);
+                                    }
+                                }
+                            }
+                            break;
+                        case "bladestorm":
+                            if (message.id === myPlayerId) {
+                                applyFreedomEffect(myPlayerId, 4000);
+                            }
+                            break;
+                        case "berserk":
+                            break;
+                        case "bloodthirst":
                             break;
                         case "lightwave":
                             if (message.id !== myPlayerId) {

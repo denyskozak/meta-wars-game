@@ -42,10 +42,10 @@ export default function MatchesPage() {
             label: 'Rogue',
             icon:  '/icons/rogue.webp'
         },
-        // warrior: {
-        //     label: 'Warrior',
-        //     icon:  '/icons/warrior.webp'
-        // },
+        warrior: {
+            label: 'Warrior',
+            icon:  '/icons/warrior.webp'
+        },
     };
 
     console.log("players: ", players);
