@@ -16,6 +16,12 @@ import { Game } from "@/components/game";
 import { Loading } from "@/components/loading";
 import { DeveloperPanel } from "@/components/DeveloperPanel";
 
+interface Character {
+  name?: string;
+  classType?: string;
+  skin?: string;
+}
+
 THREE.Cache.enabled = true;
 
 const dracoLoader = new DRACOLoader();
@@ -39,7 +45,11 @@ export default function GamePage() {
   });
   const {
     state: { character },
-  } = useInterface();
+  } = useInterface() as { state: { character: Character | null } };
+
+  const charSkin = character?.name
+    ? CLASS_MODELS[character.name as keyof typeof CLASS_MODELS] || "vampir"
+    : "vampir";
 
   const models = [
     { id: "zone", path: "zone.glb" },
@@ -48,7 +58,7 @@ export default function GamePage() {
     { id: "mad", path: "skins/mad.glb" },
     {
       id: "character",
-      path: `skins/${CLASS_MODELS[character?.name ?? ""] || "vampir"}.glb`,
+      path: `skins/${charSkin}.glb`,
     },
     { id: "heal-effect", path: "heal-effect.glb" },
     { id: "bottle_magic", path: "bottle_magic.glb" },
