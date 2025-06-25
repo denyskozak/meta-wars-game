@@ -66,7 +66,7 @@ export default function castShadowLeap({
   );
 
   if (!intersect) {
-    teleportTo(behind);
+    teleportTo({ x: behind.x, y: behind.y, z: behind.z, yaw: rotY });
   }
 
   sendToSocket({ type: 'CAST_SPELL', payload: { type: 'shadow-leap', targetId } });

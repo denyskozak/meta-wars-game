@@ -11,3 +11,4 @@ export const MAX_MANA = 130;
 // Amount of experience required for each level
 export const XP_PER_LEVEL = 1000;
 export { default as SPELL_COST } from './spellCosts.json';
+export { default as CLASS_MODELS } from './classModels.json';

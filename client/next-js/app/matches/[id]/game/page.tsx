@@ -8,6 +8,7 @@ import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader";
 import { DRACOLoader } from "three/examples/jsm/loaders/DRACOLoader";
 import { MeshoptDecoder } from "three/examples/jsm/libs/meshopt_decoder.module.js";
 import { useParams } from "next/navigation";
+import { CLASS_MODELS } from "@/consts";
 
 import { useWS } from "@/hooks/useWS";
 import { useInterface } from "@/context/inteface";
@@ -44,9 +45,10 @@ export default function GamePage() {
     { id: "zone", path: "zone.glb" },
     { id: "bolvar", path: "skins/bolvar.glb" },
     { id: "vampir", path: "skins/vampir.glb" },
+    { id: "mad", path: "skins/mad.glb" },
     {
       id: "character",
-      path: character?.name === "paladin" ? "skins/bolvar.glb" : "skins/vampir.glb",
+      path: `skins/${CLASS_MODELS[character?.name ?? ""] || "vampir"}.glb`,
     },
     { id: "heal-effect", path: "heal-effect.glb" },
     { id: "bottle_magic", path: "bottle_magic.glb" },

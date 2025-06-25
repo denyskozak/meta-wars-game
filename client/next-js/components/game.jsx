@@ -1,5 +1,5 @@
 import React, {useLayoutEffect, useRef, useState, useEffect} from "react";
-import {MAX_HP, MAX_MANA} from "../consts";
+import { MAX_HP, MAX_MANA, CLASS_MODELS } from "../consts";
 import { SPELL_COST } from '../consts';
 import * as THREE from "three";
 import { Fire } from "../three/Fire";
@@ -1676,8 +1676,8 @@ export function Game({models, sounds, textures, matchId, character}) {
                         startSkillCooldown,
                         sounds,
                     });
-                    applySpeedEffect(playerId, 6000);
-                    spawnSprintTrail(playerId, 6000);
+                    applySpeedEffect(playerId, 4000, 1.5);
+                    spawnSprintTrail(playerId, 4000);
                     break;
                 case "shadow-leap":
                     castShadowLeap({
@@ -2648,9 +2648,9 @@ export function Game({models, sounds, textures, matchId, character}) {
             }
         }
 
-        function applySpeedEffect(playerId, duration = 5000) {
+        function applySpeedEffect(playerId, duration = 5000, multiplier = 1.4) {
             if (playerId === myPlayerId) {
-                movementSpeedModifier = 1.4;
+                movementSpeedModifier = multiplier;
                 setTimeout(() => (movementSpeedModifier = 1), duration);
             }
         }
@@ -3576,8 +3576,8 @@ export function Game({models, sounds, textures, matchId, character}) {
                             break;
                         case "sprint":
                             if (message.id === myPlayerId) {
-                                applySpeedEffect(myPlayerId, 6000);
-                                spawnSprintTrail(myPlayerId, 6000);
+                                applySpeedEffect(myPlayerId, 4000, 1.5);
+                                spawnSprintTrail(myPlayerId, 4000);
                             }
                             break;
                         case "shadow-leap":
@@ -3861,7 +3861,7 @@ export function Game({models, sounds, textures, matchId, character}) {
                     message.players.forEach((playerId) => {
                         const p = players.get(Number(playerId));
                         const cls = p?.classType || "";
-                        const charModel = p?.character || (cls === 'paladin' ? 'bolvar' : 'vampir');
+                        const charModel = p?.character || CLASS_MODELS[cls] || 'vampir';
                         createPlayer(Number(playerId), String(playerId), String(playerId), cls, charModel);
                     })
                     startCountdown();

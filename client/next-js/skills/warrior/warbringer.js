@@ -63,7 +63,7 @@ export default function castWarbringer({
     const startPos = start.clone();
     const delta = new THREE.Vector3().subVectors(target, startPos);
     const startTime = performance.now();
-    const duration = 400; // ms - longer duration for smoother movement
+    const duration = 560; // ms - slowed down by ~40%
     const ease = (t) => t * t * (3 - 2 * t); // smoothstep easing
     function step() {
       const t = Math.min(1, (performance.now() - startTime) / duration);
