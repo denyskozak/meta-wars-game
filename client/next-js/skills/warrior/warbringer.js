@@ -4,7 +4,7 @@ import { SPELL_COST } from '../../consts';
 
 export const meta = {
   id: 'warbringer',
-  key: 'E',
+  key: 'R',
   icon: '/icons/classes/warrior/warbringer.jpg',
   autoFocus: false,
 };
@@ -63,10 +63,11 @@ export default function castWarbringer({
     const startPos = start.clone();
     const delta = new THREE.Vector3().subVectors(target, startPos);
     const startTime = performance.now();
-    const duration = 200; // ms
+    const duration = 400; // ms - longer duration for smoother movement
+    const ease = (t) => t * t * (3 - 2 * t); // smoothstep easing
     function step() {
       const t = Math.min(1, (performance.now() - startTime) / duration);
-      const pos = startPos.clone().addScaledVector(delta, t);
+      const pos = startPos.clone().addScaledVector(delta, ease(t));
       teleportTo({ x: pos.x, y: pos.y, z: pos.z });
       if (t < 1) requestAnimationFrame(step);
     }

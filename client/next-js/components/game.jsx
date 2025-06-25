@@ -695,7 +695,7 @@ export function Game({models, sounds, textures, matchId, character}) {
             sprint: 30000,
             'shadow-leap': 12000,
             'warbringer': 10000,
-            'savage-blow': 10000,
+            'savage-blow': 0,
             'hamstring': 5000,
             'bladestorm': 40000,
             'berserk': 45000,
@@ -965,7 +965,7 @@ export function Game({models, sounds, textures, matchId, character}) {
             if (className === 'warlock') castSpell('darkball');
             else if (className === 'paladin') castSpell('lightstrike');
             else if (className === 'rogue') castSpell('blood-strike');
-            else if (className === 'warrior') castSpell('warbringer');
+            else if (className === 'warrior') castSpell('savage-blow');
             else castSpell('fireball');
         }
         function handleKeyR() {
@@ -973,7 +973,7 @@ export function Game({models, sounds, textures, matchId, character}) {
             if (className === 'warlock') castSpell('corruption');
             else if (className === 'paladin') castSpell('stun');
             else if (className === 'rogue') castSpell('eviscerate');
-            else if (className === 'warrior') castSpell('savage-blow');
+            else if (className === 'warrior') castSpell('warbringer');
             else castSpell('iceball');
         }
         function handleKeyF() {
@@ -3614,7 +3614,7 @@ export function Game({models, sounds, textures, matchId, character}) {
                                     const toMe = me.model.position.clone().sub(origin);
                                     const distance = toMe.length();
                                     if (distance < MELEE_RANGE_ATTACK && forward.angleTo(toMe.normalize()) < LIGHTSTRIKE_ANGLE) {
-                                        applySlowEffect(myPlayerId, 2000);
+                                        applySlowEffect(myPlayerId, 4000);
                                     }
                                 }
                             }

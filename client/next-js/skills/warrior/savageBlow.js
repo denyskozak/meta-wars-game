@@ -2,7 +2,7 @@ import { SPELL_COST } from '../../consts';
 
 export const meta = {
   id: 'savage-blow',
-  key: 'R',
+  key: 'E',
   icon: '/icons/classes/warrior/savageblow.jpg',
   autoFocus: false,
 };
