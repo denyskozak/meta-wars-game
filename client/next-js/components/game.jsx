@@ -3197,7 +3197,17 @@ export function Game({models, sounds, textures, matchId, character}) {
                 player.rotation.set(0, 0, 0);
 
                 player.traverse((object) => {
-                    if (object.isMesh) object.castShadow = true;
+                    if (object.isMesh) {
+                        object.castShadow = true;
+                        // Clone materials to avoid sharing between players
+                        if (object.material) {
+                            if (Array.isArray(object.material)) {
+                                object.material = object.material.map((m) => m.clone());
+                            } else {
+                                object.material = object.material.clone();
+                            }
+                        }
+                    }
                 });
                 // Create a DOM element for the player's name
                 // const nameDiv = document.createElement('div');
