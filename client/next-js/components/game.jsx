@@ -795,7 +795,7 @@ export function Game({models, sounds, textures, matchId, character}) {
         const LIGHTWAVE_RING_DURATION = 1000; // ms
         const LIGHTSTRIKE_DAMAGE = 28; // 30% less damage
         // Slightly increased to improve melee reliability
-        const LIGHTSTRIKE_RANGE = 1.5; // melee range
+        const MELEE_RANGE_ATTACK = 1.7; // melee range
         const LIGHTSTRIKE_ANGLE = Math.PI / 4;
         const LIGHTWAVE_DAMAGE = 40;
         const STUN_SPIN_SPEED = 2;
@@ -3539,7 +3539,7 @@ export function Game({models, sounds, textures, matchId, character}) {
                                     const forward = new THREE.Vector3(0, 0, 1).applyQuaternion(caster.model.quaternion);
                                     const toMe = me.model.position.clone().sub(origin);
                                     const distance = toMe.length();
-                                    if (distance < LIGHTSTRIKE_RANGE && forward.angleTo(toMe.normalize()) < LIGHTSTRIKE_ANGLE) {
+                                    if (distance < MELEE_RANGE_ATTACK && forward.angleTo(toMe.normalize()) < LIGHTSTRIKE_ANGLE) {
                                         takeDamage(LIGHTSTRIKE_DAMAGE, message.id, 'blood-strike');
                                     }
                                 }
@@ -3588,7 +3588,7 @@ export function Game({models, sounds, textures, matchId, character}) {
                                     const forward = new THREE.Vector3(0, 0, 1).applyQuaternion(caster.model.quaternion);
                                     const toMe = me.model.position.clone().sub(origin);
                                     const distance = toMe.length();
-                                    if (distance < LIGHTSTRIKE_RANGE && forward.angleTo(toMe.normalize()) < LIGHTSTRIKE_ANGLE) {
+                                    if (distance < MELEE_RANGE_ATTACK && forward.angleTo(toMe.normalize()) < LIGHTSTRIKE_ANGLE) {
                                         takeDamage(LIGHTSTRIKE_DAMAGE, message.id, 'savage-blow');
                                     }
                                 }
@@ -3603,7 +3603,7 @@ export function Game({models, sounds, textures, matchId, character}) {
                                     const forward = new THREE.Vector3(0, 0, 1).applyQuaternion(caster.model.quaternion);
                                     const toMe = me.model.position.clone().sub(origin);
                                     const distance = toMe.length();
-                                    if (distance < LIGHTSTRIKE_RANGE && forward.angleTo(toMe.normalize()) < LIGHTSTRIKE_ANGLE) {
+                                    if (distance < MELEE_RANGE_ATTACK && forward.angleTo(toMe.normalize()) < LIGHTSTRIKE_ANGLE) {
                                         applySlowEffect(myPlayerId, 2000);
                                     }
                                 }
@@ -3640,7 +3640,7 @@ export function Game({models, sounds, textures, matchId, character}) {
                                     const forward = new THREE.Vector3(0, 0, 1).applyQuaternion(caster.model.quaternion);
                                     const toMe = me.model.position.clone().sub(origin);
                                     const distance = toMe.length();
-                                    if (distance < LIGHTSTRIKE_RANGE && forward.angleTo(toMe.normalize()) < LIGHTSTRIKE_ANGLE) {
+                                    if (distance < MELEE_RANGE_ATTACK && forward.angleTo(toMe.normalize()) < LIGHTSTRIKE_ANGLE) {
                                         takeDamage(LIGHTSTRIKE_DAMAGE, message.id, 'lightstrike');
                                     }
                                 }
