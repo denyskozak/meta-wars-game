@@ -138,6 +138,8 @@ export default function GamePage() {
       damageRune: new Audio("/sounds/damage-rune.ogg"),
       sinisterStrike: new Audio("/sounds/sinister-strike.ogg"),
       mortalStrike: new Audio("/sounds/mortal-strike.ogg"),
+      charge: new Audio("/sounds/charge.ogg"),
+      shadowLeap: new Audio("/sounds/shadowleap.ogg"),
     };
 
     Promise.all([preloadModels(models), preloadTextures()]).then(

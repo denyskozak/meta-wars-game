@@ -77,8 +77,8 @@ export default function castWarbringer({
   sendToSocket({ type: 'CAST_SPELL', payload: { type: 'warbringer' } });
   activateGlobalCooldown();
   startSkillCooldown('warbringer');
-  if (sounds?.blink) {
-    sounds.blink.volume = 0.5;
-    sounds.blink.play();
+  if (sounds?.charge) {
+    sounds.charge.volume = 0.5;
+    sounds.charge.play();
   }
 }
