@@ -870,7 +870,6 @@ export function Game({models, sounds, textures, matchId, character}) {
         let isHealActive = false;
         const frostNovaRings = [];
         const lightWaveRings = [];
-        const meleeRangeIndicators = [];
 
         // Crosshair elements
         const target = document.getElementById("target");
@@ -1578,7 +1577,6 @@ export function Game({models, sounds, textures, matchId, character}) {
                     performLightStrike();
                     break;
                 case "stun":
-                    spawnMeleeRangeIndicator(playerId);
                     const target = castStun({
                         playerId,
                         globalSkillCooldown,
@@ -1646,7 +1644,6 @@ export function Game({models, sounds, textures, matchId, character}) {
                     });
                     break;
                 case "kidney-strike":
-                    spawnMeleeRangeIndicator(playerId);
                     const targetKidney = castKidneyStrike({
                         playerId,
                         globalSkillCooldown,
@@ -1725,7 +1722,6 @@ export function Game({models, sounds, textures, matchId, character}) {
                     performSavageBlow();
                     break;
                 case "hamstring":
-                    spawnMeleeRangeIndicator(playerId);
                     castHamstring({
                         playerId,
                         globalSkillCooldown,
@@ -1760,7 +1756,6 @@ export function Game({models, sounds, textures, matchId, character}) {
                     });
                     break;
                 case "bloodthirst":
-                    spawnMeleeRangeIndicator(playerId);
                     castBloodthirst({
                         globalSkillCooldown,
                         isCasting,
@@ -1795,7 +1790,6 @@ export function Game({models, sounds, textures, matchId, character}) {
             if (!playerData) return;
             const { mixer, actions } = playerData;
 
-            spawnMeleeRangeIndicator(myPlayerId, MELEE_RANGE_ATTACK, 700, true);
 
             lightSword(myPlayerId, 500);
 
@@ -1841,7 +1835,6 @@ export function Game({models, sounds, textures, matchId, character}) {
             if (!playerData) return;
             const { mixer, actions } = playerData;
 
-            spawnMeleeRangeIndicator(myPlayerId, MELEE_RANGE_ATTACK, 700, true);
 
             lightSword(myPlayerId, 500);
 
@@ -1871,7 +1864,6 @@ export function Game({models, sounds, textures, matchId, character}) {
             if (!playerData) return;
             const { mixer, actions } = playerData;
 
-            spawnMeleeRangeIndicator(myPlayerId, MELEE_RANGE_ATTACK, 700, true);
 
             lightSword(myPlayerId, 500);
 
@@ -2854,83 +2846,6 @@ export function Game({models, sounds, textures, matchId, character}) {
             activeSprintTrails.set(playerId, { mesh, start: performance.now(), duration, timeout });
         }
 
-        function spawnMeleeRangeIndicator(
-            playerId,
-            range = MELEE_RANGE_ATTACK,
-            duration = 700,
-            arc = false,
-            angle = LIGHTSTRIKE_ANGLE * 2,
-        ) {
-            const playerData = players.get(playerId);
-            const player = playerData?.model;
-            if (!player) return;
-
-            const innerRadius = Math.max(range - 0.1, 0);
-            const geometry = arc
-                ? new THREE.RingGeometry(
-                      innerRadius,
-                      range,
-                      32,
-                      1,
-                      -angle / 2,
-                      angle,
-                  )
-                : new THREE.RingGeometry(innerRadius, range, 32);
-
-            // Create a simple radial color gradient
-            const pos = geometry.attributes.position;
-            const colors = [];
-
-            let startColor = new THREE.Color(0xff6666);
-            let endColor = new THREE.Color(0xff0000);
-            switch (playerData?.classType) {
-                case 'paladin':
-                    startColor = new THREE.Color(0xffe599);
-                    endColor = new THREE.Color(0xffcc33);
-                    break;
-                case 'warrior':
-                    startColor = new THREE.Color(0xff6666);
-                    endColor = new THREE.Color(0xff0000);
-                    break;
-                case 'rogue':
-                    startColor = new THREE.Color(0xcc66ff);
-                    endColor = new THREE.Color(0x9900ff);
-                    break;
-            }
-
-            for (let i = 0; i < pos.count; i++) {
-                const x = pos.getX(i);
-                const y = pos.getY(i);
-                const r = Math.sqrt(x * x + y * y);
-                const t = (r - innerRadius) / (range - innerRadius);
-                const c = startColor.clone().lerp(endColor, t);
-                colors.push(c.r, c.g, c.b);
-            }
-            geometry.setAttribute(
-                'color',
-                new THREE.Float32BufferAttribute(colors, 3),
-            );
-            const material = new THREE.MeshBasicMaterial({
-                vertexColors: true,
-                transparent: true,
-                opacity: 0.6,
-                side: THREE.DoubleSide,
-            });
-            const mesh = new THREE.Mesh(geometry, material);
-            mesh.rotation.x = -Math.PI / 2;
-
-            const posWorld = new THREE.Vector3();
-            player.getWorldPosition(posWorld);
-            mesh.position.copy(posWorld);
-            mesh.position.y += 0.05;
-
-            mesh.rotation.y = player.rotation.y;
-
-            scene.add(mesh);
-
-            meleeRangeIndicators.push({ mesh, start: performance.now(), duration });
-        }
-
 
 
         function toggleShieldOnPlayer(id, visible) {
@@ -3180,16 +3095,6 @@ export function Game({models, sounds, textures, matchId, character}) {
                         }
                     }
 
-                    for (let i = meleeRangeIndicators.length - 1; i >= 0; i--) {
-                        const effect = meleeRangeIndicators[i];
-                        const elapsed = performance.now() - effect.start;
-                        const progress = elapsed / effect.duration;
-                        effect.mesh.material.opacity = 0.4 * (1 - progress);
-                        if (progress >= 1) {
-                            effect.mesh.parent?.remove(effect.mesh);
-                            meleeRangeIndicators.splice(i, 1);
-                        }
-                    }
 
                     activeSprintTrails.forEach((obj, id) => {
                         const progress = (performance.now() - obj.start) / obj.duration;
@@ -3711,7 +3616,6 @@ export function Game({models, sounds, textures, matchId, character}) {
                             break;
                         case "blood-strike":
                             if (message.id !== myPlayerId) {
-                                spawnMeleeRangeIndicator(message.id, MELEE_RANGE_ATTACK, 700, true);
                                 const caster = players.get(message.id);
                                 const me = players.get(myPlayerId);
                                 if (caster && me) {
@@ -3771,7 +3675,6 @@ export function Game({models, sounds, textures, matchId, character}) {
                             break;
                         case "savage-blow":
                             if (message.id !== myPlayerId) {
-                                spawnMeleeRangeIndicator(message.id, MELEE_RANGE_ATTACK, 700, true);
                                 const caster = players.get(message.id);
                                 const me = players.get(myPlayerId);
                                 if (caster && me) {
@@ -3830,7 +3733,6 @@ export function Game({models, sounds, textures, matchId, character}) {
                             break;
                         case "lightstrike":
                             if (message.id !== myPlayerId) {
-                                spawnMeleeRangeIndicator(message.id, MELEE_RANGE_ATTACK, 700, true);
                                 const caster = players.get(message.id);
                                 const me = players.get(myPlayerId);
                                 if (caster && me) {
