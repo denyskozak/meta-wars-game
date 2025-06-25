@@ -72,5 +72,9 @@ export default function castShadowLeap({
   sendToSocket({ type: 'CAST_SPELL', payload: { type: 'shadow-leap', targetId } });
   activateGlobalCooldown();
   startSkillCooldown('shadow-leap');
+  if (sounds?.shadowLeap) {
+    sounds.shadowLeap.volume = 0.5;
+    sounds.shadowLeap.play();
+  }
   return targetId;
 }

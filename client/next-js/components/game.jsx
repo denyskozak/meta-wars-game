@@ -3581,6 +3581,11 @@ export function Game({models, sounds, textures, matchId, character}) {
                             }
                             break;
                         case "shadow-leap":
+                            if (sounds.shadowLeap) {
+                                sounds.shadowLeap.currentTime = 0;
+                                sounds.shadowLeap.volume = 0.5;
+                                sounds.shadowLeap.play();
+                            }
                             break;
                         case "stun":
                             if (message.payload.targetId) {
@@ -3588,6 +3593,11 @@ export function Game({models, sounds, textures, matchId, character}) {
                             }
                             break;
                         case "warbringer":
+                            if (sounds.charge) {
+                                sounds.charge.currentTime = 0;
+                                sounds.charge.volume = 0.5;
+                                sounds.charge.play();
+                            }
                             break;
                         case "savage-blow":
                             if (message.id !== myPlayerId) {
