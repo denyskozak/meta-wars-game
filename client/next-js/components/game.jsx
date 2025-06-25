@@ -1691,6 +1691,11 @@ export function Game({models, sounds, textures, matchId, character}) {
                         activateGlobalCooldown,
                         startSkillCooldown,
                         sounds,
+                        players,
+                        teleportTo,
+                        playerCollider,
+                        worldOctree,
+                        FIREBLAST_RANGE,
                     });
                     break;
                 case "warbringer":
