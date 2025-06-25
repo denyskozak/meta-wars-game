@@ -5,6 +5,7 @@ import {Coins} from "../parts/Coins";
 import {Scoreboard} from "../parts/Scoreboard";
 import {GameMenu} from "../parts/Menu";
 import {Buffs} from "../parts/Buffs";
+import {ComboPoints} from "../parts/ComboPoints";
 import {ExperienceBar} from "../parts/ExperienceBar";
 import {Progress} from "@heroui/react";
 
@@ -64,6 +65,7 @@ export const Interface = () => {
                     <Progress id="hpBar" aria-label="HP" value={Math.round((selfStats.hp / MAX_HP) * 100)} color="secondary" disableAnimation />
                     <p className="text-medium font-semibold">Mana: {Math.round(selfStats.mana)}</p>
                     <Progress id="manaBar" aria-label="Mana" value={Math.round((selfStats.mana / MAX_MANA) * 100)} color="primary" disableAnimation />
+                    <ComboPoints />
                 </div>
             </div>
 

@@ -1,0 +1,13 @@
+.combo-points {
+    display: flex;
+    gap: 2px;
+    margin-top: 2px;
+}
+
+.combo-points img {
+    opacity: 0.3;
+}
+
+.combo-points img.active {
+    opacity: 1;
+}

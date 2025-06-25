@@ -16,7 +16,7 @@ const ICEBALL_ICON = '/icons/spell_frostbolt.jpg';
 const FROSTNOVA_ICON = '/icons/frostnova.jpg';
 const FREEDOM_ICON = '/icons/classes/paladin/sealofvalor.jpg';
 const DIVINE_SPEED_ICON = '/icons/classes/paladin/speedoflight.jpg';
-const COMBO_ICON = '/icons/classes/rogue/sinister_strike.jpg';
+const COMBO_ICON = '/icons/combo_point.jpg';
 const ROGUE_SPRINT_ICON = '/icons/classes/rogue/sprint.jpg';
 const ADRENALINE_RUSH_ICON = '/icons/classes/rogue/adrenalinerush.jpg';
 
