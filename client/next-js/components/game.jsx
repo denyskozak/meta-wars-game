@@ -2864,31 +2864,51 @@ export function Game({models, sounds, textures, matchId, character}) {
             const player = players.get(playerId)?.model;
             if (!player) return;
 
+            const innerRadius = Math.max(range - 0.1, 0);
             const geometry = arc
                 ? new THREE.RingGeometry(
-                      Math.max(range - 0.1, 0),
+                      innerRadius,
                       range,
                       32,
                       1,
                       -angle / 2,
                       angle,
                   )
-                : new THREE.RingGeometry(Math.max(range - 0.1, 0), range, 32);
+                : new THREE.RingGeometry(innerRadius, range, 32);
+
+            // Create a simple radial color gradient
+            const pos = geometry.attributes.position;
+            const colors = [];
+            const startColor = new THREE.Color(0xff6666);
+            const endColor = new THREE.Color(0xff0000);
+            for (let i = 0; i < pos.count; i++) {
+                const x = pos.getX(i);
+                const y = pos.getY(i);
+                const r = Math.sqrt(x * x + y * y);
+                const t = (r - innerRadius) / (range - innerRadius);
+                const c = startColor.clone().lerp(endColor, t);
+                colors.push(c.r, c.g, c.b);
+            }
+            geometry.setAttribute(
+                'color',
+                new THREE.Float32BufferAttribute(colors, 3),
+            );
             const material = new THREE.MeshBasicMaterial({
-                color: 0x00ff00,
+                vertexColors: true,
                 transparent: true,
-                opacity: 0.4,
+                opacity: 0.6,
                 side: THREE.DoubleSide,
             });
             const mesh = new THREE.Mesh(geometry, material);
             mesh.rotation.x = -Math.PI / 2;
+            // Align indicator so the arc faces forward
+            mesh.rotation.y = Math.PI / 2;
 
             // Keep world size when attached to a scaled player
             const invScale = 1 / player.scale.x;
             mesh.scale.setScalar(invScale);
             // Position slightly above the player's feet
             mesh.position.set(0, 0.05 * invScale, 0);
-            mesh.rotation.y = 0;
 
             // Attach to player so it follows movement and rotation
             player.add(mesh);
