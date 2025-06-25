@@ -2864,10 +2864,6 @@ export function Game({models, sounds, textures, matchId, character}) {
             const player = players.get(playerId)?.model;
             if (!player) return;
 
-            const position = new THREE.Vector3();
-            player.getWorldPosition(position);
-            position.y += 0.05;
-
             const geometry = arc
                 ? new THREE.RingGeometry(
                       Math.max(range - 0.1, 0),
@@ -2886,12 +2882,12 @@ export function Game({models, sounds, textures, matchId, character}) {
             });
             const mesh = new THREE.Mesh(geometry, material);
             mesh.rotation.x = -Math.PI / 2;
-            if (arc) {
-                mesh.rotation.y = player.rotation.y;
-            }
-            mesh.position.copy(position);
+            // Position slightly above the ground relative to the player
+            mesh.position.set(0, 0.05, 0);
 
-            scene.add(mesh);
+            // Attach to player so it follows their movement
+            player.add(mesh);
+
             meleeRangeIndicators.push({ mesh, start: performance.now(), duration });
         }
 
@@ -3150,7 +3146,7 @@ export function Game({models, sounds, textures, matchId, character}) {
                         const progress = elapsed / effect.duration;
                         effect.mesh.material.opacity = 0.4 * (1 - progress);
                         if (progress >= 1) {
-                            scene.remove(effect.mesh);
+                            effect.mesh.parent?.remove(effect.mesh);
                             meleeRangeIndicators.splice(i, 1);
                         }
                     }
