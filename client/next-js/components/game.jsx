@@ -36,7 +36,7 @@ import castPaladinHeal, { meta as paladinHealMeta } from '../skills/paladin/heal
 import { meta as lightWaveMeta } from '../skills/paladin/lightWave';
 import castHandOfFreedom, { meta as handOfFreedomMeta } from '../skills/paladin/handFreedom';
 import castDivineSpeed, { meta as divineSpeedMeta } from '../skills/paladin/divineSpeed';
-import castBloodStrike, { meta as bloodStrikeMeta } from '../skills/rogue/bloodStrike';
+import { meta as bloodStrikeMeta } from '../skills/rogue/bloodStrike';
 import castEviscerate, { meta as eviscerateMeta } from '../skills/rogue/eviscerate';
 import castKidneyStrike, { meta as kidneyStrikeMeta } from '../skills/rogue/kidneyStrike';
 import castAdrenalineRush, { meta as adrenalineRushMeta } from '../skills/rogue/adrenalineRush';
@@ -1588,15 +1588,7 @@ export function Game({models, sounds, textures, matchId, character}) {
                     });
                     break;
                 case "blood-strike":
-                    castBloodStrike({
-                        globalSkillCooldown,
-                        isCasting,
-                        mana,
-                        sendToSocket,
-                        activateGlobalCooldown,
-                        startSkillCooldown,
-                        sounds,
-                    });
+                    performBloodStrike();
                     break;
                 case "eviscerate":
                     castEviscerate({
@@ -1728,6 +1720,34 @@ export function Game({models, sounds, textures, matchId, character}) {
             sendToSocket({ type: 'CAST_SPELL', payload: { type: 'lightwave' } });
             activateGlobalCooldown();
             startSkillCooldown('lightwave');
+        }
+
+        function performBloodStrike() {
+            const playerData = players.get(myPlayerId);
+            if (!playerData) return;
+            const { mixer, actions } = playerData;
+
+            lightSword(myPlayerId, 500);
+
+            controlAction({
+                action: actions['attack'],
+                actionName: 'attack',
+                mixer,
+                loop: THREE.LoopOnce,
+                fadeIn: 0.1,
+                reset: true,
+                clampWhenFinished: true,
+            });
+
+            if (sounds.autoAttack) {
+                sounds.autoAttack.currentTime = 0;
+                sounds.autoAttack.volume = 0.5;
+                sounds.autoAttack.play();
+            }
+
+            sendToSocket({ type: 'CAST_SPELL', payload: { type: 'blood-strike' } });
+            activateGlobalCooldown();
+            startSkillCooldown('blood-strike');
         }
 
 
@@ -3409,7 +3429,14 @@ export function Game({models, sounds, textures, matchId, character}) {
                             }
                             break;
                         case "blood-strike":
-                            // melee swing effect placeholder
+                            if (message.id !== myPlayerId) {
+                                lightSword(message.id, 500);
+                                if (sounds.autoAttack) {
+                                    sounds.autoAttack.currentTime = 0;
+                                    sounds.autoAttack.volume = 0.5;
+                                    sounds.autoAttack.play();
+                                }
+                            }
                             break;
                         case "eviscerate":
                             break;
