@@ -3532,6 +3532,18 @@ export function Game({models, sounds, textures, matchId, character}) {
                             break;
                         case "blood-strike":
                             if (message.id !== myPlayerId) {
+                                const caster = players.get(message.id);
+                                const me = players.get(myPlayerId);
+                                if (caster && me) {
+                                    const origin = caster.model.position.clone();
+                                    const forward = new THREE.Vector3(0, 0, 1).applyQuaternion(caster.model.quaternion);
+                                    const toMe = me.model.position.clone().sub(origin);
+                                    const distance = toMe.length();
+                                    if (distance < LIGHTSTRIKE_RANGE && forward.angleTo(toMe.normalize()) < LIGHTSTRIKE_ANGLE) {
+                                        takeDamage(LIGHTSTRIKE_DAMAGE, message.id, 'blood-strike');
+                                    }
+                                }
+
                                 lightSword(message.id, 500);
                                 if (sounds.sinisterStrike) {
                                     sounds.sinisterStrike.currentTime = 0;
