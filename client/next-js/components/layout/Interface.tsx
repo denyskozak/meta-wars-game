@@ -20,7 +20,7 @@ export const Interface = () => {
     const {
         state: { character },
     } = useInterface() as { state: { character: { name?: string } | null } };
-    const [target, setTarget] = useState<{id:number, hp:number, mana:number, address:string, classType?:string}|null>(null);
+    const [target, setTarget] = useState<{id:number, hp:number, mana:number, address:string, classType?:string, buffs?:any[], debuffs?:any[]}|null>(null);
     const [selfStats, setSelfStats] = useState<{hp:number, mana:number, points:number, level:number, skillPoints:number, learnedSkills:Record<string, boolean>}>({hp: MAX_HP, mana: MAX_MANA, points: 0, level: 1, skillPoints:1, learnedSkills:{}});
 
     useEffect(() => {
@@ -78,10 +78,13 @@ export const Interface = () => {
                         <div id="targetAddress" className="target-address">{target.address}</div>
                         <p className="text-medium font-semibold">HP: {Math.round((target.hp / MAX_HP) * 100)}</p>
                         <Progress id="targetHpBar" aria-label="Target HP" value={Math.round((target.hp / MAX_HP) * 100)} color="secondary" className="mb-1 w-40" disableAnimation />
-                        <p className="text-medium font-semibold">Mana: {Math.round(target.mana)}</p>
-                        <Progress id="targetManaBar" aria-label="Target Mana" value={Math.round((target.mana / MAX_MANA) * 100)} color="primary" className="w-40" disableAnimation />
+                        <p className="text-medium font-semibold">{(target.classType === 'rogue' || target.classType === 'warrior') ? 'Energy' : 'Mana'}: {Math.round(target.mana)}</p>
+                        <Progress id="targetManaBar" aria-label={(target.classType === 'rogue' || target.classType === 'warrior') ? 'Target Energy' : 'Target Mana'} value={Math.round((target.mana / MAX_MANA) * 100)} color="primary" className="w-40" disableAnimation />
                     </div>
                 </div>
+            )}
+            {target && (
+                <Buffs buffs={target.buffs || []} debuffs={target.debuffs || []} className="target-buffs-container" />
             )}
 
             <div id="target" style={{

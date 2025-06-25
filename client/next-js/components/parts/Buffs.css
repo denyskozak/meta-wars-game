@@ -46,3 +46,15 @@
     color: #fff;
     pointer-events: none;
 }
+
+.target-buffs-container {
+    position: absolute;
+    top: 100px;
+    left: 180px;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px;
+    width: 140px;
+    pointer-events: none;
+    z-index: 1000;
+}
