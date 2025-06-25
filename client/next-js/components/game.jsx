@@ -279,6 +279,7 @@ export function Game({models, sounds, textures, matchId, character}) {
         const activeImmolation = new Map(); // key = playerId -> effect mesh
         const activeStunEffects = new Map(); // key = playerId -> {group, timeout}
         const activeFearEffects = new Map(); // key = playerId -> {sprite, timeout}
+        const activeSprintTrails = new Map(); // key = playerId -> {mesh, start, duration, timeout}
         const fearTexture = new THREE.TextureLoader().load('/icons/classes/warlock/possession.jpg');
 
         const glowTexture = (() => {
@@ -344,6 +345,21 @@ export function Game({models, sounds, textures, matchId, character}) {
             ctx.closePath();
             ctx.fillStyle = 'rgba(255,255,0,1)';
             ctx.fill();
+            return new THREE.CanvasTexture(canvas);
+        })();
+
+        const trailTexture = (() => {
+            const width = 64;
+            const height = 8;
+            const canvas = document.createElement('canvas');
+            canvas.width = width;
+            canvas.height = height;
+            const ctx = canvas.getContext('2d');
+            const grad = ctx.createLinearGradient(0, 0, width, 0);
+            grad.addColorStop(0, 'rgba(255,255,255,0)');
+            grad.addColorStop(1, 'rgba(255,255,255,0.8)');
+            ctx.fillStyle = grad;
+            ctx.fillRect(0, 0, width, height);
             return new THREE.CanvasTexture(canvas);
         })();
 
@@ -652,7 +668,7 @@ export function Game({models, sounds, textures, matchId, character}) {
             frostnova: 15000,
             'hand-of-freedom': 15000,
             'divine-speed': 30000,
-            'blood-strike': 5000,
+            'blood-strike': 1000,
             eviscerate: 10000,
             'kidney-strike': 20000,
             'adrenaline-rush': 45000,
@@ -1633,6 +1649,7 @@ export function Game({models, sounds, textures, matchId, character}) {
                         sounds,
                     });
                     applySpeedEffect(playerId, 6000);
+                    spawnSprintTrail(playerId, 6000);
                     break;
                 case "shadow-leap":
                     castShadowLeap({
@@ -2607,6 +2624,38 @@ export function Game({models, sounds, textures, matchId, character}) {
             lightWaveRings.push({ mesh, start: performance.now(), duration });
         }
 
+        function spawnSprintTrail(playerId, duration = 6000) {
+            if (playerId !== myPlayerId) return;
+            const existing = activeSprintTrails.get(playerId);
+            if (existing) {
+                existing.mesh.parent?.remove(existing.mesh);
+                clearTimeout(existing.timeout);
+            }
+
+            const player = players.get(playerId)?.model;
+            if (!player) return;
+
+            const geometry = new THREE.PlaneGeometry(1.5, 0.3);
+            const material = new THREE.MeshBasicMaterial({
+                map: trailTexture,
+                transparent: true,
+                depthWrite: false,
+                blending: THREE.AdditiveBlending,
+            });
+            const mesh = new THREE.Mesh(geometry, material);
+            mesh.rotation.x = -Math.PI / 2;
+            mesh.position.set(0, 0.05, -0.7);
+
+            player.add(mesh);
+
+            const timeout = setTimeout(() => {
+                mesh.parent?.remove(mesh);
+                activeSprintTrails.delete(playerId);
+            }, duration);
+
+            activeSprintTrails.set(playerId, { mesh, start: performance.now(), duration, timeout });
+        }
+
 
 
         function toggleShieldOnPlayer(id, visible) {
@@ -2855,6 +2904,17 @@ export function Game({models, sounds, textures, matchId, character}) {
                             lightWaveRings.splice(i, 1);
                         }
                     }
+
+                    activeSprintTrails.forEach((obj, id) => {
+                        const progress = (performance.now() - obj.start) / obj.duration;
+                        obj.mesh.scale.x = 1 + progress * 1.5;
+                        obj.mesh.material.opacity = 0.8 * (1 - progress);
+                        if (progress >= 1) {
+                            obj.mesh.parent?.remove(obj.mesh);
+                            clearTimeout(obj.timeout);
+                            activeSprintTrails.delete(id);
+                        }
+                    });
 
                     runes.forEach(r => {
                         const speed = r.userData.type === 'damage' ? 0.05 : 0.1;
@@ -3366,6 +3426,7 @@ export function Game({models, sounds, textures, matchId, character}) {
                         case "sprint":
                             if (message.id === myPlayerId) {
                                 applySpeedEffect(myPlayerId, 6000);
+                                spawnSprintTrail(myPlayerId, 6000);
                             }
                             break;
                         case "shadow-leap":
