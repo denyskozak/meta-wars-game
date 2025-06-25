@@ -21,7 +21,15 @@ const ROGUE_SPRINT_ICON = '/icons/classes/rogue/sprint.jpg';
 const ADRENALINE_RUSH_ICON = '/icons/classes/rogue/adrenalinerush.jpg';
 
 function updateLevel(player) {
-    player.level = Math.min(10, Math.floor(player.points / XP_PER_LEVEL) + 1);
+    const prevLevel = player.level || 1;
+    const newLevel = Math.min(10, Math.floor(player.points / XP_PER_LEVEL) + 1);
+    if (newLevel > prevLevel) {
+        const gained = Math.min(newLevel, 6) - Math.min(prevLevel, 6);
+        if (gained > 0) {
+            player.skillPoints = (player.skillPoints || 0) + gained;
+        }
+    }
+    player.level = newLevel;
 }
 
 const RUNE_POSITIONS = [
@@ -228,6 +236,8 @@ function createPlayer(address, classType, character) {
         assists: 0,
         points: 0,
         level: 1,
+        skillPoints: 1,
+        learnedSkills: {},
         hp: MAX_HP,
         mana: MAX_MANA,
         comboPoints: 0,
@@ -690,11 +700,22 @@ ws.on('connection', (socket) => {
                 }
                 break;
 
+            case 'LEARN_SKILL':
+                if (match) {
+                    const player = match.players.get(id);
+                    const skill = message.skillId;
+                    if (player && skill && player.skillPoints > 0 && !player.learnedSkills[skill]) {
+                        player.learnedSkills[skill] = true;
+                        player.skillPoints -= 1;
+                    }
+                }
+                break;
+
             case 'CAST_SPELL':
                 if (match) {
                     const player = match.players.get(id);
                     const cost = SPELL_COST[message.payload?.type] || 0;
-                    if (player && player.mana >= cost) {
+                    if (player && player.mana >= cost && player.learnedSkills && player.learnedSkills[message.payload?.type]) {
 
                         player.mana -= cost;
                         if (message.payload.type === 'heal') {

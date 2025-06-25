@@ -21,7 +21,7 @@ export const Interface = () => {
         state: { character },
     } = useInterface() as { state: { character: { name?: string } | null } };
     const [target, setTarget] = useState<{id:number, hp:number, mana:number, address:string, classType?:string}|null>(null);
-    const [selfStats, setSelfStats] = useState<{hp:number, mana:number, points:number, level:number}>({hp: MAX_HP, mana: MAX_MANA, points: 0, level: 1});
+    const [selfStats, setSelfStats] = useState<{hp:number, mana:number, points:number, level:number, skillPoints:number, learnedSkills:Record<string, boolean>}>({hp: MAX_HP, mana: MAX_MANA, points: 0, level: 1, skillPoints:1, learnedSkills:{}});
 
     useEffect(() => {
         const handler = (e: CustomEvent) => {
@@ -39,7 +39,8 @@ export const Interface = () => {
                     prev.hp === e.detail.hp &&
                     prev.mana === e.detail.mana &&
                     prev.points === e.detail.points &&
-                    prev.level === e.detail.level
+                    prev.level === e.detail.level &&
+                    prev.skillPoints === e.detail.skillPoints
                 ) {
                     return prev;
                 }
@@ -111,7 +112,7 @@ export const Interface = () => {
             <Scoreboard />
             <GameMenu />
             <Buffs />
-            <SkillBar mana={selfStats.mana}/>
+            <SkillBar mana={selfStats.mana} level={selfStats.level} skillPoints={selfStats.skillPoints} learnedSkills={selfStats.learnedSkills}/>
             <CastBar/>
             <ExperienceBar />
             <Chat />
