@@ -20,7 +20,7 @@ import {MAX_HP, MAX_MANA} from "../../consts";
 export const Interface = () => {
     const {
         state: { character },
-    } = useInterface() as { state: { character: { name?: string } | null } };
+    } = useInterface() as { state: { character: { name?: string, classType: string } | null } };
     const [target, setTarget] = useState<{id:number, hp:number, mana:number, address:string, classType?:string, buffs?:any[], debuffs?:any[]}|null>(null);
     const [selfStats, setSelfStats] = useState<{hp:number, mana:number, points:number, level:number, skillPoints:number, learnedSkills:Record<string, boolean>}>({hp: MAX_HP, mana: MAX_MANA, points: 0, level: 1, skillPoints:1, learnedSkills:{}});
 
@@ -52,9 +52,10 @@ export const Interface = () => {
         return () => window.removeEventListener('self-update', handler as EventListener);
     }, []);
 
+    console.log("character: ", character);
     return (
         <div className="interface-container">
-            <div className="absolute top-24 left-5 flex items-center gap-2 bg-black/70 p-2 rounded">
+            {character && <div className="absolute top-24 left-5 flex items-center gap-2 bg-black/70 p-2 rounded">
                 {character?.name && (
                     <div className="w-20 h-20 rounded-full overflow-hidden bg-black/50 flex items-center justify-center">
                         <Image src={CLASS_ICONS[character.name] || ''} alt={character.name} width={250} height={250}/>
@@ -63,11 +64,11 @@ export const Interface = () => {
                 <div className="w-40 space-y-1">
                     <p className="text-medium font-semibold">HP: {Math.round((selfStats.hp / MAX_HP) * 100)}</p>
                     <Progress id="hpBar" aria-label="HP" value={Math.round((selfStats.hp / MAX_HP) * 100)} color="secondary" disableAnimation />
-                    <p className="text-medium font-semibold">Mana: {Math.round(selfStats.mana)}</p>
-                    <Progress id="manaBar" aria-label="Mana" value={Math.round((selfStats.mana / MAX_MANA) * 100)} color="primary" disableAnimation />
+                    <p className="text-medium font-semibold">{(character.classType === 'rogue' || character.classType === 'warrior') ? 'Energy' : 'Mana'}: {Math.round(selfStats.mana)}</p>
+                    <Progress id="manaBar" aria-label={(character.classType === 'rogue' || character.classType === 'warrior') ? 'Energy' : 'Mana'} value={Math.round((selfStats.mana / MAX_MANA) * 100)} color="primary" disableAnimation />
                     <ComboPoints />
                 </div>
-            </div>
+            </div>}
 
             {target && (
                 <div id="targetPanel" className="target-panel">

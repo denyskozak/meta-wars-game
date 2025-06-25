@@ -2398,7 +2398,6 @@ export function Game({models, sounds, textures, matchId, character}) {
 
             if (!mixer) return false; // Ensure mixer exists
 
-            console.log("error check actions: ", actions);
             return Object.values(actions).some(
                 (action) => action && action.isRunning() && !excludeActions.includes(action),
             );

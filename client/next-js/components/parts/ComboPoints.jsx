@@ -12,7 +12,7 @@ export const ComboPoints = () => {
             {Array.from({ length: 5 }).map((_, idx) => (
                 <Image
                     key={idx}
-                    src="/icons/combo_point.jpg"
+                    src="/icons/classes/rogue/combo_point.jpg"
                     alt="Combo Point"
                     width={16}
                     height={16}
