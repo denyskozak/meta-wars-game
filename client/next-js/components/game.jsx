@@ -3125,6 +3125,10 @@ export function Game({models, sounds, textures, matchId, character}) {
                 attack360: get('attack_360'),
             };
 
+            // Speed up attack animations
+            if (actions.attack) actions.attack.timeScale *= 2;
+            if (actions.attack360) actions.attack360.timeScale *= 2;
+
             return actions;
         }
 
