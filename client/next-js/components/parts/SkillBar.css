@@ -62,3 +62,17 @@
     pointer-events: none;
     font-size: 14px;
 }
+
+.skill-button.locked .skill-icon {
+    filter: grayscale(100%) brightness(0.4);
+}
+
+.skill-triangle {
+    position: absolute;
+    top: 0;
+    right: 0;
+    width: 0;
+    height: 0;
+    border-left: 12px solid transparent;
+    border-bottom: 12px solid gold;
+}

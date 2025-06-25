@@ -243,7 +243,9 @@ export function Game({models, sounds, textures, matchId, character}) {
         let hp = MAX_HP,
             mana = MAX_MANA,
             points = 0,
-            level = 1;
+            level = 1,
+            skillPoints = 1;
+        let learnedSkills = {};
         let actions = [];
         let playerMixers = [];
         let settings;
@@ -396,12 +398,12 @@ export function Game({models, sounds, textures, matchId, character}) {
 
         // Function to update the HP bar width
         function updateHPBar() {
-            dispatchEvent('self-update', { hp, mana, points, level });
+            dispatchEvent('self-update', { hp, mana, points, level, skillPoints, learnedSkills });
         }
 
         // Function to update the Mana bar width
         function updateManaBar() {
-            dispatchEvent('self-update', { hp, mana, points, level });
+            dispatchEvent('self-update', { hp, mana, points, level, skillPoints, learnedSkills });
         }
 
         function dispatchTargetUpdate() {
@@ -1362,6 +1364,9 @@ export function Game({models, sounds, textures, matchId, character}) {
 
 
         function castSpell(spellType, playerId = myPlayerId) {
+            if (!learnedSkills || !learnedSkills[spellType]) {
+                return;
+            }
             dispatchEvent('skill-use', { skill: spellType });
             const meta = SPELL_META[spellType];
             if (!isFocused && meta?.autoFocus !== false) {
@@ -3761,6 +3766,8 @@ export function Game({models, sounds, textures, matchId, character}) {
                             mana = player.mana;
                             points = player.points;
                             level = player.level;
+                            skillPoints = player.skillPoints || skillPoints;
+                            learnedSkills = player.learnedSkills || learnedSkills;
                             updateHPBar();
                             updateManaBar();
                             dispatch({type: 'SET_BUFFS', payload: player.buffs || []});
