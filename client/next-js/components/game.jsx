@@ -801,8 +801,8 @@ export function Game({models, sounds, textures, matchId, character}) {
         const LIGHTWAVE_RING_DURATION = 1000; // ms
         const LIGHTSTRIKE_DAMAGE = 28; // 30% less damage
         // Slightly increased to improve melee reliability
-        // Increase melee range by 40%
-        const MELEE_RANGE_ATTACK = 2.38; // melee range
+        // Increase melee range by 25%
+        const MELEE_RANGE_ATTACK = 2.125; // melee range
         const LIGHTSTRIKE_ANGLE = Math.PI / 4;
         const LIGHTWAVE_DAMAGE = 40;
         const STUN_SPIN_SPEED = 2;
