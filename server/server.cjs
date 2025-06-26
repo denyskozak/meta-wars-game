@@ -361,7 +361,7 @@ function applyDamage(match, victimId, dealerId, damage, spellType) {
     if (attacker && attacker.buffs.length) {
         const now = Date.now();
         attacker.buffs.forEach(buff => {
-            if (buff.type === 'damage' && buff.expires > now) {
+            if (buff.type === 'damage' && (buff.expires === undefined || buff.expires > now)) {
                 if (typeof buff.percent === 'number') {
                     totalDamage += totalDamage * buff.percent;
                 } else if (typeof buff.bonus === 'number') {
