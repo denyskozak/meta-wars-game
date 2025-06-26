@@ -150,6 +150,7 @@ export default function GamePage() {
       mortalStrike: new Audio("/sounds/mortal-strike.ogg"),
       charge: new Audio("/sounds/charge.ogg"),
       shadowLeap: new Audio("/sounds/shadowleap.ogg"),
+      bladestorm: new Audio("/sounds/bladestorm.ogg"),
     };
 
     Promise.all([preloadModels(models), preloadTextures()]).then(
