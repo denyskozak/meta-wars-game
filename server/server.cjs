@@ -448,7 +448,7 @@ ws.on('connection', (socket) => {
                     player.mana = Math.min(MAX_MANA, player.mana + MANA_REGEN_AMOUNT);
                 }
                 if (player.buffs.length) {
-                    player.buffs = player.buffs.filter(b => b.expires > now);
+                    player.buffs = player.buffs.filter(b => b.expires === undefined || b.expires > now);
                 }
                 if (player.debuffs && player.debuffs.length) {
                     player.debuffs = player.debuffs.filter(deb => {
