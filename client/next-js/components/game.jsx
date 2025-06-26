@@ -861,6 +861,7 @@ export function Game({models, sounds, textures, matchId, character}) {
         const SHIELD_MANA_COST = SPELL_COST['shield'];
         const SHIELD_DURATION = 3; // Shield duration in seconds
         const DAMAGE_REDUCTION = 0.5; // Reduces damage by 50%
+        const PRIORITY_ACTIONS = ['attack', 'attack_360'];
         // Rotation speed for the damage rune effect attached to players
         const DAMAGE_EFFECT_ROT_SPEED = 0.4;
         const DAMAGE_EFFECT_MAP_SPEED = 0.1;
@@ -952,16 +953,16 @@ export function Game({models, sounds, textures, matchId, character}) {
         const chatInputElement = document.getElementById("chat-input");
 
         function handleKeyW() {
-            !isCasting && setAnimation("walk");
+            !isCasting && !isActionRunning(PRIORITY_ACTIONS) && setAnimation("walk");
         }
         function handleKeyA() {
-            !isCasting && setAnimation("walk");
+            !isCasting && !isActionRunning(PRIORITY_ACTIONS) && setAnimation("walk");
         }
         function handleKeyD() {
-            !isCasting && setAnimation("walk");
+            !isCasting && !isActionRunning(PRIORITY_ACTIONS) && setAnimation("walk");
         }
         function handleKeyS() {
-            !isCasting && setAnimation("idle");
+            !isCasting && !isActionRunning(PRIORITY_ACTIONS) && setAnimation("idle");
         }
         function handleKeyE() {
             const className = character?.name?.toLowerCase();
@@ -1024,7 +1025,7 @@ export function Game({models, sounds, textures, matchId, character}) {
             dispatch({type: 'SET_SCOREBOARD_VISIBLE', payload: true});
         }
         function handleSpace() {
-            if (playerOnFloor && !jumpBlocked) {
+            if (playerOnFloor && !jumpBlocked && !isActionRunning(PRIORITY_ACTIONS)) {
                 jumpBlocked = true;
                 const {mixer, actions} = players.get(myPlayerId);
                 const actionName = 'jump';
@@ -1126,6 +1127,7 @@ export function Game({models, sounds, textures, matchId, character}) {
             // // Check if no movement keys are active
             if (
                 !isCasting &&
+                !isActionRunning(PRIORITY_ACTIONS) &&
                 !keyStates["KeyW"] &&
                 !keyStates["KeyA"] &&
                 !keyStates["KeyD"] &&
@@ -1385,7 +1387,7 @@ export function Game({models, sounds, textures, matchId, character}) {
                 return;
             }
 
-            if (globalSkillCooldown || isCasting) {
+            if (globalSkillCooldown || isCasting || isActionRunning(PRIORITY_ACTIONS)) {
                 return;
             }
             switch (spellType) {
@@ -2424,6 +2426,13 @@ export function Game({models, sounds, textures, matchId, character}) {
             return Object.values(actions).some(
                 (action) => action && action.isRunning() && !excludeActions.includes(action),
             );
+        }
+
+        function isActionRunning(names) {
+            const { actions } = players.get(myPlayerId);
+            if (!actions) return false;
+            const list = Array.isArray(names) ? names : [names];
+            return list.some(name => actions[name] && actions[name].isRunning());
         }
 
         // settings = {
