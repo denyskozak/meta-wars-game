@@ -301,6 +301,7 @@ export function Game({models, sounds, textures, matchId, character}) {
         const activeStunEffects = new Map(); // key = playerId -> {group, timeout}
         const activeFearEffects = new Map(); // key = playerId -> {sprite, timeout}
         const activeSprintTrails = new Map(); // key = playerId -> {mesh, start, duration, timeout}
+        const activeBladestorms = new Map(); // key = playerId -> {start, duration, sound}
         const fearTexture = new THREE.TextureLoader().load('/icons/classes/warlock/possession.jpg');
 
         const glowTexture = (() => {
@@ -712,7 +713,7 @@ export function Game({models, sounds, textures, matchId, character}) {
             'shadow-leap': 12000,
             'warbringer': 10000,
             'savage-blow': 0,
-            'hamstring': 5000,
+            'hamstring': 10000,
             'bladestorm': 40000,
             'berserk': 45000,
             'bloodthirst': 30000,
@@ -813,10 +814,12 @@ export function Game({models, sounds, textures, matchId, character}) {
         const LIGHTWAVE_RING_DURATION = 1000; // ms
         const LIGHTSTRIKE_DAMAGE = 28; // 30% less damage
         // Slightly increased to improve melee reliability
-        const MELEE_RANGE_ATTACK = 1.7; // melee range
+        // Increase melee range by 25%
+        const MELEE_RANGE_ATTACK = 2.125; // melee range
         const LIGHTSTRIKE_ANGLE = Math.PI / 4;
         const LIGHTWAVE_DAMAGE = 40;
         const STUN_SPIN_SPEED = 2;
+        const BLADESTORM_DAMAGE = 40;
 
         // Медленнее пускаем сферы как настоящие заклинания
         const MIN_SPHERE_IMPULSE = 6;
@@ -2701,10 +2704,10 @@ export function Game({models, sounds, textures, matchId, character}) {
             }, duration);
         }
 
-        function applySlowEffect(playerId, duration = 3000) {
+        function applySlowEffect(playerId, duration = 3000, multiplier = 0.6) {
             if (playerId === myPlayerId) {
                 if (freedomActive) return;
-                movementSpeedModifier = 0.6;
+                movementSpeedModifier = multiplier;
                 setTimeout(() => (movementSpeedModifier = 1), duration);
             }
         }
@@ -2891,6 +2894,35 @@ export function Game({models, sounds, textures, matchId, character}) {
             }, duration);
 
             activeSprintTrails.set(playerId, { mesh, start: performance.now(), duration, timeout });
+        }
+
+        function startBladestorm(playerId, duration = 5000) {
+            const playerData = players.get(playerId);
+            if (!playerData) return;
+            const { mixer, actions } = playerData;
+
+            controlAction({
+                action: actions['attack360'] || actions['attack'],
+                actionName: 'attack_360',
+                mixer,
+                loop: THREE.LoopRepeat,
+                fadeIn: 0.1,
+                reset: true,
+                clampWhenFinished: true,
+            });
+
+            const sound = sounds.bladestorm;
+            if (sound) {
+                sound.currentTime = 0;
+                sound.volume = 0.5;
+                sound.loop = true;
+                sound.play();
+            }
+
+            activeBladestorms.set(playerId, { start: performance.now(), duration, sound });
+            if (playerId === myPlayerId) {
+                isCasting = true;
+            }
         }
 
 
@@ -3154,6 +3186,25 @@ export function Game({models, sounds, textures, matchId, character}) {
                             obj.mesh.parent?.remove(obj.mesh);
                             clearTimeout(obj.timeout);
                             activeSprintTrails.delete(id);
+                        }
+                    });
+
+                    activeBladestorms.forEach((obj, id) => {
+                        const player = players.get(id)?.model;
+                        if (!player) return;
+                        const elapsed = performance.now() - obj.start;
+                        if (elapsed >= obj.duration) {
+                            activeBladestorms.delete(id);
+                            obj.sound?.pause();
+                            if (id === myPlayerId) isCasting = false;
+                        } else {
+                            player.rotation.y += delta * 10;
+                            if (id !== myPlayerId) {
+                                const me = players.get(myPlayerId)?.model;
+                                if (me && me.position.distanceTo(player.position) < MELEE_RANGE_ATTACK) {
+                                    takeDamage(BLADESTORM_DAMAGE * delta, id, 'bladestorm');
+                                }
+                            }
                         }
                     });
 
@@ -3754,14 +3805,15 @@ export function Game({models, sounds, textures, matchId, character}) {
                                     const toMe = me.model.position.clone().sub(origin);
                                     const distance = toMe.length();
                                     if (distance < MELEE_RANGE_ATTACK && forward.angleTo(toMe.normalize()) < LIGHTSTRIKE_ANGLE) {
-                                        applySlowEffect(myPlayerId, 4000);
+                                        applySlowEffect(myPlayerId, 5000, 0.3);
                                     }
                                 }
                             }
                             break;
                         case "bladestorm":
+                            startBladestorm(message.id);
                             if (message.id === myPlayerId) {
-                                applyFreedomEffect(myPlayerId, 4000);
+                                applyFreedomEffect(myPlayerId, 5000);
                             }
                             break;
                         case "berserk":
