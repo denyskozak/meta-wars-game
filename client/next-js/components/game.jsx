@@ -397,6 +397,19 @@ export function Game({models, sounds, textures, matchId, character}) {
             return sprite;
         }
 
+        function makeFireSprite(size = 0.5) {
+            const material = new THREE.SpriteMaterial({
+                map: textures.fire,
+                transparent: true,
+                depthWrite: false,
+                blending: THREE.AdditiveBlending,
+            });
+            const sprite = new THREE.Sprite(material);
+            sprite.scale.set(size, size, 1);
+            sprite.renderOrder = 999;
+            return sprite;
+        }
+
         // Function to update the HP bar width
         function updateHPBar() {
             dispatchEvent('self-update', { hp, mana, points, level, skillPoints, learnedSkills });
@@ -1896,6 +1909,11 @@ export function Game({models, sounds, textures, matchId, character}) {
                 sphereMesh.lookAt(camera.position);
             }
 
+            if (type === 'fireball') {
+                const sprite = makeFireSprite(SPELL_SCALES.fireball * 1.5);
+                sphereMesh.add(sprite);
+            }
+
             scene.add(sphereMesh); // Add the sphereMesh to the scene
 
 
@@ -2196,6 +2214,11 @@ export function Game({models, sounds, textures, matchId, character}) {
                 if (sphere.type === 'pyroblast') {
                     sphere.mesh.lookAt(camera.position);
                 }
+                sphere.mesh?.children.forEach(c => {
+                    if (c.isSprite && c.material?.rotation !== undefined) {
+                        c.material.rotation += deltaTime * 5;
+                    }
+                });
             }
         }
 
@@ -2772,12 +2795,36 @@ export function Game({models, sounds, textures, matchId, character}) {
             player.getWorldPosition(position);
             position.y += 0.1;
 
-            const geometry = new THREE.RingGeometry(1, 1.5, 32);
-            const material = new THREE.MeshBasicMaterial({
-                map: textures.ice,
+            const geometry = new THREE.RingGeometry(1, 1.5, 64);
+            const material = new THREE.ShaderMaterial({
+                uniforms: {
+                    time: { value: 0 },
+                    tex: { value: textures.ice },
+                },
                 transparent: true,
-                opacity: 0.8,
                 side: THREE.DoubleSide,
+                blending: THREE.AdditiveBlending,
+                vertexShader: `
+                    varying vec2 vUv;
+                    void main(){
+                        vUv = uv;
+                        gl_Position = projectionMatrix * modelViewMatrix * vec4(position,1.0);
+                    }
+                `,
+                fragmentShader: `
+                    uniform float time;
+                    uniform sampler2D tex;
+                    varying vec2 vUv;
+                    void main(){
+                        vec2 uv = vUv - 0.5;
+                        float angle = atan(uv.y, uv.x) + time * 2.0;
+                        float radius = length(uv);
+                        uv = vec2(cos(angle), sin(angle)) * radius + 0.5;
+                        vec4 col = texture2D(tex, uv);
+                        float alpha = smoothstep(0.1, 0.2, radius) * (1.0 - smoothstep(0.7, 0.9, radius));
+                        gl_FragColor = vec4(col.rgb, col.a * alpha);
+                    }
+                `,
             });
             const mesh = new THREE.Mesh(geometry, material);
             mesh.rotation.x = -Math.PI / 2;
@@ -3076,6 +3123,9 @@ export function Game({models, sounds, textures, matchId, character}) {
                         const progress = elapsed / effect.duration;
                         effect.mesh.scale.setScalar(1 + progress * 2);
                         effect.mesh.material.opacity = 0.8 * (1 - progress);
+                        if (effect.mesh.material.uniforms?.time) {
+                            effect.mesh.material.uniforms.time.value += delta;
+                        }
                         if (progress >= 1) {
                             scene.remove(effect.mesh);
                             frostNovaRings.splice(i, 1);
