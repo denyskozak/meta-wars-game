@@ -126,7 +126,8 @@ const SPELL_META = {
 };
 
 const SPELL_SCALES = {
-    fireball: 1.8,
+    // fireball slightly smaller for better visuals
+    fireball: 1.0,
     iceball: 1.8,
     darkball: 1.68,
     pyroblast: 5,
@@ -542,7 +543,7 @@ export function Game({models, sounds, textures, matchId, character}) {
       gl_FragColor = vec4(finalColor, alpha);
     }
   `,
-            transparent: true,
+            transparent: false,
             blending: THREE.AdditiveBlending,
             depthWrite: false,
         });
@@ -2518,7 +2519,10 @@ export function Game({models, sounds, textures, matchId, character}) {
                         ? position.yaw
                         : position.rotation?.y;
                 if (typeof rotY === "number") {
-                    yaw = rotY;
+                    // camera yaw is offset by PI relative to the model's
+                    // facing direction, so adjust accordingly when
+                    // teleporting to preserve the desired orientation
+                    yaw = rotY - Math.PI;
                     pitch = 0;
                     model.rotation.y = rotY;
                 }
