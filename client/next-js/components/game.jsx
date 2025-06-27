@@ -126,7 +126,7 @@ const SPELL_META = {
 };
 
 const SPELL_SCALES = {
-    fireball: 2.34, // increased by 30%
+    fireball: 1.8,
     iceball: 1.8,
     darkball: 1.68,
     pyroblast: 5,
@@ -392,18 +392,6 @@ export function Game({models, sounds, textures, matchId, character}) {
             return sprite;
         }
 
-        function makeFireSprite(size = 0.5) {
-            const material = new THREE.SpriteMaterial({
-                map: textures.fire,
-                transparent: true,
-                depthWrite: false,
-                blending: THREE.AdditiveBlending,
-            });
-            const sprite = new THREE.Sprite(material);
-            sprite.scale.set(size, size, 1);
-            sprite.renderOrder = 999;
-            return sprite;
-        }
 
         // Function to update the HP bar width
         function updateHPBar() {
@@ -455,12 +443,7 @@ export function Game({models, sounds, textures, matchId, character}) {
             });
         };
 
-        const fireballGeometry = new THREE.CapsuleGeometry(
-            0.195,   // radius 30% larger
-            0.416,   // length 30% larger
-            8,      // cap-seg (больше сегментов → плавнее)
-            16      // radial-seg
-        );
+        const fireballGeometry = new THREE.SphereGeometry(0.13, 16, 16); // Огненный шар (30% больше)
 
         const fireTexture = textures.fire;
         fireTexture.wrapS = fireTexture.wrapT = THREE.RepeatWrapping;
@@ -522,13 +505,50 @@ export function Game({models, sounds, textures, matchId, character}) {
                   vec3  col   = (coreCol * core + flameCol * flame) * texCol * 1.5;
                   float alpha = core + flame;
 
-                  if (alpha < 0.05) discard;
-                  gl_FragColor = vec4(col, alpha);
-                }`
+                if (alpha < 0.05) discard;
+                gl_FragColor = vec4(col, alpha);
+              }`
+        });
+
+        const simpleFireballMaterial = new THREE.ShaderMaterial({
+            uniforms: {
+                time: {value: 0.0},
+                color: {value: new THREE.Color(0xff5500)},
+                glowColor: {value: new THREE.Color(0xffaa33)},
+            },
+            vertexShader: `
+    varying vec2 vUv;
+    void main() {
+      vUv = uv;
+      gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
+    }
+  `,
+            fragmentShader: `
+    uniform float time;
+    uniform vec3 color;
+    uniform vec3 glowColor;
+    varying vec2 vUv;
+
+    void main() {
+      float dist = distance(vUv, vec2(0.5));
+
+      float core = smoothstep(0.4, 0.0, dist);
+      float glow = smoothstep(0.6, 0.2, dist) * (0.6 + 0.4 * sin(time * 3.0));
+
+      vec3 finalColor = color * core + glowColor * glow;
+
+      float alpha = clamp(core + glow * 0.8, 0.0, 1.0);
+
+      gl_FragColor = vec4(finalColor, alpha);
+    }
+  `,
+            transparent: true,
+            blending: THREE.AdditiveBlending,
+            depthWrite: false,
         });
         const fireballMesh = new THREE.Mesh(
             fireballGeometry,
-            fireballMaterial     // own instance
+            simpleFireballMaterial     // own instance
         );
         fireballMesh.scale.set(
             SPELL_SCALES.fireball,
@@ -1908,10 +1928,7 @@ export function Game({models, sounds, textures, matchId, character}) {
                 sphereMesh.lookAt(camera.position);
             }
 
-            if (type === 'fireball') {
-                const sprite = makeFireSprite(SPELL_SCALES.fireball * 1.5);
-                sphereMesh.add(sprite);
-            }
+
 
             scene.add(sphereMesh); // Add the sphereMesh to the scene
 
