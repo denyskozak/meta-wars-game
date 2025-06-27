@@ -52,7 +52,7 @@ export default function GamePage() {
     : "vampir";
 
   const models = [
-    { id: "zone", path: "zone.glb" },
+    { id: "zone", path: "zone-fantasy-1.glb" },
     { id: "bolvar", path: "skins/bolvar.glb" },
     { id: "vampir", path: "skins/vampir.glb" },
     { id: "mad", path: "skins/mad.glb" },

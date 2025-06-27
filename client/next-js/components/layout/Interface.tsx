@@ -52,7 +52,6 @@ export const Interface = () => {
         return () => window.removeEventListener('self-update', handler as EventListener);
     }, []);
 
-    console.log("character: ", character);
     return (
         <div className="interface-container">
             {character && <div className="absolute top-24 left-5 flex items-center gap-2 bg-black/70 p-2 rounded">

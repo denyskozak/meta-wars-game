@@ -127,7 +127,7 @@ const SPELL_META = {
 
 const SPELL_SCALES = {
     // fireball slightly smaller for better visuals
-    fireball: 1.0,
+    fireball: 1.5,
     iceball: 1.8,
     darkball: 1.68,
     pyroblast: 5,
@@ -511,45 +511,10 @@ export function Game({models, sounds, textures, matchId, character}) {
               }`
         });
 
-        const simpleFireballMaterial = new THREE.ShaderMaterial({
-            uniforms: {
-                time: {value: 0.0},
-                color: {value: new THREE.Color(0xff5500)},
-                glowColor: {value: new THREE.Color(0xffaa33)},
-            },
-            vertexShader: `
-    varying vec2 vUv;
-    void main() {
-      vUv = uv;
-      gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
-    }
-  `,
-            fragmentShader: `
-    uniform float time;
-    uniform vec3 color;
-    uniform vec3 glowColor;
-    varying vec2 vUv;
 
-    void main() {
-      float dist = distance(vUv, vec2(0.5));
-
-      float core = smoothstep(0.4, 0.0, dist);
-      float glow = smoothstep(0.6, 0.2, dist) * (0.6 + 0.4 * sin(time * 3.0));
-
-      vec3 finalColor = color * core + glowColor * glow;
-
-      float alpha = clamp(core + glow * 0.8, 0.0, 1.0);
-
-      gl_FragColor = vec4(finalColor, alpha);
-    }
-  `,
-            transparent: false,
-            blending: THREE.AdditiveBlending,
-            depthWrite: false,
-        });
         const fireballMesh = new THREE.Mesh(
             fireballGeometry,
-            simpleFireballMaterial     // own instance
+            fireballMaterial
         );
         fireballMesh.scale.set(
             SPELL_SCALES.fireball,
