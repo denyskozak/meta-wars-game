@@ -125,6 +125,7 @@ const ws = new WebSocket.Server({server});
 const matches = new Map(); // matchId => { id, players: Map, maxPlayers, isFull, finished, summary }
 const finishedMatches = new Map(); // store summary of finished matches
 let matchCounter = 1;
+let rankings = {};
 
 function shuffle(arr) {
     const a = arr.slice();
@@ -242,6 +243,21 @@ function finalizeMatch(match) {
     match.finished = true;
     match.status = 'finished';
     const sorted = Array.from(match.players.entries()).sort((a, b) => b[1].kills - a[1].kills);
+    // update rankings based on player positions
+    const total = sorted.length;
+    const deltas = {};
+    sorted.forEach(([pid, p], idx) => {
+        if (!p.address) return;
+        let delta = 0;
+        if (idx < 3) {
+            delta = 3 - idx; // 1st:3, 2nd:2, 3rd:1
+        } else if (idx >= total - 3) {
+            const posFromEnd = total - 1 - idx;
+            delta = -(3 - posFromEnd); // last: -3, etc
+        }
+        deltas[pid] = delta;
+        rankings[p.address] = (rankings[p.address] || 0) + delta;
+    });
     match.summary = sorted.map(([pid, p], idx) => {
         let rarity = 'simple';
         if (idx === 0 || idx === 1) rarity = 'epic';
@@ -264,7 +280,7 @@ function finalizeMatch(match) {
         }
 
         p.chests.push(rarity);
-        return { id: pid, kills: p.kills, deaths: p.deaths, reward: rarity, coins, item };
+        return { id: pid, kills: p.kills, deaths: p.deaths, reward: rarity, coins, item, rankDelta: deltas[pid] || 0 };
     });
     finishedMatches.set(match.id, match.summary);
     broadcastToMatch(match.id, {
@@ -571,6 +587,14 @@ ws.on('connection', (socket) => {
                         summary,
                     }));
                 }
+                break;
+
+            case 'GET_RANKINGS':
+                const rankingList = Object.entries(rankings).sort((a, b) => b[1] - a[1]);
+                socket.send(JSON.stringify({
+                    type: 'RANKINGS',
+                    rankings: rankingList,
+                }));
                 break;
 
             case 'CREATE_PROFILE':
