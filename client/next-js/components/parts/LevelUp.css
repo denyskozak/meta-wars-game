@@ -1,0 +1,32 @@
+.level-up-overlay {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    pointer-events: none;
+    z-index: 2000;
+}
+
+.level-up-text {
+    font-size: 4rem;
+    font-weight: 800;
+    color: #ffd700;
+    text-shadow: 0 0 10px #fff, 0 0 20px #ffd700;
+    animation: levelUpAnim 2s ease-out forwards;
+}
+
+@keyframes levelUpAnim {
+    0% {
+        transform: scale(0.5);
+        opacity: 0;
+    }
+    50% {
+        transform: scale(1.2);
+        opacity: 1;
+    }
+    100% {
+        transform: scale(1);
+        opacity: 0;
+    }
+}
+

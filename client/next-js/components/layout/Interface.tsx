@@ -7,6 +7,7 @@ import {GameMenu} from "../parts/Menu";
 import {Buffs} from "../parts/Buffs";
 import {ComboPoints} from "../parts/ComboPoints";
 import {ExperienceBar} from "../parts/ExperienceBar";
+import {LevelUp} from "../parts/LevelUp";
 import {Progress} from "@heroui/react";
 
 import {useInterface} from "@/context/inteface";
@@ -120,6 +121,7 @@ export const Interface = () => {
             <SkillBar mana={selfStats.mana} level={selfStats.level} skillPoints={selfStats.skillPoints} learnedSkills={selfStats.learnedSkills}/>
             <CastBar/>
             <ExperienceBar />
+            <LevelUp />
             <Chat />
         </div>
     )
