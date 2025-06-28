@@ -31,9 +31,9 @@ export default function RatingPage() {
             </TableHeader>
             <TableBody>
               {ratings.map((r, idx) => (
-                <TableRow key={r.name}>
+                <TableRow key={r.address}>
                   <TableCell>{idx + 1}</TableCell>
-                  <TableCell>{r.name}</TableCell>
+                  <TableCell>{r.address}</TableCell>
                   <TableCell>{r.points}</TableCell>
                 </TableRow>
               ))}
