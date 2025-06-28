@@ -20,6 +20,7 @@ const COMBO_ICON = '/icons/classes/rogue/combo_point.jpg';
 const ROGUE_SPRINT_ICON = '/icons/classes/rogue/sprint.jpg';
 const ADRENALINE_RUSH_ICON = '/icons/classes/rogue/adrenalinerush.jpg';
 const MELEE_RANGE = 2.125;
+const LIGHTSTRIKE_DAMAGE = 34;
 
 function withinMeleeRange(a, b) {
     if (!a || !b) return false;
@@ -786,16 +787,20 @@ ws.on('connection', (socket) => {
                             });
 
                         }
-                        if (message.payload.type === 'blood-strike') {
-                            if (player.comboTarget && player.comboTarget !== message.payload.targetId) {
-                                player.comboPoints = 0;
-                                player.buffs = player.buffs.filter(b => b.type !== 'combo');
+                        if (message.payload.type === 'blood-strike' && message.payload.targetId) {
+                            const target = match.players.get(message.payload.targetId);
+                            if (target && withinMeleeRange(player, target)) {
+                                if (player.comboTarget && player.comboTarget !== message.payload.targetId) {
+                                    player.comboPoints = 0;
+                                    player.buffs = player.buffs.filter(b => b.type !== 'combo');
+                                }
+                                player.comboTarget = message.payload.targetId;
+                                player.comboPoints = Math.min(5, (player.comboPoints || 0) + 1);
+                                const comboBuff = player.buffs.find(b => b.type === 'combo');
+                                if (comboBuff) comboBuff.stacks = player.comboPoints;
+                                else player.buffs.push({ type: 'combo', stacks: player.comboPoints, icon: COMBO_ICON });
+                                applyDamage(match, target.id, id, LIGHTSTRIKE_DAMAGE, 'blood-strike');
                             }
-                            player.comboTarget = message.payload.targetId || player.comboTarget;
-                            player.comboPoints = Math.min(5, (player.comboPoints || 0) + 1);
-                            const comboBuff = player.buffs.find(b => b.type === 'combo');
-                            if (comboBuff) comboBuff.stacks = player.comboPoints;
-                            else player.buffs.push({ type: 'combo', stacks: player.comboPoints, icon: COMBO_ICON });
                         }
                         if (message.payload.type === 'eviscerate' && message.payload.targetId) {
                             const target = match.players.get(message.payload.targetId);
