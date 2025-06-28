@@ -19,6 +19,15 @@ const DIVINE_SPEED_ICON = '/icons/classes/paladin/speedoflight.jpg';
 const COMBO_ICON = '/icons/classes/rogue/combo_point.jpg';
 const ROGUE_SPRINT_ICON = '/icons/classes/rogue/sprint.jpg';
 const ADRENALINE_RUSH_ICON = '/icons/classes/rogue/adrenalinerush.jpg';
+const MELEE_RANGE = 2.125;
+
+function withinMeleeRange(a, b) {
+    if (!a || !b) return false;
+    const dx = a.position.x - b.position.x;
+    const dy = a.position.y - b.position.y;
+    const dz = a.position.z - b.position.z;
+    return Math.sqrt(dx*dx + dy*dy + dz*dz) < MELEE_RANGE;
+}
 
 function updateLevel(player) {
     const prevLevel = player.level || 1;
@@ -751,7 +760,7 @@ ws.on('connection', (socket) => {
                         }
                         if (message.payload.type === 'stun' && message.payload.targetId) {
                             const target = match.players.get(message.payload.targetId);
-                            if (target) {
+                            if (target && withinMeleeRange(player, target)) {
                                 target.debuffs = target.debuffs || [];
                                 target.debuffs.push({
                                     type: 'stun',
@@ -790,11 +799,13 @@ ws.on('connection', (socket) => {
                         }
                         if (message.payload.type === 'eviscerate' && message.payload.targetId) {
                             const target = match.players.get(message.payload.targetId);
-                            if (target) {
+                            if (target && withinMeleeRange(player, target)) {
                                 const damage = 28 * (player.comboPoints || 0);
                                 if (damage > 0) {
                                     applyDamage(match, target.id, id, damage, 'eviscerate');
                                 }
+                            }
+                            if (target) {
                                 player.comboPoints = 0;
                                 player.comboTarget = null;
                                 player.buffs = player.buffs.filter(b => b.type !== 'combo');
@@ -809,7 +820,7 @@ ws.on('connection', (socket) => {
                         }
                         if (message.payload.type === 'kidney-strike' && message.payload.targetId) {
                             const target = match.players.get(message.payload.targetId);
-                            if (target) {
+                            if (target && withinMeleeRange(player, target)) {
                                 target.debuffs = target.debuffs || [];
                                 const duration = 2000 + (player.comboPoints * 500);
                                 target.debuffs.push({

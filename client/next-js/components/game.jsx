@@ -247,6 +247,8 @@ export function Game({models, sounds, textures, matchId, character}) {
         let settings;
         let leftMouseButtonClicked = false;
 
+        let meleeRangeIndicator = null;
+
         let movementSpeedModifier = 1; // Normal speed
 
         const damageBar = document.getElementById("damage");
@@ -266,6 +268,9 @@ export function Game({models, sounds, textures, matchId, character}) {
             if (players.has(myPlayerId)) {
                 const m = players.get(myPlayerId).model;
                 m.scale.set(currentScale, currentScale, currentScale);
+                if (meleeRangeIndicator) {
+                    meleeRangeIndicator.scale.setScalar(1 / currentScale);
+                }
             }
         };
 
@@ -284,6 +289,10 @@ export function Game({models, sounds, textures, matchId, character}) {
             scene.remove(oldModel);
             scene.add(newModel);
             playerData.model = newModel;
+            if (meleeRangeIndicator) {
+                newModel.add(meleeRangeIndicator);
+                meleeRangeIndicator.scale.setScalar(1 / currentScale);
+            }
         };
 
         window.addEventListener('DEV_SCALE_CHANGE', handleScaleChange);
@@ -792,7 +801,7 @@ export function Game({models, sounds, textures, matchId, character}) {
         const FROSTNOVA_RANGE = FIREBLAST_RANGE / 2;
         const FROSTNOVA_RING_DURATION = 1000; // ms
         const LIGHTWAVE_RING_DURATION = 1000; // ms
-        const LIGHTSTRIKE_DAMAGE = 28; // 30% less damage
+        const LIGHTSTRIKE_DAMAGE = 34; // increased for warrior/paladin/rogue E
         // Slightly increased to improve melee reliability
         // Increase melee range by 25%
         const MELEE_RANGE_ATTACK = 2.125; // melee range
@@ -1101,7 +1110,7 @@ export function Game({models, sounds, textures, matchId, character}) {
         function handleKeyUpSpace() {
             setTimeout(() => {
                 jumpBlocked = false;
-            }, 2000);
+            }, 4000);
         }
 
         const keyUpHandlers = {
@@ -3325,6 +3334,15 @@ export function Game({models, sounds, textures, matchId, character}) {
 
 
                 scene.add(player);
+                if (id === myPlayerId) {
+                    const geo = new THREE.RingGeometry(MELEE_RANGE_ATTACK - 0.05, MELEE_RANGE_ATTACK, 32);
+                    const mat = new THREE.MeshBasicMaterial({ color: 0xff0000, transparent: true, opacity: 0.4, side: THREE.DoubleSide });
+                    meleeRangeIndicator = new THREE.Mesh(geo, mat);
+                    meleeRangeIndicator.rotation.x = -Math.PI / 2;
+                    meleeRangeIndicator.position.y = 0.05;
+                    meleeRangeIndicator.scale.setScalar(1 / currentScale);
+                    player.add(meleeRangeIndicator);
+                }
                 players.set(id, {
                     model: player,
                     mixer: mixer,
@@ -3471,8 +3489,13 @@ export function Game({models, sounds, textures, matchId, character}) {
         // Function to remove a player from the scene
         function removePlayer(id) {
             if (players.has(id)) {
-                scene.remove(players.get(id));
-                delete players.get(id);
+                const data = players.get(id);
+                if (data.model) scene.remove(data.model);
+                players.delete(id);
+                if (id === myPlayerId && meleeRangeIndicator) {
+                    meleeRangeIndicator.parent?.remove(meleeRangeIndicator);
+                    meleeRangeIndicator = null;
+                }
                 if (id === targetedPlayerId) {
                     targetedPlayerId = null;
                     dispatchTargetUpdate();
@@ -3727,10 +3750,34 @@ export function Game({models, sounds, textures, matchId, character}) {
                             }
                             break;
                         case "eviscerate":
+                            if (message.payload.targetId === myPlayerId) {
+                                const caster = players.get(message.id);
+                                const me = players.get(myPlayerId);
+                                if (caster && me) {
+                                    const origin = caster.model.position.clone();
+                                    const forward = new THREE.Vector3(0, 0, 1).applyQuaternion(caster.model.quaternion);
+                                    const toMe = me.model.position.clone().sub(origin);
+                                    const distance = toMe.length();
+                                    if (distance < MELEE_RANGE_ATTACK && forward.angleTo(toMe.normalize()) < LIGHTSTRIKE_ANGLE) {
+                                        // damage applied by server, just play effect
+                                        takeDamage(0, message.id, 'eviscerate');
+                                    }
+                                }
+                            }
                             break;
                         case "kidney-strike":
-                            if (message.payload.targetId) {
-                                applyStunEffect(message.payload.targetId, 2000);
+                            if (message.payload.targetId === myPlayerId) {
+                                const caster = players.get(message.id);
+                                const me = players.get(myPlayerId);
+                                if (caster && me) {
+                                    const origin = caster.model.position.clone();
+                                    const forward = new THREE.Vector3(0, 0, 1).applyQuaternion(caster.model.quaternion);
+                                    const toMe = me.model.position.clone().sub(origin);
+                                    const distance = toMe.length();
+                                    if (distance < MELEE_RANGE_ATTACK && forward.angleTo(toMe.normalize()) < LIGHTSTRIKE_ANGLE) {
+                                        applyStunEffect(message.payload.targetId, 2000);
+                                    }
+                                }
                             }
                             break;
                         case "adrenaline-rush":
@@ -3752,8 +3799,18 @@ export function Game({models, sounds, textures, matchId, character}) {
                             }
                             break;
                         case "stun":
-                            if (message.payload.targetId) {
-                                applyStunEffect(message.payload.targetId, 3000);
+                            if (message.payload.targetId === myPlayerId) {
+                                const caster = players.get(message.id);
+                                const me = players.get(myPlayerId);
+                                if (caster && me) {
+                                    const origin = caster.model.position.clone();
+                                    const forward = new THREE.Vector3(0, 0, 1).applyQuaternion(caster.model.quaternion);
+                                    const toMe = me.model.position.clone().sub(origin);
+                                    const distance = toMe.length();
+                                    if (distance < MELEE_RANGE_ATTACK && forward.angleTo(toMe.normalize()) < LIGHTSTRIKE_ANGLE) {
+                                        applyStunEffect(message.payload.targetId, 3000);
+                                    }
+                                }
                             }
                             break;
                         case "warbringer":
