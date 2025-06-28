@@ -8,8 +8,8 @@ import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader";
 import { DRACOLoader } from "three/examples/jsm/loaders/DRACOLoader";
 import { MeshoptDecoder } from "three/examples/jsm/libs/meshopt_decoder.module.js";
 import { useParams } from "next/navigation";
-import { CLASS_MODELS } from "@/consts";
 
+import { CLASS_MODELS } from "@/consts";
 import { useWS } from "@/hooks/useWS";
 import { useInterface } from "@/context/inteface";
 import { Game } from "@/components/game";
@@ -151,6 +151,7 @@ export default function GamePage() {
       charge: new Audio("/sounds/charge.ogg"),
       shadowLeap: new Audio("/sounds/shadowleap.ogg"),
       bladestorm: new Audio("/sounds/bladestorm.ogg"),
+      levelUp: new Audio("/sounds/level-up.ogg"),
     };
 
     Promise.all([preloadModels(models), preloadTextures()]).then(

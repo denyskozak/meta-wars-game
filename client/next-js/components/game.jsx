@@ -241,6 +241,7 @@ export function Game({models, sounds, textures, matchId, character}) {
             points = 0,
             level = 1,
             skillPoints = 1;
+        let prevLevel = 1;
         let learnedSkills = {};
         let actions = [];
         let playerMixers = [];
@@ -4032,6 +4033,14 @@ export function Game({models, sounds, textures, matchId, character}) {
                             hp = player.hp;
                             mana = player.mana;
                             points = player.points;
+                            if (player.level > prevLevel) {
+                                if (sounds.levelUp) {
+                                    sounds.levelUp.currentTime = 0;
+                                    sounds.levelUp.volume = 0.5;
+                                    sounds.levelUp.play();
+                                }
+                            }
+                            prevLevel = player.level;
                             level = player.level;
                             skillPoints = player.skillPoints || skillPoints;
                             learnedSkills = player.learnedSkills || learnedSkills;
