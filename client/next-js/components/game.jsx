@@ -819,6 +819,9 @@ export function Game({models, sounds, textures, matchId, character}) {
         // Use the same range as fireblast for consistency
         const SPHERE_MAX_DISTANCE = FIREBLAST_RANGE / 2;
 
+        // Number of sprites used for the fireball tail
+        const FIREBALL_TAIL_SEGMENTS = 6;
+
         const STEPS_PER_FRAME = 30;
 
         const sphereGeometry = new THREE.IcosahedronGeometry(SPHERE_RADIUS, 5);
@@ -1897,14 +1900,33 @@ export function Game({models, sounds, textures, matchId, character}) {
         }
 
 
-       function castSphere(model, sphereMesh, type, damage) {
+        function castSphere(model, sphereMesh, type, damage) {
             sphereMesh.rotation.copy(model.rotation);
 
             if (sphereMesh instanceof Fire) {
                 sphereMesh.lookAt(camera.position);
             }
 
-
+            let tailSprites = null;
+            let tailPositions = null;
+            if (type === 'fireball') {
+                tailSprites = [];
+                tailPositions = [];
+                for (let i = 0; i < FIREBALL_TAIL_SEGMENTS; i++) {
+                    const mat = new THREE.SpriteMaterial({
+                        map: fireTexture,
+                        transparent: true,
+                        depthWrite: false,
+                        blending: THREE.AdditiveBlending,
+                    });
+                    const sprite = new THREE.Sprite(mat);
+                    const scale = 0.15 * (1 - i / FIREBALL_TAIL_SEGMENTS);
+                    sprite.scale.set(scale, scale * 2, 1);
+                    sprite.visible = false;
+                    scene.add(sprite);
+                    tailSprites.push(sprite);
+                }
+            }
 
             scene.add(sphereMesh); // Add the sphereMesh to the scene
 
@@ -1963,6 +1985,8 @@ export function Game({models, sounds, textures, matchId, character}) {
                 type,
                 damage,
                 ownerId: myPlayerId,
+                tailSprites,
+                tailPositions,
             });
         }
 
@@ -2157,6 +2181,9 @@ export function Game({models, sounds, textures, matchId, character}) {
 
         const removeSphere = (sphere, index) => {
             scene.remove(sphere.mesh); // Remove the fireball from the scene
+            if (sphere.tailSprites) {
+                sphere.tailSprites.forEach((s) => scene.remove(s));
+            }
             spheres.splice(index, 1); // Remove it from the array
             sphere.mesh = null;
         };
@@ -2196,7 +2223,23 @@ export function Game({models, sounds, textures, matchId, character}) {
                     continue;
                 }
 
-                // Хвосты отключены
+                if (sphere.tailSprites) {
+                    sphere.tailPositions.unshift(sphere.collider.center.clone());
+                    if (sphere.tailPositions.length > FIREBALL_TAIL_SEGMENTS) {
+                        sphere.tailPositions.pop();
+                    }
+                    sphere.tailSprites.forEach((s, i) => {
+                        const pos = sphere.tailPositions[i];
+                        if (pos) {
+                            s.visible = true;
+                            s.position.copy(pos);
+                            s.lookAt(camera.position);
+                            s.material.opacity = 1 - i / FIREBALL_TAIL_SEGMENTS;
+                        } else {
+                            s.visible = false;
+                        }
+                    });
+                }
             }
 
             // spheresCollisions(); // Handle collisions between spheres
@@ -3597,6 +3640,27 @@ export function Game({models, sounds, textures, matchId, character}) {
                 data.rotation.z,
             );
 
+            let tailSprites = null;
+            let tailPositions = null;
+            if (data.type === 'fireball') {
+                tailSprites = [];
+                tailPositions = [];
+                for (let i = 0; i < FIREBALL_TAIL_SEGMENTS; i++) {
+                    const mat = new THREE.SpriteMaterial({
+                        map: fireTexture,
+                        transparent: true,
+                        depthWrite: false,
+                        blending: THREE.AdditiveBlending,
+                    });
+                    const sprite = new THREE.Sprite(mat);
+                    const scale = 0.15 * (1 - i / FIREBALL_TAIL_SEGMENTS);
+                    sprite.scale.set(scale, scale * 2, 1);
+                    sprite.visible = false;
+                    scene.add(sprite);
+                    tailSprites.push(sprite);
+                }
+            }
+
             scene.add(sphere);
 
             spheres.push({
@@ -3613,6 +3677,8 @@ export function Game({models, sounds, textures, matchId, character}) {
                 type: data.type,
                 damage: data.damage,
                 ownerId,
+                tailSprites,
+                tailPositions,
             });
         }
 
