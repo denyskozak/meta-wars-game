@@ -289,10 +289,27 @@ export function Game({models, sounds, textures, matchId, character}) {
             scene.remove(oldModel);
             scene.add(newModel);
             playerData.model = newModel;
-            if (meleeRangeIndicator) {
-                newModel.add(meleeRangeIndicator);
-                meleeRangeIndicator.scale.setScalar(1 / currentScale);
+            if (!meleeRangeIndicator) {
+                const geo = new THREE.RingGeometry(
+                    MELEE_RANGE_ATTACK - 0.05,
+                    MELEE_RANGE_ATTACK,
+                    32,
+                    1,
+                    Math.PI / 2 - MELEE_ANGLE / 2,
+                    MELEE_ANGLE,
+                );
+                const mat = new THREE.MeshBasicMaterial({
+                    color: 0xff0000,
+                    transparent: true,
+                    opacity: 0.4,
+                    side: THREE.DoubleSide,
+                });
+                meleeRangeIndicator = new THREE.Mesh(geo, mat);
+                meleeRangeIndicator.rotation.x = -Math.PI / 2;
+                meleeRangeIndicator.position.y = 0.05;
             }
+            newModel.add(meleeRangeIndicator);
+            meleeRangeIndicator.scale.setScalar(1 / currentScale);
         };
 
         window.addEventListener('DEV_SCALE_CHANGE', handleScaleChange);
