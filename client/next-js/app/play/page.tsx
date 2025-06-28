@@ -1,7 +1,16 @@
 "use client";
 
 import Image from "next/image";
-import { Card, CardHeader } from "@heroui/react";
+import {
+  Card,
+  CardHeader,
+  Table,
+  TableHeader,
+  TableColumn,
+  TableBody,
+  TableRow,
+  TableCell,
+} from "@heroui/react";
 import { useRouter } from "next/navigation";
 import { useCurrentAccount } from "@mysten/dapp-kit";
 
@@ -9,11 +18,13 @@ import { Navbar } from "@/components/navbar";
 import { ConnectionButton } from "@/components/connection-button";
 import { ProfileForm } from "@/components/profile-form";
 import { useProfile } from "@/hooks";
+import { useRatings } from "@/hooks/useRatings";
 
 export default function MatchesPage() {
   const router = useRouter();
   const account = useCurrentAccount();
   const { profile, refetch } = useProfile();
+  const { ratings } = useRatings();
 
   return (
     <div className="h-full w-full  items-center justify-center">
@@ -56,6 +67,25 @@ export default function MatchesPage() {
                   />
                 </Card>
               </div>
+              <Card className="w-full max-w-xl mx-32 mt-4 p-4 space-y-2">
+                <h4 className="font-bold text-large">Leaderboard</h4>
+                <Table aria-label="rankings">
+                  <TableHeader>
+                    <TableColumn>Rank</TableColumn>
+                    <TableColumn>Address</TableColumn>
+                    <TableColumn>Points</TableColumn>
+                  </TableHeader>
+                  <TableBody>
+                    {ratings.map((r, idx) => (
+                      <TableRow key={r.address}>
+                        <TableCell>{idx + 1}</TableCell>
+                        <TableCell>{r.address}</TableCell>
+                        <TableCell>{r.points}</TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              </Card>
             </>
           ) : (
             <ProfileForm onCreated={refetch} />
