@@ -7,11 +7,11 @@ export default function castDarkball({ playerId, castSpellImpl, igniteHands, cas
   castSpellImpl(
     playerId,
     SPELL_COST['darkball'],
-    500,
+    1000,
     (model) => castSphere(model, darkballMesh.clone(), meta.id, damage),
     sounds.fireballCast,
     sounds.fireball,
     meta.id,
-    true
+    false
   );
 }

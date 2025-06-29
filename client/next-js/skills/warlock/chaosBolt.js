@@ -7,11 +7,11 @@ export default function castChaosBolt({ playerId, castSpellImpl, igniteHands, ca
   castSpellImpl(
     playerId,
     SPELL_COST['chaosbolt'],
-    0,
+    1000,
     (model) => castSphere(model, chaosBoltMesh.clone(), meta.id, damage),
     sounds.fireballCast,
     sounds.fireball,
     meta.id,
-    true
+    false
   );
 }
