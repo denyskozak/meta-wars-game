@@ -22,6 +22,7 @@ const CLASS_STATS = require('../client/next-js/consts/classStats.json');
 const ADRENALINE_RUSH_ICON = '/icons/classes/rogue/adrenalinerush.jpg';
 const MELEE_RANGE = 2.125;
 const LIGHTSTRIKE_DAMAGE = 34;
+const BLADESTORM_DAMAGE = 40;
 
 function withinMeleeRange(a, b) {
     if (!a || !b) return false;
@@ -478,7 +479,19 @@ ws.on('connection', (socket) => {
                     player.mana = Math.min(MAX_MANA, player.mana + MANA_REGEN_AMOUNT);
                 }
                 if (player.buffs.length) {
-                    player.buffs = player.buffs.filter(b => b.expires === undefined || b.expires > now);
+                    player.buffs = player.buffs.filter(b => {
+                        if (b.type === 'bladestorm') {
+                            if (b.nextTick !== undefined && b.nextTick <= now) {
+                                b.nextTick = now + b.interval;
+                                match.players.forEach((t, tid) => {
+                                    if (tid !== pid && withinMeleeRange(player, t)) {
+                                        applyDamage(match, tid, pid, BLADESTORM_DAMAGE, 'bladestorm');
+                                    }
+                                });
+                            }
+                        }
+                        return b.expires === undefined || b.expires > now;
+                    });
                 }
                 if (player.debuffs && player.debuffs.length) {
                     player.debuffs = player.debuffs.filter(deb => {
@@ -758,6 +771,9 @@ ws.on('connection', (socket) => {
                     const player = match.players.get(id);
                     const cost = SPELL_COST[message.payload?.type] || 0;
                     if (player && player.mana >= cost && player.learnedSkills && player.learnedSkills[message.payload?.type]) {
+                        if (player.buffs.some(b => b.type === 'bladestorm' && (b.expires === undefined || b.expires > Date.now()))) {
+                            break;
+                        }
 
                         player.mana -= cost;
                         if (message.payload.type === 'heal') {
@@ -906,7 +922,16 @@ ws.on('connection', (socket) => {
                                 expires: Date.now() + 6000,
                                 icon: ROGUE_SPRINT_ICON,
                             });
-                        
+
+                        }
+                        if (message.payload.type === 'bladestorm') {
+                            player.buffs.push({
+                                type: 'bladestorm',
+                                expires: Date.now() + 5000,
+                                interval: 200,
+                                nextTick: Date.now() + 200,
+                                icon: '/icons/classes/warrior/bladestorm.jpg',
+                            });
                         }
                         if (message.payload.type === 'fear' && message.payload.targetId) {
                             const target = match.players.get(message.payload.targetId);
