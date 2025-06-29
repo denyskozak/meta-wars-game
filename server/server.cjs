@@ -7,7 +7,7 @@ const http = require('http');
 const UPDATE_MATCH_INTERVAL = 33;
 const MAX_HP = 120;
 const MAX_MANA = 130;
-const MAX_POINTS = 10000;
+const MAX_KILLS = 15;
 const XP_PER_LEVEL = 1000;
 const MANA_REGEN_INTERVAL = 1000;
 const MANA_REGEN_AMOUNT = 1.3; // 30% faster mana regeneration
@@ -360,7 +360,7 @@ function checkXpRunePickup(match, playerId) {
                 runeType: rune.type,
             });
 
-            if (player.points >= MAX_POINTS && !match.finished) {
+            if (player.kills >= MAX_KILLS && !match.finished) {
                 finalizeMatch(match);
             }
             break;
@@ -399,7 +399,7 @@ function applyDamage(match, victimId, dealerId, damage, spellType) {
                 type: 'KILL',
                 killerId: dealerId,
             });
-            if (attacker.points >= MAX_POINTS && !match.finished) {
+            if (attacker.kills >= MAX_KILLS && !match.finished) {
                 finalizeMatch(match);
             }
         }
@@ -542,7 +542,7 @@ ws.on('connection', (socket) => {
                     killerPlayer.points += 600;
                     updateLevel(killerPlayer);
 
-                    if (killerPlayer.points >= MAX_POINTS && !match.finished) {
+                    if (killerPlayer.kills >= MAX_KILLS && !match.finished) {
                         finalizeMatch(match);
                     }
                 }
