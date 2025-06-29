@@ -9,6 +9,11 @@ export const CastBar = () => {
     const startRef = useRef(0);
     const durationRef = useRef(1500);
     const onEndRef = useRef(() => {});
+    const isCastingRef = useRef(false);
+
+    useEffect(() => {
+        isCastingRef.current = isCasting;
+    }, [isCasting]);
 
     useEffect(() => {
         const handleStartCast = (e) => {
@@ -33,7 +38,7 @@ export const CastBar = () => {
         };
 
         const handleReleaseCast = () => {
-            if (!isCasting) return;
+            if (!isCastingRef.current) return;
             const elapsed = Date.now() - startRef.current;
             const remaining = Math.max(0, durationRef.current - elapsed);
             if (intervalRef.current) {
@@ -53,7 +58,7 @@ export const CastBar = () => {
             window.removeEventListener("release-cast", handleReleaseCast);
             if (intervalRef.current) clearInterval(intervalRef.current);
         };
-    }, [isCasting]);
+    }, []);
 
     if (!isCasting) return null;
 
