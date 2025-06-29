@@ -311,8 +311,8 @@ export function Game({models, sounds, textures, matchId, character}) {
                 });
                 meleeRangeIndicator = new THREE.Mesh(geo, mat);
                 meleeRangeIndicator.rotation.x = -Math.PI / 2;
-                // Rotate indicator to face forward
-                meleeRangeIndicator.rotation.y = Math.PI;
+                // Ensure indicator faces the player's forward direction
+                meleeRangeIndicator.rotation.y = 0;
                 meleeRangeIndicator.position.y = 0.05;
             }
             newModel.add(meleeRangeIndicator);
@@ -3441,8 +3441,8 @@ export function Game({models, sounds, textures, matchId, character}) {
                     const mat = new THREE.MeshBasicMaterial({ color: 0xff0000, transparent: true, opacity: 0.4, side: THREE.DoubleSide });
                     meleeRangeIndicator = new THREE.Mesh(geo, mat);
                     meleeRangeIndicator.rotation.x = -Math.PI / 2;
-                    // Rotate indicator to face forward
-                    meleeRangeIndicator.rotation.y = Math.PI;
+                    // Ensure indicator faces the player's forward direction
+                    meleeRangeIndicator.rotation.y = 0;
                     meleeRangeIndicator.position.y = 0.05;
                     meleeRangeIndicator.scale.setScalar(1 / currentScale);
                     player.add(meleeRangeIndicator);
