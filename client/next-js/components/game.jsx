@@ -3440,7 +3440,7 @@ export function Game({models, sounds, textures, matchId, character}) {
                     );
                     const mat = new THREE.MeshBasicMaterial({ color: 0xff0000, transparent: true, opacity: 0.4, side: THREE.DoubleSide });
                     meleeRangeIndicator = new THREE.Mesh(geo, mat);
-                    meleeRangeIndicator.rotation.x = -Math.PI / 2;
+                    meleeRangeIndicator.rotation.x = Math.PI / 2;
                     // Ensure indicator faces the player's forward direction
                     meleeRangeIndicator.rotation.y = 0;
                     meleeRangeIndicator.position.y = 0.05;
