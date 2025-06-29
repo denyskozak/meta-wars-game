@@ -1931,15 +1931,8 @@ export function Game({models, sounds, textures, matchId, character}) {
                 tailSprites = [];
                 tailPositions = [];
                 for (let i = 0; i < FIREBALL_TAIL_SEGMENTS; i++) {
-                    const mat = new THREE.SpriteMaterial({
-                        map: fireTexture,
-                        transparent: true,
-                        depthWrite: false,
-                        blending: THREE.AdditiveBlending,
-                    });
-                    const sprite = new THREE.Sprite(mat);
                     const scale = 0.15 * (1 - i / FIREBALL_TAIL_SEGMENTS);
-                    sprite.scale.set(scale, scale * 2, 1);
+                    const sprite = makeGlowSprite(0xff6600, scale);
                     sprite.visible = false;
                     scene.add(sprite);
                     tailSprites.push(sprite);
@@ -3664,15 +3657,8 @@ export function Game({models, sounds, textures, matchId, character}) {
                 tailSprites = [];
                 tailPositions = [];
                 for (let i = 0; i < FIREBALL_TAIL_SEGMENTS; i++) {
-                    const mat = new THREE.SpriteMaterial({
-                        map: fireTexture,
-                        transparent: true,
-                        depthWrite: false,
-                        blending: THREE.AdditiveBlending,
-                    });
-                    const sprite = new THREE.Sprite(mat);
                     const scale = 0.15 * (1 - i / FIREBALL_TAIL_SEGMENTS);
-                    sprite.scale.set(scale, scale * 2, 1);
+                    const sprite = makeGlowSprite(0xff6600, scale);
                     sprite.visible = false;
                     scene.add(sprite);
                     tailSprites.push(sprite);
