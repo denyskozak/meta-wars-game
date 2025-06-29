@@ -132,11 +132,12 @@ async function mintItemWithOptions(recipientAddress, itemType, opts = {}) {
         tx.transferObjects([it], tx.pure.address(recipientAddress));
         tx.setGasBudget(10000000);
         tx.setSender(keypair.toSuiAddress());
-        const bytes = await tx.build({ client });
-        const { signature, bytes: signed } = await keypair.signTransaction(bytes);
-        await client.executeTransactionBlock({ transactionBlock: signed, signature });
+        const bytes = await tx.build({client});
+        const {signature, bytes: signed} = await keypair.signTransaction(bytes);
+        await client.executeTransactionBlock({transactionBlock: signed, signature});
     } catch (error) {
-    console.error('mintItemWithOptions failed:', error);
+        console.error('mintItemWithOptions failed:', error);
+    }
 }
 
 async function createProfile(recipientAddress, nickname) {
@@ -154,7 +155,6 @@ async function createProfile(recipientAddress, nickname) {
     } catch (error) {
         console.error('createProfile failed:', error);
     }
-}
 }
 
 module.exports = {
