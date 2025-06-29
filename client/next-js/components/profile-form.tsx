@@ -18,6 +18,7 @@ export function ProfileForm({ onCreated }: ProfileFormProps) {
   useEffect(() => {
     const handleMessage = (event: MessageEvent) => {
       let message: any = {};
+
       try {
         message = JSON.parse(event.data);
       } catch (e) {
@@ -31,6 +32,7 @@ export function ProfileForm({ onCreated }: ProfileFormProps) {
     };
 
     socket.addEventListener("message", handleMessage);
+
     return () => {
       socket.removeEventListener("message", handleMessage);
     };
@@ -42,12 +44,14 @@ export function ProfileForm({ onCreated }: ProfileFormProps) {
   };
 
   return (
-    <div className="flex gap-2 items-end">
+    <div className="flex flex-col gap-2 items-start">
       <Input label="Nickname" value={nickname} onValueChange={setNickname} />
       <Button color="primary" isDisabled={!nickname} onPress={handleCreate}>
         Create Profile
       </Button>
-      <Button variant="light" onPress={() => router.push("/matches")}>Skip</Button>
+      <Button variant="light" onPress={() => router.push("/matches")}>
+        Skip
+      </Button>
     </div>
   );
 }
