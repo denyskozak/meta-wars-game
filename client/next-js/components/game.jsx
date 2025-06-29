@@ -900,8 +900,8 @@ export function Game({models, sounds, textures, matchId, character}) {
         const DAMAGE_REDUCTION = 0.5; // Reduces damage by 50%
         const PRIORITY_ACTIONS = ['attack', 'attack_360'];
         // Rotation speed for the damage rune effect attached to players
-        const DAMAGE_EFFECT_ROT_SPEED = 0.4;
-        const DAMAGE_EFFECT_MAP_SPEED = 0.1;
+        const DAMAGE_EFFECT_ROT_SPEED = 0.2;
+        const DAMAGE_EFFECT_MAP_SPEED = 0.05;
         // Activate shield
         let isShieldActive = false;
         let isChatActive = false;
@@ -3302,7 +3302,7 @@ export function Game({models, sounds, textures, matchId, character}) {
                     });
 
                     runes.forEach(r => {
-                        const speed = r.userData.type === 'damage' ? 0.05 : 0.1;
+                        const speed = r.userData.type === 'damage' ? 0.025 : 0.1;
                         r.rotation.y += delta * speed;
                     });
 
