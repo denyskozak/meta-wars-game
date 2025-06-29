@@ -181,7 +181,7 @@ export default function GamePage() {
         sounds={preloadedData.sounds}
         textures={preloadedData.textures}
       />
-      <DeveloperPanel models={preloadedData.models} />
+      {/*<DeveloperPanel models={preloadedData.models} />*/}
     </>
   );
 }
