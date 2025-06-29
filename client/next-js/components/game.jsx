@@ -1113,6 +1113,15 @@ export function Game({models, sounds, textures, matchId, character}) {
             KeyQ: handleKeyQ,
         };
 
+        const skillKeyCodes = new Set([
+            'KeyE',
+            'KeyR',
+            'KeyF',
+            'Digit3',
+            'Digit2',
+            'KeyQ',
+        ]);
+
         document.addEventListener("keydown", (event) => {
             if (event.code === "Escape") {
                 handleEscape();
@@ -1168,6 +1177,10 @@ export function Game({models, sounds, textures, matchId, character}) {
 
             const handler = keyUpHandlers[event.code];
             if (handler) handler();
+
+            if (isCasting && skillKeyCodes.has(event.code)) {
+                dispatchEvent('release-cast');
+            }
 
             // // Check if no movement keys are active
             if (
