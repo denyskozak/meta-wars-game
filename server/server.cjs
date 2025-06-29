@@ -546,9 +546,7 @@ ws.on('connection', (socket) => {
                         const matchReadyMessage = {
                             type: 'MATCH_READY',
                             id: match.id,
-                            players: Array.from(match.players).map(([id]) => {
-                                return id;
-                            }),
+                            players: Array.from(match.players),
                         };
                         broadcastToMatch(match.id, matchReadyMessage);
                         match.players.forEach((p, pid) => {

@@ -4234,10 +4234,9 @@ export function Game({models, sounds, textures, matchId, character}) {
 
                     console.log("MATCH_READY: ", message);
                     myPlayerId = message.myPlayerId;
-                    message.players.forEach((playerId) => {
-                        const p = players.get(Number(playerId));
-                        const cls = p?.classType || "";
-                        const charModel = p?.character || CLASS_MODELS[cls] || 'vampir';
+                    message.players.forEach(([playerId, playerOptions]) => {
+                        const cls = playerOptions?.classType || "";
+                        const charModel = playerOptions?.character || CLASS_MODELS[cls] || 'vampir';
                         createPlayer(Number(playerId), String(playerId), String(playerId), cls, charModel);
                     })
                     startCountdown();
