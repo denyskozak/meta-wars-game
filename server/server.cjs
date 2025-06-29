@@ -11,6 +11,7 @@ const MAX_KILLS = 15;
 const XP_PER_LEVEL = 1000;
 const MANA_REGEN_INTERVAL = 1000;
 const MANA_REGEN_AMOUNT = 1.3; // 30% faster mana regeneration
+const HP_REGEN_AMOUNT = 0.8; // Basic health regeneration per tick
 const SPELL_COST = require('../client/next-js/consts/spellCosts.json');
 const ICEBALL_ICON = '/icons/spell_frostbolt.jpg';
 const FROSTNOVA_ICON = '/icons/frostnova.jpg';
@@ -477,6 +478,9 @@ ws.on('connection', (socket) => {
             match.players.forEach((player, pid) => {
                 if (player.mana < MAX_MANA) {
                     player.mana = Math.min(MAX_MANA, player.mana + MANA_REGEN_AMOUNT);
+                }
+                if (player.hp < player.maxHp) {
+                    player.hp = Math.min(player.maxHp, player.hp + HP_REGEN_AMOUNT);
                 }
                 if (player.buffs.length) {
                     player.buffs = player.buffs.filter(b => {
