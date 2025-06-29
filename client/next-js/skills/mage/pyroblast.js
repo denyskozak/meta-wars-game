@@ -7,11 +7,11 @@ export default function castPyroblast({ playerId, castSpellImpl, igniteHands, ca
   castSpellImpl(
     playerId,
     SPELL_COST['pyroblast'],
-    0,
+    1000,
     (model) => castSphere(model, pyroblastMesh.clone(), meta.id, damage),
     sounds.fireballCast,
     sounds.fireball,
     meta.id,
-    true
+    false
   );
 }

@@ -7,11 +7,11 @@ export default function castFireball({ playerId, castSpellImpl, igniteHands, cas
   castSpellImpl(
     playerId,
     SPELL_COST['fireball'],
-    500,
+    1000,
     (model) => castSphere(model, fireballMesh.clone(), meta.id, damage),
     sounds.fireballCast,
     sounds.fireball,
     meta.id,
-    true
+    false
   );
 }
