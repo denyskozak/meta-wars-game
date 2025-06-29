@@ -27,7 +27,7 @@ import castFrostNova, { meta as frostNovaMeta } from '../skills/mage/frostNova';
 import castBlink, { meta as blinkMeta } from '../skills/mage/blink';
 import castDarkball, { meta as darkballMeta } from '../skills/warlock/darkball';
 import castCorruption, { meta as corruptionMeta } from '../skills/warlock/corruption';
-import castImmolate, { meta as immolateMeta } from '../skills/warlock/immolate';
+import castLifeTap, { meta as lifeTapMeta } from '../skills/warlock/lifeTap';
 import castChaosBolt, { meta as chaosBoltMeta } from '../skills/warlock/chaosBolt';
 import castLifeDrain, { meta as lifeDrainMeta } from '../skills/warlock/lifeDrain';
 import castFear, { meta as fearMeta } from '../skills/warlock/fear';
@@ -66,7 +66,7 @@ const SPELL_ICONS = {
     [pyroblastMeta.id]: pyroblastMeta.icon,
     [darkballMeta.id]: darkballMeta.icon,
     [corruptionMeta.id]: corruptionMeta.icon,
-    [immolateMeta.id]: immolateMeta.icon,
+    [lifeTapMeta.id]: lifeTapMeta.icon,
     [chaosBoltMeta.id]: chaosBoltMeta.icon,
     [lifeDrainMeta.id]: lifeDrainMeta.icon,
     [fearMeta.id]: fearMeta.icon,
@@ -99,7 +99,7 @@ const SPELL_META = {
     [pyroblastMeta.id]: pyroblastMeta,
     [darkballMeta.id]: darkballMeta,
     [corruptionMeta.id]: corruptionMeta,
-    [immolateMeta.id]: immolateMeta,
+    [lifeTapMeta.id]: lifeTapMeta,
     [chaosBoltMeta.id]: chaosBoltMeta,
     [lifeDrainMeta.id]: lifeDrainMeta,
     [fearMeta.id]: fearMeta,
@@ -704,7 +704,7 @@ export function Game({models, sounds, textures, matchId, character}) {
             fireball: 0,
             darkball: 0,
             corruption: 10000,
-            immolate: 10000,
+            lifetap: 10000,
             iceball: 5000,
             fireblast: 5000,
             chaosbolt: 6000,
@@ -1085,7 +1085,7 @@ export function Game({models, sounds, textures, matchId, character}) {
         }
         function handleKeyQ() {
             const className = character?.name?.toLowerCase();
-            if (className === 'warlock') castSpell('immolate');
+            if (className === 'warlock') castSpell('lifetap');
             else if (className === 'paladin') castSpell('paladin-heal');
             else if (className === 'rogue') castSpell('shadow-leap');
             else if (className === 'warrior') castSpell('bladestorm');
@@ -1497,14 +1497,10 @@ export function Game({models, sounds, textures, matchId, character}) {
                         sounds,
                     });
                     break;
-                case "immolate":
-                    castImmolate({
+                case "lifetap":
+                    castLifeTap({
                         playerId,
                         castSpellImpl,
-                        igniteHands,
-                        mana,
-                        getTargetPlayer,
-                        dispatch,
                         sendToSocket,
                         sounds,
                     });
@@ -3784,14 +3780,7 @@ export function Game({models, sounds, textures, matchId, character}) {
                                 });
                             }
                             break;
-                        case "immolate":
-                            applyImmolationEffect(message.payload.targetId);
-                            if (message.payload.targetId === myPlayerId) {
-                                dispatch({
-                                    type: "SEND_CHAT_MESSAGE",
-                                    payload: "You are burning!",
-                                });
-                            }
+                        case "lifetap":
                             break;
                         case "fear":
                             if (message.payload.targetId === myPlayerId) {
