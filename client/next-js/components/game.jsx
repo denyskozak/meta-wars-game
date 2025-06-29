@@ -312,7 +312,7 @@ export function Game({models, sounds, textures, matchId, character}) {
                 meleeRangeIndicator = new THREE.Mesh(geo, mat);
                 meleeRangeIndicator.rotation.x = -Math.PI / 2;
                 // Rotate indicator to face forward
-                meleeRangeIndicator.rotation.y = Math.PI;
+                meleeRangeIndicator.rotation.y = 0;
                 meleeRangeIndicator.position.y = 0.05;
             }
             newModel.add(meleeRangeIndicator);
@@ -831,7 +831,7 @@ export function Game({models, sounds, textures, matchId, character}) {
         const LIGHTSTRIKE_DAMAGE = 34; // increased for warrior/paladin/rogue E
         // Slightly increased to improve melee reliability
         // Increase melee range by 25%
-        const MELEE_RANGE_ATTACK = 2.125; // melee range
+        const MELEE_RANGE_ATTACK = 1.9125; // melee range reduced by 10%
         // Melee arc in radians (120 degrees)
         const MELEE_ANGLE = (120 * Math.PI) / 180;
         const LIGHTWAVE_DAMAGE = 40;
@@ -3419,7 +3419,7 @@ export function Game({models, sounds, textures, matchId, character}) {
                     meleeRangeIndicator = new THREE.Mesh(geo, mat);
                     meleeRangeIndicator.rotation.x = -Math.PI / 2;
                     // Rotate indicator to face forward
-                    meleeRangeIndicator.rotation.y = Math.PI;
+                    meleeRangeIndicator.rotation.y = 0;
                     meleeRangeIndicator.position.y = 0.05;
                     meleeRangeIndicator.scale.setScalar(1 / currentScale);
                     player.add(meleeRangeIndicator);

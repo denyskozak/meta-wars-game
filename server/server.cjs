@@ -5,7 +5,7 @@ const http = require('http');
 // const { createProfile } = require('./sui.cjs');
 
 const UPDATE_MATCH_INTERVAL = 33;
-const MAX_HP = 120;
+const MAX_HP = 150;
 const MAX_MANA = 130;
 const MAX_KILLS = 15;
 const XP_PER_LEVEL = 1000;
@@ -20,7 +20,7 @@ const COMBO_ICON = '/icons/classes/rogue/combo_point.jpg';
 const ROGUE_SPRINT_ICON = '/icons/classes/rogue/sprint.jpg';
 const CLASS_STATS = require('../client/next-js/consts/classStats.json');
 const ADRENALINE_RUSH_ICON = '/icons/classes/rogue/adrenalinerush.jpg';
-const MELEE_RANGE = 2.125;
+const MELEE_RANGE = 1.9125; // reduced by 10%
 const LIGHTSTRIKE_DAMAGE = 34;
 
 function withinMeleeRange(a, b) {
@@ -394,9 +394,11 @@ function applyDamage(match, victimId, dealerId, damage, spellType) {
         });
     }
 
-    const absorbed = Math.min(victim.armor, totalDamage);
-    victim.armor -= absorbed;
-    totalDamage -= absorbed;
+    // Armor reduces damage but is not consumed
+    if (victim.armor > 0) {
+        const reduction = Math.min(1, victim.armor / 100);
+        totalDamage = totalDamage * (1 - reduction);
+    }
     victim.hp = Math.max(0, victim.hp - totalDamage);
     if (victim.hp <= 0) {
         victim.deaths++;
