@@ -327,7 +327,7 @@ export function Game({models, sounds, textures, matchId, character}) {
         const activeDamageEffects = new Map(); // key = playerId -> effect mesh
         const activeImmolation = new Map(); // key = playerId -> effect mesh
         const activeStunEffects = new Map(); // key = playerId -> {group, timeout}
-        const activeFearEffects = new Map(); // key = playerId -> {sprite, timeout}
+        const activeFearEffects = new Map(); // key = playerId -> {group, timeout}
         const activeSprintTrails = new Map(); // key = playerId -> {mesh, start, duration, timeout}
         const activeBladestorms = new Map(); // key = playerId -> {start, duration, sound}
         const fearTexture = new THREE.TextureLoader().load('/icons/classes/warlock/possession.jpg');
@@ -836,6 +836,7 @@ export function Game({models, sounds, textures, matchId, character}) {
         const MELEE_ANGLE = (120 * Math.PI) / 180;
         const LIGHTWAVE_DAMAGE = 40;
         const STUN_SPIN_SPEED = 2;
+        const FEAR_SPIN_SPEED = 1.5;
         const BLADESTORM_DAMAGE = 40;
 
         // Медленнее пускаем сферы как настоящие заклинания
@@ -2838,26 +2839,34 @@ export function Game({models, sounds, textures, matchId, character}) {
         function applyFearEffect(playerId, duration = 3000) {
             const existing = activeFearEffects.get(playerId);
             if (existing) {
-                existing.sprite.parent?.remove(existing.sprite);
+                existing.group.parent?.remove(existing.group);
                 clearTimeout(existing.timeout);
             }
 
-            const material = new THREE.SpriteMaterial({
-                map: fearTexture,
-                transparent: true,
-                depthWrite: false,
-            });
-            const sprite = new THREE.Sprite(material);
-            sprite.scale.set(1, 1, 1);
-            sprite.renderOrder = 999;
-            scene.add(sprite);
+            const group = new THREE.Group();
+            const count = 3;
+            for (let i = 0; i < count; i++) {
+                const material = new THREE.SpriteMaterial({
+                    map: fearTexture,
+                    transparent: true,
+                    depthWrite: false,
+                    blending: THREE.AdditiveBlending,
+                });
+                const sprite = new THREE.Sprite(material);
+                sprite.scale.set(1, 1, 1);
+                const angle = (i / count) * Math.PI * 2;
+                sprite.position.set(Math.cos(angle) * 0.8, 0, Math.sin(angle) * 0.8);
+                group.add(sprite);
+            }
+
+            scene.add(group);
 
             const timeout = setTimeout(() => {
-                sprite.parent?.remove(sprite);
+                group.parent?.remove(group);
                 activeFearEffects.delete(playerId);
             }, duration);
 
-            activeFearEffects.set(playerId, { sprite, timeout });
+            activeFearEffects.set(playerId, { group, timeout });
         }
 
         function spawnFrostNovaRing(playerId, duration = FROSTNOVA_RING_DURATION) {
@@ -3215,8 +3224,9 @@ export function Game({models, sounds, textures, matchId, character}) {
                     activeFearEffects.forEach((obj, id) => {
                         const target = players.get(id)?.model;
                         if (!target) return;
-                        target.getWorldPosition(obj.sprite.position);
-                        obj.sprite.position.y += 2;
+                        target.getWorldPosition(obj.group.position);
+                        obj.group.position.y += 2;
+                        obj.group.rotation.y += delta * FEAR_SPIN_SPEED;
                     });
 
                     for (let i = frostNovaRings.length - 1; i >= 0; i--) {
