@@ -2,7 +2,7 @@ const WebSocket = require('ws');
 const http = require('http');
 // const { mintChest } = require('./sui.cjs');
 // const { mintCoins, mintItemWithOptions } = require('./sui.cjs');
-// const { createProfile } = require('./sui.cjs');
+const { createProfile } = require('./sui.cjs');
 
 const UPDATE_MATCH_INTERVAL = 33;
 const MAX_HP = 120;
@@ -614,7 +614,22 @@ ws.on('connection', (socket) => {
 
             case 'CREATE_PROFILE':
                 if (message.address && message.nickname) {
-                    // createProfile(message.address, message.nickname);
+                    createProfile(message.address, message.nickname)
+                        .then(() => {
+                            socket.send(JSON.stringify({
+                                type: 'PROFILE_CREATED',
+                                nickname: message.nickname,
+                                success: true,
+                            }));
+                        })
+                        .catch(err => {
+                            console.error('createProfile failed:', err);
+                            socket.send(JSON.stringify({
+                                type: 'PROFILE_CREATED',
+                                nickname: message.nickname,
+                                success: false,
+                            }));
+                        });
                 }
                 break;
 

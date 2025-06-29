@@ -1,29 +1,44 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Input } from "@heroui/input";
 import { Button } from "@heroui/react";
 import { useRouter } from "next/navigation";
 
-import { useTransaction } from "@/hooks";
+import { useWS } from "@/hooks/useWS";
 
 export interface ProfileFormProps {
   onCreated?: () => void;
 }
 export function ProfileForm({ onCreated }: ProfileFormProps) {
   const [nickname, setNickname] = useState("");
-  const { createProfile } = useTransaction();
+  const { socket, sendToSocket } = useWS();
   const router = useRouter();
 
-  const handleCreate = async () => {
+  useEffect(() => {
+    const handleMessage = (event: MessageEvent) => {
+      let message: any = {};
+      try {
+        message = JSON.parse(event.data);
+      } catch (e) {
+        return;
+      }
+
+      if (message.type === "PROFILE_CREATED" && message.success) {
+        setNickname("");
+        onCreated?.();
+      }
+    };
+
+    socket.addEventListener("message", handleMessage);
+    return () => {
+      socket.removeEventListener("message", handleMessage);
+    };
+  }, [socket, onCreated]);
+
+  const handleCreate = () => {
     if (!nickname) return;
-    try {
-      await createProfile(nickname);
-      setNickname("");
-      onCreated?.();
-    } catch (e) {
-      console.error(e);
-    }
+    sendToSocket({ type: "CREATE_PROFILE", nickname });
   };
 
   return (
