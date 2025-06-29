@@ -13,17 +13,19 @@ export default function castFear({ playerId, castSpellImpl, mana, getTargetPlaye
     }
     return;
   }
-  const targetId = getTargetPlayer();
-  if (!targetId) {
-    dispatch({ type: 'SEND_CHAT_MESSAGE', payload: `No target for fear!` });
-    sounds?.noTarget?.play?.();
-    return;
-  }
   castSpellImpl(
     playerId,
     SPELL_COST['fear'],
     FEAR_CAST_TIME,
-    () => sendToSocket({ type: 'CAST_SPELL', payload: { type: 'fear', targetId } }),
+    () => {
+      const targetId = getTargetPlayer();
+      if (!targetId) {
+        dispatch({ type: 'SEND_CHAT_MESSAGE', payload: `No target for fear!` });
+        sounds?.noTarget?.play?.();
+        return;
+      }
+      sendToSocket({ type: 'CAST_SPELL', payload: { type: 'fear', targetId } });
+    },
     sounds.spellCast,
     sounds.spellCast,
     meta.id,

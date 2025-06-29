@@ -17,7 +17,6 @@ export const CastBar = () => {
             onEndRef.current = onEnd;
             setProgress(0);
             setIsCasting(true);
-
             startRef.current = Date.now();
 
             if (intervalRef.current) clearInterval(intervalRef.current);
@@ -26,22 +25,35 @@ export const CastBar = () => {
                 const elapsed = Date.now() - startRef.current;
                 const percent = Math.min((elapsed / durationRef.current) * 100, 100);
                 setProgress(percent);
-
                 if (percent >= 100) {
                     clearInterval(intervalRef.current);
                     intervalRef.current = null;
-                    setIsCasting(false);
-                    onEndRef.current?.();
                 }
-            }, 30); // обновление каждые 30мс
+            }, 30);
+        };
+
+        const handleReleaseCast = () => {
+            if (!isCasting) return;
+            const elapsed = Date.now() - startRef.current;
+            const remaining = Math.max(0, durationRef.current - elapsed);
+            if (intervalRef.current) {
+                clearInterval(intervalRef.current);
+                intervalRef.current = null;
+            }
+            setTimeout(() => {
+                onEndRef.current?.();
+            }, remaining);
+            setIsCasting(false);
         };
 
         window.addEventListener("start-cast", handleStartCast);
+        window.addEventListener("release-cast", handleReleaseCast);
         return () => {
             window.removeEventListener("start-cast", handleStartCast);
+            window.removeEventListener("release-cast", handleReleaseCast);
             if (intervalRef.current) clearInterval(intervalRef.current);
         };
-    }, []);
+    }, [isCasting]);
 
     if (!isCasting) return null;
 

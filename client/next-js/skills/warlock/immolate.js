@@ -22,19 +22,18 @@ export default function castImmolate({
     return;
   }
 
-  const targetId = getTargetPlayer();
-  if (!targetId) {
-    dispatch({ type: 'SEND_CHAT_MESSAGE', payload: `No target for immolate!` });
-    sounds?.noTarget?.play?.();
-    return;
-  }
-
   igniteHands(playerId, 1500);
   castSpellImpl(
     playerId,
     SPELL_COST['immolate'],
     1500,
     () => {
+      const targetId = getTargetPlayer();
+      if (!targetId) {
+        dispatch({ type: 'SEND_CHAT_MESSAGE', payload: `No target for immolate!` });
+        sounds?.noTarget?.play?.();
+        return;
+      }
       sendToSocket({ type: 'CAST_SPELL', payload: { type: 'immolate', targetId } });
     },
     sounds.fireballCast,
