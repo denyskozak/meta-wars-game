@@ -1,6 +1,6 @@
 import React, {useLayoutEffect, useRef, useState, useEffect} from "react";
 import gsap from "gsap";
-import { MAX_HP, MAX_MANA, CLASS_MODELS } from "../consts";
+import { MAX_HP, MAX_MANA, CLASS_MODELS, CLASS_STATS } from "../consts";
 import { SPELL_COST } from '../consts';
 import * as THREE from "three";
 import { Fire } from "../three/Fire";
@@ -236,7 +236,11 @@ export function Game({models, sounds, textures, matchId, character}) {
         let camera;
         const animations = models["character_animations"];
 
-        let hp = MAX_HP,
+        const baseStats = CLASS_STATS[character?.classType] || { hp: MAX_HP, armor: 0 };
+        let hp = baseStats.hp,
+            armor = baseStats.armor,
+            maxHp = baseStats.hp,
+            maxArmor = baseStats.armor,
             mana = MAX_MANA,
             points = 0,
             level = 1,
@@ -423,12 +427,12 @@ export function Game({models, sounds, textures, matchId, character}) {
 
         // Function to update the HP bar width
         function updateHPBar() {
-            dispatchEvent('self-update', { hp, mana, points, level, skillPoints, learnedSkills });
+            dispatchEvent('self-update', { hp, mana, armor, maxHp, maxArmor, points, level, skillPoints, learnedSkills });
         }
 
         // Function to update the Mana bar width
         function updateManaBar() {
-            dispatchEvent('self-update', { hp, mana, points, level, skillPoints, learnedSkills });
+            dispatchEvent('self-update', { hp, mana, armor, maxHp, maxArmor, points, level, skillPoints, learnedSkills });
         }
 
         function dispatchTargetUpdate() {
@@ -444,6 +448,9 @@ export function Game({models, sounds, textures, matchId, character}) {
             dispatchEvent('target-update', {
                 id: targetedPlayerId,
                 hp: p.hp,
+                maxHp: p.maxHp,
+                armor: p.armor,
+                maxArmor: p.maxArmor,
                 mana: p.mana,
                 address: p.address || `Player ${targetedPlayerId}`,
                 classType: p.classType,
@@ -1051,6 +1058,9 @@ export function Game({models, sounds, textures, matchId, character}) {
         function handleKeyT() {
             dispatch({type: 'SET_SCOREBOARD_VISIBLE', payload: true});
         }
+        function handleKeyC() {
+            dispatch({type: 'SET_STATS_VISIBLE', payload: true});
+        }
         function handleSpace() {
             if (playerOnFloor && !jumpBlocked && !isActionRunning(PRIORITY_ACTIONS)) {
                 jumpBlocked = true;
@@ -1095,6 +1105,7 @@ export function Game({models, sounds, textures, matchId, character}) {
             KeyG: handleKeyG,
             KeyJ: handleKeyJ,
             KeyT: handleKeyT,
+            KeyC: handleKeyC,
             Space: handleSpace,
             KeyQ: handleKeyQ,
         };
@@ -1129,6 +1140,9 @@ export function Game({models, sounds, textures, matchId, character}) {
         function handleKeyUpT() {
             dispatch({type: 'SET_SCOREBOARD_VISIBLE', payload: false});
         }
+        function handleKeyUpC() {
+            dispatch({type: 'SET_STATS_VISIBLE', payload: false});
+        }
         function handleKeyUpSpace() {
             setTimeout(() => {
                 jumpBlocked = false;
@@ -1138,6 +1152,7 @@ export function Game({models, sounds, textures, matchId, character}) {
         const keyUpHandlers = {
             KeyG: handleKeyUpG,
             KeyT: handleKeyUpT,
+            KeyC: handleKeyUpC,
             Space: handleKeyUpSpace,
         };
 
@@ -3999,6 +4014,9 @@ export function Game({models, sounds, textures, matchId, character}) {
                 case "UPDATE_STATS":
                     if (message.playerId === myPlayerId) {
                         hp = message.hp;
+                        armor = message.armor;
+                        maxHp = message.maxHp || maxHp;
+                        maxArmor = message.maxArmor || maxArmor;
                         mana = message.mana;
                         updateHPBar();
                         updateManaBar();
@@ -4010,6 +4028,9 @@ export function Game({models, sounds, textures, matchId, character}) {
                     } else if (players.has(message.playerId)) {
                         const p = players.get(message.playerId);
                         p.hp = message.hp;
+                        p.armor = message.armor;
+                        if (message.maxHp !== undefined) p.maxHp = message.maxHp;
+                        if (message.maxArmor !== undefined) p.maxArmor = message.maxArmor;
                         p.mana = message.mana;
                         p.buffs = message.buffs || [];
                         p.debuffs = message.debuffs || [];

@@ -8,6 +8,7 @@ import {Buffs} from "../parts/Buffs";
 import {ComboPoints} from "../parts/ComboPoints";
 import {ExperienceBar} from "../parts/ExperienceBar";
 import {LevelUp} from "../parts/LevelUp";
+import {StatsModal} from "../parts/StatsModal";
 import {Progress} from "@heroui/react";
 
 import {useInterface} from "@/context/inteface";
@@ -22,8 +23,10 @@ export const Interface = () => {
     const {
         state: { character },
     } = useInterface() as { state: { character: { name?: string, classType: string } | null } };
-    const [target, setTarget] = useState<{id:number, hp:number, mana:number, address:string, classType?:string, buffs?:any[], debuffs?:any[]}|null>(null);
-    const [selfStats, setSelfStats] = useState<{hp:number, mana:number, points:number, level:number, skillPoints:number, learnedSkills:Record<string, boolean>}>({hp: MAX_HP, mana: MAX_MANA, points: 0, level: 1, skillPoints:1, learnedSkills:{}});
+    const [target, setTarget] = useState<{id:number, hp:number, armor:number, maxHp:number, maxArmor:number, mana:number, address:string, classType?:string, buffs?:any[], debuffs?:any[]}|null>(null);
+    const [selfStats, setSelfStats] = useState<{hp:number, mana:number, armor:number, maxHp:number, maxArmor:number, points:number, level:number, skillPoints:number, learnedSkills:Record<string, boolean>}>(
+        {hp: MAX_HP, mana: MAX_MANA, armor: 0, maxHp: MAX_HP, maxArmor: 0, points: 0, level: 1, skillPoints:1, learnedSkills:{}}
+    );
 
     useEffect(() => {
         const handler = (e: CustomEvent) => {
@@ -40,6 +43,9 @@ export const Interface = () => {
                 if (
                     prev.hp === e.detail.hp &&
                     prev.mana === e.detail.mana &&
+                    prev.armor === e.detail.armor &&
+                    prev.maxHp === e.detail.maxHp &&
+                    prev.maxArmor === e.detail.maxArmor &&
                     prev.points === e.detail.points &&
                     prev.level === e.detail.level &&
                     prev.skillPoints === e.detail.skillPoints
@@ -62,8 +68,8 @@ export const Interface = () => {
                     </div>
                 )}
                 <div className="w-40 space-y-1">
-                    <p className="text-medium font-semibold">HP: {Math.round((selfStats.hp / MAX_HP) * 100)}</p>
-                    <Progress id="hpBar" aria-label="HP" value={Math.round((selfStats.hp / MAX_HP) * 100)} color="secondary" disableAnimation />
+                    <p className="text-medium font-semibold">HP: {Math.round((selfStats.hp / selfStats.maxHp) * 100)}</p>
+                    <Progress id="hpBar" aria-label="HP" value={Math.round((selfStats.hp / selfStats.maxHp) * 100)} color="secondary" disableAnimation />
                     <p className="text-medium font-semibold">{(character.classType === 'rogue' || character.classType === 'warrior') ? 'Energy' : 'Mana'}: {Math.round(selfStats.mana)}</p>
                     <Progress id="manaBar" aria-label={(character.classType === 'rogue' || character.classType === 'warrior') ? 'Energy' : 'Mana'} value={Math.round((selfStats.mana / MAX_MANA) * 100)} color="primary" disableAnimation />
                     <ComboPoints />
@@ -79,8 +85,8 @@ export const Interface = () => {
                     )}
                     <div className="flex flex-col">
                         <div id="targetAddress" className="target-address">{target.address}</div>
-                        <p className="text-medium font-semibold">HP: {Math.round((target.hp / MAX_HP) * 100)}</p>
-                        <Progress id="targetHpBar" aria-label="Target HP" value={Math.round((target.hp / MAX_HP) * 100)} color="secondary" className="mb-1 w-40" disableAnimation />
+                        <p className="text-medium font-semibold">HP: {Math.round((target.hp / target.maxHp) * 100)}</p>
+                        <Progress id="targetHpBar" aria-label="Target HP" value={Math.round((target.hp / target.maxHp) * 100)} color="secondary" className="mb-1 w-40" disableAnimation />
                         <p className="text-medium font-semibold">{(target.classType === 'rogue' || target.classType === 'warrior') ? 'Energy' : 'Mana'}: {Math.round(target.mana)}</p>
                         <Progress id="targetManaBar" aria-label={(target.classType === 'rogue' || target.classType === 'warrior') ? 'Target Energy' : 'Target Mana'} value={Math.round((target.mana / MAX_MANA) * 100)} color="primary" className="w-40" disableAnimation />
                     </div>
@@ -116,6 +122,7 @@ export const Interface = () => {
 
 
             <Scoreboard />
+            <StatsModal />
             <GameMenu />
             <Buffs />
             <SkillBar mana={selfStats.mana} level={selfStats.level} skillPoints={selfStats.skillPoints} learnedSkills={selfStats.learnedSkills}/>

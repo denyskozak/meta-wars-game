@@ -18,6 +18,7 @@ const FREEDOM_ICON = '/icons/classes/paladin/sealofvalor.jpg';
 const DIVINE_SPEED_ICON = '/icons/classes/paladin/speedoflight.jpg';
 const COMBO_ICON = '/icons/classes/rogue/combo_point.jpg';
 const ROGUE_SPRINT_ICON = '/icons/classes/rogue/sprint.jpg';
+const CLASS_STATS = require('../client/next-js/consts/classStats.json');
 const ADRENALINE_RUSH_ICON = '/icons/classes/rogue/adrenalinerush.jpg';
 const MELEE_RANGE = 2.125;
 const LIGHTSTRIKE_DAMAGE = 34;
@@ -213,6 +214,7 @@ const CLASS_MODELS = {
 function createPlayer(address, classType, character) {
     const spawn = randomSpawnPoint();
     const charName = character || CLASS_MODELS[classType] || 'vampir';
+    const stats = CLASS_STATS[classType] || { hp: MAX_HP, armor: 0 };
     return {
         position: {...spawn},
         spawn_point: spawn,
@@ -227,7 +229,10 @@ function createPlayer(address, classType, character) {
         level: 1,
         skillPoints: 1,
         learnedSkills: {},
-        hp: MAX_HP,
+        hp: stats.hp,
+        maxHp: stats.hp,
+        armor: stats.armor,
+        maxArmor: stats.armor,
         mana: MAX_MANA,
         comboPoints: 0,
         comboTarget: null,
@@ -303,7 +308,7 @@ function checkRunePickup(match, playerId) {
             match.runes.splice(i, 1);
             switch (rune.type) {
                 case 'heal':
-                    player.hp = Math.min(MAX_HP, player.hp + 100);
+                    player.hp = Math.min(player.maxHp, player.hp + 100);
                     break;
                 case 'mana':
                     player.mana = Math.min(MAX_MANA, player.mana + 100);
@@ -322,6 +327,9 @@ function checkRunePickup(match, playerId) {
                 type: 'UPDATE_STATS',
                 playerId,
                 hp: player.hp,
+                armor: player.armor,
+                maxHp: player.maxHp,
+                maxArmor: player.maxArmor,
                 mana: player.mana,
                 buffs: player.buffs,
                 debuffs: player.debuffs,
@@ -386,6 +394,9 @@ function applyDamage(match, victimId, dealerId, damage, spellType) {
         });
     }
 
+    const absorbed = Math.min(victim.armor, totalDamage);
+    victim.armor -= absorbed;
+    totalDamage -= absorbed;
     victim.hp = Math.max(0, victim.hp - totalDamage);
     if (victim.hp <= 0) {
         victim.deaths++;
@@ -408,7 +419,8 @@ function applyDamage(match, victimId, dealerId, damage, spellType) {
         victim.position = { ...spawn };
         victim.spawn_point = spawn;
         victim.rotation = { y: spawn.yaw || 0 };
-        victim.hp = MAX_HP;
+        victim.hp = victim.maxHp;
+        victim.armor = victim.maxArmor;
         victim.mana = MAX_MANA;
         victim.animationAction = 'idle';
 
@@ -424,6 +436,9 @@ function applyDamage(match, victimId, dealerId, damage, spellType) {
         type: 'UPDATE_STATS',
         playerId: victimId,
         hp: victim.hp,
+        armor: victim.armor,
+        maxHp: victim.maxHp,
+        maxArmor: victim.maxArmor,
         mana: victim.mana,
         buffs: victim.buffs,
         debuffs: victim.debuffs,
@@ -731,10 +746,10 @@ ws.on('connection', (socket) => {
 
                         player.mana -= cost;
                         if (message.payload.type === 'heal') {
-                            player.hp = Math.min(MAX_HP, player.hp + 50);
+                            player.hp = Math.min(player.maxHp, player.hp + 50);
                         }
                         if (message.payload.type === 'paladin-heal') {
-                            player.hp = Math.min(MAX_HP, player.hp + 50);
+                            player.hp = Math.min(player.maxHp, player.hp + 50);
                         }
 
                         if (['immolate'].includes(message.payload.type)) {
@@ -894,7 +909,7 @@ ws.on('connection', (socket) => {
                                 const caster = match.players.get(id);
                                 if (target && caster) {
                                     applyDamage(match, target.id, id, 30, 'lifedrain');
-                                    caster.hp = Math.min(MAX_HP, caster.hp + 30);
+                                    caster.hp = Math.min(caster.maxHp, caster.hp + 30);
                                 }
 
                             }
@@ -903,6 +918,9 @@ ws.on('connection', (socket) => {
                                 type: 'UPDATE_STATS',
                                 playerId: id,
                                 hp: player.hp,
+                                armor: player.armor,
+                                maxHp: player.maxHp,
+                                maxArmor: player.maxArmor,
                                 mana: player.mana,
                                 buffs: player.buffs,
                                 debuffs: player.debuffs,
@@ -950,7 +968,8 @@ ws.on('connection', (socket) => {
                 if (match) {
                     const p = match.players.get(id);
                     if (p) {
-                        p.hp = MAX_HP;
+                        p.hp = p.maxHp;
+                        p.armor = p.maxArmor;
                         p.mana = MAX_MANA;
                         p.buffs = [];
                         p.debuffs = [];
@@ -958,6 +977,9 @@ ws.on('connection', (socket) => {
                             type: 'UPDATE_STATS',
                             playerId: id,
                             hp: p.hp,
+                            armor: p.armor,
+                            maxHp: p.maxHp,
+                            maxArmor: p.maxArmor,
                             mana: p.mana,
                             buffs: p.buffs,
                             debuffs: p.debuffs,
