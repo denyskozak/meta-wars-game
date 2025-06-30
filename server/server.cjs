@@ -785,7 +785,7 @@ ws.on('connection', (socket) => {
                             player.hp = Math.min(player.maxHp, player.hp + 50);
                         }
 
-                        if (['immolate'].includes(message.payload.type)) {
+                        if (['lifetap'].includes(message.payload.type)) {
                             broadcastToMatch(match.id, {
                                 type: 'CAST_SPELL',
                                 payload: message.payload,
@@ -816,20 +816,9 @@ ws.on('connection', (socket) => {
                                 });
                             }
                         }
-                        if (message.payload.type === 'immolate' && message.payload.targetId) {
-                            const target = match.players.get(message.payload.targetId);
-                            if (target) {
-                                target.debuffs = target.debuffs || [];
-                                target.debuffs.push({
-                                    type: 'immolate',
-                                    casterId: id,
-                                    damage: 10,
-                                    interval: 1000,
-                                    nextTick: Date.now() + 1000,
-                                    ticks: 5,
-                                    icon: '/icons/spell_immolation.jpg',
-                                });
-                            }
+                        if (message.payload.type === 'lifetap') {
+                            player.hp = Math.max(0, player.hp - 30);
+                            player.mana = Math.min(MAX_MANA, player.mana + 30);
                         }
                         if (message.payload.type === 'stun' && message.payload.targetId) {
                             const target = match.players.get(message.payload.targetId);

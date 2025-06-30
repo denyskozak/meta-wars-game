@@ -21,7 +21,7 @@ const DEFAULT_SKILLS = [
 const WARLOCK_SKILLS = [
     warlockSkills.darkball,
     warlockSkills.corruption,
-    warlockSkills.immolate,
+    warlockSkills.lifetap,
     warlockSkills.chaosbolt,
     warlockSkills.fear,
     warlockSkills.lifedrain,
