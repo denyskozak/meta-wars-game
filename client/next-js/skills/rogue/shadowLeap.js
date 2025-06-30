@@ -61,13 +61,7 @@ export default function castShadowLeap({
   const backOffset = new THREE.Vector3(Math.sin(rotY), 0, Math.cos(rotY)).multiplyScalar(-BEHIND_DISTANCE);
   const behind = targetPos.clone().add(backOffset);
 
-  const intersect = worldOctree?.capsuleIntersect(
-    new Capsule(behind, behind.clone().add(new THREE.Vector3(0, 0.75, 0)), 0.35),
-  );
-
-  if (!intersect) {
-    teleportTo({ x: behind.x, y: behind.y, z: behind.z, yaw: rotY });
-  }
+  teleportTo({ x: behind.x, y: behind.y, z: behind.z, yaw: rotY });
 
   sendToSocket({ type: 'CAST_SPELL', payload: { type: 'shadow-leap', targetId } });
   activateGlobalCooldown();
