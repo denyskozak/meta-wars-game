@@ -227,6 +227,8 @@ function createPlayer(address, classType, character) {
         kills: 0,
         deaths: 0,
         assists: 0,
+        damage: 0,
+        assistants: {},
         points: 0,
         level: 1,
         skillPoints: 1,
@@ -287,7 +289,17 @@ function finalizeMatch(match) {
         }
 
         p.chests.push(rarity);
-        return { id: pid, kills: p.kills, deaths: p.deaths, reward: rarity, coins, item, rankDelta: deltas[pid] || 0 };
+        return {
+            id: pid,
+            kills: p.kills,
+            deaths: p.deaths,
+            assists: p.assists,
+            damage: Math.floor(p.damage || 0),
+            reward: rarity,
+            coins,
+            item,
+            rankDelta: deltas[pid] || 0,
+        };
     });
     finishedMatches.set(match.id, match.summary);
     broadcastToMatch(match.id, {
@@ -396,6 +408,12 @@ function applyDamage(match, victimId, dealerId, damage, spellType) {
         });
     }
 
+    if (attacker && dealerId !== victimId) {
+        attacker.damage = (attacker.damage || 0) + totalDamage;
+        victim.assistants = victim.assistants || {};
+        victim.assistants[dealerId] = Date.now();
+    }
+
     const reduction = victim.armor / 200; // 100 armor = 50% damage reduction
     totalDamage = totalDamage * Math.max(0, 1 - reduction);
     victim.hp = Math.max(0, victim.hp - totalDamage);
@@ -407,6 +425,18 @@ function applyDamage(match, victimId, dealerId, damage, spellType) {
             attacker.kills++;
             attacker.points += 600;
             updateLevel(attacker);
+
+            const now = Date.now();
+            if (victim.assistants) {
+                Object.entries(victim.assistants).forEach(([aid, ts]) => {
+                    if (aid != dealerId && now - ts < 15000) {
+                        const ap = match.players.get(Number(aid));
+                        if (ap) ap.assists = (ap.assists || 0) + 1;
+                    }
+                });
+            }
+            victim.assistants = {};
+
             broadcastToMatch(match.id, {
                 type: 'KILL',
                 killerId: dealerId,
