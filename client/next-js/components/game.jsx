@@ -1390,7 +1390,7 @@ export function Game({models, sounds, textures, matchId, character}) {
             movementSpeedModifier = 0.3;
             sounds.spellCast.volume = 0.3;
             sounds.spellCast.play();
-            dispatchEvent('start-cast', {duration: 2000, onEnd: onCastEnd})
+            dispatchEvent('start-cast', {duration: 2000, onEnd: onCastEnd, name: 'heal', icon: ''})
         }
 
         function getAimDirection() {
@@ -2159,7 +2159,7 @@ export function Game({models, sounds, textures, matchId, character}) {
                     clampWhenFinished: true,
                 });
             }, duration * 0.5);
-            dispatchEvent('start-cast', { duration, onEnd: onCastEnd });
+            dispatchEvent('start-cast', { duration, onEnd: onCastEnd, icon: SPELL_META[spellType]?.icon, name: spellType });
         }
 
         function playerCollisions() {

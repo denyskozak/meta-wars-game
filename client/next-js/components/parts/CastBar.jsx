@@ -4,6 +4,8 @@ import { Progress } from "@heroui/react";
 export const CastBar = () => {
     const [isCasting, setIsCasting] = useState(false);
     const [progress, setProgress] = useState(0);
+    const [icon, setIcon] = useState('');
+    const [name, setName] = useState('');
 
     const intervalRef = useRef(null);
     const startRef = useRef(0);
@@ -17,9 +19,11 @@ export const CastBar = () => {
 
     useEffect(() => {
         const handleStartCast = (e) => {
-            const { duration = 1500, onEnd = () => {} } = e.detail || {};
+            const { duration = 1500, onEnd = () => {}, icon = '', name = '' } = e.detail || {};
             durationRef.current = duration;
             onEndRef.current = onEnd;
+            setIcon(icon);
+            setName(name);
             setProgress(0);
             setIsCasting(true);
             startRef.current = Date.now();
@@ -63,8 +67,17 @@ export const CastBar = () => {
     if (!isCasting) return null;
 
     return (
-        <div className="fixed bottom-40 left-1/2 transform -translate-x-1/2 w-64 z-50">
-            <Progress disableAnimation aria-label="Casting..." value={progress} color="warning" />
+        <div className="fixed bottom-40 left-1/2 transform -translate-x-1/2 w-64 z-50 flex flex-col items-center">
+            <div className="flex items-center gap-2 mb-1 text-white">
+                {icon && <img src={icon} alt={name} className="w-6 h-6" />}
+                <span className="capitalize">{name}</span>
+            </div>
+            <div className="relative w-full">
+                <Progress disableAnimation aria-label="Casting..." value={progress} color="warning" />
+                <span className="absolute inset-0 flex items-center justify-center text-white text-sm font-semibold">
+                    {Math.round(progress)}%
+                </span>
+            </div>
         </div>
     );
 };
