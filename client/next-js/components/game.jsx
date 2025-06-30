@@ -829,7 +829,7 @@ export function Game({models, sounds, textures, matchId, character}) {
         const FROSTNOVA_RANGE = FIREBLAST_RANGE / 4;
         const FROSTNOVA_RING_DURATION = 1000; // ms
         const LIGHTWAVE_RING_DURATION = 1000; // ms
-        const LIGHTSTRIKE_DAMAGE = 34; // increased for warrior/paladin/rogue E
+        const LIGHTSTRIKE_DAMAGE = 41; // 20% more damage for warrior/paladin/rogue E
         // Melee range for auto attacks
         // Reduced by 30% for better balance
         const MELEE_RANGE_ATTACK = 1.49; // melee range
