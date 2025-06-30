@@ -254,6 +254,36 @@ export function Game({models, sounds, textures, matchId, character}) {
 
         let meleeRangeIndicator = null;
         const MELEE_INDICATOR_OPACITY = 0.2; // transparency for the auto attack indicator
+        const TARGET_INDICATOR_OPACITY = 0.4; // transparency for target highlight
+        let targetIndicator = null;
+
+        const createTargetIndicator = () => {
+            const geometry = new THREE.RingGeometry(0.55, 0.7, 32);
+            const material = new THREE.MeshBasicMaterial({
+                color: 0x00ff00,
+                transparent: true,
+                opacity: TARGET_INDICATOR_OPACITY,
+                side: THREE.DoubleSide,
+                depthWrite: false,
+                blending: THREE.AdditiveBlending,
+            });
+            const mesh = new THREE.Mesh(geometry, material);
+            mesh.rotation.x = -Math.PI / 2;
+            mesh.position.y = 0.05;
+            return mesh;
+        };
+
+        const updateTargetIndicator = () => {
+            if (targetIndicator) {
+                targetIndicator.parent?.remove(targetIndicator);
+                targetIndicator = null;
+            }
+            if (targetedPlayerId && players.has(targetedPlayerId)) {
+                const player = players.get(targetedPlayerId).model;
+                targetIndicator = createTargetIndicator();
+                player.add(targetIndicator);
+            }
+        };
 
         const createMeleeIndicator = () => {
             const group = new THREE.Group();
@@ -481,6 +511,7 @@ export function Game({models, sounds, textures, matchId, character}) {
         }
 
         function dispatchTargetUpdate() {
+            updateTargetIndicator();
             if (!targetedPlayerId || !players.has(targetedPlayerId)) {
                 dispatchEvent('target-update', null);
                 return;
