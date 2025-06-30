@@ -850,6 +850,14 @@ export function Game({models, sounds, textures, matchId, character}) {
         // Number of sprites used for the fireball tail
         const FIREBALL_TAIL_SEGMENTS = 6;
 
+        const SPELL_TAIL_COLORS = {
+            fireball: 0xff6600,
+            iceball: 0x88ddff,
+            pyroblast: 0xff6600,
+            darkball: 0xb84dff,
+            chaosbolt: 0xb84dff,
+        };
+
         const STEPS_PER_FRAME = 30;
 
         const sphereGeometry = new THREE.IcosahedronGeometry(SPHERE_RADIUS, 5);
@@ -1945,6 +1953,20 @@ export function Game({models, sounds, textures, matchId, character}) {
         }
 
 
+        function createSphereTail(color) {
+            const tailSprites = [];
+            const tailPositions = [];
+            for (let i = 0; i < FIREBALL_TAIL_SEGMENTS; i++) {
+                const scale = 0.15 * (1 - i / FIREBALL_TAIL_SEGMENTS);
+                const sprite = makeGlowSprite(color, scale);
+                sprite.visible = false;
+                scene.add(sprite);
+                tailSprites.push(sprite);
+            }
+            return { tailSprites, tailPositions };
+        }
+
+
         function castSphere(model, sphereMesh, type, damage) {
             sphereMesh.rotation.copy(model.rotation);
 
@@ -1954,16 +1976,9 @@ export function Game({models, sounds, textures, matchId, character}) {
 
             let tailSprites = null;
             let tailPositions = null;
-            if (type === 'fireball') {
-                tailSprites = [];
-                tailPositions = [];
-                for (let i = 0; i < FIREBALL_TAIL_SEGMENTS; i++) {
-                    const scale = 0.15 * (1 - i / FIREBALL_TAIL_SEGMENTS);
-                    const sprite = makeGlowSprite(0xff6600, scale);
-                    sprite.visible = false;
-                    scene.add(sprite);
-                    tailSprites.push(sprite);
-                }
+            const tailColor = SPELL_TAIL_COLORS[type];
+            if (tailColor !== undefined) {
+                ({ tailSprites, tailPositions } = createSphereTail(tailColor));
             }
 
             scene.add(sphereMesh); // Add the sphereMesh to the scene
@@ -3691,16 +3706,9 @@ export function Game({models, sounds, textures, matchId, character}) {
 
             let tailSprites = null;
             let tailPositions = null;
-            if (data.type === 'fireball') {
-                tailSprites = [];
-                tailPositions = [];
-                for (let i = 0; i < FIREBALL_TAIL_SEGMENTS; i++) {
-                    const scale = 0.15 * (1 - i / FIREBALL_TAIL_SEGMENTS);
-                    const sprite = makeGlowSprite(0xff6600, scale);
-                    sprite.visible = false;
-                    scene.add(sprite);
-                    tailSprites.push(sprite);
-                }
+            const tailColor = SPELL_TAIL_COLORS[data.type];
+            if (tailColor !== undefined) {
+                ({ tailSprites, tailPositions } = createSphereTail(tailColor));
             }
 
             scene.add(sphere);
