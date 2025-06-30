@@ -59,6 +59,25 @@ export const Interface = () => {
         return () => window.removeEventListener('self-update', handler as EventListener);
     }, []);
 
+    useEffect(() => {
+        const targetEl = document.getElementById('target');
+        if (!targetEl) return;
+
+        const handleStart = () => {
+            targetEl.classList.add('casting');
+        };
+        const handleRelease = () => {
+            targetEl.classList.remove('casting');
+        };
+
+        window.addEventListener('start-cast', handleStart as EventListener);
+        window.addEventListener('release-cast', handleRelease as EventListener);
+        return () => {
+            window.removeEventListener('start-cast', handleStart as EventListener);
+            window.removeEventListener('release-cast', handleRelease as EventListener);
+        };
+    }, []);
+
     return (
         <div className="interface-container">
             {character && <div className="absolute top-24 left-5 flex items-center gap-2 bg-black/70 p-2 rounded">
