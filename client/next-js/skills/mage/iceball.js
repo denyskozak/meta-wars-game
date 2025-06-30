@@ -7,11 +7,11 @@ export default function castIceball({ playerId, castSpellImpl, freezeHands, cast
   castSpellImpl(
     playerId,
     SPELL_COST['iceball'],
-    500,
+    1000,
     (model) => castSphere(model, iceballMesh.clone(), meta.id, damage),
     sounds.iceballCast,
     sounds.iceball,
     meta.id,
-    true
+    false
   );
 }

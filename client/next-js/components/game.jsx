@@ -825,7 +825,7 @@ export function Game({models, sounds, textures, matchId, character}) {
         const DARKBALL_DAMAGE = 30;
         const LIFEDRAIN_DAMAGE = 30;
         const FROSTNOVA_DAMAGE = 20;
-        const FROSTNOVA_RANGE = FIREBLAST_RANGE / 2;
+        const FROSTNOVA_RANGE = FIREBLAST_RANGE / 4;
         const FROSTNOVA_RING_DURATION = 1000; // ms
         const LIGHTWAVE_RING_DURATION = 1000; // ms
         const LIGHTSTRIKE_DAMAGE = 34; // increased for warrior/paladin/rogue E
@@ -2901,7 +2901,7 @@ export function Game({models, sounds, textures, matchId, character}) {
             player.getWorldPosition(position);
             position.y += 0.1;
 
-            const geometry = new THREE.RingGeometry(1, 1.5, 64);
+            const geometry = new THREE.RingGeometry(0.5, 1.0, 64);
             const material = new THREE.ShaderMaterial({
                 uniforms: {
                     time: { value: 0 },
@@ -2935,6 +2935,7 @@ export function Game({models, sounds, textures, matchId, character}) {
             const mesh = new THREE.Mesh(geometry, material);
             mesh.rotation.x = -Math.PI / 2;
             mesh.position.copy(position);
+            mesh.scale.setScalar(0.1);
 
             scene.add(mesh);
             frostNovaRings.push({ mesh, start: performance.now(), duration });
@@ -3257,7 +3258,7 @@ export function Game({models, sounds, textures, matchId, character}) {
                         const effect = frostNovaRings[i];
                         const elapsed = performance.now() - effect.start;
                         const progress = elapsed / effect.duration;
-                        effect.mesh.scale.setScalar(1 + progress * 2);
+                        effect.mesh.scale.setScalar(0.1 + progress * 2);
                         effect.mesh.material.opacity = 0.8 * (1 - progress);
                         if (effect.mesh.material.uniforms?.time) {
                             effect.mesh.material.uniforms.time.value += delta;
