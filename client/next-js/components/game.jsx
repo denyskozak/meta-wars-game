@@ -253,6 +253,7 @@ export function Game({models, sounds, textures, matchId, character}) {
         let leftMouseButtonClicked = false;
 
         let meleeRangeIndicator = null;
+        const MELEE_INDICATOR_OPACITY = 0.4; // transparency for the auto attack indicator
 
         let movementSpeedModifier = 1; // Normal speed
 
@@ -306,7 +307,7 @@ export function Game({models, sounds, textures, matchId, character}) {
                 const mat = new THREE.MeshBasicMaterial({
                     color: 0xffff00,
                     transparent: true,
-                    opacity: 0.4,
+                    opacity: MELEE_INDICATOR_OPACITY,
                     side: THREE.DoubleSide,
                 });
                 meleeRangeIndicator = new THREE.Mesh(geo, mat);
@@ -3449,7 +3450,7 @@ export function Game({models, sounds, textures, matchId, character}) {
                         Math.PI / 2 - MELEE_ANGLE / 2,
                         MELEE_ANGLE,
                     );
-                    const mat = new THREE.MeshBasicMaterial({ color: 0xffff00, transparent: true, opacity: 0.4, side: THREE.DoubleSide });
+                    const mat = new THREE.MeshBasicMaterial({ color: 0xffff00, transparent: true, opacity: MELEE_INDICATOR_OPACITY, side: THREE.DoubleSide });
                     meleeRangeIndicator = new THREE.Mesh(geo, mat);
                     meleeRangeIndicator.rotation.x = Math.PI / 2;
                     // Ensure indicator faces the player's forward direction
