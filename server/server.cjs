@@ -22,7 +22,7 @@ const ROGUE_SPRINT_ICON = '/icons/classes/rogue/sprint.jpg';
 const CLASS_STATS = require('../client/next-js/consts/classStats.json');
 const ADRENALINE_RUSH_ICON = '/icons/classes/rogue/adrenalinerush.jpg';
 const MELEE_RANGE = 2.125;
-const LIGHTSTRIKE_DAMAGE = 34;
+const LIGHTSTRIKE_DAMAGE = 41; // increased by 20%
 const BLADESTORM_DAMAGE = 40;
 
 function withinMeleeRange(a, b) {
