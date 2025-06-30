@@ -6,6 +6,7 @@ export const meta = {
   id: 'shadow-leap',
   key: 'Q',
   icon: '/icons/classes/rogue/shadowstep.jpg',
+  autoFocus: false,
 };
 
 export default function castShadowLeap({

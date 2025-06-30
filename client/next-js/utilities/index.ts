@@ -1,4 +1,9 @@
-import {Championship as ChampionshipType, Championship, Sponsor, Team} from "@/types";
+import {
+  Championship as ChampionshipType,
+  Championship,
+  Sponsor,
+  Team,
+} from "@/types";
 
 export const MIST_PER_SUI = 1000000000;
 
@@ -50,7 +55,6 @@ const mapTeam = (team: MoveTeam): Team => ({
   leadNickname: team.lead_nickname,
   teammateNicknames: team.teammate_nicknames,
 });
-
 
 const mapSponsor = (sponsor: MoveSponsor): Sponsor => ({
   address: sponsor.address,
