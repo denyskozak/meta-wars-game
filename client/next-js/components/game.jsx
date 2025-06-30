@@ -268,23 +268,7 @@ export function Game({models, sounds, textures, matchId, character}) {
             const wedge = new THREE.Mesh(geo, mat);
             group.add(wedge);
 
-            const cornerRadius = MELEE_RANGE_ATTACK * 0.1;
-            const cornerGeo = new THREE.CircleGeometry(cornerRadius, 16);
-            const leftCorner = new THREE.Mesh(cornerGeo, mat);
-            leftCorner.position.set(
-                MELEE_RANGE_ATTACK * Math.cos(start),
-                MELEE_RANGE_ATTACK * Math.sin(start),
-                0,
-            );
-            const rightCorner = new THREE.Mesh(cornerGeo, mat);
-            rightCorner.position.set(
-                MELEE_RANGE_ATTACK * Math.cos(start + MELEE_ANGLE),
-                MELEE_RANGE_ATTACK * Math.sin(start + MELEE_ANGLE),
-                0,
-            );
-            group.add(leftCorner);
-            group.add(rightCorner);
-            group.rotation.x = -Math.PI / 2;
+            group.rotation.x = Math.PI / 2;
             group.position.y = 0.05;
             return group;
         };
