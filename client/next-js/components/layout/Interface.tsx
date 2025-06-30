@@ -10,6 +10,7 @@ import {ExperienceBar} from "../parts/ExperienceBar";
 import {LevelUp} from "../parts/LevelUp";
 import {StatsModal} from "../parts/StatsModal";
 import {HowToPlayModal} from "../parts/HowToPlayModal";
+import {TargetHelpModal} from "../parts/TargetHelpModal";
 import {Progress} from "@heroui/react";
 
 import {useInterface} from "@/context/inteface";
@@ -144,6 +145,7 @@ export const Interface = () => {
             <Scoreboard />
             <StatsModal />
             <HowToPlayModal />
+            <TargetHelpModal />
             <GameMenu />
             <Buffs />
             <SkillBar mana={selfStats.mana} level={selfStats.level} skillPoints={selfStats.skillPoints} learnedSkills={selfStats.learnedSkills}/>
