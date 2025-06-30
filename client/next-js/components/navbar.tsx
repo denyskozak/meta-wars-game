@@ -33,7 +33,7 @@ import {
     SearchIcon,
     CoinIcon,
 } from "@/components/icons";
-import {convertMistToSui} from "@/utiltiies";
+import {convertMistToSui} from "@/utilities";
 import {ConnectionButton} from "@/components/connection-button";
 
 let clickedOnBalance = 0;

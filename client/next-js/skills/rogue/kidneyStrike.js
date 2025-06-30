@@ -4,6 +4,7 @@ export const meta = {
   id: 'kidney-strike',
   key: 'F',
   icon: '/icons/classes/rogue/kidneyshot.jpg',
+  autoFocus: false,
 };
 
 export default function castKidneyStrike({ playerId, globalSkillCooldown, isCasting, mana, getTargetPlayer, dispatch, sendToSocket, activateGlobalCooldown, startSkillCooldown, sounds }) {
