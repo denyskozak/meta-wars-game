@@ -7,7 +7,17 @@ import {useParams, useRouter} from "next/navigation";
 import {Navbar} from "@/components/navbar";
 import {useInterface} from "@/context/inteface";
 import {InterfaceContextValue, MatchDetail, PlayerData} from "@/types";
-import { CLASS_MODELS } from "@/consts";
+import {
+    CLASS_MODELS,
+    CLASS_STATS,
+    MAX_HP,
+    MAX_MANA,
+} from "@/consts";
+import * as mageSkills from "@/skills/mage";
+import * as warlockSkills from "@/skills/warlock";
+import * as paladinSkills from "@/skills/paladin";
+import * as rogueSkills from "@/skills/rogue";
+import * as warriorSkills from "@/skills/warrior";
 
 
 type Match = MatchDetail;
@@ -20,6 +30,12 @@ export default function MatchesPage() {
 
     const [selectedClassPreview, setSelectedClassPreview] = useState<string | null>(null);
 
+    const selectedStats = useMemo(() => {
+        if (!selectedClassPreview) return null;
+        const base = CLASS_STATS[selectedClassPreview] || { hp: MAX_HP, armor: 0 };
+        return { ...base, mana: MAX_MANA };
+    }, [selectedClassPreview]);
+
     const [match, setMatch] = useState<Match | null>(null);
     const [players, setPlayers] = useState<{ id: number, address: string, classType: string }[]>([]);
     const [classType, setClassType] = useState('');
@@ -28,24 +44,74 @@ export default function MatchesPage() {
     const classOptions = {
         mage: {
             label: 'Mage',
-            icon: '/icons/mage.png'
+            icon: '/icons/mage.png',
+            type: 'Ranged',
+            description: 'Master of arcane magic and spells.',
+            skills: [
+                { ...mageSkills.fireball, name: 'Fireball', description: 'Hurls a fiery ball.' },
+                { ...mageSkills.iceball, name: 'Iceball', description: 'Launches a chilling bolt.' },
+                { ...mageSkills.frostnova, name: 'Frost Nova', description: 'Freezes enemies around you.' },
+                { ...mageSkills.blink, name: 'Blink', description: 'Teleport a short distance.' },
+                { ...mageSkills.fireblast, name: 'Fireblast', description: 'Instant burst of flame.' },
+                { ...mageSkills.pyroblast, name: 'Pyroblast', description: 'Massive fireball.' },
+            ],
         },
         warlock: {
             label: 'Warlock',
-            icon: '/icons/warlock.webp'
+            icon: '/icons/warlock.webp',
+            type: 'Ranged',
+            description: 'Manipulator of dark magic.',
+            skills: [
+                { ...warlockSkills.darkball, name: 'Darkball', description: 'Shadow bolt dealing damage.' },
+                { ...warlockSkills.corruption, name: 'Corruption', description: 'Inflicts damage over time.' },
+                { ...warlockSkills.lifetap, name: 'Lifetap', description: 'Convert health into mana.' },
+                { ...warlockSkills.chaosbolt, name: 'Chaosbolt', description: 'Unleash chaotic energy.' },
+                { ...warlockSkills.fear, name: 'Fear', description: 'Terrifies the target.' },
+                { ...warlockSkills.lifedrain, name: 'Lifedrain', description: 'Drain health from target.' },
+            ],
         },
         paladin: {
             label: 'Paladin',
-            icon: '/icons/paladin.webp'
+            icon: '/icons/paladin.webp',
+            type: 'Melee',
+            description: 'Holy warrior empowered by light.',
+            skills: [
+                { ...paladinSkills.lightstrike, name: 'Light Strike', description: 'Strike with holy power.' },
+                { ...paladinSkills.stun, name: 'Stun', description: 'Stuns the enemy.' },
+                { ...paladinSkills.paladinHeal, name: 'Heal', description: 'Restore health to an ally.' },
+                { ...paladinSkills.lightwave, name: 'Lightwave', description: 'Wave of holy light.' },
+                { ...paladinSkills.handOfFreedom, name: 'Hand of Freedom', description: 'Removes movement effects.' },
+                { ...paladinSkills.divineSpeed, name: 'Divine Speed', description: 'Boosts movement speed.' },
+            ],
         },
 
         rogue: {
             label: 'Rogue',
-            icon:  '/icons/rogue.webp'
+            icon:  '/icons/rogue.webp',
+            type: 'Melee',
+            description: 'Stealthy assassin striking from shadows.',
+            skills: [
+                { ...rogueSkills.bloodStrike, name: 'Blood Strike', description: 'Strike the enemy quickly.' },
+                { ...rogueSkills.eviscerate, name: 'Eviscerate', description: 'Finishing move with high damage.' },
+                { ...rogueSkills.shadowLeap, name: 'Shadow Leap', description: 'Leap through shadows to target.' },
+                { ...rogueSkills.kidneyStrike, name: 'Kidney Strike', description: 'Stuns the enemy from behind.' },
+                { ...rogueSkills.sprint, name: 'Sprint', description: 'Increase movement speed.' },
+                { ...rogueSkills.adrenalineRush, name: 'Adrenaline Rush', description: 'Greatly boosts attack speed.' },
+            ],
         },
         warrior: {
             label: 'Warrior',
-            icon:  '/icons/warrior.webp'
+            icon:  '/icons/warrior.webp',
+            type: 'Melee',
+            description: 'Brutal melee fighter with unmatched strength.',
+            skills: [
+                { ...warriorSkills.warbringer, name: 'Warbringer', description: 'Charge to an enemy.' },
+                { ...warriorSkills.savageBlow, name: 'Savage Blow', description: 'Powerful melee attack.' },
+                { ...warriorSkills.hamstring, name: 'Hamstring', description: 'Slows the enemy.' },
+                { ...warriorSkills.bladestorm, name: 'Bladestorm', description: 'Spin to hit all nearby foes.' },
+                { ...warriorSkills.berserk, name: 'Berserk', description: 'Increase attack power.' },
+                { ...warriorSkills.bloodthirst, name: 'Bloodthirst', description: 'Attack that heals you.' },
+            ],
         },
     };
 
@@ -121,20 +187,40 @@ export default function MatchesPage() {
         <>
             {selectedClassPreview && (
                 <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center">
-                    <div className="bg-gray-600 rounded-xl p-6 w-[300px] shadow-xl flex flex-col items-center">
+                    <div className="bg-gray-800 border border-yellow-700 rounded-xl p-6 w-[360px] shadow-2xl flex flex-col items-center text-white">
                         <Image
                             src={classOptions[selectedClassPreview].icon}
                             alt={classOptions[selectedClassPreview].label}
                             width={120}
                             height={120}
                         />
-                        <h3 className="text-lg font-semibold mt-2">{classOptions[selectedClassPreview].label}</h3>
-                        <p className="text-sm text-white mt-2 mb-4 text-center">
-                            {selectedClassPreview === "mage" && "Master of arcane magic and spells."}
-                            {selectedClassPreview === "warlock" && "asdasdasdasd."}
-                            {selectedClassPreview === "paladin" && "Hasdasdasdasd."}
-                        </p>
-                        <div className="flex gap-2">
+                        <h3 className="text-xl font-bold text-yellow-300 mt-2">{classOptions[selectedClassPreview].label}</h3>
+                        <p className="text-sm text-center mt-1">{classOptions[selectedClassPreview].description}</p>
+                        {selectedStats && (
+                            <div className="mt-4 w-full">
+                                <h4 className="text-yellow-400 text-sm font-semibold mb-1">Stats</h4>
+                                <ul className="text-xs pl-4 list-disc">
+                                    <li>HP: {selectedStats.hp}</li>
+                                    <li>Mana: {selectedStats.mana}</li>
+                                    <li>Armor: {selectedStats.armor}</li>
+                                </ul>
+                            </div>
+                        )}
+                        <div className="mt-4 w-full">
+                            <h4 className="text-yellow-400 text-sm font-semibold mb-1">Skills</h4>
+                            <div className="grid grid-cols-2 gap-2">
+                                {classOptions[selectedClassPreview].skills.map((sk) => (
+                                    <div key={sk.id} className="flex gap-2 items-start">
+                                        <Image src={sk.icon} alt={sk.name} width={32} height={32} />
+                                        <div className="text-xs">
+                                            <div className="font-semibold">{sk.name}</div>
+                                            <div className="text-[10px] text-gray-300">{sk.description}</div>
+                                        </div>
+                                    </div>
+                                ))}
+                            </div>
+                        </div>
+                        <div className="flex gap-2 mt-6">
                             <Button onPress={() => {
                                 setClassType(selectedClassPreview);
                                 setSelectedClassPreview(null);
@@ -182,10 +268,11 @@ export default function MatchesPage() {
                                     <button
                                         key={value}
                                         onClick={() => setSelectedClassPreview(value)}
-                                        className="flex flex-col items-center p-2"
+                                        className="flex flex-col items-center justify-center p-2"
                                     >
                                         <Image src={opt.icon} alt={opt.label} width={180} height={180} />
                                         <span className="text-xs mt-1">{opt.label}</span>
+                                        <span className="text-[10px] text-gray-300">{opt.type}</span>
                                     </button>
                                 ))}
                             </div>
