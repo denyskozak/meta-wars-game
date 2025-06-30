@@ -3,6 +3,8 @@ import {useWS} from "@/hooks/useWS";
 import {useCallback, useEffect, useMemo, useState} from "react";
 import Image from "next/image";
 import {Button, Table, TableHeader, TableColumn, TableBody, TableRow, TableCell} from "@heroui/react";
+import {Modal, ModalContent, ModalHeader, ModalBody, ModalFooter} from "@heroui/modal";
+import {Kbd} from "@heroui/kbd";
 import {useParams, useRouter} from "next/navigation";
 import {Navbar} from "@/components/navbar";
 import {useInterface} from "@/context/inteface";
@@ -185,51 +187,78 @@ export default function MatchesPage() {
 
     return (
         <>
-            {selectedClassPreview && (
-                <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center">
-                    <div className="bg-gray-800 border border-yellow-700 rounded-xl p-6 w-[360px] shadow-2xl flex flex-col items-center text-white">
-                        <Image
-                            src={classOptions[selectedClassPreview].icon}
-                            alt={classOptions[selectedClassPreview].label}
-                            width={120}
-                            height={120}
-                        />
-                        <h3 className="text-xl font-bold text-yellow-300 mt-2">{classOptions[selectedClassPreview].label}</h3>
-                        <p className="text-sm text-center mt-1">{classOptions[selectedClassPreview].description}</p>
-                        {selectedStats && (
-                            <div className="mt-4 w-full">
-                                <h4 className="text-yellow-400 text-sm font-semibold mb-1">Stats</h4>
-                                <ul className="text-xs pl-4 list-disc">
-                                    <li>HP: {selectedStats.hp}</li>
-                                    <li>Mana: {selectedStats.mana}</li>
-                                    <li>Armor: {selectedStats.armor}</li>
-                                </ul>
-                            </div>
-                        )}
-                        <div className="mt-4 w-full">
-                            <h4 className="text-yellow-400 text-sm font-semibold mb-1">Skills</h4>
-                            <div className="grid grid-cols-2 gap-2">
-                                {classOptions[selectedClassPreview].skills.map((sk) => (
-                                    <div key={sk.id} className="flex gap-2 items-start">
-                                        <Image src={sk.icon} alt={sk.name} width={32} height={32} />
-                                        <div className="text-xs">
-                                            <div className="font-semibold">{sk.name}</div>
-                                            <div className="text-[10px] text-gray-300">{sk.description}</div>
+            <Modal
+                isOpen={Boolean(selectedClassPreview)}
+                onOpenChange={(open) => {
+                    if (!open) setSelectedClassPreview(null);
+                }}
+            >
+                <ModalContent>
+                    {(onClose) => (
+                        selectedClassPreview && (
+                            <>
+                                <ModalHeader className="flex flex-col items-center gap-2">
+                                    <Image
+                                        src={classOptions[selectedClassPreview].icon}
+                                        alt={classOptions[selectedClassPreview].label}
+                                        width={120}
+                                        height={120}
+                                    />
+                                    <h3 className="text-xl font-bold text-yellow-300">
+                                        {classOptions[selectedClassPreview].label}
+                                    </h3>
+                                </ModalHeader>
+                                <ModalBody className="text-white">
+                                    <p className="text-sm text-center mt-1">
+                                        {classOptions[selectedClassPreview].description}
+                                    </p>
+                                    {selectedStats && (
+                                        <div className="mt-4 w-full">
+                                            <h4 className="text-yellow-400 text-sm font-semibold mb-1">Stats</h4>
+                                            <ul className="text-xs pl-4 list-disc">
+                                                <li>HP: {selectedStats.hp}</li>
+                                                <li>Mana: {selectedStats.mana}</li>
+                                                <li>Armor: {selectedStats.armor}</li>
+                                            </ul>
+                                        </div>
+                                    )}
+                                    <div className="mt-4 w-full">
+                                        <h4 className="text-yellow-400 text-sm font-semibold mb-1">Skills</h4>
+                                        <div className="grid grid-cols-2 gap-2">
+                                            {classOptions[selectedClassPreview].skills.map((sk) => (
+                                                <div key={sk.id} className="flex gap-2 items-start">
+                                                    <Image src={sk.icon} alt={sk.name} width={32} height={32} />
+                                                    <div className="text-xs">
+                                                        <div className="font-semibold flex items-center gap-1">
+                                                            {sk.name}
+                                                            <Kbd>{sk.key}</Kbd>
+                                                        </div>
+                                                        <div className="text-[10px] text-gray-300">{sk.description}</div>
+                                                    </div>
+                                                </div>
+                                            ))}
                                         </div>
                                     </div>
-                                ))}
-                            </div>
-                        </div>
-                        <div className="flex gap-2 mt-6">
-                            <Button onPress={() => {
-                                setClassType(selectedClassPreview);
-                                setSelectedClassPreview(null);
-                            }} color="success">Select</Button>
-                            <Button onPress={() => setSelectedClassPreview(null)} color="secondary">Cancel</Button>
-                        </div>
-                    </div>
-                </div>
-            )}
+                                </ModalBody>
+                                <ModalFooter className="flex gap-2">
+                                    <Button
+                                        onPress={() => {
+                                            setClassType(selectedClassPreview);
+                                            onClose();
+                                        }}
+                                        color="success"
+                                    >
+                                        Select
+                                    </Button>
+                                    <Button onPress={onClose} color="secondary">
+                                        Cancel
+                                    </Button>
+                                </ModalFooter>
+                            </>
+                        )
+                    )}
+                </ModalContent>
+            </Modal>
 
             <div className="h-full">
                 <Navbar/>
