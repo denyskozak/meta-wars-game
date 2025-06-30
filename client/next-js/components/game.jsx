@@ -253,12 +253,45 @@ export function Game({models, sounds, textures, matchId, character}) {
         let leftMouseButtonClicked = false;
 
         let meleeRangeIndicator = null;
-        const MELEE_INDICATOR_OPACITY = 0.4; // transparency for the auto attack indicator
+        const MELEE_INDICATOR_OPACITY = 0.2; // transparency for the auto attack indicator
 
         const createMeleeIndicator = () => {
             const group = new THREE.Group();
             const start = Math.PI / 2 - MELEE_ANGLE / 2;
-            const geo = new THREE.RingGeometry(0, MELEE_RANGE_ATTACK, 32, 1, start, MELEE_ANGLE);
+            const end = start + MELEE_ANGLE;
+            const cornerRadius = MELEE_RANGE_ATTACK * 0.1; // slight rounding
+
+            const p0 = new THREE.Vector2(0, 0);
+            const p1 = new THREE.Vector2(Math.cos(start) * MELEE_RANGE_ATTACK, Math.sin(start) * MELEE_RANGE_ATTACK);
+            const p2 = new THREE.Vector2(Math.cos(end) * MELEE_RANGE_ATTACK, Math.sin(end) * MELEE_RANGE_ATTACK);
+
+            const off0To1 = p0.clone().add(p1.clone().sub(p0).normalize().multiplyScalar(cornerRadius));
+            const off1From0 = p1.clone().add(p0.clone().sub(p1).normalize().multiplyScalar(cornerRadius));
+            const off1To2 = p1.clone().add(p2.clone().sub(p1).normalize().multiplyScalar(cornerRadius));
+            const off2From1 = p2.clone().add(p1.clone().sub(p2).normalize().multiplyScalar(cornerRadius));
+            const off2To0 = p2.clone().add(p0.clone().sub(p2).normalize().multiplyScalar(cornerRadius));
+            const off0From2 = p0.clone().add(p2.clone().sub(p0).normalize().multiplyScalar(cornerRadius));
+
+            const shape = new THREE.Shape();
+            shape.moveTo(off0To1.x, off0To1.y);
+            shape.lineTo(off1From0.x, off1From0.y);
+            shape.absarc(p1.x, p1.y, cornerRadius,
+                Math.atan2(off1From0.y - p1.y, off1From0.x - p1.x),
+                Math.atan2(off1To2.y - p1.y, off1To2.x - p1.x),
+                false);
+            shape.lineTo(off2From1.x, off2From1.y);
+            shape.absarc(p2.x, p2.y, cornerRadius,
+                Math.atan2(off2From1.y - p2.y, off2From1.x - p2.x),
+                Math.atan2(off2To0.y - p2.y, off2To0.x - p2.x),
+                false);
+            shape.lineTo(off0From2.x, off0From2.y);
+            shape.absarc(p0.x, p0.y, cornerRadius,
+                Math.atan2(off0From2.y - p0.y, off0From2.x - p0.x),
+                Math.atan2(off0To1.y - p0.y, off0To1.x - p0.x),
+                false);
+            shape.closePath();
+
+            const geo = new THREE.ShapeGeometry(shape);
             const mat = new THREE.MeshBasicMaterial({
                 color: 0xffff00,
                 transparent: true,
@@ -267,8 +300,8 @@ export function Game({models, sounds, textures, matchId, character}) {
                 depthWrite: false,
                 blending: THREE.AdditiveBlending,
             });
-            const wedge = new THREE.Mesh(geo, mat);
-            group.add(wedge);
+            const triangle = new THREE.Mesh(geo, mat);
+            group.add(triangle);
 
             group.rotation.x = Math.PI / 2;
             group.position.y = 0.05;
