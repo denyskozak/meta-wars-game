@@ -296,7 +296,7 @@ export function Game({models, sounds, textures, matchId, character}) {
             playerData.model = newModel;
             if (!meleeRangeIndicator) {
                 const geo = new THREE.RingGeometry(
-                    MELEE_RANGE_ATTACK - 0.05,
+                    0,
                     MELEE_RANGE_ATTACK,
                     32,
                     1,
@@ -304,7 +304,7 @@ export function Game({models, sounds, textures, matchId, character}) {
                     MELEE_ANGLE,
                 );
                 const mat = new THREE.MeshBasicMaterial({
-                    color: 0xff0000,
+                    color: 0xffff00,
                     transparent: true,
                     opacity: 0.4,
                     side: THREE.DoubleSide,
@@ -3442,14 +3442,14 @@ export function Game({models, sounds, textures, matchId, character}) {
                 scene.add(player);
                 if (id === myPlayerId) {
                     const geo = new THREE.RingGeometry(
-                        MELEE_RANGE_ATTACK - 0.05,
+                        0,
                         MELEE_RANGE_ATTACK,
                         32,
                         1,
                         Math.PI / 2 - MELEE_ANGLE / 2,
                         MELEE_ANGLE,
                     );
-                    const mat = new THREE.MeshBasicMaterial({ color: 0xff0000, transparent: true, opacity: 0.4, side: THREE.DoubleSide });
+                    const mat = new THREE.MeshBasicMaterial({ color: 0xffff00, transparent: true, opacity: 0.4, side: THREE.DoubleSide });
                     meleeRangeIndicator = new THREE.Mesh(geo, mat);
                     meleeRangeIndicator.rotation.x = Math.PI / 2;
                     // Ensure indicator faces the player's forward direction
