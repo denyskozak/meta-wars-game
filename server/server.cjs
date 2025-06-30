@@ -396,9 +396,8 @@ function applyDamage(match, victimId, dealerId, damage, spellType) {
         });
     }
 
-    const absorbed = Math.min(victim.armor, totalDamage);
-    victim.armor -= absorbed;
-    totalDamage -= absorbed;
+    const reduction = victim.armor / 200; // 100 armor = 50% damage reduction
+    totalDamage = totalDamage * Math.max(0, 1 - reduction);
     victim.hp = Math.max(0, victim.hp - totalDamage);
     if (victim.hp <= 0) {
         victim.deaths++;
