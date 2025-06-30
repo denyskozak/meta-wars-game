@@ -19,6 +19,8 @@ interface PlayerSummary {
   id: number;
   kills: number;
   deaths: number;
+  assists: number;
+  damage: number;
   reward: string;
   coins: number;
   item?: { class: string; skin: string } | null;
@@ -63,6 +65,8 @@ export default function MatchSummaryPage() {
               <TableColumn>Player</TableColumn>
               <TableColumn>Kills</TableColumn>
               <TableColumn>Deaths</TableColumn>
+              <TableColumn>Assists</TableColumn>
+              <TableColumn>Damage</TableColumn>
               <TableColumn>Reward</TableColumn>
               <TableColumn>Coins</TableColumn>
               <TableColumn>Item</TableColumn>
@@ -74,6 +78,8 @@ export default function MatchSummaryPage() {
                   <TableCell>{`Player ${p.id}`}</TableCell>
                   <TableCell>{p.kills}</TableCell>
                   <TableCell>{p.deaths}</TableCell>
+                  <TableCell>{p.assists}</TableCell>
+                  <TableCell>{p.damage}</TableCell>
                   <TableCell>{p.reward}</TableCell>
                   <TableCell>{p.coins}</TableCell>
                   <TableCell>

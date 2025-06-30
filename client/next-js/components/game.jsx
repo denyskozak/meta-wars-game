@@ -4245,6 +4245,8 @@ export function Game({models, sounds, textures, matchId, character}) {
                         id: Number(id),
                         kills: p.kills,
                         deaths: p.deaths,
+                        assists: p.assists,
+                        damage: Math.floor(p.damage || 0),
                         points: p.points,
                         level: p.level,
                     }));
