@@ -1,6 +1,6 @@
 import { SPELL_COST } from '../../consts';
 
-export const meta = { id: 'lifetap', key: 'Q', icon: '/icons/classes/warlock/spell_immolation.jpg' };
+export const meta = { id: 'lifetap', key: 'Q', icon: '/icons/classes/warlock/spell_shadow_burningspirit.jpg' };
 
 export default function castLifeTap({
   playerId,

@@ -313,11 +313,18 @@ export function Game({models, sounds, textures, matchId, character}) {
             scene.remove(oldModel);
             scene.add(newModel);
             playerData.model = newModel;
-            if (!meleeRangeIndicator) {
-                meleeRangeIndicator = createMeleeIndicator();
+            const cls = playerData.classType;
+            const allowed = ['paladin', 'warrior', 'rogue'];
+            if (allowed.includes(cls)) {
+                if (!meleeRangeIndicator) {
+                    meleeRangeIndicator = createMeleeIndicator();
+                }
+                newModel.add(meleeRangeIndicator);
+                meleeRangeIndicator.scale.setScalar(1 / currentScale);
+            } else if (meleeRangeIndicator) {
+                meleeRangeIndicator.parent?.remove(meleeRangeIndicator);
+                meleeRangeIndicator = null;
             }
-            newModel.add(meleeRangeIndicator);
-            meleeRangeIndicator.scale.setScalar(1 / currentScale);
         };
 
         window.addEventListener('DEV_SCALE_CHANGE', handleScaleChange);
@@ -3442,7 +3449,10 @@ export function Game({models, sounds, textures, matchId, character}) {
 
 
                 scene.add(player);
-                if (id === myPlayerId) {
+                if (
+                    id === myPlayerId &&
+                    ['paladin', 'warrior', 'rogue'].includes(classType)
+                ) {
                     meleeRangeIndicator = createMeleeIndicator();
                     meleeRangeIndicator.scale.setScalar(1 / currentScale);
                     player.add(meleeRangeIndicator);
