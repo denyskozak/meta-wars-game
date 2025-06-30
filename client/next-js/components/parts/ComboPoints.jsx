@@ -14,8 +14,8 @@ export const ComboPoints = () => {
                     key={idx}
                     src="/icons/classes/rogue/combo_point.jpg"
                     alt="Combo Point"
-                    width={16}
-                    height={16}
+                    width={24}
+                    height={24}
                     className={idx < count ? 'active' : ''}
                 />
             ))}

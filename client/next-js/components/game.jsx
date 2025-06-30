@@ -255,6 +255,40 @@ export function Game({models, sounds, textures, matchId, character}) {
         let meleeRangeIndicator = null;
         const MELEE_INDICATOR_OPACITY = 0.4; // transparency for the auto attack indicator
 
+        const createMeleeIndicator = () => {
+            const group = new THREE.Group();
+            const start = Math.PI / 2 - MELEE_ANGLE / 2;
+            const geo = new THREE.RingGeometry(0, MELEE_RANGE_ATTACK, 32, 1, start, MELEE_ANGLE);
+            const mat = new THREE.MeshBasicMaterial({
+                color: 0xffff00,
+                transparent: true,
+                opacity: MELEE_INDICATOR_OPACITY,
+                side: THREE.DoubleSide,
+            });
+            const wedge = new THREE.Mesh(geo, mat);
+            group.add(wedge);
+
+            const cornerRadius = MELEE_RANGE_ATTACK * 0.1;
+            const cornerGeo = new THREE.CircleGeometry(cornerRadius, 16);
+            const leftCorner = new THREE.Mesh(cornerGeo, mat);
+            leftCorner.position.set(
+                MELEE_RANGE_ATTACK * Math.cos(start),
+                MELEE_RANGE_ATTACK * Math.sin(start),
+                0,
+            );
+            const rightCorner = new THREE.Mesh(cornerGeo, mat);
+            rightCorner.position.set(
+                MELEE_RANGE_ATTACK * Math.cos(start + MELEE_ANGLE),
+                MELEE_RANGE_ATTACK * Math.sin(start + MELEE_ANGLE),
+                0,
+            );
+            group.add(leftCorner);
+            group.add(rightCorner);
+            group.rotation.x = -Math.PI / 2;
+            group.position.y = 0.05;
+            return group;
+        };
+
         let movementSpeedModifier = 1; // Normal speed
 
         const damageBar = document.getElementById("damage");
@@ -296,25 +330,7 @@ export function Game({models, sounds, textures, matchId, character}) {
             scene.add(newModel);
             playerData.model = newModel;
             if (!meleeRangeIndicator) {
-                const geo = new THREE.RingGeometry(
-                    0,
-                    MELEE_RANGE_ATTACK,
-                    32,
-                    1,
-                    Math.PI / 2 - MELEE_ANGLE / 2,
-                    MELEE_ANGLE,
-                );
-                const mat = new THREE.MeshBasicMaterial({
-                    color: 0xffff00,
-                    transparent: true,
-                    opacity: MELEE_INDICATOR_OPACITY,
-                    side: THREE.DoubleSide,
-                });
-                meleeRangeIndicator = new THREE.Mesh(geo, mat);
-                meleeRangeIndicator.rotation.x = -Math.PI / 2;
-                // Ensure indicator faces the player's forward direction
-                meleeRangeIndicator.rotation.y = 0;
-                meleeRangeIndicator.position.y = 0.05;
+                meleeRangeIndicator = createMeleeIndicator();
             }
             newModel.add(meleeRangeIndicator);
             meleeRangeIndicator.scale.setScalar(1 / currentScale);
@@ -830,9 +846,9 @@ export function Game({models, sounds, textures, matchId, character}) {
         const FROSTNOVA_RING_DURATION = 1000; // ms
         const LIGHTWAVE_RING_DURATION = 1000; // ms
         const LIGHTSTRIKE_DAMAGE = 34; // increased for warrior/paladin/rogue E
-        // Slightly increased to improve melee reliability
-        // Increase melee range by 25%
-        const MELEE_RANGE_ATTACK = 2.125; // melee range
+        // Melee range for auto attacks
+        // Reduced by 30% for better balance
+        const MELEE_RANGE_ATTACK = 1.49; // melee range
         // Melee arc in radians (120 degrees)
         const MELEE_ANGLE = (120 * Math.PI) / 180;
         const LIGHTWAVE_DAMAGE = 40;
@@ -3443,20 +3459,7 @@ export function Game({models, sounds, textures, matchId, character}) {
 
                 scene.add(player);
                 if (id === myPlayerId) {
-                    const geo = new THREE.RingGeometry(
-                        0,
-                        MELEE_RANGE_ATTACK,
-                        32,
-                        1,
-                        Math.PI / 2 - MELEE_ANGLE / 2,
-                        MELEE_ANGLE,
-                    );
-                    const mat = new THREE.MeshBasicMaterial({ color: 0xffff00, transparent: true, opacity: MELEE_INDICATOR_OPACITY, side: THREE.DoubleSide });
-                    meleeRangeIndicator = new THREE.Mesh(geo, mat);
-                    meleeRangeIndicator.rotation.x = Math.PI / 2;
-                    // Ensure indicator faces the player's forward direction
-                    meleeRangeIndicator.rotation.y = 0;
-                    meleeRangeIndicator.position.y = 0.05;
+                    meleeRangeIndicator = createMeleeIndicator();
                     meleeRangeIndicator.scale.setScalar(1 / currentScale);
                     player.add(meleeRangeIndicator);
                 }
