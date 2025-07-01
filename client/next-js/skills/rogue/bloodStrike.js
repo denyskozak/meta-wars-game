@@ -27,14 +27,7 @@ export default function castBloodStrike({
     }
     return;
   }
-  const targetId = getTargetPlayer?.();
-  if (!targetId) {
-    dispatch?.({ type: 'SEND_CHAT_MESSAGE', payload: `No target for blood strike!` });
-    sounds?.noTarget?.play?.();
-    return;
-  }
-
-  sendToSocket({ type: 'CAST_SPELL', payload: { type: 'blood-strike', targetId } });
+  sendToSocket({ type: 'CAST_SPELL', payload: { type: 'blood-strike' } });
   activateGlobalCooldown();
   startSkillCooldown('blood-strike');
 }

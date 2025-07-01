@@ -23,7 +23,8 @@ const CLASS_STATS = require('../client/next-js/consts/classStats.json');
 const ADRENALINE_RUSH_ICON = '/icons/classes/rogue/adrenalinerush.jpg';
 const RAGE_ICON = '/icons/classes/warrior/rage.jpg';
 const MELEE_RANGE = 2.125;
-const LIGHTSTRIKE_DAMAGE = 35; // reduced by 15%
+const MELEE_ANGLE = (132 * Math.PI) / 180;
+const LIGHTSTRIKE_DAMAGE = 41; // increased by 20%
 const BLADESTORM_DAMAGE = 32;
 
 function withinMeleeRange(a, b) {
@@ -32,6 +33,17 @@ function withinMeleeRange(a, b) {
     const dy = a.position.y - b.position.y;
     const dz = a.position.z - b.position.z;
     return Math.sqrt(dx*dx + dy*dy + dz*dz) < MELEE_RANGE;
+}
+
+function withinMeleeCone(a, b) {
+    if (!withinMeleeRange(a, b)) return false;
+    const angleToTarget = Math.atan2(
+        b.position.x - a.position.x,
+        b.position.z - a.position.z
+    );
+    let diff = Math.abs(angleToTarget - (a.rotation?.y || 0));
+    if (diff > Math.PI) diff = Math.abs(diff - 2 * Math.PI);
+    return diff < MELEE_ANGLE;
 }
 
 function updateLevel(player) {
@@ -259,8 +271,7 @@ function createPlayer(address, classType, character) {
         armor: stats.armor,
         maxArmor: stats.armor,
         mana: MAX_MANA,
-        comboPoints: 0,
-        comboTarget: null,
+        comboPoints: classType === 'rogue' ? 0 : undefined,
         chests: [],
         address,
         classType,
@@ -928,20 +939,44 @@ ws.on('connection', (socket) => {
                             });
 
                         }
-                        if (message.payload.type === 'blood-strike' && message.payload.targetId) {
-                            const target = match.players.get(message.payload.targetId);
-                            if (target && withinMeleeRange(player, target)) {
-                                if (player.comboTarget && player.comboTarget !== message.payload.targetId) {
-                                    player.comboPoints = 0;
-                                    player.buffs = player.buffs.filter(b => b.type !== 'combo');
+                        if (message.payload.type === 'blood-strike') {
+                            const candidates = [];
+                            match.players.forEach((p, tid) => {
+                                if (tid === id) return;
+                                if (withinMeleeCone(player, p)) {
+                                    const dx = p.position.x - player.position.x;
+                                    const dy = p.position.y - player.position.y;
+                                    const dz = p.position.z - player.position.z;
+                                    const dist = Math.sqrt(dx*dx + dy*dy + dz*dz);
+                                    candidates.push({ id: tid, player: p, dist });
                                 }
-                                player.comboTarget = message.payload.targetId;
+                            });
+                            candidates.sort((a, b) => a.dist - b.dist);
+                            if (player.classType === 'rogue' && candidates.length) {
                                 player.comboPoints = Math.min(5, (player.comboPoints || 0) + 1);
                                 const comboBuff = player.buffs.find(b => b.type === 'combo');
                                 if (comboBuff) comboBuff.stacks = player.comboPoints;
                                 else player.buffs.push({ type: 'combo', stacks: player.comboPoints, icon: COMBO_ICON });
-                                applyDamage(match, target.id, id, LIGHTSTRIKE_DAMAGE, 'blood-strike');
                             }
+                            candidates.forEach(c => {
+                                applyDamage(match, c.id, id, LIGHTSTRIKE_DAMAGE, 'blood-strike');
+                            });
+                        }
+                        if (message.payload.type === 'savage-blow') {
+                            match.players.forEach((p, tid) => {
+                                if (tid === id) return;
+                                if (withinMeleeCone(player, p)) {
+                                    applyDamage(match, tid, id, LIGHTSTRIKE_DAMAGE, 'savage-blow');
+                                }
+                            });
+                        }
+                        if (message.payload.type === 'lightstrike') {
+                            match.players.forEach((p, tid) => {
+                                if (tid === id) return;
+                                if (withinMeleeCone(player, p)) {
+                                    applyDamage(match, tid, id, LIGHTSTRIKE_DAMAGE, 'lightstrike');
+                                }
+                            });
                         }
                         if (message.payload.type === 'eviscerate' && message.payload.targetId) {
                             const target = match.players.get(message.payload.targetId);
@@ -953,13 +988,11 @@ ws.on('connection', (socket) => {
                             }
                             if (target) {
                                 player.comboPoints = 0;
-                                player.comboTarget = null;
                                 player.buffs = player.buffs.filter(b => b.type !== 'combo');
                             }
                         }
                         if (message.payload.type === 'shadow-leap') {
                             player.comboPoints = Math.min(5, (player.comboPoints || 0) + 1);
-                            player.comboTarget = message.payload.targetId || player.comboTarget;
                             const comboBuff = player.buffs.find(b => b.type === 'combo');
                             if (comboBuff) comboBuff.stacks = player.comboPoints;
                             else player.buffs.push({ type: 'combo', stacks: player.comboPoints, icon: COMBO_ICON });
@@ -975,7 +1008,6 @@ ws.on('connection', (socket) => {
                                     icon: '/icons/classes/rogue/kidneyshot.jpg'
                                 });
                                 player.comboPoints = 0;
-                                player.comboTarget = null;
                                 player.buffs = player.buffs.filter(b => b.type !== 'combo');
                             }
                         }
