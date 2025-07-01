@@ -59,7 +59,7 @@ export default function Home() {
       {/*      </Snippet>*/}
       {/*  </div>*/}
       <div className="absolute bottom-8 left-1/2 transform -translate-x-1/2 z-[2] flex flex-col items-center">
-        <span className="text-medium">сделанно на</span>
+        <span className="text-medium">Made on</span>
         <Image
           alt="Sui logo"
           height={200}

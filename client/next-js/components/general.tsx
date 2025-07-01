@@ -73,6 +73,7 @@ export default function General() {
               exit={{ opacity: 0, y: -10 }}
               initial={{ opacity: 0, y: 10 }}
               transition={{ duration: 0.5 }}
+              className="backdrop-blur-sm p-4 rounded-lg"
             >
               <span className={getTitle({ color: "cyan" })}>
                 {slides[index].titles[0]}
