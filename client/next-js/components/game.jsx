@@ -292,8 +292,8 @@ export function Game({models, sounds, textures, matchId, character}) {
 
             const shape = new THREE.Shape();
             shape.moveTo(0, 0);
-            shape.lineTo(Math.cos(start) * MELEE_RANGE_ATTACK, Math.sin(start) * MELEE_RANGE_ATTACK);
-            shape.lineTo(Math.cos(end) * MELEE_RANGE_ATTACK, Math.sin(end) * MELEE_RANGE_ATTACK);
+            shape.lineTo(Math.cos(start) * MELEE_INDICATOR_RANGE, Math.sin(start) * MELEE_INDICATOR_RANGE);
+            shape.lineTo(Math.cos(end) * MELEE_INDICATOR_RANGE, Math.sin(end) * MELEE_INDICATOR_RANGE);
             shape.closePath();
 
             const geo = new THREE.ShapeGeometry(shape);
@@ -878,10 +878,11 @@ export function Game({models, sounds, textures, matchId, character}) {
         const FROSTNOVA_RING_DURATION = 1000; // ms
         const LIGHTWAVE_RING_DURATION = 1000; // ms
         const LIGHTSTRIKE_DAMAGE = 41; // 20% more damage for warrior/paladin/rogue E
-        // Melee range for auto attacks
-        // Reduced by 30% for better balance
-        // Slightly increased range and angle (10%)
-        const MELEE_RANGE_ATTACK = 1.639; // melee range
+        // Melee range for auto attacks and melee abilities
+        // Keep in sync with server constant MELEE_RANGE
+        const MELEE_RANGE_ATTACK = 2.125; // melee range
+        // Slightly extend the visual indicator so it matches perceived reach
+        const MELEE_INDICATOR_RANGE = MELEE_RANGE_ATTACK * 1.1;
         // Melee arc in radians (~132 degrees)
         const MELEE_ANGLE = (132 * Math.PI) / 180;
         const LIGHTWAVE_DAMAGE = 40;
