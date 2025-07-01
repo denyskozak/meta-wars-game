@@ -440,6 +440,7 @@ function applyDamage(match, victimId, dealerId, damage, spellType) {
             broadcastToMatch(match.id, {
                 type: 'KILL',
                 killerId: dealerId,
+                victimId,
             });
             if (attacker.kills >= MAX_KILLS && !match.finished) {
                 finalizeMatch(match);
