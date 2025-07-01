@@ -4120,17 +4120,29 @@ export function Game({models, sounds, textures, matchId, character}) {
                         }
                     }
                     break;
-                case "KILL":
-                    if (message.killerId === address) {
+                case "KILL": {
+                    const killer = players.get(message.killerId);
+                    const victim = players.get(message.victimId);
+                    const killerName = killer?.address || `Player ${message.killerId}`;
+                    const victimName = victim?.address || `Player ${message.victimId}`;
+
+                    dispatch({
+                        type: "SEND_CHAT_MESSAGE",
+                        payload: `${killerName} killed ${victimName}`,
+                    });
+
+                    if (message.killerId === myPlayerId) {
                         dispatch({
                             type: "SEND_CHAT_MESSAGE",
-                            payload: `+1 $MetaWars$ Gold for kill ${message?.character?.name}!`,
+                            payload: `+1 $MetaWars$ Gold for kill ${victimName}!`,
                         });
+                        dispatchEvent('player-kill');
                         setTimeout(() => {
                             refetchCoins();
                         }, 500);
                     }
                     break;
+                }
                 case "DAMAGE":
                     if (message.targetId) {
                         showDamage(message.targetId, message.amount, message.spellType);

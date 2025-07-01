@@ -8,6 +8,7 @@ import {Buffs} from "../parts/Buffs";
 import {ComboPoints} from "../parts/ComboPoints";
 import {ExperienceBar} from "../parts/ExperienceBar";
 import {LevelUp} from "../parts/LevelUp";
+import {KillNotification} from "../parts/KillNotification";
 import {StatsModal} from "../parts/StatsModal";
 import {HowToPlayModal} from "../parts/HowToPlayModal";
 import {TargetHelpModal} from "../parts/TargetHelpModal";
@@ -152,6 +153,7 @@ export const Interface = () => {
             <CastBar/>
             <ExperienceBar />
             <LevelUp />
+            <KillNotification />
             <Chat />
         </div>
     )
