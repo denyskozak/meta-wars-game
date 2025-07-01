@@ -26,14 +26,21 @@ export const TargetHelpModal = () => {
 
   useEffect(() => {
     if (!open) return;
-    const handler = (e) => {
+    const keyHandler = (e) => {
       if (e.key === 'Enter' || e.key === ' ') {
         e.preventDefault();
         close();
       }
     };
-    window.addEventListener('keydown', handler);
-    return () => window.removeEventListener('keydown', handler);
+    const clickHandler = () => {
+      close();
+    };
+    window.addEventListener('keydown', keyHandler);
+    window.addEventListener('mousedown', clickHandler);
+    return () => {
+      window.removeEventListener('keydown', keyHandler);
+      window.removeEventListener('mousedown', clickHandler);
+    };
   }, [open, close]);
 
   if (!open) return null;
