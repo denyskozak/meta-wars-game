@@ -2755,8 +2755,8 @@ export function Game({models, sounds, textures, matchId, character}) {
             applyHandEffect(playerId, 'fire', () => {
                 const left = new THREE.Mesh(fireballGeometry, fireballMaterial.clone());
                 const right = new THREE.Mesh(fireballGeometry, fireballMaterial.clone());
-                left.scale.set(100, 100, 100);
-                right.scale.set(100, 100, 100);
+                left.scale.set(200, 200, 200);
+                right.scale.set(200, 200, 200);
                 return {left, right};
             }, duration);
         }
