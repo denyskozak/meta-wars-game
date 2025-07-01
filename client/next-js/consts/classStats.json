@@ -1,7 +1,7 @@
 {
-  "mage": { "hp": 100, "armor": 20 },
-  "warlock": { "hp": 110, "armor": 25 },
-  "paladin": { "hp": 150, "armor": 40 },
-  "rogue": { "hp": 120, "armor": 30 },
-  "warrior": { "hp": 160, "armor": 50 }
+  "mage": { "hp": 130, "armor": 20 },
+  "warlock": { "hp": 143, "armor": 25 },
+  "paladin": { "hp": 195, "armor": 40 },
+  "rogue": { "hp": 156, "armor": 30 },
+  "warrior": { "hp": 208, "armor": 50 }
 }
