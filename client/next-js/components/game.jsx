@@ -3937,7 +3937,8 @@ export function Game({models, sounds, textures, matchId, character}) {
                                     const toMe = me.model.position.clone().sub(origin);
                                     const distance = toMe.length();
                                     if (distance < MELEE_RANGE_ATTACK && forward.angleTo(toMe.normalize()) < MELEE_ANGLE) {
-                                        takeDamage(LIGHTSTRIKE_DAMAGE, message.id, 'blood-strike');
+                                        // damage already applied by server, just play effect
+                                        takeDamage(0, message.id, 'blood-strike');
                                     }
                                 }
 
@@ -4030,7 +4031,8 @@ export function Game({models, sounds, textures, matchId, character}) {
                                     const toMe = me.model.position.clone().sub(origin);
                                     const distance = toMe.length();
                                     if (distance < MELEE_RANGE_ATTACK && forward.angleTo(toMe.normalize()) < MELEE_ANGLE) {
-                                        takeDamage(LIGHTSTRIKE_DAMAGE, message.id, 'savage-blow');
+                                        // damage already applied by server, just play effect
+                                        takeDamage(0, message.id, 'savage-blow');
                                     }
                                 }
                                 lightSword(message.id, 500);
