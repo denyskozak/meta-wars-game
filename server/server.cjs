@@ -226,6 +226,14 @@ const CLASS_MODELS = {
     warrior: 'bolvar',
 };
 
+const CLASS_E_SKILL = {
+    mage: 'fireball',
+    warlock: 'darkball',
+    paladin: 'lightstrike',
+    rogue: 'blood-strike',
+    warrior: 'savage-blow',
+};
+
 function createPlayer(address, classType, character) {
     const spawn = randomSpawnPoint();
     const charName = character || CLASS_MODELS[classType] || 'vampir';
@@ -245,7 +253,7 @@ function createPlayer(address, classType, character) {
         points: 0,
         level: 1,
         skillPoints: 1,
-        learnedSkills: {},
+        learnedSkills: CLASS_E_SKILL[classType] ? { [CLASS_E_SKILL[classType]]: true } : {},
         hp: stats.hp,
         maxHp: stats.hp,
         armor: stats.armor,
