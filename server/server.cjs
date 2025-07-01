@@ -22,8 +22,8 @@ const ROGUE_SPRINT_ICON = '/icons/classes/rogue/sprint.jpg';
 const CLASS_STATS = require('../client/next-js/consts/classStats.json');
 const ADRENALINE_RUSH_ICON = '/icons/classes/rogue/adrenalinerush.jpg';
 const RAGE_ICON = '/icons/classes/warrior/rage.jpg';
-const MELEE_RANGE = 2.125;
-const MELEE_ANGLE = (132 * Math.PI) / 180;
+const MELEE_RANGE = 1.7; // reduced by 20%
+const MELEE_ANGLE = (118.8 * Math.PI) / 180; // reduced by 10%
 const LIGHTSTRIKE_DAMAGE = 41; // increased by 20%
 const BLADESTORM_DAMAGE = 32;
 
