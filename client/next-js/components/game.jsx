@@ -2805,7 +2805,7 @@ export function Game({models, sounds, textures, matchId, character}) {
         }
 
 
-        function applyDamageRuneEffect(playerId, duration = 50000) {
+        function applyDamageRuneEffect(playerId, duration = 15000) {
             const existing = activeDamageEffects.get(playerId);
             if (existing) {
                 existing.parent?.remove(existing);

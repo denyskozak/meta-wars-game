@@ -330,8 +330,8 @@ function checkRunePickup(match, playerId) {
                 case 'damage':
                     player.buffs.push({
                         type: 'damage',
-                        percent: 0.4,
-                        expires: Date.now() + 50000,
+                        percent: 0.1,
+                        expires: Date.now() + 15000,
                         icon: '/icons/rune_power.jpg'
                     });
                     break;
