@@ -1,9 +1,9 @@
 import { useInterface } from "../../context/inteface";
 import { useEffect, useState } from "react";
-import './StatsModal.css';
+import { Modal } from "../modal";
 
 export const StatsModal = () => {
-    const { state: { statsVisible, character } } = useInterface();
+    const { state: { statsVisible, character }, dispatch } = useInterface();
     const [stats, setStats] = useState({hp:0, armor:0, maxHp:0, maxArmor:0});
 
     useEffect(() => {
@@ -21,13 +21,18 @@ export const StatsModal = () => {
         return () => window.removeEventListener('self-update', handler);
     }, []);
 
-    if (!statsVisible) return null;
-
     return (
-        <div className="stats-overlay">
-            <h2 className="stats-title">{character?.classType} stats</h2>
-            <p>HP: {stats.hp} / {stats.maxHp}</p>
-            <p>Armor: {stats.armor} / {stats.maxArmor}</p>
-        </div>
+        <Modal
+            open={statsVisible}
+            title={`${character?.classType || ''} stats`}
+            onChange={(open) => dispatch({ type: 'SET_STATS_VISIBLE', payload: open })}
+            size="sm"
+            actions={[]}
+        >
+            <div className="flex flex-col gap-1">
+                <p>HP: {stats.hp} / {stats.maxHp}</p>
+                <p>Armor: {stats.armor} / {stats.maxArmor}</p>
+            </div>
+        </Modal>
     );
 };
