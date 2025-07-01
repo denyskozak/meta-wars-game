@@ -289,7 +289,7 @@ export function Game({models, sounds, textures, matchId, character}) {
             const group = new THREE.Group();
             const start = Math.PI / 2 - MELEE_ANGLE / 2;
             const end = start + MELEE_ANGLE;
-            const cornerRadius = MELEE_RANGE_ATTACK * 0.1; // slight rounding
+            const cornerRadius = MELEE_RANGE_ATTACK * 0.04; // subtle rounding
 
             const p0 = new THREE.Vector2(0, 0);
             const p1 = new THREE.Vector2(Math.cos(start) * MELEE_RANGE_ATTACK, Math.sin(start) * MELEE_RANGE_ATTACK);
@@ -905,9 +905,10 @@ export function Game({models, sounds, textures, matchId, character}) {
         const LIGHTSTRIKE_DAMAGE = 41; // 20% more damage for warrior/paladin/rogue E
         // Melee range for auto attacks
         // Reduced by 30% for better balance
-        const MELEE_RANGE_ATTACK = 1.49; // melee range
-        // Melee arc in radians (120 degrees)
-        const MELEE_ANGLE = (120 * Math.PI) / 180;
+        // Slightly increased range and angle (10%)
+        const MELEE_RANGE_ATTACK = 1.639; // melee range
+        // Melee arc in radians (~132 degrees)
+        const MELEE_ANGLE = (132 * Math.PI) / 180;
         const LIGHTWAVE_DAMAGE = 40;
         const STUN_SPIN_SPEED = 2;
         const FEAR_SPIN_SPEED = 1.5;
