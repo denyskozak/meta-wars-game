@@ -292,11 +292,9 @@ export function Game({models, sounds, textures, matchId, character}) {
         };
 
         const createMeleeIndicator = () => {
-            const geometry = new THREE.RingGeometry(
-                MELEE_INDICATOR_RANGE * 0.95,
+            const geometry = new THREE.CircleGeometry(
                 MELEE_INDICATOR_RANGE,
                 32,
-                1,
                 Math.PI / 2 - MELEE_ANGLE / 2,
                 MELEE_ANGLE,
             );
