@@ -1946,12 +1946,6 @@ export function Game({models, sounds, textures, matchId, character}) {
         function performBloodStrike() {
             const playerData = players.get(myPlayerId);
             if (!playerData) return;
-            const targetId = getTargetPlayer();
-            if (!targetId) {
-                dispatch({ type: 'SEND_CHAT_MESSAGE', payload: `No target for blood strike!` });
-                sounds?.noTarget?.play?.();
-                return;
-            }
             const { mixer, actions } = playerData;
 
 
@@ -1973,7 +1967,7 @@ export function Game({models, sounds, textures, matchId, character}) {
                 sounds.sinisterStrike.play();
             }
 
-            sendToSocket({ type: 'CAST_SPELL', payload: { type: 'blood-strike', targetId } });
+            sendToSocket({ type: 'CAST_SPELL', payload: { type: 'blood-strike' } });
             activateGlobalCooldown();
             startSkillCooldown('blood-strike');
         }
