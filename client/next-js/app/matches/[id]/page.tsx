@@ -44,32 +44,18 @@ export default function MatchesPage() {
     const [skin, setSkin] = useState('bolvar');
     const [joined, setJoined] = useState(false);
     const classOptions = {
-        mage: {
-            label: 'Mage',
-            icon: '/icons/mage.png',
-            type: 'Ranged',
-            description: 'Master of arcane magic and spells.',
+        warrior: {
+            label: 'Warrior',
+            icon:  '/icons/warrior.webp',
+            type: 'Melee',
+            description: 'Brutal melee fighter with unmatched strength.',
             skills: [
-                { ...mageSkills.fireball, name: 'Fireball', description: 'Hurls a fiery ball.' },
-                { ...mageSkills.iceball, name: 'Iceball', description: 'Launches a chilling bolt.' },
-                { ...mageSkills.frostnova, name: 'Frost Nova', description: 'Freezes enemies around you.' },
-                { ...mageSkills.blink, name: 'Blink', description: 'Teleport a short distance.' },
-                { ...mageSkills.fireblast, name: 'Fireblast', description: 'Instant burst of flame.' },
-                { ...mageSkills.pyroblast, name: 'Pyroblast', description: 'Massive fireball.' },
-            ],
-        },
-        warlock: {
-            label: 'Warlock',
-            icon: '/icons/warlock.webp',
-            type: 'Ranged',
-            description: 'Manipulator of dark magic.',
-            skills: [
-                { ...warlockSkills.darkball, name: 'Darkball', description: 'Shadow bolt dealing damage.' },
-                { ...warlockSkills.corruption, name: 'Corruption', description: 'Inflicts damage over time.' },
-                { ...warlockSkills.lifetap, name: 'Lifetap', description: 'Convert health into mana.' },
-                { ...warlockSkills.chaosbolt, name: 'Chaosbolt', description: 'Unleash chaotic energy.' },
-                { ...warlockSkills.fear, name: 'Fear', description: 'Terrifies the target.' },
-                { ...warlockSkills.lifedrain, name: 'Lifedrain', description: 'Drain health from target.' },
+                { ...warriorSkills.warbringer, name: 'Warbringer', description: 'Charge to an enemy.' },
+                { ...warriorSkills.savageBlow, name: 'Savage Blow', description: 'Powerful melee attack.' },
+                { ...warriorSkills.hamstring, name: 'Hamstring', description: 'Slows the enemy.' },
+                { ...warriorSkills.bladestorm, name: 'Bladestorm', description: 'Spin to hit all nearby foes.' },
+                { ...warriorSkills.berserk, name: 'Berserk', description: 'Increase attack power.' },
+                { ...warriorSkills.bloodthirst, name: 'Bloodthirst', description: 'Attack that heals you.' },
             ],
         },
         paladin: {
@@ -86,7 +72,6 @@ export default function MatchesPage() {
                 { ...paladinSkills.divineSpeed, name: 'Divine Speed', description: 'Boosts movement speed.' },
             ],
         },
-
         rogue: {
             label: 'Rogue',
             icon:  '/icons/rogue.webp',
@@ -101,20 +86,35 @@ export default function MatchesPage() {
                 { ...rogueSkills.adrenalineRush, name: 'Adrenaline Rush', description: 'Greatly boosts attack speed.' },
             ],
         },
-        warrior: {
-            label: 'Warrior',
-            icon:  '/icons/warrior.webp',
-            type: 'Melee',
-            description: 'Brutal melee fighter with unmatched strength.',
+        warlock: {
+            label: 'Warlock',
+            icon: '/icons/warlock.webp',
+            type: 'Ranged',
+            description: 'Manipulator of dark magic.',
             skills: [
-                { ...warriorSkills.warbringer, name: 'Warbringer', description: 'Charge to an enemy.' },
-                { ...warriorSkills.savageBlow, name: 'Savage Blow', description: 'Powerful melee attack.' },
-                { ...warriorSkills.hamstring, name: 'Hamstring', description: 'Slows the enemy.' },
-                { ...warriorSkills.bladestorm, name: 'Bladestorm', description: 'Spin to hit all nearby foes.' },
-                { ...warriorSkills.berserk, name: 'Berserk', description: 'Increase attack power.' },
-                { ...warriorSkills.bloodthirst, name: 'Bloodthirst', description: 'Attack that heals you.' },
+                { ...warlockSkills.darkball, name: 'Darkball', description: 'Shadow bolt dealing damage.' },
+                { ...warlockSkills.corruption, name: 'Corruption', description: 'Inflicts damage over time.' },
+                { ...warlockSkills.lifetap, name: 'Lifetap', description: 'Convert health into mana.' },
+                { ...warlockSkills.chaosbolt, name: 'Chaosbolt', description: 'Unleash chaotic energy.' },
+                { ...warlockSkills.fear, name: 'Fear', description: 'Terrifies the target.' },
+                { ...warlockSkills.lifedrain, name: 'Lifedrain', description: 'Drain health from target.' },
             ],
         },
+        mage: {
+            label: 'Mage',
+            icon: '/icons/mage.png',
+            type: 'Ranged',
+            description: 'Master of arcane magic and spells.',
+            skills: [
+                { ...mageSkills.fireball, name: 'Fireball', description: 'Hurls a fiery ball.' },
+                { ...mageSkills.iceball, name: 'Iceball', description: 'Launches a chilling bolt.' },
+                { ...mageSkills.frostnova, name: 'Frost Nova', description: 'Freezes enemies around you.' },
+                { ...mageSkills.blink, name: 'Blink', description: 'Teleport a short distance.' },
+                { ...mageSkills.fireblast, name: 'Fireblast', description: 'Instant burst of flame.' },
+                { ...mageSkills.pyroblast, name: 'Pyroblast', description: 'Massive fireball.' },
+            ],
+        },
+
     };
 
     console.log("players: ", players);
