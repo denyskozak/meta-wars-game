@@ -292,18 +292,12 @@ export function Game({models, sounds, textures, matchId, character}) {
         };
 
         const createMeleeIndicator = () => {
-            const group = new THREE.Group();
-            const start = Math.PI / 2 - MELEE_ANGLE / 2;
-            const end = start + MELEE_ANGLE;
-
-            const shape = new THREE.Shape();
-            shape.moveTo(0, 0);
-            shape.lineTo(Math.cos(start) * MELEE_INDICATOR_RANGE, Math.sin(start) * MELEE_INDICATOR_RANGE);
-            shape.lineTo(Math.cos(end) * MELEE_INDICATOR_RANGE, Math.sin(end) * MELEE_INDICATOR_RANGE);
-            shape.closePath();
-
-            const geo = new THREE.ShapeGeometry(shape);
-            const mat = new THREE.MeshBasicMaterial({
+            const geometry = new THREE.RingGeometry(
+                Math.max(MELEE_INDICATOR_RANGE - 0.1, 0),
+                MELEE_INDICATOR_RANGE,
+                32,
+            );
+            const material = new THREE.MeshBasicMaterial({
                 color: 0xffff00,
                 transparent: true,
                 opacity: MELEE_INDICATOR_OPACITY,
@@ -311,12 +305,10 @@ export function Game({models, sounds, textures, matchId, character}) {
                 depthWrite: false,
                 blending: THREE.AdditiveBlending,
             });
-            const triangle = new THREE.Mesh(geo, mat);
-            group.add(triangle);
-
-            group.rotation.x = Math.PI / 2;
-            group.position.y = 0.05;
-            return group;
+            const mesh = new THREE.Mesh(geometry, material);
+            mesh.rotation.x = Math.PI / 2;
+            mesh.position.y = 0.05;
+            return mesh;
         };
 
         let movementSpeedModifier = 1; // Normal speed
