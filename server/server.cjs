@@ -21,6 +21,7 @@ const COMBO_ICON = '/icons/classes/rogue/combo_point.jpg';
 const ROGUE_SPRINT_ICON = '/icons/classes/rogue/sprint.jpg';
 const CLASS_STATS = require('../client/next-js/consts/classStats.json');
 const ADRENALINE_RUSH_ICON = '/icons/classes/rogue/adrenalinerush.jpg';
+const RAGE_ICON = '/icons/classes/warrior/rage.jpg';
 const MELEE_RANGE = 2.125;
 const LIGHTSTRIKE_DAMAGE = 41; // increased by 20%
 const BLADESTORM_DAMAGE = 32;
@@ -410,8 +411,13 @@ function applyDamage(match, victimId, dealerId, damage, spellType) {
     if (attacker && attacker.buffs.length) {
         const now = Date.now();
         attacker.buffs.forEach(buff => {
-            if (buff.type === 'damage' && (buff.expires === undefined || buff.expires > now)) {
-                if (typeof buff.percent === 'number') {
+            if ((buff.type === 'damage' || buff.type === 'rage') && (buff.expires === undefined || buff.expires > now)) {
+                if (buff.type === 'rage') {
+                    const stacks = buff.stacks || 0;
+                    if (stacks > 0) {
+                        totalDamage += totalDamage * 0.03 * stacks;
+                    }
+                } else if (typeof buff.percent === 'number') {
                     totalDamage += totalDamage * buff.percent;
                 } else if (typeof buff.bonus === 'number') {
                     totalDamage += buff.bonus;
@@ -473,6 +479,30 @@ function applyDamage(match, victimId, dealerId, damage, spellType) {
             playerId: victimId,
             position: spawn,
             rotation: { y: spawn.yaw || 0 },
+        });
+    }
+
+    if (attacker && dealerId !== victimId && attacker.classType === 'warrior') {
+        const now = Date.now();
+        let rageBuff = attacker.buffs.find(b => b.type === 'rage');
+        if (rageBuff && rageBuff.expires > now) {
+            rageBuff.stacks = Math.min(5, (rageBuff.stacks || 0) + 1);
+            rageBuff.expires = now + 5000;
+        } else {
+            attacker.buffs = attacker.buffs.filter(b => b.type !== 'rage');
+            rageBuff = { type: 'rage', stacks: 1, expires: now + 5000, icon: RAGE_ICON };
+            attacker.buffs.push(rageBuff);
+        }
+        broadcastToMatch(match.id, {
+            type: 'UPDATE_STATS',
+            playerId: dealerId,
+            hp: attacker.hp,
+            armor: attacker.armor,
+            maxHp: attacker.maxHp,
+            maxArmor: attacker.maxArmor,
+            mana: attacker.mana,
+            buffs: attacker.buffs,
+            debuffs: attacker.debuffs,
         });
     }
 
