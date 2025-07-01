@@ -382,6 +382,7 @@ export function Game({models, sounds, textures, matchId, character}) {
         const activeImmolation = new Map(); // key = playerId -> effect mesh
         const activeStunEffects = new Map(); // key = playerId -> {group, timeout}
         const activeFearEffects = new Map(); // key = playerId -> {group, timeout}
+        const activeSlowEffects = new Map(); // key = playerId -> {mesh, timeout}
         const activeSprintTrails = new Map(); // key = playerId -> {mesh, start, duration, timeout}
         const activeBladestorms = new Map(); // key = playerId -> {start, duration, sound}
         const fearTexture = new THREE.TextureLoader().load('/icons/classes/warlock/possession.jpg');
@@ -894,6 +895,7 @@ export function Game({models, sounds, textures, matchId, character}) {
         const LIGHTWAVE_DAMAGE = 40;
         const STUN_SPIN_SPEED = 2;
         const FEAR_SPIN_SPEED = 1.5;
+        const SLOW_SPIN_SPEED = 1;
         const BLADESTORM_DAMAGE = 32;
 
         // Медленнее пускаем сферы как настоящие заклинания
@@ -2868,6 +2870,34 @@ export function Game({models, sounds, textures, matchId, character}) {
                 movementSpeedModifier = multiplier;
                 setTimeout(() => (movementSpeedModifier = 1), duration);
             }
+
+            const existing = activeSlowEffects.get(playerId);
+            if (existing) {
+                existing.mesh.parent?.remove(existing.mesh);
+                clearTimeout(existing.timeout);
+            }
+
+            const player = players.get(playerId)?.model;
+            if (!player) return;
+
+            const geometry = new THREE.RingGeometry(0.6, 0.8, 32);
+            const material = new THREE.MeshBasicMaterial({
+                color: 0x88ddff,
+                transparent: true,
+                opacity: 0.6,
+                side: THREE.DoubleSide,
+                blending: THREE.AdditiveBlending,
+            });
+            const mesh = new THREE.Mesh(geometry, material);
+            mesh.rotation.x = -Math.PI / 2;
+            scene.add(mesh);
+
+            const timeout = setTimeout(() => {
+                mesh.parent?.remove(mesh);
+                activeSlowEffects.delete(playerId);
+            }, duration);
+
+            activeSlowEffects.set(playerId, { mesh, timeout });
         }
 
         function applyRootEffect(playerId, duration = 3000) {
@@ -3309,12 +3339,20 @@ export function Game({models, sounds, textures, matchId, character}) {
                        obj.group.rotation.y += delta * STUN_SPIN_SPEED;
                    });
 
-                    activeFearEffects.forEach((obj, id) => {
+                   activeFearEffects.forEach((obj, id) => {
+                       const target = players.get(id)?.model;
+                       if (!target) return;
+                       target.getWorldPosition(obj.group.position);
+                       obj.group.position.y += 2;
+                       obj.group.rotation.y += delta * FEAR_SPIN_SPEED;
+                   });
+
+                    activeSlowEffects.forEach((obj, id) => {
                         const target = players.get(id)?.model;
                         if (!target) return;
-                        target.getWorldPosition(obj.group.position);
-                        obj.group.position.y += 2;
-                        obj.group.rotation.y += delta * FEAR_SPIN_SPEED;
+                        target.getWorldPosition(obj.mesh.position);
+                        obj.mesh.position.y += 0.1;
+                        obj.mesh.rotation.z += delta * SLOW_SPIN_SPEED;
                     });
 
                     for (let i = frostNovaRings.length - 1; i >= 0; i--) {
