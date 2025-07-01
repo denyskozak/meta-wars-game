@@ -3927,19 +3927,6 @@ export function Game({models, sounds, textures, matchId, character}) {
                             break;
                         case "blood-strike":
                             if (message.id !== myPlayerId) {
-                                const caster = players.get(message.id);
-                                const me = players.get(myPlayerId);
-                                if (caster && me) {
-                                    const origin = caster.model.position.clone();
-                                    const forward = new THREE.Vector3(0, 0, 1).applyQuaternion(caster.model.quaternion);
-                                    const toMe = me.model.position.clone().sub(origin);
-                                    const distance = toMe.length();
-                                    if (distance < MELEE_RANGE_ATTACK && forward.angleTo(toMe.normalize()) < MELEE_ANGLE) {
-                                        // damage already applied by server, just play effect
-                                        takeDamage(0, message.id, 'blood-strike');
-                                    }
-                                }
-
                                 lightSword(message.id, 500);
                                 if (sounds.sinisterStrike) {
                                     sounds.sinisterStrike.currentTime = 0;
@@ -4021,18 +4008,6 @@ export function Game({models, sounds, textures, matchId, character}) {
                             break;
                         case "savage-blow":
                             if (message.id !== myPlayerId) {
-                                const caster = players.get(message.id);
-                                const me = players.get(myPlayerId);
-                                if (caster && me) {
-                                    const origin = caster.model.position.clone();
-                                    const forward = new THREE.Vector3(0, 0, 1).applyQuaternion(caster.model.quaternion);
-                                    const toMe = me.model.position.clone().sub(origin);
-                                    const distance = toMe.length();
-                                    if (distance < MELEE_RANGE_ATTACK && forward.angleTo(toMe.normalize()) < MELEE_ANGLE) {
-                                        // damage already applied by server, just play effect
-                                        takeDamage(0, message.id, 'savage-blow');
-                                    }
-                                }
                                 lightSword(message.id, 500);
                                 if (sounds.mortalStrike) {
                                     sounds.mortalStrike.currentTime = 0;
@@ -4082,17 +4057,6 @@ export function Game({models, sounds, textures, matchId, character}) {
                             break;
                         case "lightstrike":
                             if (message.id !== myPlayerId) {
-                                const caster = players.get(message.id);
-                                const me = players.get(myPlayerId);
-                                if (caster && me) {
-                                    const origin = caster.model.position.clone();
-                                    const forward = new THREE.Vector3(0, 0, 1).applyQuaternion(caster.model.quaternion);
-                                    const toMe = me.model.position.clone().sub(origin);
-                                    const distance = toMe.length();
-                                    if (distance < MELEE_RANGE_ATTACK && forward.angleTo(toMe.normalize()) < MELEE_ANGLE) {
-                                        takeDamage(LIGHTSTRIKE_DAMAGE, message.id, 'lightstrike');
-                                    }
-                                }
                                 lightSword(message.id, 500);
                             }
                             break;
@@ -4157,7 +4121,7 @@ export function Game({models, sounds, textures, matchId, character}) {
                     break;
                 }
                 case "DAMAGE":
-                    if (message.targetId) {
+                    if (message.targetId && (message.targetId === myPlayerId || message.dealerId === myPlayerId)) {
                         showDamage(message.targetId, message.amount, message.spellType);
                         if (message.targetId === myPlayerId) {
                             showSelfDamage(message.amount);

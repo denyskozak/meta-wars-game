@@ -540,6 +540,7 @@ function applyDamage(match, victimId, dealerId, damage, spellType) {
     broadcastToMatch(match.id, {
         type: 'DAMAGE',
         targetId: victimId,
+        dealerId,
         amount: totalDamage,
         spellType,
     });
