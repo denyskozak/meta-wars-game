@@ -5,13 +5,13 @@ const http = require('http');
 const { createProfile } = require('./sui.cjs');
 
 const UPDATE_MATCH_INTERVAL = 33;
-const MAX_HP = 120;
+const MAX_HP = 156;
 const MAX_MANA = 130;
 const MAX_KILLS = 15;
 const XP_PER_LEVEL = 1000;
 const MANA_REGEN_INTERVAL = 1000;
 const MANA_REGEN_AMOUNT = 1.3; // 30% faster mana regeneration
-const HP_REGEN_AMOUNT = 0.8; // Basic health regeneration per tick
+const HP_REGEN_AMOUNT = 0.4; // Basic health regeneration per tick (reduced)
 const SPELL_COST = require('../client/next-js/consts/spellCosts.json');
 const ICEBALL_ICON = '/icons/spell_frostbolt.jpg';
 const FROSTNOVA_ICON = '/icons/frostnova.jpg';
@@ -23,7 +23,7 @@ const CLASS_STATS = require('../client/next-js/consts/classStats.json');
 const ADRENALINE_RUSH_ICON = '/icons/classes/rogue/adrenalinerush.jpg';
 const MELEE_RANGE = 2.125;
 const LIGHTSTRIKE_DAMAGE = 41; // increased by 20%
-const BLADESTORM_DAMAGE = 40;
+const BLADESTORM_DAMAGE = 32;
 
 function withinMeleeRange(a, b) {
     if (!a || !b) return false;
@@ -331,7 +331,7 @@ function checkRunePickup(match, playerId) {
                     player.buffs.push({
                         type: 'damage',
                         percent: 0.4,
-                        expires: Date.now() + 60000,
+                        expires: Date.now() + 50000,
                         icon: '/icons/rune_power.jpg'
                     });
                     break;
