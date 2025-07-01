@@ -1,5 +1,6 @@
 import { useInterface } from "../../context/inteface";
 import { useRouter } from "next/navigation";
+import { Button } from "@heroui/react";
 import "./Menu.css";
 
 export const GameMenu = () => {
@@ -11,11 +12,19 @@ export const GameMenu = () => {
     const closeMenu = () => dispatch({ type: 'SET_MENU_VISIBLE', payload: false });
 
     return (
-        <div className="menu-overlay">
-            <button className="menu-button">Graphics</button>
-            <button className="menu-button">General Settings</button>
-            <button className="menu-button" onClick={() => router.push('/play')}>Exit Game</button>
-            <button className="menu-button" onClick={closeMenu}>Return to Game</button>
+        <div className="menu-overlay flex flex-col gap-2">
+            <Button className="menu-button" onPress={() => {}}>
+                Graphics
+            </Button>
+            <Button className="menu-button" onPress={() => {}}>
+                General Settings
+            </Button>
+            <Button className="menu-button" onPress={() => router.push('/play')}>
+                Exit Game
+            </Button>
+            <Button className="menu-button" onPress={closeMenu} color="primary">
+                Return to Game
+            </Button>
         </div>
     );
 };
