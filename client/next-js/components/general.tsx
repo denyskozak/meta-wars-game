@@ -14,17 +14,17 @@ export default function General() {
 
   const slides = [
     {
-      titles: ["New Epoch Game", "Browser Magic Shooting"],
+      titles: ["Enjoy True Web3 Gaming", "Browser Magic Shooting"],
       subtitle: "Spell-slinging PvP with the thrill of FPS combat.",
     },
     {
       titles: ["Win Battles", "Earn Real Rewards"],
       subtitle: "Claim $MetaWars tokens, loot, and rare gear — fully tradable.",
     },
-    {
-      titles: ["No Studio. No CEO.", "Just DAO."],
-      subtitle: "The first MMORPG built by players, not publishers.",
-    },
+    // {
+    //   titles: ["No Studio. No CEO.", "Just DAO."],
+    //   subtitle: "The first MMORPG built by players, not publishers.",
+    // },
     {
       titles: ["Climb the Ladder", "Control the Game"],
       subtitle: "Top players shape balance, economy, and the future of Meta Wars.",
