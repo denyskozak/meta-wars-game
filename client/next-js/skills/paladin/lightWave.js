@@ -1,5 +1,3 @@
-import { SPELL_COST } from '../../consts';
-
 export const meta = {
   id: 'lightwave',
   key: 'F',
