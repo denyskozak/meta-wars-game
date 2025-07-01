@@ -58,13 +58,15 @@ export default function Home() {
       {/*</span>*/}
       {/*      </Snippet>*/}
       {/*  </div>*/}
-      <Image
-        alt="Sui logo"
-        className="absolute bottom-8 left-1/2 transform -translate-x-1/2 z-[2]"
-        height={200}
-        src="/Sui_Logo_White.svg"
-        width={120}
-      />
+      <div className="absolute bottom-8 left-1/2 transform -translate-x-1/2 z-[2] flex flex-col items-center">
+        <span className="text-medium">сделанно на</span>
+        <Image
+          alt="Sui logo"
+          height={200}
+          src="/Sui_Logo_White.svg"
+          width={120}
+        />
+      </div>
     </div>
   );
 }
