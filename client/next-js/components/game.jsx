@@ -1861,12 +1861,14 @@ export function Game({models, sounds, textures, matchId, character}) {
                     break;
                 case "berserk":
                     castBerserk({
+                        playerId,
                         globalSkillCooldown,
                         isCasting,
                         mana,
                         sendToSocket,
                         activateGlobalCooldown,
                         startSkillCooldown,
+                        igniteHands,
                         sounds,
                     });
                     break;
@@ -4064,6 +4066,7 @@ export function Game({models, sounds, textures, matchId, character}) {
                             }
                             break;
                         case "berserk":
+                            igniteHands(message.id, 1000);
                             break;
                         case "bloodthirst":
                             break;

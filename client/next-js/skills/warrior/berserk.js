@@ -7,7 +7,7 @@ export const meta = {
   autoFocus: false,
 };
 
-export default function castBerserk({ globalSkillCooldown, isCasting, mana, sendToSocket, activateGlobalCooldown, startSkillCooldown, sounds }) {
+export default function castBerserk({ playerId, globalSkillCooldown, isCasting, mana, sendToSocket, activateGlobalCooldown, startSkillCooldown, igniteHands, sounds }) {
   if (globalSkillCooldown || isCasting) return;
   if (mana < SPELL_COST['berserk']) {
     if (sounds?.noMana) {
@@ -17,6 +17,7 @@ export default function castBerserk({ globalSkillCooldown, isCasting, mana, send
     }
     return;
   }
+  igniteHands?.(playerId, 1000);
   sendToSocket({ type: 'CAST_SPELL', payload: { type: 'berserk' } });
   activateGlobalCooldown();
   startSkillCooldown('berserk');
