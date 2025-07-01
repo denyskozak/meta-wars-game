@@ -292,7 +292,14 @@ export function Game({models, sounds, textures, matchId, character}) {
         };
 
         const createMeleeIndicator = () => {
-            const geometry = new THREE.CircleGeometry(MELEE_INDICATOR_RANGE, 32);
+            const geometry = new THREE.RingGeometry(
+                MELEE_INDICATOR_RANGE * 0.95,
+                MELEE_INDICATOR_RANGE,
+                32,
+                1,
+                Math.PI / 2 - MELEE_ANGLE / 2,
+                MELEE_ANGLE,
+            );
             const material = new THREE.MeshBasicMaterial({
                 color: 0xffff00,
                 transparent: true,
@@ -872,7 +879,7 @@ export function Game({models, sounds, textures, matchId, character}) {
         const FROSTNOVA_RANGE = FIREBLAST_RANGE / 4;
         const FROSTNOVA_RING_DURATION = 1000; // ms
         const LIGHTWAVE_RING_DURATION = 1000; // ms
-        const LIGHTSTRIKE_DAMAGE = 41; // 20% more damage for warrior/paladin/rogue E
+        const LIGHTSTRIKE_DAMAGE = 35; // reduced by 15%
         // Melee range for auto attacks and melee abilities
         // Keep in sync with server constant MELEE_RANGE
         const MELEE_RANGE_ATTACK = 2.125; // melee range
