@@ -908,10 +908,10 @@ ws.on('connection', (socket) => {
                         if (message.payload.type === 'eviscerate' && message.payload.targetId) {
                             const target = match.players.get(message.payload.targetId);
                             if (target && withinMeleeRange(player, target)) {
-                                const damage = 28 * (player.comboPoints || 0);
-                                if (damage > 0) {
-                                    applyDamage(match, target.id, id, damage, 'eviscerate');
-                                }
+                                const base = 28;
+                                const combo = player.comboPoints || 0;
+                                const damage = base * Math.max(combo, 1);
+                                applyDamage(match, target.id, id, damage, 'eviscerate');
                             }
                             if (target) {
                                 player.comboPoints = 0;

@@ -292,11 +292,7 @@ export function Game({models, sounds, textures, matchId, character}) {
         };
 
         const createMeleeIndicator = () => {
-            const geometry = new THREE.RingGeometry(
-                Math.max(MELEE_INDICATOR_RANGE - 0.1, 0),
-                MELEE_INDICATOR_RANGE,
-                32,
-            );
+            const geometry = new THREE.CircleGeometry(MELEE_INDICATOR_RANGE, 32);
             const material = new THREE.MeshBasicMaterial({
                 color: 0xffff00,
                 transparent: true,
