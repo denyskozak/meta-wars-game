@@ -14,7 +14,7 @@ export default function General() {
 
   const slides = [
     {
-      titles: ["Enjoy True Web3 Gaming", "Browser Magic Shooting"],
+      titles: ["Crafted RPG MMO", "by Blizzard and Riot fans"],
       subtitle: "Spell-slinging PvP with the thrill of FPS combat.",
     },
     {
@@ -27,7 +27,7 @@ export default function General() {
     // },
     {
       titles: ["Climb the Ladder", "Control the Game"],
-      subtitle: "Top players shape balance, economy, and the future of Meta Wars.",
+      subtitle: "Top players shape the future of Meta Wars.",
     },
   ];
   const [index, setIndex] = useState(0);

@@ -246,7 +246,7 @@ export default function MatchesPage() {
                                             setClassType(selectedClassPreview);
                                             onClose();
                                         }}
-                                        color="success"
+                                        color="primary"
                                     >
                                         Select
                                     </Button>
