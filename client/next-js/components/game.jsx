@@ -2513,11 +2513,15 @@ export function Game({models, sounds, textures, matchId, character}) {
             }
 
             // Attach an event listener for when the animation ends
-            if (loop === THREE.LoopOnce && onEnd) {
+            if (loop === THREE.LoopOnce) {
                 const onAnimationEnd = (event) => {
                     if (event.action === action) {
                         mixer.removeEventListener("finished", onAnimationEnd); // Clean up listener
-                        onEnd(event);
+                        if (onEnd) {
+                            onEnd(event);
+                        } else {
+                            setAnimation("idle");
+                        }
                     }
                 };
 
