@@ -2451,9 +2451,18 @@ export function Game({models, sounds, textures, matchId, character}) {
                 model.traverse((obj) => {
                     if (obj.isMesh) {
                         applyToMaterials(obj, (mat) => {
+                            gsap.killTweensOf(mat);
                             mat.transparent = true;
                             mat.opacity = 0;
-                            gsap.to(mat, { opacity: 1, duration: fadeDuration });
+                            const targetOpacity =
+                                meleeRangeIndicator && obj === meleeRangeIndicator
+                                    ? MELEE_INDICATOR_OPACITY
+                                    : 1;
+                            gsap.to(mat, {
+                                opacity: targetOpacity,
+                                duration: fadeDuration,
+                                overwrite: true,
+                            });
                         });
                     }
                 });
@@ -2461,8 +2470,13 @@ export function Game({models, sounds, textures, matchId, character}) {
                 model.traverse((obj) => {
                     if (obj.isMesh) {
                         applyToMaterials(obj, (mat) => {
+                            gsap.killTweensOf(mat);
                             mat.transparent = true;
-                            gsap.to(mat, { opacity: 0, duration: fadeDuration });
+                            gsap.to(mat, {
+                                opacity: 0,
+                                duration: fadeDuration,
+                                overwrite: true,
+                            });
                         });
                     }
                 });
