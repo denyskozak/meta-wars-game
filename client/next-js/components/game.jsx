@@ -1,6 +1,14 @@
 import React, {useLayoutEffect, useRef, useState, useEffect} from "react";
 import gsap from "gsap";
-import { MAX_HP, MAX_MANA, CLASS_MODELS, CLASS_STATS } from "../consts";
+import {
+    MAX_HP,
+    MAX_MANA,
+    CLASS_MODELS,
+    CLASS_STATS,
+    MELEE_RANGE_ATTACK,
+    MELEE_INDICATOR_RANGE,
+    MELEE_ANGLE,
+} from "../consts";
 import { SPELL_COST } from '../consts';
 import * as THREE from "three";
 import { Fire } from "../three/Fire";
@@ -878,13 +886,7 @@ export function Game({models, sounds, textures, matchId, character}) {
         const FROSTNOVA_RING_DURATION = 1000; // ms
         const LIGHTWAVE_RING_DURATION = 1000; // ms
         const LIGHTSTRIKE_DAMAGE = 35; // reduced by 15%
-        // Melee range for auto attacks and melee abilities
-        // Keep in sync with server constant MELEE_RANGE
-        const MELEE_RANGE_ATTACK = 1.7; // melee range reduced by 20%
-        // Slightly extend the visual indicator so it matches perceived reach
-        const MELEE_INDICATOR_RANGE = MELEE_RANGE_ATTACK * 1.3;
-        // Melee arc in radians (~118.8 degrees)
-        const MELEE_ANGLE = (118.8 * Math.PI) / 180; // reduced by 10%
+        // Melee constants imported from shared config
         const LIGHTWAVE_DAMAGE = 40;
         const STUN_SPIN_SPEED = 2;
         const FEAR_SPIN_SPEED = 1.5;

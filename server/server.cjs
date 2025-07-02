@@ -22,29 +22,14 @@ const ROGUE_SPRINT_ICON = '/icons/classes/rogue/sprint.jpg';
 const CLASS_STATS = require('../client/next-js/consts/classStats.json');
 const ADRENALINE_RUSH_ICON = '/icons/classes/rogue/adrenalinerush.jpg';
 const RAGE_ICON = '/icons/classes/warrior/rage.jpg';
-const MELEE_RANGE = 1.7; // reduced by 20%
-const MELEE_ANGLE = (118.8 * Math.PI) / 180; // reduced by 10%
+const {
+    MELEE_RANGE,
+    MELEE_ANGLE,
+    withinMeleeRange,
+    withinMeleeCone,
+} = require('./melee.cjs');
 const LIGHTSTRIKE_DAMAGE = 41; // increased by 20%
 const BLADESTORM_DAMAGE = 32;
-
-function withinMeleeRange(a, b) {
-    if (!a || !b) return false;
-    const dx = a.position.x - b.position.x;
-    const dy = a.position.y - b.position.y;
-    const dz = a.position.z - b.position.z;
-    return Math.sqrt(dx*dx + dy*dy + dz*dz) < MELEE_RANGE;
-}
-
-function withinMeleeCone(a, b) {
-    if (!withinMeleeRange(a, b)) return false;
-    const angleToTarget = Math.atan2(
-        b.position.x - a.position.x,
-        b.position.z - a.position.z
-    );
-    let diff = Math.abs(angleToTarget - (a.rotation?.y || 0));
-    if (diff > Math.PI) diff = Math.abs(diff - 2 * Math.PI);
-    return diff < MELEE_ANGLE;
-}
 
 function updateLevel(player) {
     const prevLevel = player.level || 1;
