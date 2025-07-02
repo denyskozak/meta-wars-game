@@ -439,6 +439,7 @@ function applyDamage(match, victimId, dealerId, damage, spellType) {
 
     const reduction = victim.armor / 200; // 100 armor = 50% damage reduction
     totalDamage = totalDamage * Math.max(0, 1 - reduction);
+    totalDamage = Math.round(totalDamage);
     victim.hp = Math.max(0, victim.hp - totalDamage);
     if (victim.hp <= 0) {
         victim.deaths++;

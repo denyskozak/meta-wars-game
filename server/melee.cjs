@@ -12,13 +12,19 @@ function withinMeleeRange(a, b) {
 
 function withinMeleeCone(a, b) {
     if (!withinMeleeRange(a, b)) return false;
-    const angleToTarget = Math.atan2(
-        b.position.x - a.position.x,
-        b.position.z - a.position.z
-    );
-    let diff = Math.abs(angleToTarget - (a.rotation?.y || 0));
-    if (diff > Math.PI) diff = Math.abs(diff - 2 * Math.PI);
-    return diff < MELEE_ANGLE;
+    const dx = b.position.x - a.position.x;
+    const dy = b.position.y - a.position.y;
+    const dz = b.position.z - a.position.z;
+    const forward = {
+        x: Math.sin(a.rotation?.y || 0),
+        y: 0,
+        z: Math.cos(a.rotation?.y || 0),
+    };
+    const len = Math.sqrt(dx * dx + dy * dy + dz * dz);
+    if (!len) return true;
+    const dot = forward.x * dx + forward.y * dy + forward.z * dz;
+    const angle = Math.acos(dot / len);
+    return angle < MELEE_ANGLE;
 }
 
 module.exports = {
