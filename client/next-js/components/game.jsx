@@ -880,7 +880,7 @@ export function Game({models, sounds, textures, matchId, character}) {
         const LIGHTSTRIKE_DAMAGE = 35; // reduced by 15%
         // Melee range for auto attacks and melee abilities
         // Keep in sync with server constant MELEE_RANGE
-        const MELEE_RANGE_ATTACK = 1.7; // melee range reduced by 20%
+        const MELEE_RANGE_ATTACK = 1.36; // melee range reduced by an additional 20%
         // Slightly extend the visual indicator so it matches perceived reach
         const MELEE_INDICATOR_RANGE = MELEE_RANGE_ATTACK * 1.3;
         // Melee arc in radians (~118.8 degrees)
