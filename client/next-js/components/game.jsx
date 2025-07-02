@@ -889,7 +889,7 @@ export function Game({models, sounds, textures, matchId, character}) {
         const STUN_SPIN_SPEED = 2;
         const FEAR_SPIN_SPEED = 1.5;
         const SLOW_SPIN_SPEED = 1;
-        const BLADESTORM_DAMAGE = 32;
+        const BLADESTORM_DAMAGE = 10;
 
         // Медленнее пускаем сферы как настоящие заклинания
         const MIN_SPHERE_IMPULSE = 6;
@@ -3147,18 +3147,20 @@ export function Game({models, sounds, textures, matchId, character}) {
 
                 if (leftMouseButtonClicked) return;
 
-                // Calculate the direction the player is moving (opposite to camera's forward)
-                const targetRotationY = Math.atan2(
-                    cameraDirection.x,
-                    cameraDirection.z,
-                );
+                if (!activeBladestorms.has(myPlayerId)) {
+                    // Calculate the direction the player is moving (opposite to camera's forward)
+                    const targetRotationY = Math.atan2(
+                        cameraDirection.x,
+                        cameraDirection.z,
+                    );
 
-                // Rotate the model to face the opposite direction
-                model.rotation.y = THREE.MathUtils.lerp(
-                    model.rotation.y,
-                    targetRotationY,
-                    0.1,
-                );
+                    // Rotate the model to face the opposite direction
+                    model.rotation.y = THREE.MathUtils.lerp(
+                        model.rotation.y,
+                        targetRotationY,
+                        0.1,
+                    );
+                }
 
                 if (isShieldActive) {
                     bubbleMesh.visible = true;
