@@ -1,6 +1,10 @@
 const { MELEE_RANGE, MELEE_ANGLE_DEG } = require('../client/next-js/consts/melee.json');
 
-const MELEE_ANGLE = (MELEE_ANGLE_DEG * Math.PI) / 180; // convert degrees to radians
+// convert degrees to radians. This value represents the full cone width used by
+// the client indicator.
+const MELEE_ANGLE = (MELEE_ANGLE_DEG * Math.PI) / 180;
+// Half of the cone angle for easier comparison
+const MELEE_HALF_ANGLE = MELEE_ANGLE / 2;
 
 function withinMeleeRange(a, b) {
     if (!a || !b) return false;
@@ -24,7 +28,9 @@ function withinMeleeCone(a, b) {
     if (!len) return true;
     const dot = forward.x * dx + forward.y * dy + forward.z * dz;
     const angle = Math.acos(dot / len);
-    return angle < MELEE_ANGLE;
+    // Compare against half of the melee angle so that the total cone width
+    // matches the indicator shown on the client.
+    return angle < MELEE_HALF_ANGLE;
 }
 
 module.exports = {

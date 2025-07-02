@@ -28,7 +28,10 @@ The server uses the same JSON file for hit detection:
 
 ```js
 const { MELEE_RANGE, MELEE_ANGLE_DEG } = require('../client/next-js/consts/melee.json');
-const MELEE_ANGLE = (MELEE_ANGLE_DEG * Math.PI) / 180; // convert degrees to radians
+// convert degrees to radians. This constant is the full cone width used by the client
+// melee indicator.
+const MELEE_ANGLE = (MELEE_ANGLE_DEG * Math.PI) / 180;
+const MELEE_HALF_ANGLE = MELEE_ANGLE / 2;
 
 function withinMeleeRange(a, b) {
     if (!a || !b) return false;
@@ -52,7 +55,9 @@ function withinMeleeCone(a, b) {
     if (!len) return true;
     const dot = forward.x * dx + forward.y * dy + forward.z * dz;
     const angle = Math.acos(dot / len);
-    return angle < MELEE_ANGLE;
+    // Compare against half of the melee angle so the server cone matches the
+    // displayed indicator
+    return angle < MELEE_HALF_ANGLE;
 }
 ```
 
