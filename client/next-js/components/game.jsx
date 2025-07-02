@@ -62,7 +62,7 @@ import castBloodthirst, { meta as bloodthirstMeta } from '../skills/warrior/bloo
 import {Interface} from "@/components/layout/Interface";
 import * as iceShieldMesh from "three/examples/jsm/utils/SkeletonUtils";
 import {Loading} from "@/components/loading";
-import { Countdown } from "./parts/Countdown";
+import { Countdown } from "./parts/Countdown.jsx";
 import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader";
 import { DRACOLoader } from "three/examples/jsm/loaders/DRACOLoader";
 import { MeshoptDecoder } from "three/examples/jsm/libs/meshopt_decoder.module.js";
