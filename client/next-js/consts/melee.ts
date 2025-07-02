@@ -1,4 +1,4 @@
-import melee from "../../../shared/melee.json";
+import melee from "./melee.json";
 
 export const MELEE_RANGE_ATTACK = melee.MELEE_RANGE;
 // slightly larger circle for UI indicator

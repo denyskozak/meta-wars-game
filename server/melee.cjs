@@ -1,4 +1,4 @@
-const { MELEE_RANGE, MELEE_ANGLE_DEG } = require('../shared/melee.json');
+const { MELEE_RANGE, MELEE_ANGLE_DEG } = require('../client/next-js/consts/melee.json');
 
 const MELEE_ANGLE = (MELEE_ANGLE_DEG * Math.PI) / 180; // convert degrees to radians
 
