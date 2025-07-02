@@ -3546,6 +3546,7 @@ export function Game({models, sounds, textures, matchId, character}) {
                     meleeRangeIndicator.scale.setScalar(1 / currentScale);
                     player.add(meleeRangeIndicator);
                 }
+                const stats = CLASS_STATS[classType] || { hp: MAX_HP, armor: 0 };
                 players.set(id, {
                     model: player,
                     mixer: mixer,
@@ -3558,6 +3559,10 @@ export function Game({models, sounds, textures, matchId, character}) {
                     assists: 0,
                     points: 0,
                     level: 1,
+                    hp: stats.hp,
+                    maxHp: stats.hp,
+                    armor: stats.armor,
+                    maxArmor: stats.armor,
                     actions,
                     prevPos: new THREE.Vector3().copy(player.position),
                     buffs: [],
@@ -3590,6 +3595,9 @@ export function Game({models, sounds, textures, matchId, character}) {
                 playerData.level = message.level;
                 playerData.buffs = message.buffs;
                 playerData.debuffs = message.debuffs;
+                if (message.maxHp !== undefined) playerData.maxHp = message.maxHp;
+                if (message.maxArmor !== undefined) playerData.maxArmor = message.maxArmor;
+                if (message.armor !== undefined) playerData.armor = message.armor;
                 playerData.hp = message.hp;
                 playerData.mana = message.mana;
                 playerData.address = message.address || playerData.address;
