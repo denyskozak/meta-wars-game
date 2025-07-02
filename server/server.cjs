@@ -28,8 +28,9 @@ const {
     withinMeleeRange,
     withinMeleeCone,
 } = require('./melee.cjs');
+
 const LIGHTSTRIKE_DAMAGE = 41; // increased by 20%
-const BLADESTORM_DAMAGE = 32;
+const BLADESTORM_DAMAGE = 10;
 
 function updateLevel(player) {
     const prevLevel = player.level || 1;
