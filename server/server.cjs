@@ -140,6 +140,7 @@ const matches = new Map(); // matchId => { id, players: Map, maxPlayers, isFull,
 const finishedMatches = new Map(); // store summary of finished matches
 let matchCounter = 1;
 let rankings = {};
+const RANK_POINTS = {1: 10, 2: 7, 3: 5, 4: 2, 5: -4, 6: -6};
 
 function shuffle(arr) {
     const a = arr.slice();
@@ -272,17 +273,10 @@ function finalizeMatch(match) {
     match.status = 'finished';
     const sorted = Array.from(match.players.entries()).sort((a, b) => b[1].kills - a[1].kills);
     // update rankings based on player positions
-    const total = sorted.length;
     const deltas = {};
     sorted.forEach(([pid, p], idx) => {
         if (!p.address) return;
-        let delta = 0;
-        if (idx < 3) {
-            delta = 3 - idx; // 1st:3, 2nd:2, 3rd:1
-        } else if (idx >= total - 3) {
-            const posFromEnd = total - 1 - idx;
-            delta = -(3 - posFromEnd); // last: -3, etc
-        }
+        const delta = RANK_POINTS[idx + 1] || 0;
         deltas[pid] = delta;
         rankings[p.address] = (rankings[p.address] || 0) + delta;
     });
@@ -707,6 +701,13 @@ ws.on('connection', (socket) => {
                 socket.send(JSON.stringify({
                     type: 'RANKINGS',
                     rankings: rankingList,
+                }));
+                break;
+
+            case 'GET_RANK_POINTS':
+                socket.send(JSON.stringify({
+                    type: 'RANK_POINTS',
+                    table: Object.entries(RANK_POINTS).map(([pos, pts]) => [Number(pos), pts]),
                 }));
                 break;
 

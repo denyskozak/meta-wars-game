@@ -19,12 +19,14 @@ import { ConnectionButton } from "@/components/connection-button";
 import { ProfileForm } from "@/components/profile-form";
 import { useProfile } from "@/hooks";
 import { useRatings } from "@/hooks/useRatings";
+import { useRankTable } from "@/hooks/useRankTable";
 
 export default function MatchesPage() {
   const router = useRouter();
   const account = useCurrentAccount();
   const { profile, refetch } = useProfile();
   const { ratings } = useRatings();
+  const { table: rankTable } = useRankTable();
 
   return (
     <div className="h-full w-full  items-center justify-center">
@@ -80,6 +82,23 @@ export default function MatchesPage() {
                       <TableRow key={r.address}>
                         <TableCell>{idx + 1}</TableCell>
                         <TableCell>{r.address}</TableCell>
+                        <TableCell>{r.points}</TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              </Card>
+              <Card className="w-full max-w-xl mx-32 mt-4 p-4 space-y-2">
+                <h4 className="font-bold text-large">Rank Points</h4>
+                <Table aria-label="rank-points">
+                  <TableHeader>
+                    <TableColumn>Place</TableColumn>
+                    <TableColumn>Points</TableColumn>
+                  </TableHeader>
+                  <TableBody>
+                    {rankTable.map((r) => (
+                      <TableRow key={r.position}>
+                        <TableCell>{r.position}</TableCell>
                         <TableCell>{r.points}</TableCell>
                       </TableRow>
                     ))}
