@@ -783,7 +783,7 @@ export function Game({models, sounds, textures, matchId, character}) {
             'divine-speed': 30000,
             'blood-strike': 1000,
             eviscerate: 10000,
-            'kidney-strike': 20000,
+            'kidney-strike': 15000,
             'adrenaline-rush': 45000,
             sprint: 30000,
             'shadow-leap': 12000,
