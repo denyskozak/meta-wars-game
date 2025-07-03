@@ -34,8 +34,8 @@ export default function MatchesPage() {
 
     const selectedStats = useMemo(() => {
         if (!selectedClassPreview) return null;
-        const base = CLASS_STATS[selectedClassPreview] || { hp: MAX_HP, armor: 0 };
-        return { ...base, mana: MAX_MANA };
+        const base = CLASS_STATS[selectedClassPreview] || { hp: MAX_HP, armor: 0, mana: MAX_MANA };
+        return { ...base, mana: base.mana || MAX_MANA };
     }, [selectedClassPreview]);
 
     const [match, setMatch] = useState<Match | null>(null);

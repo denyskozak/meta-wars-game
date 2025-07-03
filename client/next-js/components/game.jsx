@@ -250,12 +250,13 @@ export function Game({models, sounds, textures, matchId, character}) {
         let camera;
         const animations = models["character_animations"];
 
-        const baseStats = CLASS_STATS[character?.classType] || { hp: MAX_HP, armor: 0 };
+        const baseStats = CLASS_STATS[character?.classType] || { hp: MAX_HP, armor: 0, mana: MAX_MANA };
         let hp = baseStats.hp,
             armor = baseStats.armor,
             maxHp = baseStats.hp,
             maxArmor = baseStats.armor,
-            mana = MAX_MANA,
+            mana = baseStats.mana || MAX_MANA,
+            maxMana = baseStats.mana || MAX_MANA,
             points = 0,
             level = 1,
             skillPoints = 1;
@@ -485,12 +486,12 @@ export function Game({models, sounds, textures, matchId, character}) {
 
         // Function to update the HP bar width
         function updateHPBar() {
-            dispatchEvent('self-update', { hp, mana, armor, maxHp, maxArmor, points, level, skillPoints, learnedSkills });
+            dispatchEvent('self-update', { hp, mana, armor, maxHp, maxArmor, maxMana, points, level, skillPoints, learnedSkills });
         }
 
         // Function to update the Mana bar width
         function updateManaBar() {
-            dispatchEvent('self-update', { hp, mana, armor, maxHp, maxArmor, points, level, skillPoints, learnedSkills });
+            dispatchEvent('self-update', { hp, mana, armor, maxHp, maxArmor, maxMana, points, level, skillPoints, learnedSkills });
         }
 
         function dispatchTargetUpdate() {
@@ -511,6 +512,7 @@ export function Game({models, sounds, textures, matchId, character}) {
                 armor: p.armor,
                 maxArmor: p.maxArmor,
                 mana: p.mana,
+                maxMana: p.maxMana,
                 address: p.address || `Player ${targetedPlayerId}`,
                 classType: p.classType,
                 buffs: p.buffs || [],
@@ -762,8 +764,8 @@ export function Game({models, sounds, textures, matchId, character}) {
             darkball: 0,
             corruption: 10000,
             lifetap: 10000,
-            iceball: 5000,
-            fireblast: 5000,
+            iceball: 3000,
+            fireblast: 6000,
             chaosbolt: 6000,
             lifedrain: 0,
             fear: 40000,
@@ -873,12 +875,12 @@ export function Game({models, sounds, textures, matchId, character}) {
         const SPHERE_RADIUS = BASE_SPHERE_RADIUS * SPELL_SCALES.fireball;
 
         const FIREBLAST_RANGE = 20;
-        const FIREBLAST_DAMAGE = 25;
+        const FIREBLAST_DAMAGE = 33;
 
         const FIREBALL_DAMAGE = 40;
         const PYROBLAST_DAMAGE = FIREBALL_DAMAGE * 1.4;
         const CHAOSBOLT_DAMAGE = FIREBALL_DAMAGE * 2;
-        const ICEBALL_DAMAGE = 25;
+        const ICEBALL_DAMAGE = 35;
         const DARKBALL_DAMAGE = 30;
         const LIFEDRAIN_DAMAGE = 30;
         const FROSTNOVA_DAMAGE = 20;
@@ -3560,7 +3562,7 @@ export function Game({models, sounds, textures, matchId, character}) {
                     meleeRangeIndicator.scale.setScalar(1 / currentScale);
                     player.add(meleeRangeIndicator);
                 }
-                const stats = CLASS_STATS[classType] || { hp: MAX_HP, armor: 0 };
+                const stats = CLASS_STATS[classType] || { hp: MAX_HP, armor: 0, mana: MAX_MANA };
                 players.set(id, {
                     model: player,
                     mixer: mixer,
@@ -3577,6 +3579,8 @@ export function Game({models, sounds, textures, matchId, character}) {
                     maxHp: stats.hp,
                     armor: stats.armor,
                     maxArmor: stats.armor,
+                    mana: stats.mana || MAX_MANA,
+                    maxMana: stats.mana || MAX_MANA,
                     actions,
                     prevPos: new THREE.Vector3().copy(player.position),
                     buffs: [],
@@ -3611,6 +3615,7 @@ export function Game({models, sounds, textures, matchId, character}) {
                 playerData.debuffs = message.debuffs;
                 if (message.maxHp !== undefined) playerData.maxHp = message.maxHp;
                 if (message.maxArmor !== undefined) playerData.maxArmor = message.maxArmor;
+                if (message.maxMana !== undefined) playerData.maxMana = message.maxMana;
                 if (message.armor !== undefined) playerData.armor = message.armor;
                 playerData.hp = message.hp;
                 playerData.mana = message.mana;
@@ -4105,6 +4110,7 @@ export function Game({models, sounds, textures, matchId, character}) {
                         maxHp = message.maxHp || maxHp;
                         maxArmor = message.maxArmor || maxArmor;
                         mana = message.mana;
+                        if (message.maxMana !== undefined) maxMana = message.maxMana;
                         updateHPBar();
                         updateManaBar();
                         dispatch({type: 'SET_BUFFS', payload: message.buffs || []});
@@ -4118,6 +4124,7 @@ export function Game({models, sounds, textures, matchId, character}) {
                         p.armor = message.armor;
                         if (message.maxHp !== undefined) p.maxHp = message.maxHp;
                         if (message.maxArmor !== undefined) p.maxArmor = message.maxArmor;
+                        if (message.maxMana !== undefined) p.maxMana = message.maxMana;
                         p.mana = message.mana;
                         p.buffs = message.buffs || [];
                         p.debuffs = message.debuffs || [];
