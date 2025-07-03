@@ -10,11 +10,11 @@ import { MeshoptDecoder } from "three/examples/jsm/libs/meshopt_decoder.module.j
 import { useParams } from "next/navigation";
 
 import { CLASS_MODELS } from "@/consts";
+import { assetUrl } from "@/utilities/assets";
 import { useWS } from "@/hooks/useWS";
 import { useInterface } from "@/context/inteface";
 import { Game } from "@/components/game";
 import { Loading } from "@/components/loading";
-import { DeveloperPanel } from "@/components/DeveloperPanel";
 
 interface Character {
   name?: string;
@@ -28,7 +28,7 @@ const dracoLoader = new DRACOLoader();
 
 dracoLoader.setDecoderPath("/libs/draco/");
 
-const loader = new GLTFLoader().setPath("/models/");
+const loader = new GLTFLoader().setPath(assetUrl("/models/"));
 
 loader.setDRACOLoader(dracoLoader);
 loader.setMeshoptDecoder(MeshoptDecoder);
@@ -130,28 +130,28 @@ export default function GamePage() {
 
     // init
     const sounds = {
-      fireball: new Audio("/sounds/fireball.ogg"),
-      fireballCast: new Audio("/sounds/fireball-cast.ogg"),
-      iceball: new Audio("/sounds/iceball.ogg"),
-      iceballCast: new Audio("/sounds/iceball-cast.ogg"),
-      heal: new Audio("/sounds/heal.ogg"),
-      spellCast: new Audio("/sounds/spell-cast.ogg"),
-      background: new Audio("/sounds/Elwynn.mp3"),
-      blink: new Audio("/sounds/blink.ogg"),
-      damage: new Audio("/sounds/damage.ogg"),
-      noMana: new Audio("/sounds/no-mana.ogg"),
-      noTarget: new Audio("/sounds/no-target.ogg"),
-      cooldown: new Audio("/sounds/cooldown.ogg"),
-      xpRune: new Audio("/sounds/xp-rune.ogg"),
-      healRune: new Audio("/sounds/heal-rune.ogg"),
-      manaRune: new Audio("/sounds/mana-rune.ogg"),
-      damageRune: new Audio("/sounds/damage-rune.ogg"),
-      sinisterStrike: new Audio("/sounds/sinister-strike.ogg"),
-      mortalStrike: new Audio("/sounds/mortal-strike.ogg"),
-      charge: new Audio("/sounds/charge.ogg"),
-      shadowLeap: new Audio("/sounds/shadowleap.ogg"),
-      bladestorm: new Audio("/sounds/bladestorm.ogg"),
-      levelUp: new Audio("/sounds/level-up.ogg"),
+      fireball: new Audio(assetUrl("/sounds/fireball.ogg")),
+      fireballCast: new Audio(assetUrl("/sounds/fireball-cast.ogg")),
+      iceball: new Audio(assetUrl("/sounds/iceball.ogg")),
+      iceballCast: new Audio(assetUrl("/sounds/iceball-cast.ogg")),
+      heal: new Audio(assetUrl("/sounds/heal.ogg")),
+      spellCast: new Audio(assetUrl("/sounds/spell-cast.ogg")),
+      background: new Audio(assetUrl("/sounds/Elwynn.mp3")),
+      blink: new Audio(assetUrl("/sounds/blink.ogg")),
+      damage: new Audio(assetUrl("/sounds/damage.ogg")),
+      noMana: new Audio(assetUrl("/sounds/no-mana.ogg")),
+      noTarget: new Audio(assetUrl("/sounds/no-target.ogg")),
+      cooldown: new Audio(assetUrl("/sounds/cooldown.ogg")),
+      xpRune: new Audio(assetUrl("/sounds/xp-rune.ogg")),
+      healRune: new Audio(assetUrl("/sounds/heal-rune.ogg")),
+      manaRune: new Audio(assetUrl("/sounds/mana-rune.ogg")),
+      damageRune: new Audio(assetUrl("/sounds/damage-rune.ogg")),
+      sinisterStrike: new Audio(assetUrl("/sounds/sinister-strike.ogg")),
+      mortalStrike: new Audio(assetUrl("/sounds/mortal-strike.ogg")),
+      charge: new Audio(assetUrl("/sounds/charge.ogg")),
+      shadowLeap: new Audio(assetUrl("/sounds/shadowleap.ogg")),
+      bladestorm: new Audio(assetUrl("/sounds/bladestorm.ogg")),
+      levelUp: new Audio(assetUrl("/sounds/level-up.ogg")),
     };
 
     Promise.all([preloadModels(models), preloadTextures()]).then(

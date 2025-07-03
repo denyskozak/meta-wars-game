@@ -1,7 +1,8 @@
+import { assetUrl } from '../../utilities/assets';
 export const meta = {
   id: 'bloodthirst',
   key: '3',
-  icon: '/icons/classes/warrior/bloodthirst.jpg',
+  icon: assetUrl('/icons/classes/warrior/bloodthirst.jpg'),
   autoFocus: false,
 };
 

@@ -1,6 +1,7 @@
+import { assetUrl } from '../../utilities/assets';
 import { SPELL_COST } from '../../consts';
 
-export const meta = { id: 'lifetap', key: 'Q', icon: '/icons/classes/warlock/spell_shadow_burningspirit.jpg' };
+export const meta = { id: 'lifetap', key: 'Q', icon: assetUrl('/icons/classes/warlock/spell_shadow_burningspirit.jpg') };
 
 export default function castLifeTap({
   playerId,

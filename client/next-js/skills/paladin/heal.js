@@ -1,9 +1,10 @@
+import { assetUrl } from '../../utilities/assets';
 import { SPELL_COST } from '../../consts';
 
 export const meta = {
   id: 'paladin-heal',
   key: 'Q',
-  icon: '/icons/classes/paladin/searinglight.jpg',
+  icon: assetUrl('/icons/classes/paladin/searinglight.jpg'),
   autoFocus: false,
 
 

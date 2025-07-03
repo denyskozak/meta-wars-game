@@ -1,3 +1,4 @@
+import { assetUrl } from '../../utilities/assets';
 import * as THREE from 'three';
 import { Capsule } from 'three/examples/jsm/math/Capsule';
 import { SPELL_COST } from '../../consts';
@@ -5,7 +6,7 @@ import { SPELL_COST } from '../../consts';
 export const meta = {
   id: 'warbringer',
   key: 'R',
-  icon: '/icons/classes/warrior/warbringer.jpg',
+  icon: assetUrl('/icons/classes/warrior/warbringer.jpg'),
   autoFocus: false,
 };
 

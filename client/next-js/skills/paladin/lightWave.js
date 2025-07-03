@@ -1,7 +1,8 @@
+import { assetUrl } from '../../utilities/assets';
 export const meta = {
   id: 'lightwave',
   key: 'F',
-  icon: '/icons/classes/paladin/divinestorm.jpg',
+  icon: assetUrl('/icons/classes/paladin/divinestorm.jpg'),
   autoFocus: false,
 };
 
