@@ -235,7 +235,7 @@ const CLASS_E_SKILL = {
 function createPlayer(address, classType, character) {
     const spawn = randomSpawnPoint();
     const charName = character || CLASS_MODELS[classType] || 'vampir';
-    const stats = CLASS_STATS[classType] || { hp: MAX_HP, armor: 0 };
+    const stats = CLASS_STATS[classType] || { hp: MAX_HP, armor: 0, mana: MAX_MANA };
     return {
         position: {...spawn},
         spawn_point: spawn,
@@ -256,7 +256,8 @@ function createPlayer(address, classType, character) {
         maxHp: stats.hp,
         armor: stats.armor,
         maxArmor: stats.armor,
-        mana: MAX_MANA,
+        mana: stats.mana || MAX_MANA,
+        maxMana: stats.mana || MAX_MANA,
         comboPoints: classType === 'rogue' ? 0 : undefined,
         chests: [],
         address,
@@ -343,7 +344,7 @@ function checkRunePickup(match, playerId) {
                     player.hp = Math.min(player.maxHp, player.hp + 100);
                     break;
                 case 'mana':
-                    player.mana = Math.min(MAX_MANA, player.mana + 100);
+                    player.mana = Math.min(player.maxMana, player.mana + 100);
                     break;
                 case 'damage':
                     player.buffs.push({
@@ -363,6 +364,7 @@ function checkRunePickup(match, playerId) {
                 maxHp: player.maxHp,
                 maxArmor: player.maxArmor,
                 mana: player.mana,
+                maxMana: player.maxMana,
                 buffs: player.buffs,
                 debuffs: player.debuffs,
             });
@@ -477,7 +479,7 @@ function applyDamage(match, victimId, dealerId, damage, spellType) {
         victim.rotation = { y: spawn.yaw || 0 };
         victim.hp = victim.maxHp;
         victim.armor = victim.maxArmor;
-        victim.mana = MAX_MANA;
+        victim.mana = victim.maxMana;
         victim.animationAction = 'idle';
 
         broadcastToMatch(match.id, {
@@ -507,6 +509,7 @@ function applyDamage(match, victimId, dealerId, damage, spellType) {
             maxHp: attacker.maxHp,
             maxArmor: attacker.maxArmor,
             mana: attacker.mana,
+            maxMana: attacker.maxMana,
             buffs: attacker.buffs,
             debuffs: attacker.debuffs,
         });
@@ -520,6 +523,7 @@ function applyDamage(match, victimId, dealerId, damage, spellType) {
         maxHp: victim.maxHp,
         maxArmor: victim.maxArmor,
         mana: victim.mana,
+        maxMana: victim.maxMana,
         buffs: victim.buffs,
         debuffs: victim.debuffs,
     });
@@ -555,8 +559,8 @@ ws.on('connection', (socket) => {
         const now = Date.now();
         for (const match of matches.values()) {
             match.players.forEach((player, pid) => {
-                if (player.mana < MAX_MANA) {
-                    player.mana = Math.min(MAX_MANA, player.mana + MANA_REGEN_AMOUNT);
+                if (player.mana < player.maxMana) {
+                    player.mana = Math.min(player.maxMana, player.mana + MANA_REGEN_AMOUNT);
                 }
                 if (player.hp < player.maxHp) {
                     player.hp = Math.min(player.maxHp, player.hp + HP_REGEN_AMOUNT);
@@ -897,7 +901,7 @@ ws.on('connection', (socket) => {
                         }
                         if (message.payload.type === 'lifetap') {
                             player.hp = Math.max(0, player.hp - 30);
-                            player.mana = Math.min(MAX_MANA, player.mana + 30);
+                            player.mana = Math.min(player.maxMana, player.mana + 30);
                         }
                         if (message.payload.type === 'stun' && message.payload.targetId) {
                             const target = match.players.get(message.payload.targetId);
@@ -1053,6 +1057,7 @@ ws.on('connection', (socket) => {
                                 maxHp: player.maxHp,
                                 maxArmor: player.maxArmor,
                                 mana: player.mana,
+                                maxMana: player.maxMana,
                                 buffs: player.buffs,
                                 debuffs: player.debuffs,
                             });
@@ -1101,7 +1106,7 @@ ws.on('connection', (socket) => {
                     if (p) {
                         p.hp = p.maxHp;
                         p.armor = p.maxArmor;
-                        p.mana = MAX_MANA;
+                        p.mana = p.maxMana;
                         p.buffs = [];
                         p.debuffs = [];
                         broadcastToMatch(match.id, {
@@ -1112,6 +1117,7 @@ ws.on('connection', (socket) => {
                             maxHp: p.maxHp,
                             maxArmor: p.maxArmor,
                             mana: p.mana,
+                            maxMana: p.maxMana,
                             buffs: p.buffs,
                             debuffs: p.debuffs,
                         });

@@ -1,7 +1,7 @@
 {
-  "mage": { "hp": 130, "armor": 20 },
-  "warlock": { "hp": 143, "armor": 25 },
-  "paladin": { "hp": 195, "armor": 40 },
-  "rogue": { "hp": 156, "armor": 30 },
-  "warrior": { "hp": 208, "armor": 50 }
+  "mage": { "hp": 130, "armor": 20, "mana": 195 },
+  "warlock": { "hp": 143, "armor": 25, "mana": 130 },
+  "paladin": { "hp": 195, "armor": 40, "mana": 130 },
+  "rogue": { "hp": 156, "armor": 30, "mana": 130 },
+  "warrior": { "hp": 208, "armor": 50, "mana": 130 }
 }
