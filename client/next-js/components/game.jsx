@@ -9,7 +9,8 @@ import {
     MELEE_INDICATOR_RANGE,
     MELEE_ANGLE,
 } from "../consts";
-import { SPELL_COST } from '../consts';
+import { SPELL_COST, ASSET_BASE_URL } from '../consts';
+import { assetUrl } from '../utilities/assets';
 import * as THREE from "three";
 import { Fire } from "../three/Fire";
 import * as SkeletonUtils from "three/examples/jsm/utils/SkeletonUtils";
@@ -329,7 +330,7 @@ export function Game({models, sounds, textures, matchId, character}) {
         // Developer panel helpers
         const devDraco = new DRACOLoader();
         devDraco.setDecoderPath('/libs/draco/');
-        const devLoader = new GLTFLoader().setPath('/models/');
+        const devLoader = new GLTFLoader().setPath(assetUrl('/models/'));
         devLoader.setDRACOLoader(devDraco);
         devLoader.setMeshoptDecoder(MeshoptDecoder);
         let currentScale = 0.4;

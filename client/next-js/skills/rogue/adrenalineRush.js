@@ -1,9 +1,10 @@
+import { assetUrl } from '../../utilities/assets';
 import { SPELL_COST } from '../../consts';
 
 export const meta = {
   id: 'adrenaline-rush',
   key: '2',
-  icon: '/icons/classes/rogue/adrenalinerush.jpg',
+  icon: assetUrl('/icons/classes/rogue/adrenalinerush.jpg'),
   autoFocus: false,
 };
 

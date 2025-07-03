@@ -1,9 +1,10 @@
+import { assetUrl } from '../../utilities/assets';
 import { SPELL_COST } from '../../consts';
 
 export const meta = {
   id: 'hand-of-freedom',
   key: '3',
-  icon: '/icons/classes/paladin/sealofvalor.jpg',
+  icon: assetUrl('/icons/classes/paladin/sealofvalor.jpg'),
   autoFocus: false,
 };
 

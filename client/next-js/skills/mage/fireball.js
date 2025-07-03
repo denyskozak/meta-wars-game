@@ -1,6 +1,7 @@
+import { assetUrl } from '../../utilities/assets';
 import { SPELL_COST } from '../../consts';
 
-export const meta = { id: 'fireball', key: 'E', icon: '/icons/classes/mage/fireball.png' };
+export const meta = { id: 'fireball', key: 'E', icon: assetUrl('/icons/classes/mage/fireball.png') };
 
 export default function castFireball({ playerId, castSpellImpl, igniteHands, castSphere, fireballMesh, sounds, damage }) {
   igniteHands(playerId, 1000);

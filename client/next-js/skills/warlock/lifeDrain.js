@@ -1,6 +1,7 @@
+import { assetUrl } from '../../utilities/assets';
 import { SPELL_COST } from '../../consts';
 
-export const meta = { id: 'lifedrain', key: '2', icon: '/icons/classes/warlock/lifedrain.jpg' };
+export const meta = { id: 'lifedrain', key: '2', icon: assetUrl('/icons/classes/warlock/lifedrain.jpg') };
 
 export default function castLifeDrain({
   playerId,

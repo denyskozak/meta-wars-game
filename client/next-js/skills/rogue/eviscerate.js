@@ -1,9 +1,10 @@
+import { assetUrl } from '../../utilities/assets';
 import { SPELL_COST } from '../../consts';
 
 export const meta = {
   id: 'eviscerate',
   key: 'R',
-  icon: '/icons/classes/rogue/eviscerate.jpg',
+  icon: assetUrl('/icons/classes/rogue/eviscerate.jpg'),
   autoFocus: false,
 };
 

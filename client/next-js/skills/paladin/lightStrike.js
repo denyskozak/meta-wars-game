@@ -1,9 +1,10 @@
+import { assetUrl } from '../../utilities/assets';
 import { SPELL_COST } from '../../consts';
 
 export const meta = {
   id: 'lightstrike',
   key: 'E',
-  icon: '/icons/classes/paladin/crusaderstrike.jpg',
+  icon: assetUrl('/icons/classes/paladin/crusaderstrike.jpg'),
   autoFocus: false,
 };
 

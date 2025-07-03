@@ -1,9 +1,10 @@
+import { assetUrl } from '../../utilities/assets';
 import { SPELL_COST } from '../../consts';
 
 export const meta = {
   id: 'berserk',
   key: '2',
-  icon: '/icons/classes/warrior/berserk.jpg',
+  icon: assetUrl('/icons/classes/warrior/berserk.jpg'),
   autoFocus: false,
 };
 

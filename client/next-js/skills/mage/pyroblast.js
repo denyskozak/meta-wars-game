@@ -1,6 +1,7 @@
+import { assetUrl } from '../../utilities/assets';
 import { SPELL_COST } from '../../consts';
 
-export const meta = { id: 'pyroblast', key: '2', icon: '/icons/classes/mage/pyroblast.jpg' };
+export const meta = { id: 'pyroblast', key: '2', icon: assetUrl('/icons/classes/mage/pyroblast.jpg') };
 
 export default function castPyroblast({ playerId, castSpellImpl, igniteHands, castSphere, pyroblastMesh, sounds, damage }) {
   igniteHands(playerId, 1000);

@@ -1,6 +1,7 @@
+import { assetUrl } from '../../utilities/assets';
 import { SPELL_COST } from '../../consts';
 
-export const meta = { id: 'iceball', key: 'R', icon: '/icons/classes/mage/spell_frostbolt.jpg' };
+export const meta = { id: 'iceball', key: 'R', icon: assetUrl('/icons/classes/mage/spell_frostbolt.jpg') };
 
 export default function castIceball({ playerId, castSpellImpl, freezeHands, castSphere, iceballMesh, sounds, damage }) {
   freezeHands(playerId, 1000);

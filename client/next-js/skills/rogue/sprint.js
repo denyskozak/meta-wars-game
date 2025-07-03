@@ -1,9 +1,10 @@
+import { assetUrl } from '../../utilities/assets';
 import { SPELL_COST } from '../../consts';
 
 export const meta = {
   id: 'sprint',
   key: '3',
-  icon: '/icons/classes/rogue/sprint.jpg',
+  icon: assetUrl('/icons/classes/rogue/sprint.jpg'),
   autoFocus: false,
 };
 

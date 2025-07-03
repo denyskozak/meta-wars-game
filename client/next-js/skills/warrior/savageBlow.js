@@ -1,9 +1,10 @@
+import { assetUrl } from '../../utilities/assets';
 import { SPELL_COST } from '../../consts';
 
 export const meta = {
   id: 'savage-blow',
   key: 'E',
-  icon: '/icons/classes/warrior/savageblow.jpg',
+  icon: assetUrl('/icons/classes/warrior/savageblow.jpg'),
   autoFocus: false,
 };
 
