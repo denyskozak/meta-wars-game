@@ -31,6 +31,8 @@ const {
 
 const LIGHTSTRIKE_DAMAGE = 41; // increased by 20%
 const BLADESTORM_DAMAGE = 10;
+const BLOOD_STRIKE_DAMAGE = 35; // 15% reduction
+const BLOOD_STRIKE_RANGE = MELEE_RANGE * 0.8; // 20% smaller radius
 
 function updateLevel(player) {
     const prevLevel = player.level || 1;
@@ -936,7 +938,9 @@ ws.on('connection', (socket) => {
                                     const dy = p.position.y - player.position.y;
                                     const dz = p.position.z - player.position.z;
                                     const dist = Math.sqrt(dx*dx + dy*dy + dz*dz);
-                                    candidates.push({ id: tid, player: p, dist });
+                                    if (dist < BLOOD_STRIKE_RANGE) {
+                                        candidates.push({ id: tid, player: p, dist });
+                                    }
                                 }
                             });
                             candidates.sort((a, b) => a.dist - b.dist);
@@ -947,7 +951,7 @@ ws.on('connection', (socket) => {
                                 else player.buffs.push({ type: 'combo', stacks: player.comboPoints, icon: COMBO_ICON });
                             }
                             candidates.forEach(c => {
-                                applyDamage(match, c.id, id, LIGHTSTRIKE_DAMAGE, 'blood-strike');
+                                applyDamage(match, c.id, id, BLOOD_STRIKE_DAMAGE, 'blood-strike');
                             });
                         }
                         if (message.payload.type === 'savage-blow') {
