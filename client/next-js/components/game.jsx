@@ -2389,9 +2389,9 @@ export function Game({models, sounds, textures, matchId, character}) {
             if (!controlsEnabled || debuffsRef.current.some(d => d.type === 'stun')) return;
             const model = players.get(myPlayerId).model;
             // Adjust walking and running speed
-            const baseWalkSpeed = 7.2; // Increased running speed by 20%
+            const baseWalkSpeed = 6.12; // Reduced running speed by 15%
             const speedDelta =
-                deltaTime * (playerOnFloor ? baseWalkSpeed : 5) * movementSpeedModifier; // Apply speed modifier
+                deltaTime * (playerOnFloor ? baseWalkSpeed : 4.25) * movementSpeedModifier; // Apply speed modifier
 
             // Rotate playerVelocity when pressing A or D
             if (keyStates["KeyA"]) {
