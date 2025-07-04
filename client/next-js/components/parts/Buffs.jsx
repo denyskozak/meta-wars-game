@@ -1,5 +1,6 @@
 import {useInterface} from '@/context/inteface';
 import {useEffect, useState} from 'react';
+import { assetUrl } from '../../utilities/assets';
 import './Buffs.css';
 
 /**
@@ -45,7 +46,7 @@ export const Buffs = (
         const timeLeft = getRemaining(item);
         return (
             <div key={`${type}-${idx}`} className="buff-icon">
-                <img src={item.icon || '/icons/shield.png'} alt={item.type} />
+                <img src={item.icon || assetUrl('/icons/shield.png')} alt={item.type} />
                 {item.stacks && <span className="stack-count">{item.stacks}</span>}
                 {timeLeft > 0 && <span className="time">{formatTime(timeLeft)}</span>}
             </div>

@@ -1,4 +1,5 @@
 import { useEffect, useState, useCallback } from "react";
+import { assetUrl } from "../../utilities/assets";
 import "./TargetHelpModal.css";
 
 const STORAGE_KEY = 'hideTargetHelp';
@@ -49,7 +50,7 @@ export const TargetHelpModal = () => {
     <div className="target-help-overlay">
       <h2 className="target-help-title">Target Help</h2>
       <div className="target-help-body">
-        <img src="/icons/target-green.svg" alt="Target Help" className="target-help-image" />
+        <img src={assetUrl('/icons/target-green.svg')} alt="Target Help" className="target-help-image" />
       </div>
       <div className="target-help-actions">
         <button className="target-help-button" onClick={dontShowAgain}>Don't show again</button>

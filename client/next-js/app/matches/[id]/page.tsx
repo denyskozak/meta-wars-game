@@ -2,6 +2,7 @@
 import {useWS} from "@/hooks/useWS";
 import {useCallback, useEffect, useMemo, useState} from "react";
 import Image from "next/image";
+import { assetUrl } from "@/utilities/assets";
 import {Button, Table, TableHeader, TableColumn, TableBody, TableRow, TableCell} from "@heroui/react";
 import {Modal, ModalContent, ModalHeader, ModalBody, ModalFooter} from "@heroui/modal";
 import {Kbd} from "@heroui/kbd";
@@ -46,7 +47,7 @@ export default function MatchesPage() {
     const classOptions = {
         warrior: {
             label: 'Warrior',
-            icon:  '/icons/warrior.webp',
+            icon:  assetUrl('/icons/warrior.webp'),
             type: 'Melee',
             description: 'Brutal melee fighter with unmatched strength.',
             skills: [
@@ -60,7 +61,7 @@ export default function MatchesPage() {
         },
         paladin: {
             label: 'Paladin',
-            icon: '/icons/paladin.webp',
+            icon: assetUrl('/icons/paladin.webp'),
             type: 'Melee',
             description: 'Holy warrior empowered by light.',
             skills: [
@@ -74,7 +75,7 @@ export default function MatchesPage() {
         },
         rogue: {
             label: 'Rogue',
-            icon:  '/icons/rogue.webp',
+            icon:  assetUrl('/icons/rogue.webp'),
             type: 'Melee',
             description: 'Stealthy assassin striking from shadows.',
             skills: [
@@ -88,7 +89,7 @@ export default function MatchesPage() {
         },
         warlock: {
             label: 'Warlock',
-            icon: '/icons/warlock.webp',
+            icon: assetUrl('/icons/warlock.webp'),
             type: 'Ranged',
             description: 'Manipulator of dark magic.',
             skills: [
@@ -102,7 +103,7 @@ export default function MatchesPage() {
         },
         mage: {
             label: 'Mage',
-            icon: '/icons/mage.png',
+            icon: assetUrl('/icons/mage.png'),
             type: 'Ranged',
             description: 'Master of arcane magic and spells.',
             skills: [
