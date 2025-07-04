@@ -1877,6 +1877,9 @@ export function Game({models, sounds, textures, matchId, character}) {
                         igniteHands,
                         sounds,
                     });
+                    applySpeedEffect(playerId, 6000, 1.5);
+                    applyFreedomEffect(playerId, 6000);
+                    spawnSprintTrail(playerId, 6000);
                     break;
                 case "bloodthirst":
                     castBloodthirst({
@@ -4099,6 +4102,11 @@ export function Game({models, sounds, textures, matchId, character}) {
                             break;
                         case "berserk":
                             igniteHands(message.id, 1000);
+                            if (message.id === myPlayerId) {
+                                applySpeedEffect(myPlayerId, 6000, 1.5);
+                                applyFreedomEffect(myPlayerId, 6000);
+                                spawnSprintTrail(myPlayerId, 6000);
+                            }
                             break;
                         case "bloodthirst":
                             break;

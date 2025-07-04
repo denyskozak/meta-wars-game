@@ -22,6 +22,7 @@ const ROGUE_SPRINT_ICON = '/icons/classes/rogue/sprint.jpg';
 const CLASS_STATS = require('../client/next-js/consts/classStats.json');
 const ADRENALINE_RUSH_ICON = '/icons/classes/rogue/adrenalinerush.jpg';
 const RAGE_ICON = '/icons/classes/warrior/rage.jpg';
+const BERSERK_ICON = '/icons/classes/warrior/berserk.jpg';
 const {
     MELEE_RANGE,
     MELEE_ANGLE,
@@ -1033,10 +1034,20 @@ ws.on('connection', (socket) => {
                                 icon: '/icons/classes/warrior/bladestorm.jpg',
                             });
                         }
+                        if (message.payload.type === 'berserk') {
+                            player.debuffs = player.debuffs?.filter(d => d.type !== 'slow' && d.type !== 'root') || [];
+                            player.buffs.push({
+                                type: 'berserk',
+                                expires: Date.now() + 6000,
+                                icon: BERSERK_ICON,
+                            });
+                        }
                         if (message.payload.type === 'fear' && message.payload.targetId) {
                             const target = match.players.get(message.payload.targetId);
                             if (target) {
-                                target.debuffs = target.debuffs || [];
+                                const immune = target.buffs?.some(b => (b.type === 'freedom' || b.type === 'berserk') && (b.expires === undefined || b.expires > Date.now()));
+                                if (!immune) {
+                                    target.debuffs = target.debuffs || [];
                                     target.debuffs.push({
                                         type: 'root',
                                         expires: Date.now() + 3000,
@@ -1044,6 +1055,7 @@ ws.on('connection', (socket) => {
                                     });
                                 }
                             }
+                        }
                             if (message.payload.type === 'lifedrain' && message.payload.targetId) {
                                 const target = match.players.get(message.payload.targetId);
                                 const caster = match.players.get(id);
@@ -1076,30 +1088,36 @@ ws.on('connection', (socket) => {
                     if (message.spellType === 'iceball') {
                         const target = match.players.get(id);
                         if (target) {
-                            target.debuffs = target.debuffs || [];
-                            target.debuffs = target.debuffs.filter(d => d.type !== 'slow');
-                            target.debuffs.push({
-                                type: 'slow',
-                                percent: 0.4,
-                                expires: Date.now() + 3000,
-                                icon: ICEBALL_ICON,
-                            });
-                            broadcastToMatch(match.id, {
-                                type: 'CAST_SPELL',
-                                payload: { type: 'iceball-hit', targetId: id },
-                                id: message.damageDealerId,
-                            });
+                            const immune = target.buffs?.some(b => (b.type === 'freedom' || b.type === 'berserk') && (b.expires === undefined || b.expires > Date.now()));
+                            if (!immune) {
+                                target.debuffs = target.debuffs || [];
+                                target.debuffs = target.debuffs.filter(d => d.type !== 'slow');
+                                target.debuffs.push({
+                                    type: 'slow',
+                                    percent: 0.4,
+                                    expires: Date.now() + 3000,
+                                    icon: ICEBALL_ICON,
+                                });
+                                broadcastToMatch(match.id, {
+                                    type: 'CAST_SPELL',
+                                    payload: { type: 'iceball-hit', targetId: id },
+                                    id: message.damageDealerId,
+                                });
+                            }
                         }
                     }
                     if (message.spellType === 'frostnova') {
                         const target = match.players.get(id);
                         if (target) {
-                            target.debuffs = target.debuffs || [];
-                            target.debuffs.push({
-                                type: 'root',
-                                expires: Date.now() + 3000,
-                                icon: FROSTNOVA_ICON,
-                            });
+                            const immune = target.buffs?.some(b => (b.type === 'freedom' || b.type === 'berserk') && (b.expires === undefined || b.expires > Date.now()));
+                            if (!immune) {
+                                target.debuffs = target.debuffs || [];
+                                target.debuffs.push({
+                                    type: 'root',
+                                    expires: Date.now() + 3000,
+                                    icon: FROSTNOVA_ICON,
+                                });
+                            }
                         }
                     }
                 }
