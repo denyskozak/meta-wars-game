@@ -2422,7 +2422,9 @@ export function Game({models, sounds, textures, matchId, character}) {
                 } else {
                     const cameraDir = new THREE.Vector3();
                     camera.getWorldDirection(cameraDir);
-                    y = cameraDir.y;
+                    cameraDir.y = 0;
+                    cameraDir.normalize().negate();
+                    y = Math.atan2(cameraDir.x, cameraDir.z);
                 }
 
 
