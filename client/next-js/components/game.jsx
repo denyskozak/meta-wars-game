@@ -1407,7 +1407,7 @@ export function Game({models, sounds, textures, matchId, character}) {
             dispatchEvent('start-cast', {duration: 2000, onEnd: onCastEnd, name: 'heal', icon: ''})
         }
 
-        function getAimDirection() {
+       function getAimDirection() {
             const cameraDir = new THREE.Vector3();
             camera.getWorldDirection(cameraDir);
 
@@ -1422,7 +1422,18 @@ export function Game({models, sounds, textures, matchId, character}) {
                 return farPoint.sub(start).normalize();
             }
 
-            // Default behaviour - fire in the camera direction
+            // If not focused, shoot in the direction the model is facing
+            const player = players.get(myPlayerId);
+            if (player) {
+                const dir = new THREE.Vector3(
+                    Math.sin(player.model.rotation.y),
+                    0,
+                    Math.cos(player.model.rotation.y),
+                );
+                return dir.normalize();
+            }
+
+            // Fallback to camera direction
             return cameraDir.normalize();
         }
 
