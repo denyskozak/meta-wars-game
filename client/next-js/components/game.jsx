@@ -1292,17 +1292,8 @@ export function Game({models, sounds, textures, matchId, character}) {
                 containerRef.current.style.cursor = 'none';
                 mouseTime = performance.now();
 
-                sounds.background.volume = 0.1;
-                sounds.background.play();
-            }
-        });
-
-        document.addEventListener("mouseup", (event) => {
-            if (event.button === 0 && isCameraRotating) {
-                document.exitPointerLock();
-                isCameraRotating = false;
-                containerRef.current.style.cursor = 'default';
-            }
+            sounds.background.volume = 0.1;
+            sounds.background.play();
         });
 
         document.addEventListener("contextmenu", (event) => {
@@ -1310,12 +1301,14 @@ export function Game({models, sounds, textures, matchId, character}) {
         });
 
         document.body.addEventListener("mousemove", (event) => {
-            if (document.pointerLockElement === document.body && isCameraRotating) {
+            if (document.pointerLockElement === document.body) {
+                // Only update pitch based on mouse movement. Horizontal
+                // rotation is handled via keyboard inputs.
+                yaw -= event.movementX / 500;
                 pitch = Math.max(
                     -Math.PI / 2,
                     Math.min(Math.PI / 2, pitch + event.movementY / 500),
                 );
-                yaw -= event.movementX / 500;
             }
         });
         // const renderCursor = () => {
@@ -2387,14 +2380,14 @@ export function Game({models, sounds, textures, matchId, character}) {
             const speedDelta =
                 deltaTime * (playerOnFloor ? baseWalkSpeed : 3.825) * movementSpeedModifier; // Apply speed modifier
 
-            // Rotate the player model with A and D
+            // Rotate the camera horizontally using A and D instead of strafing
             if (keyStates["KeyA"]) {
-                model.rotation.y += ROTATION_SPEED * deltaTime;
+                yaw += ROTATION_SPEED * deltaTime;
                 if (!isAnyActionRunning()) setAnimation("walk");
             }
 
             if (keyStates["KeyD"]) {
-                model.rotation.y -= ROTATION_SPEED * deltaTime;
+                yaw -= ROTATION_SPEED * deltaTime;
                 if (!isAnyActionRunning()) setAnimation("walk");
             }
 
@@ -3160,7 +3153,26 @@ export function Game({models, sounds, textures, matchId, character}) {
                 // model.position.y += 0.5; // Adjust the height to keep the model slightly above ground
                 // Lower the model slightly so the feet touch the ground
                 model.position.y -= 0.7;
-                // orientation is controlled manually via keyboard
+                // Get the camera's forward direction
+                const cameraDirection = new THREE.Vector3();
+
+                camera.getWorldDirection(cameraDirection);
+
+                if (leftMouseButtonClicked) return;
+
+
+                    // Calculate the direction the player is moving (opposite to camera's forward)
+                    const targetRotationY = Math.atan2(
+                        cameraDirection.x,
+                        cameraDirection.z,
+                    );
+
+                    // Rotate the model to face the opposite direction
+                    model.rotation.y = THREE.MathUtils.lerp(
+                        model.rotation.y,
+                        targetRotationY,
+                        0.1,
+                    );
 
 
                 if (isShieldActive) {

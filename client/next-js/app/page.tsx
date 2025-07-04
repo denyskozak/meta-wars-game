@@ -13,11 +13,11 @@ export default function Home() {
         <div className="relative justify-center flex flex-col w-full h-[calc(100%-98px)]">
 
             <Image
-                className="absolute top-0 left-0 w-full h-full object-cover z-[0]"
+                className="absolute w-full h-full object-cover z-[0]"
                 alt="Turtle Art"
-                width={3840}
-                height={1961}
-                src="/background.webp"
+                width={600}
+                height={300}
+                src="/big-logo.webp"
             />
 
             <main className="z-[1] flex justify-center w-full h-full overflow-y-auto">
