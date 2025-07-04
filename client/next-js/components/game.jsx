@@ -388,7 +388,7 @@ export function Game({models, sounds, textures, matchId, character}) {
         const activeSlowEffects = new Map(); // key = playerId -> {mesh, timeout}
         const activeSprintTrails = new Map(); // key = playerId -> {mesh, start, duration, timeout}
         const activeBladestorms = new Map(); // key = playerId -> {start, duration, sound}
-        const fearTexture = new THREE.TextureLoader().load('/icons/classes/warlock/possession.jpg');
+        const fearTexture = new THREE.TextureLoader().load(assetUrl('/icons/classes/warlock/possession.jpg'));
 
         const glowTexture = (() => {
             const size = 64;
@@ -1469,7 +1469,7 @@ export function Game({models, sounds, textures, matchId, character}) {
         function highlightCrosshair() {
             if (!targetImage) return;
             if (!isFocused) {
-                targetImage.src = '/icons/target.svg';
+                targetImage.src = assetUrl('/icons/target.svg');
                 return;
             }
             const id = getTargetPlayer();
@@ -1481,12 +1481,12 @@ export function Game({models, sounds, textures, matchId, character}) {
                 const targetPos = players.get(id).model.position.clone();
                 const dist = start.distanceTo(targetPos);
                 if (dist <= FIREBLAST_RANGE) {
-                    targetImage.src = '/icons/target-green.svg';
+                    targetImage.src = assetUrl('/icons/target-green.svg');
                 } else {
-                    targetImage.src = '/icons/target.svg';
+                    targetImage.src = assetUrl('/icons/target.svg');
                 }
             } else {
-                targetImage.src = '/icons/target.svg';
+                targetImage.src = assetUrl('/icons/target.svg');
             }
         }
 

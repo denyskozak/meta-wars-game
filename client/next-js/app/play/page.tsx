@@ -1,6 +1,7 @@
 "use client";
 
 import Image from "next/image";
+import { assetUrl } from "@/utilities/assets";
 import {
   Card,
   CardHeader,
@@ -48,7 +49,7 @@ export default function MatchesPage() {
                     alt="Open World"
                     className="w-full h-full object-cover rounded-t-lg"
                     height={1200}
-                    src="/images/open-world.jpg"
+                    src={assetUrl('/images/open-world.jpg')}
                     width={2000}
                   />
                 </Card>
@@ -64,7 +65,7 @@ export default function MatchesPage() {
                     alt="Arena Match"
                     className="w-full h-full object-cover rounded-t-lg"
                     height={1200}
-                    src="/images/battle.jpg"
+                    src={assetUrl('/images/battle.jpg')}
                     width={2000}
                   />
                 </Card>
@@ -115,7 +116,7 @@ export default function MatchesPage() {
               alt="Arena Match"
               className="w-full h-full absolute object-cover rounded-t-lg"
               height={1400}
-              src="/images/tower_bg.png"
+              src={assetUrl('/images/tower_bg.png')}
               width={3000}
             />
             <ConnectionButton className="m-auto" text="Connect to Play" />

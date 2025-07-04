@@ -1,4 +1,5 @@
 import { useEffect, useState, useCallback } from "react";
+import { assetUrl } from "../../utilities/assets";
 import {
   Modal as HeroModal,
   ModalContent,
@@ -56,7 +57,7 @@ export const HowToPlayModal = () => {
             <ModalHeader>How to Play</ModalHeader>
             <ModalBody>
               <div style={{ width: 400, height: 300 }} className="flex items-center justify-center">
-                <img src="/images/how-to-play.webp" alt="How to play" className="max-w-full max-h-full" />
+                <img src={assetUrl('/images/how-to-play.webp')} alt="How to play" className="max-w-full max-h-full" />
               </div>
             </ModalBody>
             <ModalFooter>

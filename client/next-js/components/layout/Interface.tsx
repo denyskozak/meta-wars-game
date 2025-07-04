@@ -18,6 +18,7 @@ import {CLASS_ICONS} from "@/consts/classes";
 
 import './Interface.css';
 import Image from "next/image";
+import { assetUrl } from "@/utilities/assets";
 import React, {useEffect, useState} from "react";
 import {MAX_HP, MAX_MANA} from "../../consts";
 
@@ -135,7 +136,7 @@ export const Interface = () => {
                     alt="Target"
                     width={25}
                     height={25}
-                    src="/icons/target.svg"
+                    src={assetUrl('/icons/target.svg')}
                 />
             </div>
 

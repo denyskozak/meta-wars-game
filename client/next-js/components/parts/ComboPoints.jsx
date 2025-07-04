@@ -1,5 +1,6 @@
 import { useInterface } from '@/context/inteface';
 import Image from 'next/image';
+import { assetUrl } from '../../utilities/assets';
 import './ComboPoints.css';
 
 export const ComboPoints = () => {
@@ -12,7 +13,7 @@ export const ComboPoints = () => {
             {Array.from({ length: 5 }).map((_, idx) => (
                 <Image
                     key={idx}
-                    src="/icons/classes/rogue/combo_point.jpg"
+                    src={assetUrl('/icons/classes/rogue/combo_point.jpg')}
                     alt="Combo Point"
                     width={24}
                     height={24}
