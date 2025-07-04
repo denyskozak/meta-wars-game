@@ -963,7 +963,7 @@ export function Game({models, sounds, textures, matchId, character}) {
         const SHIELD_MANA_COST = SPELL_COST['shield'];
         const SHIELD_DURATION = 3; // Shield duration in seconds
         const DAMAGE_REDUCTION = 0.5; // Reduces damage by 50%
-        const PRIORITY_ACTIONS = ['attack', 'attack_360'];
+        const PRIORITY_ACTIONS = ['attack', 'attack360'];
         // Rotation speed for the damage rune effect attached to players
         const DAMAGE_EFFECT_ROT_SPEED = 0.2;
         const DAMAGE_EFFECT_MAP_SPEED = 0.05;
