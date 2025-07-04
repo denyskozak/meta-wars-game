@@ -885,7 +885,7 @@ export function Game({models, sounds, textures, matchId, character}) {
         const DARKBALL_DAMAGE = 30;
         const LIFEDRAIN_DAMAGE = 30;
         const FROSTNOVA_DAMAGE = 20;
-        const FROSTNOVA_RANGE = FIREBLAST_RANGE / 4;
+        const FROSTNOVA_RANGE = MELEE_RANGE_ATTACK;
         const FROSTNOVA_RING_DURATION = 1000; // ms
         const LIGHTWAVE_RING_DURATION = 1000; // ms
         const LIGHTSTRIKE_DAMAGE = 35; // reduced by 15%
@@ -3039,7 +3039,8 @@ export function Game({models, sounds, textures, matchId, character}) {
             const mesh = new THREE.Mesh(geometry, material);
             mesh.rotation.x = -Math.PI / 2;
             mesh.position.copy(position);
-            mesh.scale.setScalar(0.1);
+            // begin at scale 0 so the nova expands from the player
+            mesh.scale.setScalar(0);
 
             scene.add(mesh);
             frostNovaRings.push({ mesh, start: performance.now(), duration });
@@ -3372,7 +3373,8 @@ export function Game({models, sounds, textures, matchId, character}) {
                         const effect = frostNovaRings[i];
                         const elapsed = performance.now() - effect.start;
                         const progress = elapsed / effect.duration;
-                        effect.mesh.scale.setScalar(0.1 + progress * 2);
+                        // expand from the player out to the melee range
+                        effect.mesh.scale.setScalar(FROSTNOVA_RANGE * progress);
                         effect.mesh.material.opacity = 0.8 * (1 - progress);
                         if (effect.mesh.material.uniforms?.time) {
                             effect.mesh.material.uniforms.time.value += delta;
