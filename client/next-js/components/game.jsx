@@ -886,7 +886,7 @@ export function Game({models, sounds, textures, matchId, character}) {
         const LIFEDRAIN_DAMAGE = 30;
         const FROSTNOVA_DAMAGE = 20;
         const FROSTNOVA_RANGE = MELEE_RANGE_ATTACK;
-        const FROSTNOVA_RING_DURATION = 1000; // ms
+        const FROSTNOVA_RING_DURATION = 500; // ms, faster nova
         const LIGHTWAVE_RING_DURATION = 1000; // ms
         const LIGHTWAVE_RANGE = MELEE_RANGE_ATTACK;
         const LIGHTSTRIKE_DAMAGE = 35; // reduced by 15%
@@ -2393,9 +2393,9 @@ export function Game({models, sounds, textures, matchId, character}) {
             if (!controlsEnabled || debuffsRef.current.some(d => d.type === 'stun')) return;
             const model = players.get(myPlayerId).model;
             // Adjust walking and running speed
-            const baseWalkSpeed = 6.12; // Reduced running speed by 15%
+            const baseWalkSpeed = 5.508; // Slowed base speed by 10%
             const speedDelta =
-                deltaTime * (playerOnFloor ? baseWalkSpeed : 4.25) * movementSpeedModifier; // Apply speed modifier
+                deltaTime * (playerOnFloor ? baseWalkSpeed : 3.825) * movementSpeedModifier; // Apply speed modifier
 
             // Rotate playerVelocity when pressing A or D
             if (keyStates["KeyA"]) {
