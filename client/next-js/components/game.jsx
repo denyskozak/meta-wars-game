@@ -780,12 +780,12 @@ export function Game({models, sounds, textures, matchId, character}) {
             lightwave: 5000,
             frostnova: 15000,
             'hand-of-freedom': 15000,
-            'divine-speed': 30000,
+            'divine-speed': 20000,
             'blood-strike': 1000,
             eviscerate: 10000,
             'kidney-strike': 15000,
             'adrenaline-rush': 45000,
-            sprint: 30000,
+            sprint: 20000,
             'shadow-leap': 12000,
             'warbringer': 10000,
             'savage-blow': 0,
@@ -1736,7 +1736,7 @@ export function Game({models, sounds, textures, matchId, character}) {
                         startSkillCooldown,
                         sounds,
                     });
-                    applySpeedEffect(playerId, 5000);
+                    applySpeedEffect(playerId, 5000, 2);
                     break;
                 case "paladin-heal":
                     castPaladinHeal({
@@ -1800,7 +1800,7 @@ export function Game({models, sounds, textures, matchId, character}) {
                         startSkillCooldown,
                         sounds,
                     });
-                    applySpeedEffect(playerId, 4000, 1.5);
+                    applySpeedEffect(playerId, 4000, 2);
                     spawnSprintTrail(playerId, 4000);
                     break;
                 case "shadow-leap":
@@ -3982,7 +3982,7 @@ export function Game({models, sounds, textures, matchId, character}) {
                             break;
                         case "divine-speed":
                             if (message.id === myPlayerId) {
-                                applySpeedEffect(myPlayerId, 5000);
+                                applySpeedEffect(myPlayerId, 5000, 2);
                             }
                             break;
                         case "blood-strike":
@@ -4033,7 +4033,7 @@ export function Game({models, sounds, textures, matchId, character}) {
                             break;
                         case "sprint":
                             if (message.id === myPlayerId) {
-                                applySpeedEffect(myPlayerId, 4000, 1.5);
+                                applySpeedEffect(myPlayerId, 4000, 2);
                                 spawnSprintTrail(myPlayerId, 4000);
                             }
                             break;
