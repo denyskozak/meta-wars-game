@@ -995,6 +995,8 @@ export function Game({models, sounds, textures, matchId, character}) {
         // Variables for camera rotation control
         let yaw = 3;
         let pitch = 0;
+        // Speed in radians per second for keyboard based rotation
+        const ROTATION_SPEED = 2.5;
 
         // const mouse = new THREE.Vector2(); // Normalized device coordinates
         // const raycaster = new THREE.Raycaster(); // To project cursor onto the scene
@@ -1309,10 +1311,8 @@ export function Game({models, sounds, textures, matchId, character}) {
 
         document.body.addEventListener("mousemove", (event) => {
             if (document.pointerLockElement === document.body) {
-                // Update yaw (horizontal rotation) normally
-                yaw -= event.movementX / 500;
-
-                // Update pitch (vertical rotation) with reversed movement for regular behavior
+                // Only update pitch based on mouse movement. Horizontal
+                // rotation is handled via keyboard inputs.
                 pitch = Math.max(
                     -Math.PI / 2,
                     Math.min(Math.PI / 2, pitch + event.movementY / 500),
@@ -2388,14 +2388,14 @@ export function Game({models, sounds, textures, matchId, character}) {
             const speedDelta =
                 deltaTime * (playerOnFloor ? baseWalkSpeed : 3.825) * movementSpeedModifier; // Apply speed modifier
 
-            // Rotate playerVelocity when pressing A or D
+            // Rotate the camera horizontally using A and D instead of strafing
             if (keyStates["KeyA"]) {
-                playerVelocity.add(getSideVector().multiplyScalar(-speedDelta));
+                yaw += ROTATION_SPEED * deltaTime;
                 if (!isAnyActionRunning()) setAnimation("walk");
             }
 
             if (keyStates["KeyD"]) {
-                playerVelocity.add(getSideVector().multiplyScalar(speedDelta));
+                yaw -= ROTATION_SPEED * deltaTime;
                 if (!isAnyActionRunning()) setAnimation("walk");
             }
 
