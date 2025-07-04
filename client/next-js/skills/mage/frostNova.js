@@ -1,9 +1,10 @@
 import { SPELL_COST } from "../../consts";
+import { assetUrl } from "../../utilities/assets";
 
 export const meta = {
   id: "frostnova",
   key: "Q",
-  icon: "/icons/classes/mage/frostnova.jpg",
+  icon: assetUrl('/icons/classes/mage/frostnova.jpg'),
   autoFocus: false,
 };
 
