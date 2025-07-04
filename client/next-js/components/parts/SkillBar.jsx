@@ -65,6 +65,7 @@ export const SkillBar = ({ mana = 0, level = 1, skillPoints = 0, learnedSkills =
     const [cooldowns, setCooldowns] = useState({});
     const [pressed, setPressed] = useState({});
     const [learned, setLearned] = useState(learnedSkills || {});
+    const [ready, setReady] = useState({});
     const [points, setPoints] = useState(skillPoints);
     const prevLevel = useRef(level);
     const { sendToSocket } = useWS();
@@ -107,18 +108,31 @@ export const SkillBar = ({ mana = 0, level = 1, skillPoints = 0, learnedSkills =
 
     useEffect(() => {
         const interval = setInterval(() => {
+            const finished = [];
             setCooldowns((prev) => {
-                const updated = {...prev};
+                const updated = { ...prev };
                 let changed = false;
                 Object.keys(updated).forEach((key) => {
                     const remaining = updated[key].end - Date.now();
                     if (remaining <= 0) {
                         delete updated[key];
+                        finished.push(key);
                         changed = true;
                     }
                 });
                 return changed ? updated : prev;
             });
+            if (finished.length) {
+                finished.forEach((key) => {
+                    setReady((r) => ({ ...r, [key]: true }));
+                    setTimeout(() => {
+                        setReady((r) => {
+                            const { [key]: _removed, ...rest } = r;
+                            return rest;
+                        });
+                    }, 400);
+                });
+            }
         }, 100);
         return () => clearInterval(interval);
     }, []);
@@ -155,7 +169,7 @@ export const SkillBar = ({ mana = 0, level = 1, skillPoints = 0, learnedSkills =
                 const insufficientMana = mana < (SPELL_COST[skill.id] || 0);
                 const locked = !learned[skill.id];
                 return (
-                    <div className={`skill-button${pressed[skill.id] ? ' pressed' : ''}${insufficientMana ? ' no-mana' : ''}${locked ? ' locked' : ''}`} key={skill.id}>
+                    <div className={`skill-button${pressed[skill.id] ? ' pressed' : ''}${insufficientMana ? ' no-mana' : ''}${locked ? ' locked' : ''}${ready[skill.id] ? ' ready' : ''}`} key={skill.id}>
                         <div className="skill-icon" style={{backgroundImage: `url('${skill.icon}')`}}></div>
                         {locked && points > 0 && <div className="skill-plus">+</div>}
                         {data && (
