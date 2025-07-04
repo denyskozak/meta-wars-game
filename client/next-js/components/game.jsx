@@ -591,7 +591,7 @@ export function Game({models, sounds, textures, matchId, character}) {
                   float core  = smoothstep(0.35, 0.0, r);
                   float flame = smoothstep(0.8, 0.2, r);
 
-                  float flow = fract(vPos.z * 4.0 - time * 5.0);
+                  float flow = fract(vPos.z * 6.0 - time * 5.0);
                   float flicker = 0.5 + 0.5 * sin(time * 20.0 + vNoise * 6.283);
                   core  *= 0.9 + 0.1 * vNoise;
                   flame *= flow * flicker;
@@ -615,7 +615,7 @@ export function Game({models, sounds, textures, matchId, character}) {
         fireballMesh.scale.set(
             SPELL_SCALES.fireball,
             SPELL_SCALES.fireball,
-            SPELL_SCALES.fireball,
+            SPELL_SCALES.fireball * 1.3,
         );
 
         const pyroblastMesh = new THREE.Mesh(
@@ -726,7 +726,7 @@ export function Game({models, sounds, textures, matchId, character}) {
         iceballMesh.scale.set(
             SPELL_SCALES.iceball,
             SPELL_SCALES.iceball,
-            SPELL_SCALES.iceball,
+            SPELL_SCALES.iceball * 1.3,
         );
 
 
@@ -905,7 +905,7 @@ export function Game({models, sounds, textures, matchId, character}) {
         const SPHERE_MAX_DISTANCE = FIREBLAST_RANGE / 2;
 
         // Number of sprites used for the fireball tail
-        const FIREBALL_TAIL_SEGMENTS = 6;
+        const FIREBALL_TAIL_SEGMENTS = 8;
 
         const SPELL_TAIL_COLORS = {
             fireball: 0xff6600,
