@@ -266,7 +266,7 @@ export function Game({models, sounds, textures, matchId, character}) {
         let actions = [];
         let playerMixers = [];
         let settings;
-        let leftMouseButtonClicked = false;
+        let isCameraRotating = false;
 
         let meleeRangeIndicator = null;
         const MELEE_INDICATOR_OPACITY = 0.2; // transparency for the auto attack indicator
@@ -1110,9 +1110,6 @@ export function Game({models, sounds, textures, matchId, character}) {
             else if (className === 'warrior') castSpell('berserk');
 
         }
-        function handleKeyG() {
-            leftMouseButtonClicked = true;
-        }
         function handleKeyJ() {
             const currentPosition = new THREE.Vector3();
             playerCollider.getCenter(currentPosition);
@@ -1172,7 +1169,6 @@ export function Game({models, sounds, textures, matchId, character}) {
             KeyF: handleKeyF,
             Digit3: handleDigit3,
             Digit2: handleDigit2,
-            KeyG: handleKeyG,
             KeyJ: handleKeyJ,
             KeyT: handleKeyT,
             KeyC: handleKeyC,
@@ -1213,9 +1209,6 @@ export function Game({models, sounds, textures, matchId, character}) {
             if (handler) handler();
         });
 
-        function handleKeyUpG() {
-            leftMouseButtonClicked = false;
-        }
         function handleKeyUpT() {
             dispatch({type: 'SET_SCOREBOARD_VISIBLE', payload: false});
         }
@@ -1229,7 +1222,6 @@ export function Game({models, sounds, textures, matchId, character}) {
         }
 
         const keyUpHandlers = {
-            KeyG: handleKeyUpG,
             KeyT: handleKeyUpT,
             KeyC: handleKeyUpC,
             Space: handleKeyUpSpace,
@@ -1275,15 +1267,16 @@ export function Game({models, sounds, textures, matchId, character}) {
             highlightCrosshair();
         };
 
-        // chatch even
+        // handle mouse events
         document.addEventListener("mousedown", (event) => {
             if (!controlsEnabled || debuffsRef.current.some(d => d.type === 'stun')) return;
+
             if (event.button === 2) {
                 // Right mouse button
                 handleRightClick();
             }
+
             if (event.button === 0) {
-                // Left mouse button
                 const id = getTargetPlayer();
                 if (id) {
                     targetedPlayerId = id;
@@ -1292,17 +1285,24 @@ export function Game({models, sounds, textures, matchId, character}) {
                     targetedPlayerId = null;
                     dispatchTargetUpdate();
                 }
+
+                // begin camera rotation
+                document.body.requestPointerLock();
+                isCameraRotating = true;
+                containerRef.current.style.cursor = 'none';
+                mouseTime = performance.now();
+
+                sounds.background.volume = 0.1;
+                sounds.background.play();
             }
         });
 
-        // block mouse
-        containerRef.current.addEventListener("mousedown", () => {
-            if (debuffsRef.current.some(d => d.type === 'stun')) return;
-            document.body.requestPointerLock();
-            mouseTime = performance.now();
-
-            sounds.background.volume = 0.1;
-            sounds.background.play();
+        document.addEventListener("mouseup", (event) => {
+            if (event.button === 0 && isCameraRotating) {
+                document.exitPointerLock();
+                isCameraRotating = false;
+                containerRef.current.style.cursor = 'default';
+            }
         });
 
         document.addEventListener("contextmenu", (event) => {
@@ -1310,13 +1310,12 @@ export function Game({models, sounds, textures, matchId, character}) {
         });
 
         document.body.addEventListener("mousemove", (event) => {
-            if (document.pointerLockElement === document.body) {
-                // Only update pitch based on mouse movement. Horizontal
-                // rotation is handled via keyboard inputs.
+            if (document.pointerLockElement === document.body && isCameraRotating) {
                 pitch = Math.max(
                     -Math.PI / 2,
                     Math.min(Math.PI / 2, pitch + event.movementY / 500),
                 );
+                yaw -= event.movementX / 500;
             }
         });
         // const renderCursor = () => {
@@ -2388,14 +2387,14 @@ export function Game({models, sounds, textures, matchId, character}) {
             const speedDelta =
                 deltaTime * (playerOnFloor ? baseWalkSpeed : 3.825) * movementSpeedModifier; // Apply speed modifier
 
-            // Rotate the camera horizontally using A and D instead of strafing
+            // Rotate the player model with A and D
             if (keyStates["KeyA"]) {
-                yaw += ROTATION_SPEED * deltaTime;
+                model.rotation.y += ROTATION_SPEED * deltaTime;
                 if (!isAnyActionRunning()) setAnimation("walk");
             }
 
             if (keyStates["KeyD"]) {
-                yaw -= ROTATION_SPEED * deltaTime;
+                model.rotation.y -= ROTATION_SPEED * deltaTime;
                 if (!isAnyActionRunning()) setAnimation("walk");
             }
 
@@ -3161,26 +3160,7 @@ export function Game({models, sounds, textures, matchId, character}) {
                 // model.position.y += 0.5; // Adjust the height to keep the model slightly above ground
                 // Lower the model slightly so the feet touch the ground
                 model.position.y -= 0.7;
-                // Get the camera's forward direction
-                const cameraDirection = new THREE.Vector3();
-
-                camera.getWorldDirection(cameraDirection);
-
-                if (leftMouseButtonClicked) return;
-
-
-                    // Calculate the direction the player is moving (opposite to camera's forward)
-                    const targetRotationY = Math.atan2(
-                        cameraDirection.x,
-                        cameraDirection.z,
-                    );
-
-                    // Rotate the model to face the opposite direction
-                    model.rotation.y = THREE.MathUtils.lerp(
-                        model.rotation.y,
-                        targetRotationY,
-                        0.1,
-                    );
+                // orientation is controlled manually via keyboard
 
 
                 if (isShieldActive) {
