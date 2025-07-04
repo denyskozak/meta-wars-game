@@ -769,7 +769,7 @@ export function Game({models, sounds, textures, matchId, character}) {
             fireblast: 6000,
             chaosbolt: 6000,
             lifedrain: 0,
-            fear: 40000,
+            fear: 45000,
             'ice-shield': 30000,
             pyroblast: 15000,
             blink: 10000,
@@ -888,6 +888,7 @@ export function Game({models, sounds, textures, matchId, character}) {
         const FROSTNOVA_RANGE = FIREBLAST_RANGE / 4;
         const FROSTNOVA_RING_DURATION = 1000; // ms
         const LIGHTWAVE_RING_DURATION = 1000; // ms
+        const LIGHTWAVE_RANGE = MELEE_RANGE_ATTACK;
         const LIGHTSTRIKE_DAMAGE = 35; // reduced by 15%
         const LIGHTWAVE_DAMAGE = 40;
         const STUN_SPIN_SPEED = 2;
@@ -3387,7 +3388,7 @@ export function Game({models, sounds, textures, matchId, character}) {
                         const effect = lightWaveRings[i];
                         const elapsed = performance.now() - effect.start;
                         const progress = elapsed / effect.duration;
-                        effect.mesh.scale.setScalar(0.1 + progress * 3);
+                        effect.mesh.scale.setScalar(progress * LIGHTWAVE_RANGE);
                         effect.mesh.material.opacity = 0.9 * (1 - progress);
                         effect.mesh.rotation.z += delta * 2;
                         if (progress >= 1) {
@@ -4084,7 +4085,7 @@ export function Game({models, sounds, textures, matchId, character}) {
                                     spawnLightWaveRing(message.id);
                                     const myPos = players.get(myPlayerId)?.model.position.clone();
                                     const casterPos = caster.model.position.clone();
-                                    if (myPos && casterPos && myPos.distanceTo(casterPos) < FIREBLAST_RANGE) {
+                                    if (myPos && casterPos && myPos.distanceTo(casterPos) < MELEE_RANGE_ATTACK) {
                                         takeDamage(LIGHTWAVE_DAMAGE, message.id, 'lightwave');
                                     }
                                 }
