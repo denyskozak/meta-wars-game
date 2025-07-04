@@ -25,13 +25,12 @@ const RAGE_ICON = '/icons/classes/warrior/rage.jpg';
 const BERSERK_ICON = '/icons/classes/warrior/berserk.jpg';
 const {
     MELEE_RANGE,
-    MELEE_ANGLE,
     withinMeleeRange,
     withinMeleeCone,
 } = require('./melee.cjs');
 
 const LIGHTSTRIKE_DAMAGE = 41; // increased by 20%
-const BLADESTORM_DAMAGE = 10;
+const BLADESTORM_DAMAGE = 40;
 const BLOOD_STRIKE_DAMAGE = 35; // 15% reduction
 const BLOOD_STRIKE_RANGE = MELEE_RANGE * 0.8; // 20% smaller radius
 
@@ -940,16 +939,9 @@ ws.on('connection', (socket) => {
                             match.players.forEach((p, tid) => {
                                 if (tid === id) return;
                                 if (withinMeleeCone(player, p)) {
-                                    const dx = p.position.x - player.position.x;
-                                    const dy = p.position.y - player.position.y;
-                                    const dz = p.position.z - player.position.z;
-                                    const dist = Math.sqrt(dx*dx + dy*dy + dz*dz);
-                                    if (dist < BLOOD_STRIKE_RANGE) {
-                                        candidates.push({ id: tid, player: p, dist });
-                                    }
+                                    candidates.push({ id: tid, player: p });
                                 }
                             });
-                            candidates.sort((a, b) => a.dist - b.dist);
                             if (player.classType === 'rogue' && candidates.length) {
                                 player.comboPoints = Math.min(5, (player.comboPoints || 0) + 1);
                                 const comboBuff = player.buffs.find(b => b.type === 'combo');
@@ -976,18 +968,20 @@ ws.on('connection', (socket) => {
                                 }
                             });
                         }
-                        if (message.payload.type === 'eviscerate' && message.payload.targetId) {
+                        if (message.payload.type === 'eviscerate') {
                             const target = match.players.get(message.payload.targetId);
-                            if (target && withinMeleeRange(player, target)) {
-                                const base = 28;
-                                const combo = player.comboPoints || 0;
-                                const damage = base * Math.max(combo, 1);
-                                applyDamage(match, target.id, id, damage, 'eviscerate');
-                            }
-                            if (target) {
-                                player.comboPoints = 0;
-                                player.buffs = player.buffs.filter(b => b.type !== 'combo');
-                            }
+                            const base = 28;
+                            const combo = player.comboPoints || 0;
+                            const damage = base * (combo + 1);
+                            match.players.forEach((p, tid) => {
+                                if (tid === id) return;
+                                if (withinMeleeCone(player, p)) {
+                                    applyDamage(match, tid, id, damage, 'eviscerate');
+                                }
+                            });
+
+                            player.comboPoints = 0;
+                            player.buffs = player.buffs.filter(b => b.type !== 'combo');
                         }
                         if (message.payload.type === 'shadow-leap') {
                             player.comboPoints = Math.min(5, (player.comboPoints || 0) + 1);
@@ -1029,10 +1023,16 @@ ws.on('connection', (socket) => {
                             player.buffs.push({
                                 type: 'bladestorm',
                                 expires: Date.now() + 5000,
-                                interval: 200,
-                                nextTick: Date.now() + 200,
+                                interval: 1000,
+                                nextTick: Date.now() + 1000,
                                 icon: '/icons/classes/warrior/bladestorm.jpg',
                             });
+
+                            socket.send(JSON.stringify({
+                                type: 'CAST_SPELL',
+                                payload: message.payload,
+                                id
+                            }))
                         }
                         if (message.payload.type === 'berserk') {
                             player.debuffs = player.debuffs?.filter(d => d.type !== 'slow' && d.type !== 'root') || [];

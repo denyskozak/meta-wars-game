@@ -12,8 +12,6 @@ export default function castBloodStrike({
   globalSkillCooldown,
   isCasting,
   mana,
-  getTargetPlayer,
-  dispatch,
   sendToSocket,
   activateGlobalCooldown,
   startSkillCooldown,

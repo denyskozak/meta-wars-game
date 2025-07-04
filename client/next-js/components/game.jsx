@@ -46,7 +46,7 @@ import castPaladinHeal, { meta as paladinHealMeta } from '../skills/paladin/heal
 import { meta as lightWaveMeta } from '../skills/paladin/lightWave';
 import castHandOfFreedom, { meta as handOfFreedomMeta } from '../skills/paladin/handFreedom';
 import castDivineSpeed, { meta as divineSpeedMeta } from '../skills/paladin/divineSpeed';
-import { meta as bloodStrikeMeta } from '../skills/rogue/bloodStrike';
+import castBloodStrike, { meta as bloodStrikeMeta } from '../skills/rogue/bloodStrike';
 import castEviscerate, { meta as eviscerateMeta } from '../skills/rogue/eviscerate';
 import castKidneyStrike, { meta as kidneyStrikeMeta } from '../skills/rogue/kidneyStrike';
 import castAdrenalineRush, { meta as adrenalineRushMeta } from '../skills/rogue/adrenalineRush';
@@ -963,7 +963,7 @@ export function Game({models, sounds, textures, matchId, character}) {
         const SHIELD_MANA_COST = SPELL_COST['shield'];
         const SHIELD_DURATION = 3; // Shield duration in seconds
         const DAMAGE_REDUCTION = 0.5; // Reduces damage by 50%
-        const PRIORITY_ACTIONS = ['attack', 'attack360'];
+        const PRIORITY_ACTIONS = ['attack', 'attack_360'];
         // Rotation speed for the damage rune effect attached to players
         const DAMAGE_EFFECT_ROT_SPEED = 0.2;
         const DAMAGE_EFFECT_MAP_SPEED = 0.05;
@@ -1748,16 +1748,21 @@ export function Game({models, sounds, textures, matchId, character}) {
                     });
                     break;
                 case "blood-strike":
-                    performBloodStrike();
+                    castBloodStrike({
+                        globalSkillCooldown,
+                        isCasting,
+                        mana,
+                        sendToSocket,
+                        activateGlobalCooldown,
+                        startSkillCooldown,
+                        sounds,
+                    });
                     break;
                 case "eviscerate":
                     castEviscerate({
                         globalSkillCooldown,
                         isCasting,
                         mana,
-                        playerId,
-                        getTargetPlayer,
-                        dispatch,
                         sendToSocket,
                         activateGlobalCooldown,
                         startSkillCooldown,
@@ -1943,7 +1948,7 @@ export function Game({models, sounds, textures, matchId, character}) {
 
             controlAction({
                 action: actions['attack360'] || actions['attack'],
-                actionName: 'attack_360',
+                actionName: 'attack360',
                 mixer,
                 loop: THREE.LoopOnce,
                 fadeIn: 0.1,
@@ -1956,34 +1961,6 @@ export function Game({models, sounds, textures, matchId, character}) {
             startSkillCooldown('lightwave');
         }
 
-        function performBloodStrike() {
-            const playerData = players.get(myPlayerId);
-            if (!playerData) return;
-            const { mixer, actions } = playerData;
-
-
-            lightSword(myPlayerId, 500);
-
-            controlAction({
-                action: actions['attack'],
-                actionName: 'attack',
-                mixer,
-                loop: THREE.LoopOnce,
-                fadeIn: 0.1,
-                reset: true,
-                clampWhenFinished: true,
-            });
-
-            if (sounds.sinisterStrike) {
-                sounds.sinisterStrike.currentTime = 0;
-                sounds.sinisterStrike.volume = 0.5;
-                sounds.sinisterStrike.play();
-            }
-
-            sendToSocket({ type: 'CAST_SPELL', payload: { type: 'blood-strike' } });
-            activateGlobalCooldown();
-            startSkillCooldown('blood-strike');
-        }
 
         function performSavageBlow() {
             const playerData = players.get(myPlayerId);
@@ -2531,7 +2508,7 @@ export function Game({models, sounds, textures, matchId, character}) {
             // Fade in the new action
             action.fadeIn(fadeIn).play();
             if (actionName) {
-                sendToSocket({type: "UPDATE_ANIMATION", actionName, fadeIn});
+                sendToSocket({type: "UPDATE_ANIMATION", actionName, loop, fadeIn});
             }
 
             // Attach an event listener for when the animation ends
@@ -3111,12 +3088,13 @@ export function Game({models, sounds, textures, matchId, character}) {
 
         function startBladestorm(playerId, duration = 5000) {
             const playerData = players.get(playerId);
+
             if (!playerData) return;
             const { mixer, actions } = playerData;
 
             controlAction({
                 action: actions['attack360'] || actions['attack'],
-                actionName: 'attack_360',
+                actionName: 'attack360',
                 mixer,
                 loop: THREE.LoopRepeat,
                 fadeIn: 0.1,
@@ -3136,6 +3114,11 @@ export function Game({models, sounds, textures, matchId, character}) {
             if (playerId === myPlayerId) {
                 isCasting = true;
             }
+
+            setTimeout(() => {
+                mixer.stopAllAction();
+                actions['idle'].play();
+            }, duration)
         }
 
 
@@ -3174,7 +3157,7 @@ export function Game({models, sounds, textures, matchId, character}) {
 
                 if (leftMouseButtonClicked) return;
 
-                if (!activeBladestorms.has(myPlayerId)) {
+
                     // Calculate the direction the player is moving (opposite to camera's forward)
                     const targetRotationY = Math.atan2(
                         cameraDirection.x,
@@ -3187,7 +3170,7 @@ export function Game({models, sounds, textures, matchId, character}) {
                         targetRotationY,
                         0.1,
                     );
-                }
+
 
                 if (isShieldActive) {
                     bubbleMesh.visible = true;
@@ -3422,14 +3405,6 @@ export function Game({models, sounds, textures, matchId, character}) {
                             activeBladestorms.delete(id);
                             obj.sound?.pause();
                             if (id === myPlayerId) isCasting = false;
-                        } else {
-                            player.rotation.y += delta * 10;
-                            if (id !== myPlayerId) {
-                                const me = players.get(myPlayerId)?.model;
-                                if (me && me.position.distanceTo(player.position) < MELEE_RANGE_ATTACK) {
-                                    takeDamage(BLADESTORM_DAMAGE * delta, id, 'bladestorm');
-                                }
-                            }
                         }
                     });
 
@@ -3635,10 +3610,12 @@ export function Game({models, sounds, textures, matchId, character}) {
                 }
 
                 const action = actions?.[message.animationAction];
+                const loop = message.loop ?? THREE.LoopOnce;
                 if (action && message.animationAction !== playerData.currentAction) {
                     controlAction({
                         action,
                         mixer,
+                        loop,
                         fadeIn: 0.2
                     });
                     playerData.currentAction = message.animationAction;
@@ -3999,20 +3976,6 @@ export function Game({models, sounds, textures, matchId, character}) {
                             }
                             break;
                         case "eviscerate":
-                            if (message.payload.targetId === myPlayerId) {
-                                const caster = players.get(message.id);
-                                const me = players.get(myPlayerId);
-                                if (caster && me) {
-                                    const origin = caster.model.position.clone();
-                                    const forward = new THREE.Vector3(0, 0, 1).applyQuaternion(caster.model.quaternion);
-                                    const toMe = me.model.position.clone().sub(origin);
-                                    const distance = toMe.length();
-                                    if (distance < MELEE_RANGE_ATTACK && forward.angleTo(toMe.normalize()) < MELEE_ANGLE) {
-                                        // damage applied by server, just play effect
-                                        takeDamage(0, message.id, 'eviscerate');
-                                    }
-                                }
-                            }
                             break;
                         case "kidney-strike":
                             if (message.payload.targetId === myPlayerId) {
