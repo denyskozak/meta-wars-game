@@ -5,6 +5,7 @@ import React from "react";
 
 import General from "@/components/general";
 import {Navbar} from "@/components/navbar";
+import {FlyImage} from "@/components/FlyImage";
 
 export default function Home() {
   return (
@@ -12,13 +13,16 @@ export default function Home() {
         <Navbar />
         <div className="relative justify-center align-middle items-center flex flex-col w-full h-[calc(100%-98px)]">
 
-            <Image
-                className="mt-[86] object-cover z-[1]"
-                alt="Turtle Art"
-                width={400}
-                height={200}
-                src="/big-logo.webp"
-            />
+
+                    <Image
+                        className="mt-[86] object-cover z-[1]"
+                        alt="Big Logo"
+                        width={400}
+                        height={200}
+                        src="/big-logo.webp"
+                    />
+
+
             <Image
                 className="absolute top-0 left-0 w-full h-full object-cover z-[0]"
                 alt="Turtle Art"
