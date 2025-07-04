@@ -979,6 +979,61 @@ export function Game({models, sounds, textures, matchId, character}) {
         const targetImage = document.getElementById("targetImage");
         let isFocused = false;
 
+        const AIM_BEAM_OPACITY = 0.5;
+        let aimBeam = null;
+
+        function createAimBeam() {
+            const material = new THREE.LineBasicMaterial({
+                color: 0xffff00,
+                transparent: true,
+                opacity: AIM_BEAM_OPACITY,
+                depthWrite: false,
+            });
+            const geometry = new THREE.BufferGeometry();
+            geometry.setFromPoints([new THREE.Vector3(), new THREE.Vector3()]);
+            return new THREE.Line(geometry, material);
+        }
+
+        function showAimBeam() {
+            if (aimBeam || document.pointerLockElement === document.body) return;
+            aimBeam = createAimBeam();
+            scene.add(aimBeam);
+            updateAimBeam();
+        }
+
+        function updateAimBeam() {
+            if (!aimBeam) return;
+            const dir = getAimDirection();
+            const start = playerCollider.start
+                .clone()
+                .add(playerCollider.end)
+                .multiplyScalar(0.5)
+                .addScaledVector(dir, playerCollider.radius * 2);
+            const end = start.clone().addScaledVector(dir, SPHERE_MAX_DISTANCE);
+            const positions = aimBeam.geometry.attributes.position.array;
+            positions[0] = start.x;
+            positions[1] = start.y;
+            positions[2] = start.z;
+            positions[3] = end.x;
+            positions[4] = end.y;
+            positions[5] = end.z;
+            aimBeam.geometry.attributes.position.needsUpdate = true;
+        }
+
+        function hideAimBeam() {
+            if (!aimBeam) return;
+            aimBeam.parent?.remove(aimBeam);
+            aimBeam.geometry.dispose();
+            aimBeam.material.dispose();
+            aimBeam = null;
+        }
+
+        document.addEventListener('pointerlockchange', () => {
+            if (document.pointerLockElement === document.body) {
+                hideAimBeam();
+            }
+        });
+
         // Хвосты отключены
 
         function adjustFOV(delta) {
@@ -2134,10 +2189,14 @@ export function Game({models, sounds, textures, matchId, character}) {
             const onCastEnd = () => {
                 soundCast.pause();
                 isCasting = false;
+                hideAimBeam();
                 execute();
             };
 
             isCasting = true;
+            if (document.pointerLockElement !== document.body) {
+                showAimBeam();
+            }
 
             const actionName = 'casting';
             controlAction({
@@ -3438,6 +3497,7 @@ export function Game({models, sounds, textures, matchId, character}) {
                     // renderCursor();
                     updateCameraPosition();
                     highlightCrosshair();
+                    if (aimBeam) updateAimBeam();
                 }
 
                 teleportPlayerIfOob();
