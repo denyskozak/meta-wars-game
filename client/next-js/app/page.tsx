@@ -10,14 +10,21 @@ export default function Home() {
   return (
     <div className="h-full">
         <Navbar />
-        <div className="relative justify-center flex flex-col w-full h-[calc(100%-98px)]">
+        <div className="relative justify-center align-middle items-center flex flex-col w-full h-[calc(100%-98px)]">
 
             <Image
-                className="absolute w-full h-full object-cover z-[0]"
+                className="mt-[86] object-cover z-[1]"
                 alt="Turtle Art"
-                width={600}
-                height={300}
+                width={400}
+                height={200}
                 src="/big-logo.webp"
+            />
+            <Image
+                className="absolute top-0 left-0 w-full h-full object-cover z-[0]"
+                alt="Turtle Art"
+                width={2000}
+                height={1000}
+                src="/background.webp"
             />
 
             <main className="z-[1] flex justify-center w-full h-full overflow-y-auto">
@@ -58,15 +65,15 @@ export default function Home() {
       {/*</span>*/}
       {/*      </Snippet>*/}
       {/*  </div>*/}
-      <div className="absolute bottom-8 left-1/2 transform -translate-x-1/2 z-[2] flex flex-col items-center">
-        <span className="text-medium">Made on</span>
-        <Image
-          alt="Sui logo"
-          height={200}
-          src="/Sui_Logo_White.svg"
-          width={120}
-        />
-      </div>
+      {/*<div className="absolute bottom-8 left-1/2 transform -translate-x-1/2 z-[2] flex flex-col items-center">*/}
+      {/*  <span className="text-medium">Made on</span>*/}
+      {/*  <Image*/}
+      {/*    alt="Sui logo"*/}
+      {/*    height={200}*/}
+      {/*    src="/Sui_Logo_White.svg"*/}
+      {/*    width={120}*/}
+      {/*  />*/}
+      {/*</div>*/}
     </div>
   );
 }

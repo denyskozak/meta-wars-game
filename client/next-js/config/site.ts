@@ -9,20 +9,19 @@ export const siteConfig = {
     //   href: "/",
     // },
     {
-      label: "FAQ",
-      href: "/faq",
-    },
-
-    {
-      label: "Tokenomics",
-      href: "/tokenomics",
-    },
-    {
-      label: "Rating",
+      label: "Ranked",
       href: "/rating",
     },
     {
-      label: "Proposals",
+      label: "About Us",
+      href: "/tokenomics",
+    },
+    {
+      label: "FAQ",
+      href: "/faq",
+    },
+    {
+      label: "DAO",
       href: "/dao",
     },
     // {

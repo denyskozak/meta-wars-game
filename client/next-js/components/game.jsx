@@ -1260,9 +1260,12 @@ export function Game({models, sounds, textures, matchId, character}) {
             if (isFocused) {
                 target.style.display = "block"; // Показываем перекрестие
                 showModel(false);
+                document.body.requestPointerLock();
+
             } else {
                 target.style.display = "none"; // Показываем перекрестие
                 showModel(true);
+                document.exitPointerLock();
             }
             highlightCrosshair();
         };
@@ -1272,19 +1275,18 @@ export function Game({models, sounds, textures, matchId, character}) {
             if (!controlsEnabled || debuffsRef.current.some(d => d.type === 'stun')) return;
 
             if (event.button === 2) {
-                // Right mouse button
                 handleRightClick();
             }
 
             if (event.button === 0) {
-                const id = getTargetPlayer();
-                if (id) {
-                    targetedPlayerId = id;
-                    dispatchTargetUpdate();
-                } else {
-                    targetedPlayerId = null;
-                    dispatchTargetUpdate();
-                }
+                // const id = getTargetPlayer();
+                // if (id) {
+                //     targetedPlayerId = id;
+                //     dispatchTargetUpdate();
+                // } else {
+                //     targetedPlayerId = null;
+                //     dispatchTargetUpdate();
+                // }
 
                 // begin camera rotation
                 document.body.requestPointerLock();
@@ -1292,8 +1294,17 @@ export function Game({models, sounds, textures, matchId, character}) {
                 containerRef.current.style.cursor = 'none';
                 mouseTime = performance.now();
 
-            sounds.background.volume = 0.1;
-            sounds.background.play();
+                sounds.background.volume = 0.1;
+                sounds.background.play();
+            }
+        });
+
+        document.addEventListener("mouseup", (event) => {
+            if (event.button === 0 && isCameraRotating) {
+                document.exitPointerLock();
+                isCameraRotating = false;
+                containerRef.current.style.cursor = 'default';
+            }
         });
 
         document.addEventListener("contextmenu", (event) => {
@@ -2382,22 +2393,44 @@ export function Game({models, sounds, textures, matchId, character}) {
 
             // Rotate the camera horizontally using A and D instead of strafing
             if (keyStates["KeyA"]) {
-                yaw += ROTATION_SPEED * deltaTime;
+                if (document.pointerLockElement !== document.body) {
+                    yaw += ROTATION_SPEED * deltaTime;
+                    model.rotation.y += ROTATION_SPEED * deltaTime;
+                } else {
+                    playerVelocity.add(getSideVector().multiplyScalar(-speedDelta));
+                }
+
                 if (!isAnyActionRunning()) setAnimation("walk");
             }
 
             if (keyStates["KeyD"]) {
-                yaw -= ROTATION_SPEED * deltaTime;
+                if (document.pointerLockElement !== document.body) {
+                    yaw -= ROTATION_SPEED * deltaTime;
+                    model.rotation.y -= ROTATION_SPEED * deltaTime;
+                } else {
+                    playerVelocity.add(getSideVector().multiplyScalar(speedDelta));
+                }
+
                 if (!isAnyActionRunning()) setAnimation("walk");
             }
 
             if (keyStates["KeyW"]) {
-                const forwardVector = new THREE.Vector3(
-                    Math.sin(model.rotation.y),
-                    0,
-                    Math.cos(model.rotation.y),
-                );
+                let y = 0;
 
+                if (document.pointerLockElement !== document.body) {
+                    y = model.rotation.y;
+                } else {
+                    const cameraDir = new THREE.Vector3();
+                    camera.getWorldDirection(cameraDir);
+                    y = cameraDir.y;
+                }
+
+
+                const forwardVector = new THREE.Vector3(
+                    Math.sin(y),
+                    0,
+                    Math.cos(y),
+                );
                 playerVelocity.add(forwardVector.multiplyScalar(speedDelta));
                 if (!isAnyActionRunning()) setAnimation("walk");
             }
@@ -3154,26 +3187,6 @@ export function Game({models, sounds, textures, matchId, character}) {
                 // Lower the model slightly so the feet touch the ground
                 model.position.y -= 0.7;
                 // Get the camera's forward direction
-                const cameraDirection = new THREE.Vector3();
-
-                camera.getWorldDirection(cameraDirection);
-
-                if (leftMouseButtonClicked) return;
-
-
-                    // Calculate the direction the player is moving (opposite to camera's forward)
-                    const targetRotationY = Math.atan2(
-                        cameraDirection.x,
-                        cameraDirection.z,
-                    );
-
-                    // Rotate the model to face the opposite direction
-                    model.rotation.y = THREE.MathUtils.lerp(
-                        model.rotation.y,
-                        targetRotationY,
-                        0.1,
-                    );
-
 
                 if (isShieldActive) {
                     bubbleMesh.visible = true;
