@@ -3734,9 +3734,31 @@ export function Game({models, sounds, textures, matchId, character}) {
             }
         }
 
+        function playHitReaction(playerId) {
+            const data = players.get(playerId);
+            if (!data) return;
+            const { actions, mixer } = data;
+            const hit = actions?.hitReaction;
+            if (!hit || !mixer) return;
+            if (hit.isRunning()) return;
+            hit.reset();
+            hit.setLoop(THREE.LoopOnce, 1);
+            hit.clampWhenFinished = true;
+            hit.fadeIn(0.1).play();
+            const onFinished = (e) => {
+                if (e.action === hit) {
+                    mixer.removeEventListener('finished', onFinished);
+                    hit.fadeOut(0.1);
+                }
+            };
+            mixer.addEventListener('finished', onFinished);
+        }
+
         function showDamage(playerId, amount, spellType) {
             const player = players.get(playerId)?.model;
             if (!player) return;
+
+            playHitReaction(playerId);
 
             let record = damageLabels.get(playerId);
             if (!record) {
