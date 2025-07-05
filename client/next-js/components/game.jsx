@@ -1609,7 +1609,7 @@ export function Game({models, sounds, textures, matchId, character}) {
                     });
                     break;
                 case "shadowbolt":
-                    castDarkball({
+                    castShadowbolt({
                         playerId,
                         castSpellImpl,
                         igniteHands: darkHands,
