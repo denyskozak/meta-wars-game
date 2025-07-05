@@ -464,7 +464,7 @@ export default function MatchesPage() {
           ) : (
             <div className="flex flex-col text-center">
               <span className="mb-1 text-large">Choose a Class:</span>
-              <div className="grid grid-cols-3 gap-2">
+              <div className="flex flex-row flex-wrap justify-center">
                 {Object.entries(classOptions).map(([value, opt]) => (
                   <button
                     key={value}

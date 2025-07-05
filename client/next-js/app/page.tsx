@@ -11,9 +11,10 @@ export default function Home() {
   return (
     <div className="h-full">
       <Navbar />
-      <MagicCanvas />
+
       <div className="relative justify-center align-middle items-center flex flex-col w-full h-[calc(100%-98px)]">
-        <Image
+          <MagicCanvas />
+          <Image
           alt="Big Logo"
           className="mt-[86] object-cover z-[1]"
           height={200}

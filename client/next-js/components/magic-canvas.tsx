@@ -30,7 +30,10 @@ export const MagicCanvas = () => {
     window.addEventListener("resize", resize);
 
     const createParticles = (e: MouseEvent) => {
+      const hue = 201; // approx #299ad8
       for (let i = 0; i < 5; i++) {
+        const saturation = 70 + Math.random() * 10;
+        const lightness = 55 + Math.random() * 10;
         particles.push({
           x: e.clientX,
           y: e.clientY,
@@ -38,7 +41,7 @@ export const MagicCanvas = () => {
           vy: (Math.random() - 0.5) * 2,
           alpha: 1,
           size: 2 + Math.random() * 3,
-          color: `hsl(${Math.random() * 360},100%,80%)`,
+          color: `hsl(${hue},${saturation}%,${lightness}%)`,
         });
       }
     };
@@ -80,10 +83,10 @@ export const MagicCanvas = () => {
   }, []);
 
   return (
-    <canvas
-      ref={canvasRef}
-      className="pointer-events-none fixed inset-0 z-[2]"
-    />
+      <canvas
+          ref={canvasRef}
+          className="pointer-events-none fixed inset-0 z-[2]"
+      />
   );
 };
 
