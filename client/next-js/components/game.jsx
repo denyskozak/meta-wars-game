@@ -135,8 +135,8 @@ const SPELL_META = {
 };
 
 const SPELL_SCALES = {
-    // fireball slightly smaller for better visuals
-    fireball: 1.5,
+    // fireball enlarged for better visuals
+    fireball: 3,
     iceball: 1.8,
     darkball: 1.68,
     pyroblast: 5,
@@ -1039,11 +1039,7 @@ export function Game({models, sounds, textures, matchId, character}) {
             aimBeam = null;
         }
 
-        document.addEventListener('pointerlockchange', () => {
-            if (document.pointerLockElement === document.body) {
-                hideAimBeam();
-            }
-        });
+
 
         // Хвосты отключены
 
@@ -1364,15 +1360,11 @@ export function Game({models, sounds, textures, matchId, character}) {
         });
 
         document.body.addEventListener("mousemove", (event) => {
-            if (document.pointerLockElement === document.body) {
-                // Only update pitch based on mouse movement. Horizontal
-                // rotation is handled via keyboard inputs.
-                yaw -= event.movementX / 500;
-                pitch = Math.max(
-                    -Math.PI / 2,
-                    Math.min(Math.PI / 2, pitch + event.movementY / 500),
-                );
-            }
+            yaw -= event.movementX / 500;
+            pitch = Math.max(
+                -Math.PI / 2,
+                Math.min(Math.PI / 2, pitch + event.movementY / 500),
+            );
         });
         // const renderCursor = () => {
         //     if (!model) return;
@@ -2191,9 +2183,7 @@ export function Game({models, sounds, textures, matchId, character}) {
             };
 
             isCasting = true;
-            if (document.pointerLockElement !== document.body) {
-                showAimBeam();
-            }
+            showAimBeam();
 
             const actionName = 'casting';
             controlAction({
@@ -3236,6 +3226,8 @@ export function Game({models, sounds, textures, matchId, character}) {
                 // model.position.y += 0.5; // Adjust the height to keep the model slightly above ground
                 // Lower the model slightly so the feet touch the ground
                 model.position.y -= 0.7;
+                // Rotate the model to match the camera direction
+                model.rotation.y = yaw + Math.PI;
                 // Get the camera's forward direction
 
                 if (isShieldActive) {
