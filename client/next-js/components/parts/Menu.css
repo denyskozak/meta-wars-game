@@ -18,7 +18,12 @@
     padding: 10px;
     border: none;
     border-radius: 5px;
-    background-color: #ffffff;
-    color: #000;
+    background-color: #8B4513;
+    color: #f1e9d2;
     cursor: pointer;
+    transition: background-color 0.2s;
+}
+
+.menu-button:hover {
+    background-color: #B8860B;
 }
