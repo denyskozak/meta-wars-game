@@ -5,12 +5,12 @@ import React from "react";
 
 import General from "@/components/general";
 import { Navbar } from "@/components/navbar";
-
-
+import SparkleCursor from "@/components/SparkleCursor";
 
 export default function Home() {
   return (
     <div className="h-full">
+      <SparkleCursor />
       <Navbar />
       <div className="relative justify-center align-middle items-center flex flex-col w-full h-[calc(100%-98px)]">
         <Image
