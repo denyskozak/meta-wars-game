@@ -25,5 +25,5 @@ export function BackgroundMusic() {
     };
   }, []);
 
-  return <audio ref={audioRef} src="/gods.mp3" autoPlay />;
+  return <audio ref={audioRef} src="/bg.mp3" autoPlay />;
 }
