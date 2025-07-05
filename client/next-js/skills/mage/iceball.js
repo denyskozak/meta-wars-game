@@ -1,5 +1,5 @@
 import { assetUrl } from '../../utilities/assets';
-import { SPELL_COST } from '../../consts';
+import castProjectile from '../common/castProjectile';
 
 export const meta = {
   id: 'iceball',
@@ -9,15 +9,15 @@ export const meta = {
 };
 
 export default function castIceball({ playerId, castSpellImpl, freezeHands, castSphere, iceballMesh, sounds, damage }) {
-  freezeHands(playerId, 1000);
-  castSpellImpl(
+  castProjectile({
     playerId,
-    SPELL_COST['iceball'],
-    1000,
-    (model) => castSphere(model, iceballMesh.clone(), meta.id, damage),
-    sounds.iceballCast,
-    sounds.iceball,
-    meta.id,
-    false
-  );
+    castSpellImpl,
+    handsEffect: freezeHands,
+    castSphere,
+    mesh: iceballMesh,
+    castSound: sounds.iceballCast,
+    travelSound: sounds.iceball,
+    damage,
+    id: meta.id,
+  });
 }

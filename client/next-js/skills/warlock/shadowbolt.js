@@ -2,19 +2,19 @@ import { assetUrl } from '../../utilities/assets';
 import castProjectile from '../common/castProjectile';
 
 export const meta = {
-  id: 'pyroblast',
-  key: '2',
-  icon: assetUrl('/icons/classes/mage/pyroblast.jpg'),
+  id: 'shadowbolt',
+  key: 'E',
+  icon: assetUrl('/icons/classes/warlock/spell_shadowbolt.jpg'),
   autoFocus: false,
 };
 
-export default function castPyroblast({ playerId, castSpellImpl, igniteHands, castSphere, pyroblastMesh, sounds, damage }) {
+export default function castShadowbolt({ playerId, castSpellImpl, igniteHands, castSphere, shadowboltMesh, sounds, damage }) {
   castProjectile({
     playerId,
     castSpellImpl,
     handsEffect: igniteHands,
     castSphere,
-    mesh: pyroblastMesh,
+    mesh: shadowboltMesh,
     castSound: sounds.fireballCast,
     travelSound: sounds.fireball,
     damage,
