@@ -5,6 +5,7 @@ import React from "react";
 
 import General from "@/components/general";
 import { Navbar } from "@/components/navbar";
+import MagicCanvas from "@/components/magic-canvas";
 
 
 
@@ -12,6 +13,7 @@ export default function Home() {
   return (
     <div className="h-full">
       <Navbar />
+      <MagicCanvas />
       <div className="relative justify-center align-middle items-center flex flex-col w-full h-[calc(100%-98px)]">
         <Image
           alt="Big Logo"
