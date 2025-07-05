@@ -5,6 +5,7 @@ import React from "react";
 import "@mysten/dapp-kit/dist/index.css";
 
 import { Providers } from "./providers";
+import { BackgroundMusic } from "@/components/background-music";
 
 import { siteConfig } from "@/config/site";
 import { fontSans } from "@/config/fonts";
@@ -42,6 +43,7 @@ export default function RootLayout({
         )}
       >
         <Providers themeProps={{ attribute: "class", defaultTheme: "dark" }}>
+          <BackgroundMusic />
           <div className=" h-screen w-screen">{children}</div>
         </Providers>
         <script src="https://cdn.jsdelivr.net/npm/gsap@3.12.7/dist/TextPlugin.min.js" />
