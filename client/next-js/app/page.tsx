@@ -7,8 +7,6 @@ import General from "@/components/general";
 import { Navbar } from "@/components/navbar";
 import MagicCanvas from "@/components/magic-canvas";
 
-
-
 export default function Home() {
   return (
     <div className="h-full">
