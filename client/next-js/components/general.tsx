@@ -66,10 +66,10 @@ export default function General() {
             <motion.div
               key={slides[index].titles[0]}
               animate={{ opacity: 1, y: 0 }}
+              className="p-4 rounded-lg"
               exit={{ opacity: 0, y: -10 }}
               initial={{ opacity: 0, y: 10 }}
               transition={{ duration: 0.5 }}
-              className="p-4 rounded-lg"
             >
               <span className={getTitle({ color: "cyan" })}>
                 {slides[index].titles[0]}
@@ -95,16 +95,14 @@ export default function General() {
         {/*    <span className={`${getTitle()} fade-in-animation`}>Championships&nbsp;</span>*/}
         {/*</div>*/}
 
-
-          <Button
-            className="border-2 w-[188] h-[48] border-black shadow-lg overflow-hidden group hover:-translate-y-1 hover:shadow-xl "
-            size="lg"
-            onPress={() => router.push("/play")}
-          >
-            <span className="absolute inset-0 bg-gradient-to-r from-pink-500 via-red-500 to-yellow-500 animate-pulse opacity-100 group-hover:opacity-100 blur-md " />
-            <span className="relative z-10">Launch Game</span>
-          </Button>
-
+        <Button
+          className="border-2 w-[188] h-[48] border-black shadow-lg overflow-hidden group hover:-translate-y-1 hover:shadow-xl "
+          size="lg"
+          onPress={() => router.push("/play")}
+        >
+          <span className="absolute inset-0 bg-gradient-to-r from-pink-500 via-red-500 to-yellow-500 animate-pulse opacity-100 group-hover:opacity-100 blur-md " />
+          <span className="relative z-10">Launch Game</span>
+        </Button>
       </section>
     </div>
   );

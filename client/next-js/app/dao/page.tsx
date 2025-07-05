@@ -1,6 +1,17 @@
 "use client";
 
-import {Card, Table, TableHeader, TableColumn, TableBody, TableRow, TableCell, Button, addToast} from "@heroui/react";
+import {
+  Card,
+  Table,
+  TableHeader,
+  TableColumn,
+  TableBody,
+  TableRow,
+  TableCell,
+  Button,
+  addToast,
+} from "@heroui/react";
+
 import { Navbar } from "@/components/navbar";
 import { title } from "@/components/primitives";
 import { useDao } from "@/hooks/useDao";
@@ -13,8 +24,10 @@ export default function DaoPage() {
       addToast({
         title: "For voting join Meta-Wars organization.",
       });
+
       return;
     }
+
     return vote(id, value);
   };
 
@@ -37,12 +50,19 @@ export default function DaoPage() {
                   <TableCell>{p.description}</TableCell>
                   <TableCell>{p.yes}</TableCell>
                   <TableCell>{p.no}</TableCell>
-                    <TableCell>
-                      <div className="flex gap-2">
-                        <Button size="sm" onPress={() => voteHandler(p.id, true)}>Yes</Button>
-                        <Button size="sm" onPress={() => voteHandler(p.id, false)}>No</Button>
-                      </div>
-                    </TableCell>
+                  <TableCell>
+                    <div className="flex gap-2">
+                      <Button size="sm" onPress={() => voteHandler(p.id, true)}>
+                        Yes
+                      </Button>
+                      <Button
+                        size="sm"
+                        onPress={() => voteHandler(p.id, false)}
+                      >
+                        No
+                      </Button>
+                    </div>
+                  </TableCell>
                 </TableRow>
               ))}
             </TableBody>

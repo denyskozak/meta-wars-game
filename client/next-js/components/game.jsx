@@ -995,7 +995,7 @@ export function Game({models, sounds, textures, matchId, character}) {
         }
 
         function showAimBeam() {
-            if (aimBeam || document.pointerLockElement === document.body) return;
+            if (aimBeam || isFocused) return;
             aimBeam = createAimBeam();
             scene.add(aimBeam);
             updateAimBeam();
@@ -2479,11 +2479,15 @@ export function Game({models, sounds, textures, matchId, character}) {
                 if (document.pointerLockElement !== document.body) {
                     y = model.rotation.y;
                 } else {
-                    const cameraDir = new THREE.Vector3();
-                    camera.getWorldDirection(cameraDir);
-                    cameraDir.y = 0;
-                    cameraDir.normalize().negate();
-                    y = Math.atan2(cameraDir.x, cameraDir.z);
+                    const cameraDirection = new THREE.Vector3();
+
+                    camera.getWorldDirection(cameraDirection);
+
+                    // Calculate the direction the player is moving (opposite to camera's forward)
+                    y = Math.atan2(
+                        cameraDirection.x,
+                        cameraDirection.z,
+                    );
                 }
 
 

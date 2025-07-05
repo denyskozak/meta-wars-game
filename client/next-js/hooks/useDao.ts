@@ -1,6 +1,12 @@
-import { useCurrentAccount, useSuiClientQuery, useSuiClient, useSignTransaction } from "@mysten/dapp-kit";
-import { PACKAGE_ID, NETWORK } from "@/consts";
+import {
+  useCurrentAccount,
+  useSuiClientQuery,
+  useSuiClient,
+  useSignTransaction,
+} from "@mysten/dapp-kit";
 import { Transaction } from "@mysten/sui/transactions";
+
+import { PACKAGE_ID, NETWORK } from "@/consts";
 
 interface DaoProposal {
   id: string;
@@ -34,17 +40,17 @@ export const useDao = () => {
   );
 
   const hasTicket = Array.isArray(tickets?.data) && tickets.data.length > 0;
-  const ticketId = hasTicket
-    ? tickets.data[0].data?.objectId
-    : undefined;
+  const ticketId = hasTicket ? tickets.data[0].data?.objectId : undefined;
 
   const proposals: DaoProposal[] = Array.isArray(proposalsData?.data)
     ? proposalsData.data.map((p: any) => {
         const fields = p.data?.content?.fields || {};
         const descBytes = fields.description || [];
-        const description = typeof descBytes === "string"
-          ? descBytes
-          : new TextDecoder().decode(Uint8Array.from(descBytes));
+        const description =
+          typeof descBytes === "string"
+            ? descBytes
+            : new TextDecoder().decode(Uint8Array.from(descBytes));
+
         return {
           id: p.data?.objectId || "",
           description,
@@ -55,17 +61,29 @@ export const useDao = () => {
     : [];
 
   const exec = async (tx: Transaction) => {
-    const { bytes, signature } = await signTransaction({ transaction: tx, chain: `sui:${NETWORK}` });
-    const result = await client.executeTransactionBlock({ transactionBlock: bytes, signature });
+    const { bytes, signature } = await signTransaction({
+      transaction: tx,
+      chain: `sui:${NETWORK}`,
+    });
+    const result = await client.executeTransactionBlock({
+      transactionBlock: bytes,
+      signature,
+    });
+
     await client.waitForTransaction({ digest: result.digest });
   };
 
   const vote = async (proposalId: string, inFavor: boolean) => {
     if (!ticketId || !account) return;
     const tx = new Transaction();
+
     tx.moveCall({
       target: `${PACKAGE_ID}::dao::vote`,
-      arguments: [tx.object(proposalId), tx.object(ticketId), tx.pure.bool(inFavor)],
+      arguments: [
+        tx.object(proposalId),
+        tx.object(ticketId),
+        tx.pure.bool(inFavor),
+      ],
     });
     tx.setSender(account.address);
     await exec(tx);

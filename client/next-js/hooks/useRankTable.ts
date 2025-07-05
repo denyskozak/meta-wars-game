@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+
 import { useWS } from "./useWS";
 
 export interface RankEntry {
@@ -13,6 +14,7 @@ export const useRankTable = () => {
   useEffect(() => {
     const handleMessage = (event: MessageEvent) => {
       let message: any = {};
+
       try {
         message = JSON.parse(event.data);
       } catch (e) {
@@ -24,7 +26,7 @@ export const useRankTable = () => {
           message.table.map(([pos, pts]: [number, number]) => ({
             position: pos,
             points: pts,
-          }))
+          })),
         );
       }
     };

@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+
 import { useWS } from "./useWS";
 
 export interface RatingItem {
@@ -14,6 +15,7 @@ export const useRatings = () => {
   useEffect(() => {
     const handleMessage = (event: MessageEvent) => {
       let message: any = {};
+
       try {
         message = JSON.parse(event.data);
       } catch (e) {

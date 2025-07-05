@@ -1,6 +1,4 @@
 export const world = {
-    id: 'homebase',
-    stuff: [
-
-    ]
-}
+  id: "homebase",
+  stuff: [],
+};

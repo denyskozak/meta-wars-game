@@ -1,7 +1,6 @@
 "use client";
 
 import Image from "next/image";
-import { assetUrl } from "@/utilities/assets";
 import {
   Card,
   CardHeader,
@@ -15,6 +14,7 @@ import {
 import { useRouter } from "next/navigation";
 import { useCurrentAccount } from "@mysten/dapp-kit";
 
+import { assetUrl } from "@/utilities/assets";
 import { Navbar } from "@/components/navbar";
 import { ConnectionButton } from "@/components/connection-button";
 import { ProfileForm } from "@/components/profile-form";
@@ -49,7 +49,7 @@ export default function MatchesPage() {
                     alt="Open World"
                     className="w-full h-full object-cover rounded-t-lg"
                     height={1200}
-                    src={assetUrl('/images/open-world.jpg')}
+                    src={assetUrl("/images/open-world.jpg")}
                     width={2000}
                   />
                 </Card>
@@ -65,7 +65,7 @@ export default function MatchesPage() {
                     alt="Arena Match"
                     className="w-full h-full object-cover rounded-t-lg"
                     height={1200}
-                    src={assetUrl('/images/battle.jpg')}
+                    src={assetUrl("/images/battle.jpg")}
                     width={2000}
                   />
                 </Card>
@@ -116,7 +116,7 @@ export default function MatchesPage() {
               alt="Arena Match"
               className="w-full h-full absolute object-cover rounded-t-lg"
               height={1400}
-              src={assetUrl('/images/tower_bg.png')}
+              src={assetUrl("/images/tower_bg.png")}
               width={3000}
             />
             <ConnectionButton className="m-auto" text="Connect to Play" />

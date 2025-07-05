@@ -14,7 +14,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { ToastProvider } from "@heroui/toast";
 
 import { NETWORK } from "@/consts";
-import {InterfaceProvider} from "@/context/inteface";
+import { InterfaceProvider } from "@/context/inteface";
 
 const { networkConfig } = createNetworkConfig({
   testnet: { url: getFullnodeUrl(NETWORK) },
@@ -41,15 +41,19 @@ export function Providers({ children, themeProps }: ProvidersProps) {
     <HeroUIProvider navigate={router.push}>
       <ToastProvider />
       <InterfaceProvider>
-      <QueryClientProvider client={queryClient}>
-        <SuiClientProvider defaultNetwork="testnet" networks={networkConfig}>
-          <WalletProvider slushWallet={{
-            name: "Meta Wars Tournaments",
-          }}>
-            <NextThemesProvider {...themeProps}>{children}</NextThemesProvider>
-          </WalletProvider>
-        </SuiClientProvider>
-      </QueryClientProvider>
+        <QueryClientProvider client={queryClient}>
+          <SuiClientProvider defaultNetwork="testnet" networks={networkConfig}>
+            <WalletProvider
+              slushWallet={{
+                name: "Meta Wars Tournaments",
+              }}
+            >
+              <NextThemesProvider {...themeProps}>
+                {children}
+              </NextThemesProvider>
+            </WalletProvider>
+          </SuiClientProvider>
+        </QueryClientProvider>
       </InterfaceProvider>
     </HeroUIProvider>
   );

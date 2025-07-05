@@ -9,10 +9,11 @@ import {
   TableRow,
   TableCell,
 } from "@heroui/react";
-import { Navbar } from "@/components/navbar";
-import { title, subtitle } from "@/components/primitives";
 import Image from "next/image";
 import React from "react";
+
+import { Navbar } from "@/components/navbar";
+import { title, subtitle } from "@/components/primitives";
 
 export default function TokenomicsPage() {
   return (
@@ -20,10 +21,18 @@ export default function TokenomicsPage() {
       <Navbar />
       <div className="flex justify-center items-start p-4 h-full overflow-y-auto">
         <Card className="w-full max-w-5xl p-6 space-y-6">
-          <h1 className={title({ color: "metaWars" })}>$MetaWars Tokenomics Overview</h1>
+          <h1 className={title({ color: "metaWars" })}>
+            $MetaWars Tokenomics Overview
+          </h1>
 
           <h2 className={title({ size: "md" })}>Project Summary</h2>
-          <p className={subtitle()}>Meta Wars is a competitive multiplayer game where 6–10 players enter a match, earn loot boxes, and receive rewards such as coins, items, rare medals, and the native utility token: $MetaWars. The game incorporates Web3 mechanics like item ownership, staking, DAO voting, and token-based economy.</p>
+          <p className={subtitle()}>
+            Meta Wars is a competitive multiplayer game where 6–10 players enter
+            a match, earn loot boxes, and receive rewards such as coins, items,
+            rare medals, and the native utility token: $MetaWars. The game
+            incorporates Web3 mechanics like item ownership, staking, DAO
+            voting, and token-based economy.
+          </p>
 
           <h2 className={title({ size: "md" })}>Token Overview</h2>
           <Table aria-label="Token overview">
@@ -71,15 +80,23 @@ export default function TokenomicsPage() {
 
           <h2 className={title({ size: "md" })}>Token Flow Diagram</h2>
           <Image
-              alt="Token Flow"
-              width={200}
-              height={280}
-              src="/token_flow.png"
+            alt="Token Flow"
+            height={280}
+            src="/token_flow.png"
+            width={200}
           />
-          <h2 className={title({ size: "md" })}>Deflation Mechanics (Burn Model)</h2>
+          <h2 className={title({ size: "md" })}>
+            Deflation Mechanics (Burn Model)
+          </h2>
           <p>10% of every transaction is burned.</p>
-          <p>Includes item purchases, upgrades, forge fees, and marketplace trades.</p>
-          <p>This creates long-term scarcity and increases token value as supply decreases.</p>
+          <p>
+            Includes item purchases, upgrades, forge fees, and marketplace
+            trades.
+          </p>
+          <p>
+            This creates long-term scarcity and increases token value as supply
+            decreases.
+          </p>
 
           <h2 className={title({ size: "md" })}>Staking Program</h2>
           <p>$MetaWars holders can stake tokens to:</p>
@@ -87,7 +104,10 @@ export default function TokenomicsPage() {
             <li>Support game infrastructure and liquidity.</li>
             <li>Earn platform fees and rewards.</li>
             <li>Get early access to new features or items.</li>
-            <li>Vote in governance decisions (staking + medals unlock voting power).</li>
+            <li>
+              Vote in governance decisions (staking + medals unlock voting
+              power).
+            </li>
           </ul>
           <p>Staking pools will include:</p>
           <ul className="list-disc list-inside space-y-1">
@@ -122,9 +142,14 @@ export default function TokenomicsPage() {
               </TableRow>
             </TableBody>
           </Table>
-          <p>Loot box rewards are rate-limited via energy systems to prevent farming abuse.</p>
+          <p>
+            Loot box rewards are rate-limited via energy systems to prevent
+            farming abuse.
+          </p>
 
-          <h2 className={title({ size: "md" })}>DAO Governance (via $MetaWars + Medals)</h2>
+          <h2 className={title({ size: "md" })}>
+            DAO Governance (via $MetaWars + Medals)
+          </h2>
           <ul className="list-disc list-inside space-y-1">
             <li>Vote on game development proposals.</li>
             <li>Help balance in-game economies.</li>
@@ -182,7 +207,9 @@ export default function TokenomicsPage() {
           <h2 className={title({ size: "md" })}>Investor Highlights</h2>
           <ul className="list-disc list-inside space-y-1">
             <li>🔥 Deflationary model with 10% burn per transaction</li>
-            <li>🎮 Real in-game demand for skins, upgrades, gear, tournaments</li>
+            <li>
+              🎮 Real in-game demand for skins, upgrades, gear, tournaments
+            </li>
             <li>📊 DAO & governance participation</li>
             <li>💰 Opportunity for early access at a private round discount</li>
             <li>🔐 Transparent emission model with staking incentives</li>

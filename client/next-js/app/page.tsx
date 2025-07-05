@@ -4,37 +4,35 @@ import Image from "next/image";
 import React from "react";
 
 import General from "@/components/general";
-import {Navbar} from "@/components/navbar";
-import {FlyImage} from "@/components/FlyImage";
+import { Navbar } from "@/components/navbar";
+
+
 
 export default function Home() {
   return (
     <div className="h-full">
-        <Navbar />
-        <div className="relative justify-center align-middle items-center flex flex-col w-full h-[calc(100%-98px)]">
+      <Navbar />
+      <div className="relative justify-center align-middle items-center flex flex-col w-full h-[calc(100%-98px)]">
+        <Image
+          alt="Big Logo"
+          className="mt-[86] object-cover z-[1]"
+          height={200}
+          src="/big-logo.webp"
+          width={400}
+        />
 
+        <Image
+          alt="Turtle Art"
+          className="absolute top-0 left-0 w-full h-full object-cover z-[0]"
+          height={1000}
+          src="/background.webp"
+          width={2000}
+        />
 
-                    <Image
-                        className="mt-[86] object-cover z-[1]"
-                        alt="Big Logo"
-                        width={400}
-                        height={200}
-                        src="/big-logo.webp"
-                    />
-
-
-            <Image
-                className="absolute top-0 left-0 w-full h-full object-cover z-[0]"
-                alt="Turtle Art"
-                width={2000}
-                height={1000}
-                src="/background.webp"
-            />
-
-            <main className="z-[1] flex justify-center w-full h-full overflow-y-auto">
-                <General />
-            </main>
-        </div>
+        <main className="z-[1] flex justify-center w-full h-full overflow-y-auto">
+          <General />
+        </main>
+      </div>
 
       {/*<Card className="max-w-100">*/}
       {/*    <FAQ/>*/}
