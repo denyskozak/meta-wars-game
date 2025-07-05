@@ -221,6 +221,18 @@ export function Game({models, sounds, textures, matchId, character}) {
     const account = useCurrentAccount();
     const address = account?.address;
 
+    useEffect(() => {
+        const container = containerRef.current;
+        if (!container) return;
+        const handleMouseDown = (event) => {
+            if (container.contains(event.target)) {
+                container.requestPointerLock();
+            }
+        };
+        document.addEventListener('mousedown', handleMouseDown);
+        return () => document.removeEventListener('mousedown', handleMouseDown);
+    }, []);
+
     useLayoutEffect(() => {
         // Store other players
         const players = new Map();
@@ -266,7 +278,6 @@ export function Game({models, sounds, textures, matchId, character}) {
         let actions = [];
         let playerMixers = [];
         let settings;
-        let isCameraRotating = false;
 
         let meleeRangeIndicator = null;
         const MELEE_INDICATOR_OPACITY = 0.2; // transparency for the auto attack indicator
@@ -1362,12 +1373,9 @@ export function Game({models, sounds, textures, matchId, character}) {
             if (isFocused) {
                 target.style.display = "block"; // Показываем перекрестие
                 showModel(false);
-                document.body.requestPointerLock();
-
             } else {
                 target.style.display = "none"; // Показываем перекрестие
                 showModel(true);
-                document.exitPointerLock();
             }
             highlightCrosshair();
         };
@@ -1390,10 +1398,6 @@ export function Game({models, sounds, textures, matchId, character}) {
                 //     dispatchTargetUpdate();
                 // }
 
-                // begin camera rotation
-                document.body.requestPointerLock();
-                isCameraRotating = true;
-                containerRef.current.style.cursor = 'none';
                 mouseTime = performance.now();
 
                 sounds.background.volume = 0.1;
@@ -1401,13 +1405,6 @@ export function Game({models, sounds, textures, matchId, character}) {
             }
         });
 
-        document.addEventListener("mouseup", (event) => {
-            if (event.button === 0 && isCameraRotating) {
-                document.exitPointerLock();
-                isCameraRotating = false;
-                containerRef.current.style.cursor = 'default';
-            }
-        });
 
         document.addEventListener("contextmenu", (event) => {
             event.preventDefault(); // Prevent the context menu from showing
@@ -2499,24 +2496,12 @@ export function Game({models, sounds, textures, matchId, character}) {
 
             // Rotate the camera horizontally using A and D instead of strafing
             if (keyStates["KeyA"]) {
-                if (document.pointerLockElement !== document.body) {
-                    yaw += ROTATION_SPEED * deltaTime;
-                    model.rotation.y += ROTATION_SPEED * deltaTime;
-                } else {
-                    playerVelocity.add(getSideVector().multiplyScalar(-speedDelta));
-                }
-
+                playerVelocity.add(getSideVector().multiplyScalar(-speedDelta));
                 if (!isAnyActionRunning()) setAnimation("walk");
             }
 
             if (keyStates["KeyD"]) {
-                if (document.pointerLockElement !== document.body) {
-                    yaw -= ROTATION_SPEED * deltaTime;
-                    model.rotation.y -= ROTATION_SPEED * deltaTime;
-                } else {
-                    playerVelocity.add(getSideVector().multiplyScalar(speedDelta));
-                }
-
+                playerVelocity.add(getSideVector().multiplyScalar(speedDelta));
                 if (!isAnyActionRunning()) setAnimation("walk");
             }
 
