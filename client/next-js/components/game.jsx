@@ -885,6 +885,7 @@ export function Game({models, sounds, textures, matchId, character}) {
         const NUM_SPHERES = 100;
         const BASE_SPHERE_RADIUS = 0.26;
         const SPHERE_RADIUS = BASE_SPHERE_RADIUS * SPELL_SCALES.fireball;
+        const SPHERE_SPAWN_OFFSET = playerCollider.radius + SPHERE_RADIUS;
 
         const FIREBLAST_RANGE = 20;
         const FIREBLAST_DAMAGE = 33;
@@ -989,8 +990,10 @@ export function Game({models, sounds, textures, matchId, character}) {
         const target = document.getElementById("target");
         const targetImage = document.getElementById("targetImage");
         let isFocused = false;
+        let isCameraDragging = false;
 
         const AIM_BEAM_OPACITY = 0.5;
+        const AIM_BEAM_LENGTH = SPHERE_MAX_DISTANCE * 1.5;
         let aimBeam = null;
 
         function createAimBeam() {
@@ -1019,8 +1022,8 @@ export function Game({models, sounds, textures, matchId, character}) {
                 .clone()
                 .add(playerCollider.end)
                 .multiplyScalar(0.5)
-                .addScaledVector(dir, playerCollider.radius * 2);
-            const end = start.clone().addScaledVector(dir, SPHERE_MAX_DISTANCE);
+                .addScaledVector(dir, SPHERE_SPAWN_OFFSET);
+            const end = start.clone().addScaledVector(dir, AIM_BEAM_LENGTH);
             const positions = aimBeam.geometry.attributes.position.array;
             positions[0] = start.x;
             positions[1] = start.y;
@@ -1338,6 +1341,9 @@ export function Game({models, sounds, textures, matchId, character}) {
             }
 
             if (event.button === 0) {
+                if (!isFocused && document.pointerLockElement !== containerRef.current) {
+                    isCameraDragging = true;
+                }
                 // const id = getTargetPlayer();
                 // if (id) {
                 //     targetedPlayerId = id;
@@ -1354,12 +1360,19 @@ export function Game({models, sounds, textures, matchId, character}) {
             }
         });
 
+        document.addEventListener("mouseup", () => {
+            isCameraDragging = false;
+        });
+
 
         document.addEventListener("contextmenu", (event) => {
             event.preventDefault(); // Prevent the context menu from showing
         });
 
         document.body.addEventListener("mousemove", (event) => {
+            const locked = document.pointerLockElement === containerRef.current;
+            if (!locked && !isCameraDragging) return;
+
             yaw -= event.movementX / 500;
             pitch = Math.max(
                 -Math.PI / 2,
@@ -2088,7 +2101,7 @@ export function Game({models, sounds, textures, matchId, character}) {
                 .clone()
                 .add(playerCollider.end)
                 .multiplyScalar(0.5)
-                .addScaledVector(aimDir, playerCollider.radius * 2);
+                .addScaledVector(aimDir, SPHERE_SPAWN_OFFSET);
 
             sphereMesh.position.copy(initialPosition);
 
@@ -2451,7 +2464,7 @@ export function Game({models, sounds, textures, matchId, character}) {
             if (keyStates["KeyW"]) {
                 let y = 0;
 
-                if (document.pointerLockElement !== document.body) {
+                if (document.pointerLockElement !== containerRef.current) {
                     y = model.rotation.y;
                 } else {
                     const cameraDirection = new THREE.Vector3();
@@ -3227,7 +3240,10 @@ export function Game({models, sounds, textures, matchId, character}) {
                 // Lower the model slightly so the feet touch the ground
                 model.position.y -= 0.7;
                 // Rotate the model to match the camera direction
-                model.rotation.y = yaw + Math.PI;
+                const locked = document.pointerLockElement === containerRef.current;
+                if (locked || !isCameraDragging) {
+                    model.rotation.y = yaw + Math.PI;
+                }
                 // Get the camera's forward direction
 
                 if (isShieldActive) {
