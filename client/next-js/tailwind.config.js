@@ -16,19 +16,22 @@ module.exports = {
     },
   },
   darkMode: "class",
-  plugins: [heroui({
-    themes: {
-      light: {
-        colors: {
-          secondary: '#f2499d', // Replace with your desired color
+  plugins: [
+    heroui({
+      themes: {
+        light: {
+          colors: {
+            primary: '#8B4513',
+            secondary: '#D4AF37',
+          },
+        },
+        dark: {
+          colors: {
+            primary: '#B8860B',
+            secondary: '#D4AF37',
+          },
         },
       },
-      dark: {
-        colors: {
-          primary:  '#00b7fa', // Replace with your desired color
-          secondary: '#953B51', // Replace with your desired color
-        },
-      },
-    },
-  })],
+    }),
+  ],
 }
