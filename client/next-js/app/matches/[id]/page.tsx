@@ -473,6 +473,7 @@ export default function MatchesPage() {
                   >
                     <Image
                       alt={opt.label}
+                      className="transition-transform hover:scale-110 focus:scale-110"
                       height={180}
                       src={opt.icon}
                       width={180}
