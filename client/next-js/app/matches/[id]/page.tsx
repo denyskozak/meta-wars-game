@@ -31,6 +31,7 @@ import * as warlockSkills from "@/skills/warlock";
 import * as paladinSkills from "@/skills/paladin";
 import * as rogueSkills from "@/skills/rogue";
 import * as warriorSkills from "@/skills/warrior";
+import { SkillsList } from "@/components/skills-list";
 
 type Match = MatchDetail;
 
@@ -372,32 +373,10 @@ export default function MatchesPage() {
                       </ul>
                     </div>
                   )}
-                  <div className="mt-4 w-full">
-                    <h4 className="text-yellow-400 text-sm font-semibold mb-1">
-                      Skills
-                    </h4>
-                    <div className="grid grid-cols-2 gap-2">
-                      {classOptions[selectedClassPreview].skills.map((sk) => (
-                        <div key={sk.id} className="flex gap-2 items-start">
-                          <Image
-                            alt={sk.name}
-                            height={32}
-                            src={sk.icon}
-                            width={32}
-                          />
-                          <div className="text-xs">
-                            <div className="font-semibold flex items-center gap-1">
-                              {sk.name}
-                              <Kbd>{sk.key}</Kbd>
-                            </div>
-                            <div className="text-[10px] text-gray-300">
-                              {sk.description}
-                            </div>
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
+                  <SkillsList
+                    className="mt-4 w-full"
+                    skills={classOptions[selectedClassPreview].skills}
+                  />
                 </ModalBody>
                 <ModalFooter className="flex gap-2">
                   <Button color="secondary" onPress={onClose}>
