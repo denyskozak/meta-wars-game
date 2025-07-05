@@ -187,7 +187,7 @@ export default function GamePage() {
 
   if (
     Object.keys(preloadedData.models).length < models.length ||
-    Object.keys(preloadedData.textures).length < 3
+    Object.keys(preloadedData.textures).length < 5
   ) {
     return <Loading text="Loading assets..." />;
   }
