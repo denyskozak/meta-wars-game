@@ -882,10 +882,6 @@ export function Game({models, sounds, textures, matchId, character}) {
 
         const GRAVITY = 20;
 
-        const NUM_SPHERES = 100;
-        const BASE_SPHERE_RADIUS = 0.26;
-        const SPHERE_RADIUS = BASE_SPHERE_RADIUS * SPELL_SCALES.fireball;
-        const SPHERE_SPAWN_OFFSET = playerCollider.radius + SPHERE_RADIUS;
 
         const FIREBLAST_RANGE = 20;
         const FIREBLAST_DAMAGE = 33;
@@ -929,8 +925,6 @@ export function Game({models, sounds, textures, matchId, character}) {
 
         const STEPS_PER_FRAME = 30;
 
-        const sphereGeometry = new THREE.IcosahedronGeometry(SPHERE_RADIUS, 5);
-        const sphereMaterial = new THREE.MeshLambertMaterial({color: 0xdede8d});
 
         const spheres = [];
 
@@ -966,6 +960,10 @@ export function Game({models, sounds, textures, matchId, character}) {
         const keyStates = {};
 
         const vector1 = new THREE.Vector3();
+
+        const BASE_SPHERE_RADIUS = 0.26;
+        const SPHERE_RADIUS = BASE_SPHERE_RADIUS * SPELL_SCALES.fireball;
+        const SPHERE_SPAWN_OFFSET = playerCollider.radius + SPHERE_RADIUS;
 
         // Set limits for the FOV
         const minFOV = 10;
