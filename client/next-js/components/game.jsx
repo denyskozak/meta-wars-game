@@ -34,7 +34,7 @@ import castFireblast, { meta as fireblastMeta } from '../skills/mage/fireblast';
 import castPyroblast, { meta as pyroblastMeta } from '../skills/mage/pyroblast';
 import castFrostNova, { meta as frostNovaMeta } from '../skills/mage/frostNova';
 import castBlink, { meta as blinkMeta } from '../skills/mage/blink';
-import castDarkball, { meta as darkballMeta } from '../skills/warlock/darkball';
+import castShadowbolt, { meta as shadowboltMeta } from '../skills/warlock/shadowbolt';
 import castCorruption, { meta as corruptionMeta } from '../skills/warlock/corruption';
 import castLifeTap, { meta as lifeTapMeta } from '../skills/warlock/lifeTap';
 import castChaosBolt, { meta as chaosBoltMeta } from '../skills/warlock/chaosBolt';
@@ -73,7 +73,7 @@ const SPELL_ICONS = {
     [iceballMeta.id]: iceballMeta.icon,
     [fireblastMeta.id]: fireblastMeta.icon,
     [pyroblastMeta.id]: pyroblastMeta.icon,
-    [darkballMeta.id]: darkballMeta.icon,
+    [shadowboltMeta.id]: shadowboltMeta.icon,
     [corruptionMeta.id]: corruptionMeta.icon,
     [lifeTapMeta.id]: lifeTapMeta.icon,
     [chaosBoltMeta.id]: chaosBoltMeta.icon,
@@ -106,7 +106,7 @@ const SPELL_META = {
     [iceballMeta.id]: iceballMeta,
     [fireblastMeta.id]: fireblastMeta,
     [pyroblastMeta.id]: pyroblastMeta,
-    [darkballMeta.id]: darkballMeta,
+    [shadowboltMeta.id]: shadowboltMeta,
     [corruptionMeta.id]: corruptionMeta,
     [lifeTapMeta.id]: lifeTapMeta,
     [chaosBoltMeta.id]: chaosBoltMeta,
@@ -138,7 +138,7 @@ const SPELL_SCALES = {
     // fireball slightly smaller for better visuals
     fireball: 1.5,
     iceball: 1.8,
-    darkball: 1.68,
+    shadowbolt: 1.68,
     pyroblast: 5,
     chaosBolt: 5.4,
 };
@@ -662,9 +662,9 @@ export function Game({models, sounds, textures, matchId, character}) {
             darkballMaterial
         );
         darkballMesh.scale.set(
-            SPELL_SCALES.darkball,
-            SPELL_SCALES.darkball,
-            SPELL_SCALES.darkball,
+            SPELL_SCALES.shadowbolt,
+            SPELL_SCALES.shadowbolt,
+            SPELL_SCALES.shadowbolt,
         );
 
         const chaosBoltMesh = new THREE.Mesh(
@@ -773,7 +773,7 @@ export function Game({models, sounds, textures, matchId, character}) {
         const cooldownDuration = 700; // Cooldown duration in milliseconds
         const SKILL_COOLDOWNS = {
             fireball: 0,
-            darkball: 0,
+            shadowbolt: 0,
             corruption: 10000,
             lifetap: 10000,
             iceball: 3000,
@@ -922,7 +922,7 @@ export function Game({models, sounds, textures, matchId, character}) {
             fireball: 0xff6600,
             iceball: 0x88ddff,
             pyroblast: 0xff6600,
-            darkball: 0xb84dff,
+            shadowbolt: 0xb84dff,
             chaosbolt: 0xb84dff,
         };
 
@@ -1136,7 +1136,7 @@ export function Game({models, sounds, textures, matchId, character}) {
         }
         function handleKeyE() {
             const className = character?.name?.toLowerCase();
-            if (className === 'warlock') castSpell('darkball');
+            if (className === 'warlock') castSpell('shadowbolt');
             else if (className === 'paladin') castSpell('lightstrike');
             else if (className === 'rogue') castSpell('blood-strike');
             else if (className === 'warrior') castSpell('savage-blow');
@@ -1603,7 +1603,7 @@ export function Game({models, sounds, textures, matchId, character}) {
                         damage: FIREBALL_DAMAGE,
                     });
                     break;
-                case "darkball":
+                case "shadowbolt":
                     castDarkball({
                         playerId,
                         castSpellImpl,
@@ -1669,7 +1669,7 @@ export function Game({models, sounds, textures, matchId, character}) {
                         sounds,
                     });
                     break;
-                case "darkball":
+                case "shadowbolt":
                     darkHands(playerId, 1000);
                     castSpellImpl(
                         playerId,
@@ -1678,7 +1678,7 @@ export function Game({models, sounds, textures, matchId, character}) {
                         (model) => castSphere(model, darkballMesh.clone(), spellType, DARKBALL_DAMAGE),
                         sounds.fireballCast,
                         sounds.fireball,
-                        'darkball',
+                        'shadowbolt',
                         false
                     )
                     break;
@@ -3869,7 +3869,7 @@ export function Game({models, sounds, textures, matchId, character}) {
             let sphere;
             if (data.type === "fireball") {
                 sphere = fireballMesh.clone();
-            } else if (data.type === "darkball") {
+            } else if (data.type === "shadowbolt") {
                 sphere = darkballMesh.clone();
             } else if (data.type === "pyroblast") {
                 sphere = pyroblastMesh.clone();
@@ -3947,7 +3947,7 @@ export function Game({models, sounds, textures, matchId, character}) {
                             igniteHands(message.id, 1000);
                             castSphereOtherUser(message.payload, message.id);
                             break;
-                        case "darkball":
+                        case "shadowbolt":
                             igniteHands(message.id, 1000);
                             castSphereOtherUser(message.payload, message.id);
                             break;

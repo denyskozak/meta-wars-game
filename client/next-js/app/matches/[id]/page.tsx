@@ -184,8 +184,8 @@ export default function MatchesPage() {
       description: "Manipulator of dark magic.",
       skills: [
         {
-          ...warlockSkills.darkball,
-          name: "Darkball",
+          ...warlockSkills.shadowbolt,
+          name: "Shadowbolt",
           description: "Shadow bolt dealing damage.",
         },
         {
