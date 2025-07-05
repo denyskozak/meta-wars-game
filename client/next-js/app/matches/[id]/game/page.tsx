@@ -118,6 +118,26 @@ export default function GamePage() {
           });
         }),
         new Promise<void>((resolve) => {
+          textureLoader.load(
+            "https://raw.githubusercontent.com/pizza3/asset/master/noise9.jpg",
+            (t) => {
+              t.wrapS = t.wrapT = THREE.RepeatWrapping;
+              textures.noise = t;
+              resolve();
+            },
+          );
+        }),
+        new Promise<void>((resolve) => {
+          textureLoader.load(
+            "https://raw.githubusercontent.com/pizza3/asset/master/sparklenoise.jpg",
+            (t) => {
+              t.wrapS = t.wrapT = THREE.RepeatWrapping;
+              textures.sparkle = t;
+              resolve();
+            },
+          );
+        }),
+        new Promise<void>((resolve) => {
           exrLoader.load("/textures/world.exr", (t) => {
             textures.world = t;
             resolve();
