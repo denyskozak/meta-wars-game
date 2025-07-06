@@ -33,6 +33,15 @@ export function BackgroundMusic({ children }: { children?: React.ReactNode }) {
   const pathname = usePathname();
   const [playing, setPlaying] = useState(true);
 
+  // Load saved preference from sessionStorage
+  useEffect(() => {
+    const stored = sessionStorage.getItem("bg-music-playing");
+
+    if (stored === "false") {
+      setPlaying(false);
+    }
+  }, []);
+
   const toggle = () => {
     const audio = audioRef.current;
 
@@ -40,9 +49,11 @@ export function BackgroundMusic({ children }: { children?: React.ReactNode }) {
     if (audio.paused) {
       audio.play().catch(() => {});
       setPlaying(true);
+      sessionStorage.setItem("bg-music-playing", "true");
     } else {
       audio.pause();
       setPlaying(false);
+      sessionStorage.setItem("bg-music-playing", "false");
     }
   };
 
@@ -52,12 +63,16 @@ export function BackgroundMusic({ children }: { children?: React.ReactNode }) {
     if (!audio) return;
     audio.volume = 0.4;
     audio.loop = true;
-    if (/^\/matches\/[^/]+\/game/.test(pathname || "")) {
-      audio.pause();
-      setPlaying(false);
-    } else {
+    const stored = sessionStorage.getItem("bg-music-playing");
+    const shouldPlay =
+      stored !== "false" && !/^\/matches\/[^/]+\/game/.test(pathname || "");
+
+    if (shouldPlay) {
       audio.play().catch(() => {});
       setPlaying(true);
+    } else {
+      audio.pause();
+      setPlaying(false);
     }
   }, [pathname]);
 
