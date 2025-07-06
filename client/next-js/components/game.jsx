@@ -768,7 +768,7 @@ export function Game({models, sounds, textures, matchId, character}) {
     void main(){
       float dist = distance(vUv, vec2(0.5));
 
-      float core = smoothstep(0.45, 0.0, dist);
+      float core = smoothstep(0.5, 0.0, dist);
       float glow = smoothstep(0.75, 0.25, dist) *
                    (0.5 + 0.5 * abs(sin(time * 4.0 + vNoise * 3.1415)));
 
