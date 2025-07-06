@@ -146,7 +146,7 @@ export const Interface = () => {
           )}
           <div className="w-40 space-y-1">
             <p className="text-medium font-semibold">
-              HP: {Math.round((selfStats.hp / selfStats.maxHp) * 100)}
+              HP: {Math.round(selfStats.hp)}
             </p>
             <Progress
               disableAnimation
@@ -196,7 +196,7 @@ export const Interface = () => {
               {target.address}
             </div>
             <p className="text-medium font-semibold">
-              HP: {Math.round((target.hp / target.maxHp) * 100)}
+              HP: {Math.round(target.hp)}
             </p>
             <Progress
               disableAnimation

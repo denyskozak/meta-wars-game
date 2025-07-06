@@ -75,7 +75,6 @@ export default function MatchesPage() {
   >([]);
   const [classType, setClassType] = useState("");
   const [joined, setJoined] = useState(false);
-  const [isReady, setIsReady] = useState(false);
   const classOptions = {
     warrior: {
       label: "Warrior",
@@ -269,7 +268,6 @@ export default function MatchesPage() {
     },
   };
 
-  console.log("players: ", players);
   useEffect(() => {
     const handleMessage = (event: MessageEvent) => {
       const message = JSON.parse(event.data);
@@ -305,9 +303,9 @@ export default function MatchesPage() {
         case "PLAYER_LEFT":
           setPlayers((prev) => prev.filter((p) => p.id !== message.playerId));
           break;
-        case "MATCH_READY":
+        case 'CHARACTER_READY':
           router.push(`/matches/${params?.id}/game`);
-          break;
+          break
       }
     };
 
@@ -324,17 +322,6 @@ export default function MatchesPage() {
   ) => {
     const charModel = CLASS_MODELS[cls] || "vampir";
 
-    if (!joined) {
-      sendToSocket({ type: "JOIN_MATCH", classType: cls, character: charModel });
-      sendToSocket({ type: "GET_MATCH" });
-      setJoined(true);
-    }
-
-    if (!isReady) {
-      sendToSocket({ type: "READY_FOR_MATCH" });
-      setIsReady(true);
-    }
-
     dispatch({
       type: "SET_CHARACTER",
       payload: {
@@ -345,6 +332,9 @@ export default function MatchesPage() {
     });
 
     setClassType(cls);
+
+    sendToSocket({ type: "SET_CHARACTER", classType: cls, character: charModel });
+
     onClose();
   };
 

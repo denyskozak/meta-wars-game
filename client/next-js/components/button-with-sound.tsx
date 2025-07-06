@@ -10,6 +10,7 @@ export function ButtonWithSound({ onPress, ...props }: ButtonProps) {
     if (audioRef.current) {
       try {
         audioRef.current.currentTime = 0;
+        audioRef.current.volume = 0.3;
         audioRef.current.play().catch(() => {});
       } catch {
         // ignore play errors
@@ -20,7 +21,7 @@ export function ButtonWithSound({ onPress, ...props }: ButtonProps) {
 
   return (
     <>
-      <audio ref={audioRef} hidden src="/click.mp3">
+      <audio ref={audioRef} hidden src="/button_click.ogg">
         <track kind="captions" />
       </audio>
       <Button {...props} onPress={handlePress} />

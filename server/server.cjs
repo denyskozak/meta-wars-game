@@ -820,6 +820,19 @@ ws.on('connection', (socket) => {
                 broadcastMatchesToWaitingClients();
                 break;
 
+            case 'SET_CHARACTER':
+                if (match) {
+                    const players = match.players;
+                    const myPlayer = players.get(id);
+                    myPlayer.classType = message.classType;
+                    myPlayer.character = message.character;
+                    socket.send(JSON.stringify({
+                        type: 'CHARACTER_READY'
+                    }))
+                }
+
+
+                break;
             case 'JOIN_MATCH':
                 const matchToJoin = matches.get(message.matchId);
                 if (!matchToJoin || matchToJoin.isFull) {
@@ -827,8 +840,7 @@ ws.on('connection', (socket) => {
                     break;
                 }
 
-                const char = typeof message.character === 'string' ? message.character : null;
-                const newPlayer = createPlayer(message.address, message.classType, char);
+                const newPlayer = createPlayer(message.address, '', '');
                 matchToJoin.players.set(id, newPlayer);
                 broadcastToMatch(matchToJoin.id, {
                     type: 'PLAYER_RESPAWN',
@@ -861,6 +873,10 @@ ws.on('connection', (socket) => {
                         ...matchToJoin,
                         players: Array.from(matchToJoin.players),
                     },
+                }));
+
+                socket.send(JSON.stringify({
+                    type: 'ME_JOINED_MATCH',
                 }));
                 broadcastMatchesToWaitingClients();
                 break;

@@ -50,7 +50,7 @@ export function BackgroundMusic({ children }: { children?: React.ReactNode }) {
     const audio = audioRef.current;
 
     if (!audio) return;
-    audio.volume = 0.5;
+    audio.volume = 0.4;
     audio.loop = true;
     if (/^\/matches\/[^/]+\/game/.test(pathname || "")) {
       audio.pause();

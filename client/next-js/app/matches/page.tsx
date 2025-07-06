@@ -17,7 +17,7 @@ import {
   ModalFooter,
 } from "@heroui/modal";
 import { Input } from "@heroui/input";
-import { useRouter } from "next/navigation";
+import {useParams, useRouter} from "next/navigation";
 
 import { ButtonWithSound as Button } from "@/components/button-with-sound";
 import { useWS } from "@/hooks/useWS";
@@ -34,6 +34,7 @@ interface Match {
 export default function MatchesPage() {
   const { socket, sendToSocket } = useWS();
   const router = useRouter();
+  const params = useParams();
 
   const [matches, setMatches] = useState<Match[]>([]);
   const [name, setName] = useState("Teee");
@@ -48,6 +49,9 @@ export default function MatchesPage() {
       switch (message.type) {
         case "MATCH_LIST":
           setMatches(message.matches);
+          break;
+        case "ME_JOINED_MATCH":
+          router.push(`/matches/${params?.id}`);
           break;
       }
     };
@@ -80,7 +84,7 @@ export default function MatchesPage() {
   };
 
   const goToLobby = (id) => {
-    router.push(`/matches/${id}`);
+    sendToSocket({ type: "JOIN_MATCH", matchId: id });
   };
 
   return (
