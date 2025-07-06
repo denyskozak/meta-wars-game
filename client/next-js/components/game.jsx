@@ -1588,10 +1588,9 @@ export function Game({models, sounds, textures, matchId, character}) {
             let minDist = Infinity;
             players.forEach((p, id) => {
                 if (id === myPlayerId) return;
-                const box = new THREE.Box3().setFromObject(p.model);
-                const hit = raycaster.ray.intersectBox(box, new THREE.Vector3());
-                if (hit) {
-                    const dist = origin.distanceTo(hit);
+                const intersects = raycaster.intersectObject(p.model, true);
+                if (intersects.length > 0) {
+                    const dist = intersects[0].distance;
                     if (dist < minDist && hasLineOfSight(id)) {
                         minDist = dist;
                         closest = id;
