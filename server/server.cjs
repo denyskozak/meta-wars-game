@@ -23,6 +23,17 @@ const CLASS_STATS = require('../client/next-js/consts/classStats.json');
 const ADRENALINE_RUSH_ICON = '/icons/classes/rogue/adrenalinerush.jpg';
 const RAGE_ICON = '/icons/classes/warrior/rage.jpg';
 const BERSERK_ICON = '/icons/classes/warrior/berserk.jpg';
+
+const SPHERE_SPELLS = new Set([
+    'fireball',
+    'shadowbolt',
+    'chaosbolt',
+    'iceball',
+    'pyroblast',
+]);
+const PROJECTILE_RADIUS = 0.35;
+const PROJECTILE_MAX_DISTANCE = 10;
+const PROJECTILE_UPDATE_INTERVAL = UPDATE_MATCH_INTERVAL;
 const {
     MELEE_RANGE,
     withinMeleeRange,
@@ -183,6 +194,7 @@ function createMatch({name, maxPlayers = 6, ownerId}) {
         summary: null,
         runes: generateRunes(matchId),
         xpRunes: generateXpRunes(matchId),
+        projectiles: [],
     };
     matches.set(matchId, match);
     playerMatchMap.set(ownerId, matchId);
@@ -552,6 +564,50 @@ ws.on('connection', (socket) => {
     }, UPDATE_MATCH_INTERVAL);
 
     setInterval(() => {
+        for (const match of matches.values()) {
+            if (!match.projectiles.length) continue;
+            const remove = [];
+            match.projectiles.forEach((p, idx) => {
+                p.position.x += p.velocity.x * (PROJECTILE_UPDATE_INTERVAL / 1000);
+                p.position.y += p.velocity.y * (PROJECTILE_UPDATE_INTERVAL / 1000);
+                p.position.z += p.velocity.z * (PROJECTILE_UPDATE_INTERVAL / 1000);
+                const dist = Math.sqrt(
+                    (p.position.x - p.start.x) ** 2 +
+                    (p.position.y - p.start.y) ** 2 +
+                    (p.position.z - p.start.z) ** 2
+                );
+                if (dist > PROJECTILE_MAX_DISTANCE) {
+                    remove.push(idx);
+                    return;
+                }
+                for (const [pid, player] of match.players) {
+                    if (pid === p.ownerId) continue;
+                    const dx = player.position.x - p.position.x;
+                    const dy = player.position.y - p.position.y;
+                    const dz = player.position.z - p.position.z;
+                    const d2 = dx * dx + dy * dy + dz * dz;
+                    const r = PROJECTILE_RADIUS + 0.6;
+                    if (d2 < r * r) {
+                        applyDamage(match, pid, p.ownerId, p.damage, p.type);
+                        if (p.type === 'iceball') {
+                            broadcastToMatch(match.id, {
+                                type: 'CAST_SPELL',
+                                payload: { type: 'iceball-hit', targetId: pid },
+                                id: p.ownerId,
+                            });
+                        }
+                        remove.push(idx);
+                        break;
+                    }
+                }
+            });
+            for (let i = remove.length - 1; i >= 0; i--) {
+                match.projectiles.splice(remove[i], 1);
+            }
+        }
+    }, PROJECTILE_UPDATE_INTERVAL);
+
+    setInterval(() => {
         const now = Date.now();
         for (const match of matches.values()) {
             match.players.forEach((player, pid) => {
@@ -864,6 +920,25 @@ ws.on('connection', (socket) => {
                         }
 
                         player.mana -= cost;
+
+                        if (SPHERE_SPELLS.has(message.payload.type)) {
+                            const proj = {
+                                id: `proj_${Date.now()}_${Math.random()}`,
+                                position: { ...message.payload.position },
+                                start: { ...message.payload.position },
+                                velocity: { ...message.payload.velocity },
+                                ownerId: id,
+                                type: message.payload.type,
+                                damage: message.payload.damage || 0,
+                            };
+                            match.projectiles.push(proj);
+                            broadcastToMatch(match.id, {
+                                type: 'CAST_SPELL',
+                                payload: { ...message.payload, id: proj.id },
+                                id,
+                            }, id);
+                        }
+
                         if (message.payload.type === 'heal') {
                             player.hp = Math.min(player.maxHp, player.hp + 50);
                         }
@@ -880,7 +955,7 @@ ws.on('connection', (socket) => {
                         }
 
 
-                        if (['fireball', 'shadowbolt', 'corruption', 'chaosbolt', 'iceball', 'shield', 'pyroblast', 'fireblast', 'lightstrike', 'lightwave', 'stun', 'paladin-heal', 'frostnova', 'blink', 'hand-of-freedom', 'divine-speed', 'lifedrain', 'fear', 'blood-strike', 'eviscerate', 'kidney-strike', 'adrenaline-rush', 'sprint', 'shadow-leap', 'warbringer', 'savage-blow', 'hamstring', 'bladestorm', 'berserk', 'bloodthirst'].includes(message.payload.type)) {
+                        if (['corruption', 'shield', 'fireblast', 'lightstrike', 'lightwave', 'stun', 'paladin-heal', 'frostnova', 'blink', 'hand-of-freedom', 'divine-speed', 'lifedrain', 'fear', 'blood-strike', 'eviscerate', 'kidney-strike', 'adrenaline-rush', 'sprint', 'shadow-leap', 'warbringer', 'savage-blow', 'hamstring', 'bladestorm', 'berserk', 'bloodthirst'].includes(message.payload.type)) {
                             broadcastToMatch(match.id, {
                                 type: 'CAST_SPELL',
                                 payload: message.payload,
@@ -1084,6 +1159,9 @@ ws.on('connection', (socket) => {
 
             case 'TAKE_DAMAGE':
                 if (match) {
+                    if (SPHERE_SPELLS.has(message.spellType)) {
+                        break;
+                    }
                     applyDamage(match, id, message.damageDealerId, message.damage, message.spellType);
                     if (message.spellType === 'iceball') {
                         const target = match.players.get(id);
