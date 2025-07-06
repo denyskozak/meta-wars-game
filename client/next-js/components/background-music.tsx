@@ -25,5 +25,7 @@ export function BackgroundMusic() {
     };
   }, []);
 
-  return <audio ref={audioRef} src="/bg.mp3" autoPlay />;
+  return <audio ref={audioRef} src="/bg.mp3" autoPlay >
+    <track kind="captions" />
+  </audio>;
 }
