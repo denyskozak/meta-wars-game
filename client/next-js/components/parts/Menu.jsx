@@ -1,6 +1,6 @@
 import { useInterface } from "../../context/inteface";
 import { useRouter } from "next/navigation";
-import { Button } from "@heroui/react";
+import { ButtonWithSound as Button } from "../button-with-sound";
 import "./Menu.css";
 
 export const GameMenu = () => {

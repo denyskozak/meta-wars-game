@@ -1,9 +1,9 @@
 "use client";
 import React, { useRef, useEffect, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Button } from "@heroui/react";
 import { useRouter } from "next/navigation";
 
+import { ButtonWithSound as Button } from "@/components/button-with-sound";
 import { title as getTitle, subtitle } from "@/components/primitives";
 
 // Sui JS SDK
