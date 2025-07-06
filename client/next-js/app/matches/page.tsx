@@ -45,13 +45,12 @@ export default function MatchesPage() {
     const handleMessage = async (event: MessageEvent) => {
       let message = JSON.parse(event.data);
 
-      console.log("message: ", message);
       switch (message.type) {
         case "MATCH_LIST":
           setMatches(message.matches);
           break;
         case "ME_JOINED_MATCH":
-          router.push(`/matches/${params?.id}`);
+          router.push(`/matches/${message.matchId}`);
           break;
       }
     };

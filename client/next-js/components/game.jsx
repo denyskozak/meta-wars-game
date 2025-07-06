@@ -136,11 +136,11 @@ const SPELL_META = {
 
 const SPELL_SCALES = {
     // fireball enlarged for better visuals
-    fireball: 3,
-    iceball: 3,
-    shadowbolt: 3,
-    pyroblast: 5,
-    chaosBolt: 5.4,
+    fireball: 1,
+    iceball: 1,
+    shadowbolt: 1,
+    pyroblast: 2,
+    chaosBolt: 2,
 };
 
 const USER_DEFAULT_POSITION = [
@@ -560,8 +560,8 @@ export function Game({models, sounds, textures, matchId, character}) {
         const sparkTexture = textures.sparkle;
         const fireballMaterial = new THREE.ShaderMaterial({
             transparent: false,
-            depthWrite: true,
-            blending: THREE.NormalBlending,
+            depthWrite: false,
+            blending: THREE.AdditiveBlending,
             uniforms: {
                 time: {value: 0},
                 perlinnoise: {value: perlinTexture},
@@ -964,8 +964,8 @@ export function Game({models, sounds, textures, matchId, character}) {
         const BLADESTORM_DAMAGE = 10;
 
         // Медленнее пускаем сферы как настоящие заклинания
-        const MIN_SPHERE_IMPULSE = 3;
-        const MAX_SPHERE_IMPULSE = 6;
+        const MIN_SPHERE_IMPULSE = 2;
+        const MAX_SPHERE_IMPULSE = 3;
 
         // Maximum distance any sphere can travel
         // Use the same range as fireblast for consistency
@@ -1051,7 +1051,7 @@ export function Game({models, sounds, textures, matchId, character}) {
 
         const AIM_BEAM_OPACITY = 0.5;
         const AIM_BEAM_LENGTH = SPHERE_MAX_DISTANCE * 1.5;
-        const AIM_BEAM_LINEWIDTH = 4;
+        const AIM_BEAM_LINEWIDTH = 15;
         let aimBeam = null;
 
         function createAimBeam() {

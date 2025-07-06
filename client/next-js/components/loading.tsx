@@ -8,20 +8,22 @@ interface LoadingProps {
   text: string;
 }
 
-export const Loading = ({ text }: LoadingProps) => {
-  const imageSrc = React.useMemo(() => {
+const getRandomImage = () => {
     const images = [
-      "/loading-1.jpg",
-      "/loading-2.jpg",
-      "/loading-3.jpg",
-      "/loading-4.jpg",
-      "/loading-5.jpg",
+        "/loading-1.jpg",
+        "/loading-2.jpg",
+        "/loading-3.jpg",
+        "/loading-4.jpg",
+        "/loading-5.jpg",
     ];
 
     return images[Math.floor(Math.random() * images.length)];
-  }, []);
+}
 
-  const [progress, setProgress] = React.useState(0);
+const randomImage = getRandomImage();
+
+export const Loading = ({ text }: LoadingProps) => {
+    const [progress, setProgress] = React.useState(0);
 
   React.useEffect(() => {
     const interval = setInterval(() => {
@@ -35,15 +37,15 @@ export const Loading = ({ text }: LoadingProps) => {
     <div className="w-full h-full flex justify-center items-center">
       <Image
         alt="Turtle Art"
-        className="absolute top-0 left-0 w-full h-full object-cover z-[2]"
+        className="absolute top-0 left-0 w-full h-full object-cover z-[4]"
         height={1961}
-        src={imageSrc}
+        src={randomImage}
         width={3840}
       />
-      <span className="absolute z-[3] text-xl font-semibold text-white">
+      <span className="absolute z-[5] text-xl font-semibold text-white">
         {text}
       </span>
-      <div className="absolute bottom-12 left-1/2 -translate-x-1/2 z-[3] flex flex-col items-center gap-2">
+      <div className="absolute bottom-12 left-1/2 -translate-x-1/2 z-[5] flex flex-col items-center gap-2">
         <img
           alt="How to play"
           className="w-96 h-auto"

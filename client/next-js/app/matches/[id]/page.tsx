@@ -50,6 +50,7 @@ export default function MatchesPage() {
     if (previewAudioRef.current) {
       try {
         previewAudioRef.current.currentTime = 0;
+        previewAudioRef.current.volume = 0.4;
         previewAudioRef.current.play().catch(() => {});
       } catch {
         // ignore play errors
@@ -340,7 +341,7 @@ export default function MatchesPage() {
 
   return (
     <>
-      <audio ref={previewAudioRef} hidden src="/click.mp3">
+      <audio ref={previewAudioRef} hidden src="/button_click.ogg">
         <track kind="captions" />
       </audio>
       <Modal

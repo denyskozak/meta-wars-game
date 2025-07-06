@@ -890,6 +890,7 @@ ws.on('connection', (socket) => {
 
                 socket.send(JSON.stringify({
                     type: 'ME_JOINED_MATCH',
+                    matchId: message.matchId
                 }));
                 broadcastMatchesToWaitingClients();
                 break;
