@@ -27,13 +27,22 @@ import {
 
 import { siteConfig } from "@/config/site";
 import { ThemeSwitch } from "@/components/theme-switch";
-import { GithubIcon, DiscordIcon, SearchIcon } from "@/components/icons";
+import {
+  GithubIcon,
+  DiscordIcon,
+  SearchIcon,
+  PlayIcon,
+  PauseIcon,
+} from "@/components/icons";
+import { useBackgroundMusic } from "@/components/background-music";
 
 let clickedOnBalance = 0;
 
 export const Navbar = () => {
   const account = useCurrentAccount();
   const { currentWallet, connectionStatus } = useCurrentWallet();
+
+  const { playing, toggle } = useBackgroundMusic();
 
   const router = useRouter();
 
@@ -119,6 +128,18 @@ export const Navbar = () => {
           <Link isExternal aria-label="Github" href={siteConfig.links.github}>
             <GithubIcon className="text-default-500" />
           </Link>
+          <button
+            aria-label={playing ? "Pause music" : "Play music"}
+            className="px-px transition-opacity hover:opacity-80 cursor-pointer"
+            type="button"
+            onClick={toggle}
+          >
+            {playing ? (
+              <PauseIcon className="text-default-500" />
+            ) : (
+              <PlayIcon className="text-default-500" />
+            )}
+          </button>
           {/*<ThemeSwitch />*/}
         </NavbarItem>
         {/*<NavbarItem className="hidden lg:flex">{searchInput}</NavbarItem>*/}
