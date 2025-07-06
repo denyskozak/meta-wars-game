@@ -1,7 +1,8 @@
 import { ConnectModal, useCurrentAccount } from "@mysten/dapp-kit";
 import React, { useState } from "react";
-import { Button } from "@heroui/react";
 import { useRouter } from "next/navigation";
+
+import { ButtonWithSound as Button } from "@/components/button-with-sound";
 
 interface ConnectionButton {
   className?: string;

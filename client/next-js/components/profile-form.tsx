@@ -2,9 +2,9 @@
 
 import { useState, useEffect } from "react";
 import { Input } from "@heroui/input";
-import { Button } from "@heroui/react";
 import { useRouter } from "next/navigation";
 
+import { ButtonWithSound as Button } from "@/components/button-with-sound";
 import { useWS } from "@/hooks/useWS";
 
 export interface ProfileFormProps {

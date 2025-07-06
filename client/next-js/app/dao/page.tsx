@@ -8,10 +8,10 @@ import {
   TableBody,
   TableRow,
   TableCell,
-  Button,
   addToast,
 } from "@heroui/react";
 
+import { ButtonWithSound as Button } from "@/components/button-with-sound";
 import { Navbar } from "@/components/navbar";
 import { title } from "@/components/primitives";
 import { useDao } from "@/hooks/useDao";

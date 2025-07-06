@@ -2,7 +2,6 @@
 import { useEffect, useMemo, useState } from "react";
 import Image from "next/image";
 import {
-  Button,
   Table,
   TableHeader,
   TableColumn,
@@ -18,6 +17,7 @@ import {
   ModalFooter,
 } from "@heroui/modal";
 import { Kbd } from "@heroui/kbd";
+import { ButtonWithSound as Button } from "@/components/button-with-sound";
 import { useParams, useRouter } from "next/navigation";
 
 import { assetUrl } from "@/utilities/assets";

@@ -7,7 +7,6 @@ import {
   TableBody,
   TableRow,
   TableCell,
-  Button,
   useDisclosure,
 } from "@heroui/react";
 import {
@@ -20,6 +19,7 @@ import {
 import { Input } from "@heroui/input";
 import { useRouter } from "next/navigation";
 
+import { ButtonWithSound as Button } from "@/components/button-with-sound";
 import { useWS } from "@/hooks/useWS";
 import { Navbar } from "@/components/navbar";
 
