@@ -1120,8 +1120,10 @@ export function Game({models, sounds, textures, matchId, character}) {
         scene.add(cameraTarget);
 
         // Variables for camera rotation control
-        let yaw = 3;
-        let pitch = 0;
+        // Set initial yaw and pitch so the camera faces approximately
+        // the same direction as the logged rotation
+        let yaw = 1.30;       // default yaw angle in radians
+        let pitch = -0.36;    // default pitch angle in radians
         // Speed in radians per second for keyboard based rotation
         const ROTATION_SPEED = 2.5;
 
