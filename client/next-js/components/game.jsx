@@ -2104,12 +2104,12 @@ export function Game({models, sounds, textures, matchId, character}) {
         }
 
 
-        function createSphereTail(color) {
+        function createSphereTail(color, spellScale = 1) {
             const tailSprites = [];
             const tailPositions = [];
             for (let i = 0; i < FIREBALL_TAIL_SEGMENTS; i++) {
-                const scale = 0.15 * (1 - i / FIREBALL_TAIL_SEGMENTS);
-                const sprite = makeGlowSprite(color, scale);
+                const baseScale = 0.15 * (1 - i / FIREBALL_TAIL_SEGMENTS);
+                const sprite = makeGlowSprite(color, baseScale * spellScale);
                 sprite.visible = false;
                 scene.add(sprite);
                 tailSprites.push(sprite);
@@ -3810,7 +3810,8 @@ export function Game({models, sounds, textures, matchId, character}) {
             let tailPositions = null;
             const tailColor = SPELL_TAIL_COLORS[data.type];
             if (tailColor !== undefined) {
-                ({ tailSprites, tailPositions } = createSphereTail(tailColor));
+                const spellScale = SPELL_SCALES[data.type] || 1;
+                ({ tailSprites, tailPositions } = createSphereTail(tailColor, spellScale));
             }
 
             scene.add(mesh);
