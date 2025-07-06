@@ -906,8 +906,8 @@ export function Game({models, sounds, textures, matchId, character}) {
         const BLADESTORM_DAMAGE = 10;
 
         // Медленнее пускаем сферы как настоящие заклинания
-        const MIN_SPHERE_IMPULSE = 6;
-        const MAX_SPHERE_IMPULSE = 12;
+        const MIN_SPHERE_IMPULSE = 3;
+        const MAX_SPHERE_IMPULSE = 6;
 
         // Maximum distance any sphere can travel
         // Use the same range as fireblast for consistency
@@ -1674,19 +1674,6 @@ export function Game({models, sounds, textures, matchId, character}) {
                         sendToSocket,
                         sounds,
                     });
-                    break;
-                case "shadowbolt":
-                    darkHands(playerId, 1000);
-                    castSpellImpl(
-                        playerId,
-                        30,
-                        1000,
-                        (model) => castSphere(model, darkballMesh.clone(), spellType, DARKBALL_DAMAGE),
-                        sounds.fireballCast,
-                        sounds.fireball,
-                        'shadowbolt',
-                        false
-                    )
                     break;
                 case "fireblast":
                     castFireblast({
@@ -3675,8 +3662,8 @@ export function Game({models, sounds, textures, matchId, character}) {
         function updatePlayerPosition(id) {
             const p = players.get(id);
             if (!p) return;
-            const {model, position, rotation} = p;
-            model.position.set(position.x, position.y, position.z);
+            const { model, position, rotation } = p;
+            model.position.set(position.x, position.y - 0.7, position.z);
             model.rotation.y = rotation?.y;
         }
 
@@ -3748,6 +3735,7 @@ export function Game({models, sounds, textures, matchId, character}) {
         }
 
         function createProjectile(data) {
+            removeProjectile(data.id);
             let mesh;
             if (data.type === 'fireball') {
                 mesh = fireballMesh.clone();
