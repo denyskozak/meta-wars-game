@@ -288,7 +288,7 @@ export function Game({models, sounds, textures, matchId, character}) {
         const createTargetIndicator = () => {
             const geometry = new THREE.RingGeometry(0.55, 0.7, 32);
             const material = new THREE.MeshBasicMaterial({
-                color: 0x00ff00,
+                color: 0xffb457,
                 transparent: true,
                 opacity: TARGET_INDICATOR_OPACITY,
                 side: THREE.DoubleSide,
@@ -321,7 +321,7 @@ export function Game({models, sounds, textures, matchId, character}) {
                 MELEE_ANGLE,
             );
             const material = new THREE.MeshBasicMaterial({
-                color: 0xffff00,
+                color: 0xffb457,
                 transparent: true,
                 opacity: MELEE_INDICATOR_OPACITY,
                 side: THREE.DoubleSide,
@@ -415,15 +415,15 @@ export function Game({models, sounds, textures, matchId, character}) {
                 size / 2,
                 size / 2
             );
-            grad.addColorStop(0, 'rgba(255,255,255,1)');
-            grad.addColorStop(0.5, 'rgba(255,255,255,0.5)');
-            grad.addColorStop(1, 'rgba(255,255,255,0)');
+            grad.addColorStop(0, 'rgba(255,180,87,1)');
+            grad.addColorStop(0.5, 'rgba(255,180,87,0.5)');
+            grad.addColorStop(1, 'rgba(255,180,87,0)');
             ctx.fillStyle = grad;
             ctx.fillRect(0, 0, size, size);
             return new THREE.CanvasTexture(canvas);
         })();
 
-        function makeGlowSprite(color = 0xffffff, size = 1) {
+        function makeGlowSprite(color = 0xffb457, size = 1) {
             const material = new THREE.SpriteMaterial({
                 map: glowTexture,
                 color,
@@ -463,7 +463,7 @@ export function Game({models, sounds, textures, matchId, character}) {
             }
             ctx.lineTo(size / 2, size / 2 - outerRadius);
             ctx.closePath();
-            ctx.fillStyle = 'rgba(255,255,0,1)';
+            ctx.fillStyle = 'rgba(255,180,87,1)';
             ctx.fill();
             return new THREE.CanvasTexture(canvas);
         })();
@@ -476,8 +476,8 @@ export function Game({models, sounds, textures, matchId, character}) {
             canvas.height = height;
             const ctx = canvas.getContext('2d');
             const grad = ctx.createLinearGradient(0, 0, width, 0);
-            grad.addColorStop(0, 'rgba(255,255,255,0)');
-            grad.addColorStop(1, 'rgba(255,255,255,0.8)');
+            grad.addColorStop(0, 'rgba(255,180,87,0)');
+            grad.addColorStop(1, 'rgba(255,180,87,0.8)');
             ctx.fillStyle = grad;
             ctx.fillRect(0, 0, width, height);
             return new THREE.CanvasTexture(canvas);
@@ -562,8 +562,8 @@ export function Game({models, sounds, textures, matchId, character}) {
             blending: THREE.AdditiveBlending,
             uniforms: {
                 time: {value: 0},
-                coreCol: {value: new THREE.Color(0xfff8d0)},
-                flameCol: {value: new THREE.Color(0xff5500)},
+                coreCol: {value: new THREE.Color(0xffb457)},
+                flameCol: {value: new THREE.Color(0xffb457)},
                 fireTex: {value: fireTexture},
             },
             vertexShader: /* glsl */`
@@ -651,8 +651,8 @@ export function Game({models, sounds, textures, matchId, character}) {
             blending: THREE.NormalBlending,
             uniforms: {
                 time: {value: 0},
-                coreCol: {value: new THREE.Color(0xb84dff)},
-                flameCol: {value: new THREE.Color(0x220044)},
+                coreCol: {value: new THREE.Color(0xffb457)},
+                flameCol: {value: new THREE.Color(0xffb457)},
                 fireTex: {value: fireTexture},
             },
             vertexShader: fireballMaterial.vertexShader,
@@ -686,8 +686,8 @@ export function Game({models, sounds, textures, matchId, character}) {
         const iceballMaterial = new THREE.ShaderMaterial({
             uniforms: {
                 time: {value: 0.0},
-                color: {value: new THREE.Color(0x88ddff)},     // Более яркий синий
-                glowColor: {value: new THREE.Color(0xffffff)}, // Усиленное свечение
+                color: {value: new THREE.Color(0xffb457)},     // Более яркий синий
+                glowColor: {value: new THREE.Color(0xffb457)}, // Усиленное свечение
                 iceTex: {value: iceTexture},
             },
             vertexShader: `
@@ -759,7 +759,7 @@ export function Game({models, sounds, textures, matchId, character}) {
         scene.environment = worldTexture;
         scene.background = worldTexture; // optional
 
-        scene.fog = new THREE.Fog(0x88ccee, 0, 50);
+        scene.fog = new THREE.Fog(0xffb457, 0, 50);
 
         camera = new THREE.PerspectiveCamera(
             80,
@@ -829,12 +829,12 @@ export function Game({models, sounds, textures, matchId, character}) {
             }, cooldownDuration);
         }
 
-        // const fillLight1 = new THREE.HemisphereLight(0x8dc1de, 0x00668d, 1.5);
+        // const fillLight1 = new THREE.HemisphereLight(0xffb457, 0xffb457, 1.5);
 
         // fillLight1.position.set(2, 1, 1);
         // scene.add(fillLight1);
 
-        // const directionalLight = new THREE.DirectionalLight(0xffffff, 2.5);
+        // const directionalLight = new THREE.DirectionalLight(0xffb457, 2.5);
 
         // directionalLight.position.set(-5, 25, -1);
         // directionalLight.castShadow = true;
@@ -859,7 +859,7 @@ export function Game({models, sounds, textures, matchId, character}) {
         renderer.shadowMap.type = THREE.VSMShadowMap;
         renderer.toneMapping = THREE.ACESFilmicToneMapping;
 
-        function preloadMesh(mesh, color = 0xffaa33) {
+        function preloadMesh(mesh, color = 0xffb457) {
             const temp = mesh.clone();
             temp.visible = false;
             const light = new THREE.PointLight(color, 1, 5);
@@ -869,11 +869,11 @@ export function Game({models, sounds, textures, matchId, character}) {
             scene.remove(temp);
         }
 
-        preloadMesh(fireballMesh, 0xffaa33);
-        preloadMesh(pyroblastMesh, 0xffaa33);
-        preloadMesh(chaosBoltMesh, 0x8a2be2);
-        preloadMesh(darkballMesh, 0x8a2be2);
-        preloadMesh(iceballMesh, 0x88ddff);
+        preloadMesh(fireballMesh, 0xffb457);
+        preloadMesh(pyroblastMesh, 0xffb457);
+        preloadMesh(chaosBoltMesh, 0xffb457);
+        preloadMesh(darkballMesh, 0xffb457);
+        preloadMesh(iceballMesh, 0xffb457);
 
         const stats = new Stats();
 
@@ -917,11 +917,11 @@ export function Game({models, sounds, textures, matchId, character}) {
         const FIREBALL_TAIL_SEGMENTS = 8;
 
         const SPELL_TAIL_COLORS = {
-            fireball: 0xff6600,
-            iceball: 0x88ddff,
-            pyroblast: 0xff6600,
-            shadowbolt: 0xb84dff,
-            chaosbolt: 0xb84dff,
+            fireball: 0xffb457,
+            iceball: 0xffb457,
+            pyroblast: 0xffb457,
+            shadowbolt: 0xffb457,
+            chaosbolt: 0xffb457,
         };
 
         const STEPS_PER_FRAME = 30;
@@ -998,7 +998,7 @@ export function Game({models, sounds, textures, matchId, character}) {
 
         function createAimBeam() {
             const material = new THREE.LineBasicMaterial({
-                color: 0xffff00,
+                color: 0xffb457,
                 transparent: true,
                 opacity: AIM_BEAM_OPACITY,
                 depthWrite: false,
@@ -1069,7 +1069,7 @@ export function Game({models, sounds, textures, matchId, character}) {
 
         // function createCursor() {
         //     const cursorGeometry = new THREE.SphereGeometry(0.05, 16, 16); // Small sphere
-        //     const cursorMaterial = new THREE.MeshBasicMaterial({color: 0xff0000}); // Red color
+        //     const cursorMaterial = new THREE.MeshBasicMaterial({color: 0xffb457}); // Red color
         //     cursor = new THREE.Mesh(cursorGeometry, cursorMaterial);
         //     scene.add(cursor);
         // }
@@ -2735,13 +2735,13 @@ export function Game({models, sounds, textures, matchId, character}) {
 
         const bubbleMaterial = new THREE.MeshPhysicalMaterial({
             // базовый тон ­— чуть холоднее
-            color: 0x62b8ff,      // ледяной голубой
+            color: 0xffb457,      // ледяной голубой
             // прозрачность/преломление
             transparent: true,
             transmission: 1.0,           // «стекло» вместо простого alpha
             ior: 1.25,          // показатель преломления (вода ≈ 1.33)
             thickness: 0.35,          // толщина «стекла»
-            attenuationColor: 0x62b8ff,      // цвет поглощения
+            attenuationColor: 0xffb457,      // цвет поглощения
             attenuationDistance: 1.5,
             opacity: 0.8,
             // глянец и блики
@@ -2753,7 +2753,7 @@ export function Game({models, sounds, textures, matchId, character}) {
             iridescence: 0.5,
             iridescenceIOR: 1.1,
             sheen: 0.3,
-            sheenColor: 0xc8f6ff,
+            sheenColor: 0xffb457,
             // нормали «иней»
             normalMap: frostNormal,
             normalScale: new THREE.Vector2(0.2, 0.2),
@@ -2929,7 +2929,7 @@ export function Game({models, sounds, textures, matchId, character}) {
 
             const geometry = new THREE.RingGeometry(0.6, 0.8, 32);
             const material = new THREE.MeshBasicMaterial({
-                color: 0x88ddff,
+                color: 0xffb457,
                 transparent: true,
                 opacity: 0.6,
                 side: THREE.DoubleSide,
@@ -3093,7 +3093,7 @@ export function Game({models, sounds, textures, matchId, character}) {
             // Start very close to the player so the wave visually grows outwards
             const geometry = new THREE.RingGeometry(0.5, 1.5, 64);
             const material = new THREE.MeshBasicMaterial({
-                color: 0xfff8e8,
+                color: 0xffb457,
                 transparent: true,
                 opacity: 0.9,
                 side: THREE.DoubleSide,
@@ -3494,12 +3494,12 @@ export function Game({models, sounds, textures, matchId, character}) {
             const group = new THREE.Group();
             const stick = new THREE.Mesh(
                 new THREE.CylinderGeometry(0.05, 0.05, 1.5, 8),
-                new THREE.MeshStandardMaterial({color: 0x8B4513})
+                new THREE.MeshStandardMaterial({color: 0xffb457})
             );
             stick.position.y = 0.75;
             const top = new THREE.Mesh(
                 new THREE.SphereGeometry(0.1, 16, 16),
-                new THREE.MeshStandardMaterial({color: 0xffffff})
+                new THREE.MeshStandardMaterial({color: 0xffb457})
             );
             top.position.y = 1.5;
             group.add(stick);
@@ -3698,10 +3698,10 @@ export function Game({models, sounds, textures, matchId, character}) {
                 }
             });
 
-            let color = 0xffffff;
-            if (data.type === 'heal') color = 0x00ff7f;
-            if (data.type === 'mana') color = 0x44aaff;
-            if (data.type === 'damage') color = 0xff3333;
+            let color = 0xffb457;
+            if (data.type === 'heal') color = 0xffb457;
+            if (data.type === 'mana') color = 0xffb457;
+            if (data.type === 'damage') color = 0xffb457;
             const glow = makeGlowSprite(color, 1.5);
             glow.position.y = 0.2;
             rune.add(glow);
@@ -3732,7 +3732,7 @@ export function Game({models, sounds, textures, matchId, character}) {
                     child.material = child.material.clone();
                 }
             });
-            const glow = makeGlowSprite(0xffff00, 1.5);
+            const glow = makeGlowSprite(0xffb457, 1.5);
             glow.position.y = 0.2;
             rune.add(glow);
             scene.add(rune);
