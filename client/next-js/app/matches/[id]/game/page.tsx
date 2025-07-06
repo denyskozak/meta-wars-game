@@ -119,7 +119,7 @@ export default function GamePage() {
         }),
         new Promise<void>((resolve) => {
           textureLoader.load(
-            "https://raw.githubusercontent.com/pizza3/asset/master/noise9.jpg",
+            "/textures/noise9.jpg",
             (t) => {
               t.wrapS = t.wrapT = THREE.RepeatWrapping;
               textures.noise = t;
@@ -129,7 +129,7 @@ export default function GamePage() {
         }),
         new Promise<void>((resolve) => {
           textureLoader.load(
-            "https://raw.githubusercontent.com/pizza3/asset/master/sparklenoise.jpg",
+            "/textures/sparklenoise.jpg",
             (t) => {
               t.wrapS = t.wrapT = THREE.RepeatWrapping;
               textures.sparkle = t;
