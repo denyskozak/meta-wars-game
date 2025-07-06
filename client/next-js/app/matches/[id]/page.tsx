@@ -61,8 +61,8 @@ export default function MatchesPage() {
     { id: number; address: string; classType: string }[]
   >([]);
   const [classType, setClassType] = useState("");
-  const [skin, setSkin] = useState("bolvar");
   const [joined, setJoined] = useState(false);
+  const [isReady, setIsReady] = useState(false);
   const classOptions = {
     warrior: {
       label: "Warrior",
@@ -305,33 +305,34 @@ export default function MatchesPage() {
     };
   }, []);
 
-  useEffect(() => {
-    if (classType && !joined) {
-      const charModel = CLASS_MODELS[classType] || "vampir";
+  const handleClassSelect = (
+    cls: string,
+    onClose: () => void,
+  ) => {
+    const charModel = CLASS_MODELS[cls] || "vampir";
 
-      sendToSocket({ type: "JOIN_MATCH", classType, character: charModel });
+    if (!joined) {
+      sendToSocket({ type: "JOIN_MATCH", classType: cls, character: charModel });
       sendToSocket({ type: "GET_MATCH" });
       setJoined(true);
-      setSkin(charModel);
     }
-  }, [classType, joined]);
 
-  const handleReady = () => {
-    if (!joined && classType) {
-      const charModel = CLASS_MODELS[classType] || "vampir";
-
-      sendToSocket({ type: "JOIN_MATCH", classType, character: charModel });
-      setSkin(charModel);
+    if (!isReady) {
+      sendToSocket({ type: "READY_FOR_MATCH" });
+      setIsReady(true);
     }
+
     dispatch({
       type: "SET_CHARACTER",
       payload: {
-        name: classType.toLowerCase(),
-        classType: classType.toLowerCase(),
-        skin,
+        name: cls.toLowerCase(),
+        classType: cls.toLowerCase(),
+        skin: charModel,
       },
     });
-    router.push(`/matches/${params?.id}/game`);
+
+    setClassType(cls);
+    onClose();
   };
 
   return (
@@ -384,10 +385,7 @@ export default function MatchesPage() {
                   </Button>
                   <Button
                     color="primary"
-                    onPress={() => {
-                      setClassType(selectedClassPreview);
-                      onClose();
-                    }}
+                    onPress={() => handleClassSelect(selectedClassPreview, onClose)}
                   >
                     Select
                   </Button>
@@ -430,15 +428,6 @@ export default function MatchesPage() {
                 </TableBody>
               </Table>
 
-              <div className="flex gap-4 items-center flex-col">
-                <Button
-                  color="primary"
-                  disabled={!Boolean(classType)}
-                  onPress={handleReady}
-                >
-                  Ready?
-                </Button>
-              </div>
             </>
           ) : (
             <div className="flex flex-col text-center">
