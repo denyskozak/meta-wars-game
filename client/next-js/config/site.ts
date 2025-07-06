@@ -12,18 +12,18 @@ export const siteConfig = {
       label: "Ranked",
       href: "/rating",
     },
-    {
-      label: "About Us",
-      href: "/tokenomics",
-    },
+    // {
+    //   label: "About Us",
+    //   href: "/tokenomics",
+    // },
     {
       label: "FAQ",
       href: "/faq",
     },
-    {
-      label: "DAO",
-      href: "/dao",
-    },
+    // {
+    //   label: "DAO",
+    //   href: "/dao",
+    // },
     // {
     //   label: "Pricing",
     //   href: "/pricing",
@@ -77,7 +77,7 @@ export const siteConfig = {
   ],
   links: {
     discord: "https://discord.gg/VumjGgsveB",
-    github: "https://github.com/denyskozak/meta-champios",
+    // github: "https://github.com/denyskozak/meta-champios",
     // twitter: "https://twitter.com/hero_ui",
     // docs: "https://heroui.com",
     // sponsor: "https://patreon.com/jrgarciadev",

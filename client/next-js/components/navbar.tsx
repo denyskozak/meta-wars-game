@@ -88,7 +88,7 @@ export const Navbar = () => {
       <NavbarContent className="basis-1/5 sm:basis-full" justify="start">
         <NavbarBrand as="li" className="gap-3 max-w-fit">
           <NextLink className="flex justify-start items-center gap-4" href="/">
-            <Image alt="Logo" height={39} src="/logo_big.png" width={39} />
+            <Image alt="Logo" height={48}  width={48} src="/logo_big.png" />
             <p className="font-bold text-inherit text-center">
               Meta Wars
               <br />
@@ -125,9 +125,9 @@ export const Navbar = () => {
           <Link isExternal aria-label="Discord" href={siteConfig.links.discord}>
             <DiscordIcon className="text-default-500" />
           </Link>
-          <Link isExternal aria-label="Github" href={siteConfig.links.github}>
-            <GithubIcon className="text-default-500" />
-          </Link>
+          {/*<Link isExternal aria-label="Github" href={siteConfig.links.github}>*/}
+          {/*  <GithubIcon className="text-default-500" />*/}
+          {/*</Link>*/}
           <button
             aria-label={playing ? "Pause music" : "Play music"}
             className="px-px transition-opacity hover:opacity-80 cursor-pointer"
