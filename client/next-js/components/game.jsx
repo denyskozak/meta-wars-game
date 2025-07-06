@@ -238,6 +238,7 @@ export function Game({models, sounds, textures, matchId, character}) {
         const players = new Map();
         const runes = new Map();
         const xpRunes = new Map();
+        const projectiles = new Map();
         const damageLabels = new Map();
         let myPlayerId = null;
 
@@ -2294,13 +2295,7 @@ export function Game({models, sounds, textures, matchId, character}) {
             }
 
             if (touchedPlayer) {
-                const damage = sphere.damage;
-                if (sphere.type === 'fireball') {
-                    applyImmolationEffect(myPlayerId, 1000);
-                } else if (sphere.type === 'iceball') {
-                    applySlowEffect(myPlayerId, 3000);
-                }
-                takeDamage(damage, userIdTouched, sphere.type);
+                // damage will be applied by the server
             }
 
             return touchedPlayer;
@@ -3349,6 +3344,11 @@ export function Game({models, sounds, textures, matchId, character}) {
                     s.mesh.material.uniforms.time.value += delta;
                 }
             });
+            projectiles.forEach(p => {
+                if (p.mesh?.material?.uniforms?.time) {
+                    p.mesh.material.uniforms.time.value += delta;
+                }
+            });
             // Если игрок мёртв, отключаем управление
             if (hp <= 0) {
                 playerVelocity.set(0, 0, 0);
@@ -3378,6 +3378,7 @@ export function Game({models, sounds, textures, matchId, character}) {
 
                     updateModel();
                     updateSpheres(deltaTime);
+                    updateProjectiles(deltaTime);
 
                     activeShields.forEach((mesh, id) => {
                         const target = players.get(id)?.model;
@@ -3771,6 +3772,93 @@ export function Game({models, sounds, textures, matchId, character}) {
                 scene.remove(rune);
                 xpRunes.delete(id);
             }
+        }
+
+        function createProjectile(data) {
+            let mesh;
+            if (data.type === 'fireball') {
+                mesh = fireballMesh.clone();
+            } else if (data.type === 'shadowbolt') {
+                mesh = darkballMesh.clone();
+            } else if (data.type === 'pyroblast') {
+                mesh = pyroblastMesh.clone();
+            } else if (data.type === 'chaosbolt') {
+                mesh = chaosBoltMesh.clone();
+            } else if (data.type === 'iceball') {
+                mesh = iceballMesh.clone();
+            } else {
+                mesh = new THREE.Mesh(fireballGeometry, iceballMaterial.clone());
+            }
+
+            mesh.position.set(data.position.x, data.position.y, data.position.z);
+
+            let tailSprites = null;
+            let tailPositions = null;
+            const tailColor = SPELL_TAIL_COLORS[data.type];
+            if (tailColor !== undefined) {
+                ({ tailSprites, tailPositions } = createSphereTail(tailColor));
+            }
+
+            scene.add(mesh);
+            projectiles.set(data.id, {
+                mesh,
+                tailSprites,
+                tailPositions,
+                type: data.type,
+            });
+        }
+
+        function removeProjectile(id) {
+            const proj = projectiles.get(id);
+            if (proj) {
+                scene.remove(proj.mesh);
+                if (proj.tailSprites) {
+                    proj.tailSprites.forEach(s => scene.remove(s));
+                }
+                projectiles.delete(id);
+            }
+        }
+
+        function syncProjectiles(list) {
+            const ids = new Set();
+            if (Array.isArray(list)) {
+                list.forEach(p => {
+                    ids.add(p.id);
+                    if (projectiles.has(p.id)) {
+                        const proj = projectiles.get(p.id);
+                        proj.mesh.position.set(p.position.x, p.position.y, p.position.z);
+                    } else {
+                        createProjectile(p);
+                    }
+                });
+            }
+            Array.from(projectiles.keys()).forEach(id => {
+                if (!ids.has(id)) {
+                    removeProjectile(id);
+                }
+            });
+        }
+
+        function updateProjectiles(deltaTime) {
+            projectiles.forEach(p => {
+                if (p.tailSprites) {
+                    p.tailPositions.unshift(p.mesh.position.clone());
+                    if (p.tailPositions.length > FIREBALL_TAIL_SEGMENTS) {
+                        p.tailPositions.pop();
+                    }
+                    p.tailSprites.forEach((s, i) => {
+                        const pos = p.tailPositions[i];
+                        if (pos) {
+                            s.visible = true;
+                            s.position.copy(pos);
+                            s.lookAt(camera.position);
+                            s.material.opacity = 1 - i / FIREBALL_TAIL_SEGMENTS;
+                        } else {
+                            s.visible = false;
+                        }
+                    });
+                }
+            });
         }
 
         // Function to remove a player from the scene
@@ -4370,6 +4458,9 @@ export function Game({models, sounds, textures, matchId, character}) {
                                 obj.position.set(r.position.x, r.position.y, r.position.z);
                             }
                         });
+                    }
+                    if (Array.isArray(message.projectiles)) {
+                        syncProjectiles(message.projectiles);
                     }
                     Array.from(runes.keys()).forEach(id => {
                         if (!runeIds.has(id)) {
