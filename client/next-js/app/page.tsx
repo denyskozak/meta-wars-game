@@ -16,7 +16,7 @@ export default function Home() {
           <MagicCanvas />
           <Image
           alt="Big Logo"
-          className="mt-[86] object-cover z-[1]"
+          className="mt-[86] object-cover z-[2]"
           height={200}
           src="/big-logo.webp"
           width={400}
@@ -30,7 +30,7 @@ export default function Home() {
           width={2000}
         />
 
-        <main className="z-[1] flex justify-center w-full h-full overflow-y-auto">
+        <main className="z-[2] flex justify-center w-full h-full overflow-y-auto">
           <General />
         </main>
       </div>

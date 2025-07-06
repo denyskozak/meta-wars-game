@@ -14,12 +14,12 @@ export default function General() {
 
   const slides = [
     {
-      titles: ["Fantastic Online Game", "Based on Sui Blockchain"],
-      subtitle: "Become True Owner of your items",
-    },
-    {
       titles: ["Win Battles", "Earn Real Rewards"],
       subtitle: "Claim $MetaWars tokens, loot, and rare gear — fully tradable.",
+    },
+    {
+      titles: ["Fantastic Online Game", "Based on Sui Blockchain"],
+      subtitle: "Innovative technology which opens new world of opportunities",
     },
     {
       titles: ["Crafted RPG MMO", "by Blizzard and Riot fans"],

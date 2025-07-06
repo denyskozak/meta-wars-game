@@ -85,7 +85,7 @@ export const MagicCanvas = () => {
   return (
       <canvas
           ref={canvasRef}
-          className="pointer-events-none fixed inset-0 z-[2]"
+          className="pointer-events-none fixed inset-0 z-[1]"
       />
   );
 };
