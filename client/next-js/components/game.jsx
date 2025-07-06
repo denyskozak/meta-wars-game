@@ -1397,14 +1397,14 @@ export function Game({models, sounds, textures, matchId, character}) {
                 if (!isFocused && document.pointerLockElement !== containerRef.current) {
                     isCameraDragging = true;
                 }
-                // const id = getTargetPlayer();
-                // if (id) {
-                //     targetedPlayerId = id;
-                //     dispatchTargetUpdate();
-                // } else {
-                //     targetedPlayerId = null;
-                //     dispatchTargetUpdate();
-                // }
+                const id = getTargetPlayer();
+                if (id) {
+                    targetedPlayerId = id;
+                    dispatchTargetUpdate();
+                } else {
+                    targetedPlayerId = null;
+                    dispatchTargetUpdate();
+                }
 
                 mouseTime = performance.now();
 
@@ -1592,25 +1592,37 @@ export function Game({models, sounds, textures, matchId, character}) {
 
         function highlightCrosshair() {
             if (!targetImage) return;
-            if (!isFocused) {
-                targetImage.src = assetUrl('/icons/target.svg');
-                return;
-            }
+
             const id = getTargetPlayer();
-            if (id && players.has(id) && hasLineOfSight(id)) {
-                const start = playerCollider.start
-                    .clone()
-                    .add(playerCollider.end)
-                    .multiplyScalar(0.5);
-                const targetPos = players.get(id).model.position.clone();
-                const dist = start.distanceTo(targetPos);
-                if (dist <= FIREBLAST_RANGE) {
-                    targetImage.src = assetUrl('/icons/target-green.svg');
+
+            if (isFocused) {
+                if (id && players.has(id) && hasLineOfSight(id)) {
+                    const start = playerCollider.start
+                        .clone()
+                        .add(playerCollider.end)
+                        .multiplyScalar(0.5);
+                    const targetPos = players.get(id).model.position.clone();
+                    const dist = start.distanceTo(targetPos);
+                    if (dist <= FIREBLAST_RANGE) {
+                        targetImage.src = assetUrl('/icons/target-green.svg');
+                    } else {
+                        targetImage.src = assetUrl('/icons/target.svg');
+                    }
                 } else {
                     targetImage.src = assetUrl('/icons/target.svg');
                 }
             } else {
                 targetImage.src = assetUrl('/icons/target.svg');
+            }
+
+            if (id && players.has(id) && hasLineOfSight(id)) {
+                if (targetedPlayerId !== id) {
+                    targetedPlayerId = id;
+                    dispatchTargetUpdate();
+                }
+            } else if (targetedPlayerId !== null) {
+                targetedPlayerId = null;
+                dispatchTargetUpdate();
             }
         }
 
