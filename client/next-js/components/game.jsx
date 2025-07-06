@@ -136,11 +136,11 @@ const SPELL_META = {
 
 const SPELL_SCALES = {
     // fireball enlarged for better visuals
-    fireball: 0.8,
-    iceball: 0.8,
-    shadowbolt: 0.8,
-    pyroblast: 1.5,
-    chaosBolt: 1.5,
+    fireball: 2,
+    iceball: 2,
+    shadowbolt: 2,
+    pyroblast: 4,
+    chaosBolt: 4,
 };
 
 const USER_DEFAULT_POSITION = [
@@ -824,6 +824,9 @@ export function Game({models, sounds, textures, matchId, character}) {
             if (!camera) return;
             console.log(
                 `Camera position: x=${camera.position.x.toFixed(2)}, y=${camera.position.y.toFixed(2)}, z=${camera.position.z.toFixed(2)}, FOV: ${camera.fov.toFixed(2)}`,
+            );
+            console.log(
+                `Camera rotation: x=${camera.rotation.x.toFixed(2)}, y=${camera.rotation.y.toFixed(2)}, z=${camera.rotation.z.toFixed(2)}}`,
             );
         }, 5000);
 

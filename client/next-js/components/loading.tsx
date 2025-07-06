@@ -52,7 +52,7 @@ export const Loading = ({text, hideProgress = false}: LoadingProps) => {
                     className="w-96 h-auto"
                     src={assetUrl("/images/how-to-play.webp")}
                 />
-                {hideProgress && <Progress disableAnimation aria-label="Loading" className="w-full" value={progress}/>}
+                {!hideProgress && <Progress disableAnimation aria-label="Loading" className="w-full" value={progress}/>}
             </div>
         </div>
     );
