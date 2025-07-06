@@ -1,5 +1,5 @@
 "use client";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState, useRef } from "react";
 import Image from "next/image";
 import {
   Table,
@@ -44,6 +44,19 @@ export default function MatchesPage() {
   const [selectedClassPreview, setSelectedClassPreview] = useState<
     string | null
   >(null);
+  const previewAudioRef = useRef<HTMLAudioElement | null>(null);
+
+  const handleClassPreview = (cls: string) => {
+    if (previewAudioRef.current) {
+      try {
+        previewAudioRef.current.currentTime = 0;
+        previewAudioRef.current.play().catch(() => {});
+      } catch {
+        // ignore play errors
+      }
+    }
+    setSelectedClassPreview(cls);
+  };
 
   const selectedStats = useMemo(() => {
     if (!selectedClassPreview) return null;
@@ -337,6 +350,9 @@ export default function MatchesPage() {
 
   return (
     <>
+      <audio ref={previewAudioRef} hidden src="/click.mp3">
+        <track kind="captions" />
+      </audio>
       <Modal
         isOpen={Boolean(selectedClassPreview)}
         onOpenChange={(open) => {
@@ -437,7 +453,7 @@ export default function MatchesPage() {
                   <button
                     key={value}
                     className="flex flex-col items-center justify-center p-2"
-                    onClick={() => setSelectedClassPreview(value)}
+                    onClick={() => handleClassPreview(value)}
                   >
                     <Image
                       alt={opt.label}
