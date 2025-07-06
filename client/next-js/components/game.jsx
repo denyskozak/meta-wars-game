@@ -679,7 +679,7 @@ export function Game({models, sounds, textures, matchId, character}) {
         fireballMesh.scale.set(
             SPELL_SCALES.fireball,
             SPELL_SCALES.fireball,
-            SPELL_SCALES.fireball * 1.3,
+            SPELL_SCALES.fireball,
         );
 
         const pyroblastMesh = new THREE.Mesh(
@@ -790,7 +790,7 @@ export function Game({models, sounds, textures, matchId, character}) {
         iceballMesh.scale.set(
             SPELL_SCALES.iceball,
             SPELL_SCALES.iceball,
-            SPELL_SCALES.iceball * 1.3,
+            SPELL_SCALES.iceball,
         );
 
 
