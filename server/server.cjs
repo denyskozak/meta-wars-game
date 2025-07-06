@@ -32,7 +32,9 @@ const MAX_KILLS = 15;
 const XP_PER_LEVEL = 1000;
 const MANA_REGEN_INTERVAL = 1000;
 const MANA_REGEN_AMOUNT = 1.3; // 30% faster mana regeneration
-const HP_REGEN_AMOUNT = 0.4; // Basic health regeneration per tick (reduced)
+// Health regeneration amount applied on each regen tick
+// Reduced to slow down passive healing
+const HP_REGEN_AMOUNT = 0.2;
 const SPELL_COST = require('../client/next-js/consts/spellCosts.json');
 const ICEBALL_ICON = '/icons/spell_frostbolt.jpg';
 const FROSTNOVA_ICON = '/icons/frostnova.jpg';
