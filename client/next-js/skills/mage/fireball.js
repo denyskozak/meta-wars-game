@@ -5,7 +5,7 @@ export const meta = {
   id: 'fireball',
   key: 'E',
   icon: assetUrl('/icons/classes/mage/fireball.png'),
-  autoFocus: false,
+  autoFocus: true,
 };
 
 export default function castFireball({ playerId, castSpellImpl, igniteHands, castSphere, fireballMesh, sounds, damage }) {
