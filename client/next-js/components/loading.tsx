@@ -1,7 +1,7 @@
 import Image from "next/image";
 import React from "react";
-import { SkillsList } from "@/components/skills-list";
 
+import { SkillsList } from "@/components/skills-list";
 import { useInterface } from "@/context/inteface";
 import * as mageSkills from "@/skills/mage";
 import * as warlockSkills from "@/skills/warlock";
@@ -180,13 +180,25 @@ export const Loading = ({ text }: LoadingProps) => {
     ? CLASS_SKILLS[character.name as keyof typeof CLASS_SKILLS]
     : [];
 
+  const imageSrc = React.useMemo(() => {
+    const images = [
+      "/loading-1.webp",
+      "/loading-2.webp",
+      "/loading-3.webp",
+      "/loading-4.webp",
+      "/loading-5.webp",
+    ];
+
+    return images[Math.floor(Math.random() * images.length)];
+  }, []);
+
   return (
     <div className="w-full h-full flex justify-center items-center">
       <Image
         alt="Turtle Art"
         className="absolute top-0 left-0 w-full h-full object-cover z-[2]"
         height={1961}
-        src="/loading.webp"
+        src={imageSrc}
         width={3840}
       />
       <span className="absolute z-[3] text-xl font-semibold text-white">
