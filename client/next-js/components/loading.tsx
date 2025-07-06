@@ -11,11 +11,11 @@ interface LoadingProps {
 export const Loading = ({ text }: LoadingProps) => {
   const imageSrc = React.useMemo(() => {
     const images = [
-      "/loading-1.webp",
-      "/loading-2.webp",
-      "/loading-3.webp",
-      "/loading-4.webp",
-      "/loading-5.webp",
+      "/loading-1.jpg",
+      "/loading-2.jpg",
+      "/loading-3.jpg",
+      "/loading-4.jpg",
+      "/loading-5.jpg",
     ];
 
     return images[Math.floor(Math.random() * images.length)];
@@ -43,7 +43,7 @@ export const Loading = ({ text }: LoadingProps) => {
       <span className="absolute z-[3] text-xl font-semibold text-white">
         {text}
       </span>
-      <div className="absolute bottom-4 left-1/2 -translate-x-1/2 z-[3] flex flex-col items-center gap-2">
+      <div className="absolute bottom-12 left-1/2 -translate-x-1/2 z-[3] flex flex-col items-center gap-2">
         <img
           alt="How to play"
           className="w-96 h-auto"

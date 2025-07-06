@@ -137,8 +137,8 @@ const SPELL_META = {
 const SPELL_SCALES = {
     // fireball enlarged for better visuals
     fireball: 3,
-    iceball: 1.8,
-    shadowbolt: 1.68,
+    iceball: 3,
+    shadowbolt: 3,
     pyroblast: 5,
     chaosBolt: 5.4,
 };
@@ -658,11 +658,11 @@ export function Game({models, sounds, textures, matchId, character}) {
             vertexShader: fireballMaterial.vertexShader,
             fragmentShader: darkballFragmentShader,
         });
-        const darkballMesh = new THREE.Mesh(
+        const shadowboltMesh = new THREE.Mesh(
             fireballGeometry,
             darkballMaterial
         );
-        darkballMesh.scale.set(
+        shadowboltMesh.scale.set(
             SPELL_SCALES.shadowbolt,
             SPELL_SCALES.shadowbolt,
             SPELL_SCALES.shadowbolt,
@@ -872,7 +872,7 @@ export function Game({models, sounds, textures, matchId, character}) {
         preloadMesh(fireballMesh, 0xffaa33);
         preloadMesh(pyroblastMesh, 0xffaa33);
         preloadMesh(chaosBoltMesh, 0x8a2be2);
-        preloadMesh(darkballMesh, 0x8a2be2);
+        preloadMesh(shadowboltMesh, 0x8a2be2);
         preloadMesh(iceballMesh, 0x88ddff);
 
         const stats = new Stats();
@@ -1610,12 +1610,13 @@ export function Game({models, sounds, textures, matchId, character}) {
                     });
                     break;
                 case "shadowbolt":
+                    igniteHands(myPlayerId, 1000);
                     castShadowbolt({
                         playerId,
                         castSpellImpl,
                         igniteHands: darkHands,
                         castSphere,
-                        darkballMesh,
+                        shadowboltMesh: shadowboltMesh,
                         sounds,
                         damage: DARKBALL_DAMAGE,
                     });
@@ -3663,7 +3664,7 @@ export function Game({models, sounds, textures, matchId, character}) {
             const p = players.get(id);
             if (!p) return;
             const { model, position, rotation } = p;
-            model.position.set(position.x, position.y - 0.7, position.z);
+            model.position.set(position.x, position.y, position.z);
             model.rotation.y = rotation?.y;
         }
 
@@ -3676,7 +3677,7 @@ export function Game({models, sounds, textures, matchId, character}) {
             // Scale runes down by 30%
             rune.scale.multiplyScalar(0.14);
             // lower the rune slightly so it sits closer to the ground
-            rune.position.y -= 0.2;
+            rune.position.y -= 0.3;
             rune.userData.type = data.type;
 
             rune.traverse((child) => {
@@ -3740,7 +3741,7 @@ export function Game({models, sounds, textures, matchId, character}) {
             if (data.type === 'fireball') {
                 mesh = fireballMesh.clone();
             } else if (data.type === 'shadowbolt') {
-                mesh = darkballMesh.clone();
+                mesh = shadowboltMesh.clone();
             } else if (data.type === 'pyroblast') {
                 mesh = pyroblastMesh.clone();
             } else if (data.type === 'chaosbolt') {
