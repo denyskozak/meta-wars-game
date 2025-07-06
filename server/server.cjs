@@ -4,6 +4,27 @@ const http = require('http');
 // const { mintCoins, mintItemWithOptions } = require('./sui.cjs');
 const { createProfile } = require('./sui.cjs');
 
+// Basic CPU profiling using the Node.js inspector module
+const inspector = require('inspector');
+const fs = require('fs');
+
+const profilerSession = new inspector.Session();
+profilerSession.connect();
+profilerSession.post('Profiler.enable', () => {
+    profilerSession.post('Profiler.start');
+    console.log('CPU profiling started');
+});
+
+process.on('SIGINT', () => {
+    profilerSession.post('Profiler.stop', (err, { profile }) => {
+        if (!err) {
+            fs.writeFileSync('profile.cpuprofile', JSON.stringify(profile));
+            console.log('CPU profile saved to profile.cpuprofile');
+        }
+        process.exit();
+    });
+});
+
 const UPDATE_MATCH_INTERVAL = 33;
 const MAX_HP = 156;
 const MAX_MANA = 130;
