@@ -11,7 +11,6 @@ import { ExperienceBar } from "../parts/ExperienceBar.jsx";
 import { LevelUp } from "../parts/LevelUp.jsx";
 import { KillNotification } from "../parts/KillNotification.jsx";
 import { StatsModal } from "../parts/StatsModal.jsx";
-import { HowToPlayModal } from "../parts/HowToPlayModal.jsx";
 
 import { useInterface } from "@/context/inteface";
 import { CLASS_ICONS } from "@/consts/classes";
@@ -263,7 +262,6 @@ export const Interface = () => {
 
       <Scoreboard />
       <StatsModal />
-      <HowToPlayModal />
       <GameMenu />
       <Buffs />
       <SkillBar
