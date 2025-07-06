@@ -826,6 +826,19 @@ ws.on('connection', (socket) => {
                     const myPlayer = players.get(id);
                     myPlayer.classType = message.classType;
                     myPlayer.character = message.character;
+                    const stats = CLASS_STATS[message.classType] || { hp: MAX_HP, armor: 0, mana: MAX_MANA };
+                    myPlayer.hp = stats.hp;
+                    myPlayer.maxHp = stats.hp;
+                    myPlayer.armor = stats.armor;
+                    myPlayer.maxArmor = stats.armor;
+                    myPlayer.mana = stats.mana || MAX_MANA;
+                    myPlayer.maxMana = stats.mana || MAX_MANA;
+                    if (CLASS_E_SKILL[message.classType]) {
+                        myPlayer.learnedSkills = {
+                            ...myPlayer.learnedSkills,
+                            [CLASS_E_SKILL[message.classType]]: true,
+                        };
+                    }
                     socket.send(JSON.stringify({
                         type: 'CHARACTER_READY'
                     }))
