@@ -993,6 +993,7 @@ export function Game({models, sounds, textures, matchId, character}) {
 
         const AIM_BEAM_OPACITY = 0.5;
         const AIM_BEAM_LENGTH = SPHERE_MAX_DISTANCE * 1.5;
+        const AIM_BEAM_LINEWIDTH = 4;
         let aimBeam = null;
 
         function createAimBeam() {
@@ -1001,6 +1002,7 @@ export function Game({models, sounds, textures, matchId, character}) {
                 transparent: true,
                 opacity: AIM_BEAM_OPACITY,
                 depthWrite: false,
+                linewidth: AIM_BEAM_LINEWIDTH,
             });
             const geometry = new THREE.BufferGeometry();
             geometry.setFromPoints([new THREE.Vector3(), new THREE.Vector3()]);
