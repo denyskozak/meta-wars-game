@@ -1,11 +1,12 @@
 import Image from "next/image";
 import React from "react";
-import { Progress } from "@heroui/react";
+import {Progress} from "@heroui/react";
 
-import { assetUrl } from "@/utilities/assets";
+import {assetUrl} from "@/utilities/assets";
 
 interface LoadingProps {
-  text: string;
+    text: string;
+    hideProgress?: boolean;
 }
 
 const getRandomImage = () => {
@@ -22,37 +23,37 @@ const getRandomImage = () => {
 
 const randomImage = getRandomImage();
 
-export const Loading = ({ text }: LoadingProps) => {
+export const Loading = ({text, hideProgress = false}: LoadingProps) => {
     const [progress, setProgress] = React.useState(0);
 
-  React.useEffect(() => {
-    const interval = setInterval(() => {
-      setProgress((p) => (p >= 100 ? 0 : p + 1));
-    }, 50);
+    React.useEffect(() => {
+        const interval = setInterval(() => {
+            setProgress((p) => (p >= 100 ? 0 : p + 5));
+        }, 50);
 
-    return () => clearInterval(interval);
-  }, []);
+        return () => clearInterval(interval);
+    }, []);
 
-  return (
-    <div className="w-full h-full flex justify-center items-center">
-      <Image
-        alt="Turtle Art"
-        className="absolute top-0 left-0 w-full h-full object-cover z-[4]"
-        height={1961}
-        src={randomImage}
-        width={3840}
-      />
-      <span className="absolute z-[5] text-xl font-semibold text-white">
+    return (
+        <div className="w-full h-full flex justify-center items-center">
+            <Image
+                alt="Turtle Art"
+                className="absolute top-0 left-0 w-full h-full object-cover z-[4]"
+                height={1961}
+                src={randomImage}
+                width={3840}
+            />
+            <span className="absolute z-[5] text-xxl font-semibold text-white">
         {text}
       </span>
-      <div className="absolute bottom-12 left-1/2 -translate-x-1/2 z-[5] flex flex-col items-center gap-2">
-        <img
-          alt="How to play"
-          className="w-96 h-auto"
-          src={assetUrl("/images/how-to-play.webp")}
-        />
-        <Progress aria-label="Loading" className="w-full" value={progress} />
-      </div>
-    </div>
-  );
+            <div className="absolute bottom-12 left-1/2 -translate-x-1/2 z-[5] flex flex-col items-center gap-2">
+                <img
+                    alt="How to play"
+                    className="w-96 h-auto"
+                    src={assetUrl("/images/how-to-play.webp")}
+                />
+                {hideProgress && <Progress disableAnimation aria-label="Loading" className="w-full" value={progress}/>}
+            </div>
+        </div>
+    );
 };

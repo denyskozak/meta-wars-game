@@ -136,11 +136,11 @@ const SPELL_META = {
 
 const SPELL_SCALES = {
     // fireball enlarged for better visuals
-    fireball: 1,
-    iceball: 1,
-    shadowbolt: 1,
-    pyroblast: 2,
-    chaosBolt: 2,
+    fireball: 0.8,
+    iceball: 0.8,
+    shadowbolt: 0.8,
+    pyroblast: 1.5,
+    chaosBolt: 1.5,
 };
 
 const USER_DEFAULT_POSITION = [
@@ -964,8 +964,8 @@ export function Game({models, sounds, textures, matchId, character}) {
         const BLADESTORM_DAMAGE = 10;
 
         // Медленнее пускаем сферы как настоящие заклинания
-        const MIN_SPHERE_IMPULSE = 2;
-        const MAX_SPHERE_IMPULSE = 3;
+        const MIN_SPHERE_IMPULSE = 3;
+        const MAX_SPHERE_IMPULSE = 4;
 
         // Maximum distance any sphere can travel
         // Use the same range as fireblast for consistency
@@ -1400,6 +1400,8 @@ export function Game({models, sounds, textures, matchId, character}) {
             }
 
             if (event.button === 0) {
+                console.log("isFocused: ", isFocused);
+                console.log("1: ", document.pointerLockElement !== containerRef.current);
                 if (!isFocused && document.pointerLockElement !== containerRef.current) {
                     isCameraDragging = true;
                 }
@@ -4506,7 +4508,7 @@ export function Game({models, sounds, textures, matchId, character}) {
         <div ref={containerRef} id="game-container" className="w-full h-full">
             <Interface/>
             {countdown > 0 && <Countdown seconds={countdown} onComplete={() => setCountdown(0)} />}
-            {!isReadyToPlay && (<Loading text="Wait Other Players ..."/>)}
+            {!isReadyToPlay && (<Loading hideProgress text="Wait Other Players ..."/>)}
         </div>
     );
 }
