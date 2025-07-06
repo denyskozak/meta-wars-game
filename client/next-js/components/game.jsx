@@ -730,63 +730,15 @@ export function Game({models, sounds, textures, matchId, character}) {
             SPELL_SCALES.chaosBolt,
         );
 
-        const iceballGeometry = new THREE.SphereGeometry(0.13, 16, 16); // Ледяной шар (увеличен на 30%)
+        // Iceball uses the same shader and textures as fireball with a blue tint
+        const iceballMaterial = fireballMaterial.clone();
+        iceballMaterial.uniforms.color1.value = new THREE.Vector3(30, 80, 140);
+        iceballMaterial.uniforms.color2.value = new THREE.Vector3(200, 220, 255);
 
-        const iceTexture = textures.ice;
-        iceTexture.wrapS = iceTexture.wrapT = THREE.RepeatWrapping;
-
-        const iceballMaterial = new THREE.ShaderMaterial({
-            uniforms: {
-                time: {value: 0.0},
-                color: {value: new THREE.Color(0x88ddff)},     // Более яркий синий
-                glowColor: {value: new THREE.Color(0xffffff)}, // Усиленное свечение
-                iceTex: {value: iceTexture},
-            },
-            vertexShader: `
-    uniform float time;
-    varying vec2 vUv;
-    varying float vNoise;
-    float noise3(vec3 p){
-      return sin(p.x)*sin(p.y)*sin(p.z);
-    }
-    void main(){
-      vUv = uv;
-      float n = noise3(position*10.0 + time*2.0);
-      vNoise = n;
-      // keep sphere size static during flight
-      gl_Position = projectionMatrix * modelViewMatrix * vec4(position,1.0);
-    }
-  `,
-            fragmentShader: `
-    uniform float time;
-    uniform vec3 color;
-    uniform vec3 glowColor;
-    uniform sampler2D iceTex;
-    varying vec2 vUv;
-    varying float vNoise;
-
-    void main(){
-      float dist = distance(vUv, vec2(0.5));
-
-      float core = smoothstep(0.5, 0.0, dist);
-      float glow = smoothstep(0.75, 0.25, dist) *
-                   (0.5 + 0.5 * abs(sin(time * 4.0 + vNoise * 3.1415)));
-
-      vec2 uv = vUv * 2.0 + vec2(time * -0.5, 0.0);
-      vec3 texCol = texture2D(iceTex, uv).rgb;
-      vec3 finalColor = (color * core + glowColor * glow) * texCol * 1.5;
-
-      float alpha = clamp(core + glow * 0.8, 0.0, 1.0);
-
-      gl_FragColor = vec4(finalColor, alpha);
-    }
-  `,
-            transparent: false,
-            blending: THREE.NormalBlending,
-            depthWrite: true,
-        });
-
-        const iceballMesh = new THREE.Mesh(iceballGeometry, iceballMaterial.clone());
+        const iceballMesh = new THREE.Mesh(
+            fireballGeometry,
+            iceballMaterial
+        );
         iceballMesh.scale.set(
             SPELL_SCALES.iceball,
             SPELL_SCALES.iceball,
@@ -2878,8 +2830,8 @@ export function Game({models, sounds, textures, matchId, character}) {
 
         function freezeHands(playerId, duration = 1000) {
             applyHandEffect(playerId, 'ice', () => {
-                const left = new THREE.Mesh(iceballGeometry, iceballMaterial.clone());
-                const right = new THREE.Mesh(iceballGeometry, iceballMaterial.clone());
+                const left = new THREE.Mesh(fireballGeometry, iceballMaterial.clone());
+                const right = new THREE.Mesh(fireballGeometry, iceballMaterial.clone());
                 left.scale.set(100, 100, 100);
                 right.scale.set(100, 100, 100);
                 return {left, right};
