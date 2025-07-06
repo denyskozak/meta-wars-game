@@ -205,3 +205,38 @@ export const CoinIcon = (
     />
   </svg>
 );
+
+export const PlayIcon: React.FC<IconSvgProps> = ({
+  size = 24,
+  width,
+  height,
+  ...props
+}) => (
+  <svg
+    fill="currentColor"
+    height={size || height}
+    viewBox="0 0 24 24"
+    width={size || width}
+    {...props}
+  >
+    <polygon points="5,3 19,12 5,21" />
+  </svg>
+);
+
+export const PauseIcon: React.FC<IconSvgProps> = ({
+  size = 24,
+  width,
+  height,
+  ...props
+}) => (
+  <svg
+    fill="currentColor"
+    height={size || height}
+    viewBox="0 0 24 24"
+    width={size || width}
+    {...props}
+  >
+    <rect height="16" width="4" x="6" y="4" />
+    <rect height="16" width="4" x="14" y="4" />
+  </svg>
+);
