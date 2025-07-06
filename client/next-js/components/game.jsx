@@ -820,6 +820,12 @@ export function Game({models, sounds, textures, matchId, character}) {
             1000,
         );
         camera.rotation.order = "YXZ";
+        let cameraLogInterval = setInterval(() => {
+            if (!camera) return;
+            console.log(
+                `Camera position: x=${camera.position.x.toFixed(2)}, y=${camera.position.y.toFixed(2)}, z=${camera.position.z.toFixed(2)}, FOV: ${camera.fov.toFixed(2)}`,
+            );
+        }, 5000);
 
         let globalSkillCooldown = false; // Tracks if the global cooldown is active
         let isCasting = false;
@@ -4490,6 +4496,9 @@ export function Game({models, sounds, textures, matchId, character}) {
             socket.removeEventListener('message', handleMessage);
             if (countdownInterval) {
                 clearInterval(countdownInterval);
+            }
+            if (cameraLogInterval) {
+                clearInterval(cameraLogInterval);
             }
         };
     }, []);
