@@ -2085,16 +2085,6 @@ export function Game({models, sounds, textures, matchId, character}) {
                 sphereMesh.lookAt(camera.position);
             }
 
-            let tailSprites = null;
-            let tailPositions = null;
-            const tailColor = SPELL_TAIL_COLORS[type];
-            if (tailColor !== undefined) {
-                ({ tailSprites, tailPositions } = createSphereTail(tailColor));
-            }
-
-            scene.add(sphereMesh); // Add the sphereMesh to the scene
-
-
             // Compute aim direction based on camera ray and player position
             const aimDir = getAimDirection();
 
@@ -2103,8 +2093,6 @@ export function Game({models, sounds, textures, matchId, character}) {
                 .add(playerCollider.end)
                 .multiplyScalar(0.5)
                 .addScaledVector(aimDir, SPHERE_SPAWN_OFFSET);
-
-            sphereMesh.position.copy(initialPosition);
 
             // Calculate smoother impulse using cubic easing
             const chargeTime = Math.min(performance.now() - mouseTime, 1000); // Cap charge time to 1 second
@@ -2117,40 +2105,23 @@ export function Game({models, sounds, textures, matchId, character}) {
 
             const velocity = aimDir.clone().multiplyScalar(impulse);
 
-            // Send the fireball data to the server
             sendToSocket({
                 type: "CAST_SPELL",
                 payload: {
                     type,
                     damage,
                     position: {
-                        x: sphereMesh.position.x,
-                        y: sphereMesh.position.y,
-                        z: sphereMesh.position.z,
+                        x: initialPosition.x,
+                        y: initialPosition.y,
+                        z: initialPosition.z,
                     },
                     rotation: {
                         x: sphereMesh.rotation.x,
                         y: sphereMesh.rotation.y,
                         z: sphereMesh.rotation.z,
                     },
-                    velocity: {x: velocity.x, y: velocity.y, z: velocity.z},
+                    velocity: { x: velocity.x, y: velocity.y, z: velocity.z },
                 },
-            });
-
-            // Store velocity and collider information for the fireball
-            spheres.push({
-                mesh: sphereMesh,
-                collider: new THREE.Sphere(
-                    new THREE.Vector3().copy(sphereMesh.position),
-                    SPHERE_RADIUS,
-                ),
-                velocity: velocity,
-                initialPosition: initialPosition,
-                type,
-                damage,
-                ownerId: myPlayerId,
-                tailSprites,
-                tailPositions,
             });
         }
 
@@ -3341,11 +3312,11 @@ export function Game({models, sounds, textures, matchId, character}) {
         function animate() {
             const delta = clock.getDelta();
             fireballMaterial.uniforms.time.value += delta;
-            spheres.forEach(s => {
-                if (s.mesh?.material?.uniforms?.time) {
-                    s.mesh.material.uniforms.time.value += delta;
-                }
-            });
+            // spheres.forEach(s => {
+            //     if (s.mesh?.material?.uniforms?.time) {
+            //         s.mesh.material.uniforms.time.value += delta;
+            //     }
+            // });
             projectiles.forEach(p => {
                 if (p.mesh?.material?.uniforms?.time) {
                     p.mesh.material.uniforms.time.value += delta;
@@ -3379,7 +3350,7 @@ export function Game({models, sounds, textures, matchId, character}) {
                     }
 
                     updateModel();
-                    updateSpheres(deltaTime);
+                    // updateSpheres(deltaTime);
                     updateProjectiles(deltaTime);
 
                     activeShields.forEach((mesh, id) => {
@@ -3961,59 +3932,8 @@ export function Game({models, sounds, textures, matchId, character}) {
             }, 1000);
         }
 
-        function castSphereOtherUser(data, ownerId) {
-            let sphere;
-            if (data.type === "fireball") {
-                sphere = fireballMesh.clone();
-            } else if (data.type === "shadowbolt") {
-                sphere = darkballMesh.clone();
-            } else if (data.type === "pyroblast") {
-                sphere = pyroblastMesh.clone();
-            } else if (data.type === "chaosbolt") {
-                sphere = chaosBoltMesh.clone();
-            } else if (data.type === "iceball") {
-                sphere = iceballMesh.clone();
-            } else {
-                sphere = new THREE.Mesh(fireballGeometry, iceballMaterial.clone());
-            }
-
-            sphere.position.set(
-                data.position.x,
-                data.position.y,
-                data.position.z,
-            );
-            sphere.rotation.set(
-                data.rotation.x,
-                data.rotation.y,
-                data.rotation.z,
-            );
-
-            let tailSprites = null;
-            let tailPositions = null;
-            const tailColor = SPELL_TAIL_COLORS[data.type];
-            if (tailColor !== undefined) {
-                ({ tailSprites, tailPositions } = createSphereTail(tailColor));
-            }
-
-            scene.add(sphere);
-
-            spheres.push({
-                mesh: sphere,
-                collider: new THREE.Sphere(
-                    new THREE.Vector3().copy(sphere.position),
-                    SPHERE_RADIUS,
-                ),
-                velocity: new THREE.Vector3(
-                    data.velocity.x,
-                    data.velocity.y,
-                    data.velocity.z,
-                ),
-                type: data.type,
-                damage: data.damage,
-                ownerId,
-                tailSprites,
-                tailPositions,
-            });
+        function castSphereOtherUser(data) {
+            createProjectile(data);
         }
 
         function castShieldOtherUser() {
@@ -4041,15 +3961,15 @@ export function Game({models, sounds, textures, matchId, character}) {
                     switch (message?.payload?.type) {
                         case "fireball":
                             igniteHands(message.id, 1000);
-                            castSphereOtherUser(message.payload, message.id);
+                            castSphereOtherUser(message.payload);
                             break;
                         case "shadowbolt":
                             igniteHands(message.id, 1000);
-                            castSphereOtherUser(message.payload, message.id);
+                            castSphereOtherUser(message.payload);
                             break;
                         case "iceball":
                             freezeHands(message.id, 1000);
-                            castSphereOtherUser(message.payload, message.id);
+                            castSphereOtherUser(message.payload);
                             break;
                         case "iceball-hit":
                             if (message.payload.targetId === myPlayerId) {
@@ -4093,11 +4013,11 @@ export function Game({models, sounds, textures, matchId, character}) {
                             break;
                         case "chaosbolt":
                             igniteHands(message.id, 1000);
-                            castSphereOtherUser(message.payload, message.id);
+                            castSphereOtherUser(message.payload);
                             break;
                         case "pyroblast":
                             igniteHands(message.id, 1000);
-                            castSphereOtherUser(message.payload, message.id);
+                            castSphereOtherUser(message.payload);
                             break;
                         case "frostnova":
                             spawnFrostNovaRing(message.id);
