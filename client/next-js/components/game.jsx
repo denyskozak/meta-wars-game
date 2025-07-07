@@ -1481,30 +1481,23 @@ export function Game({models, sounds, textures, matchId, character}) {
             const cameraDir = new THREE.Vector3();
             camera.getWorldDirection(cameraDir);
 
-            // When aiming down sights, align projectiles with the on screen crosshair
+            const playerCenter = playerCollider.start
+                .clone()
+                .add(playerCollider.end)
+                .multiplyScalar(0.5);
+
             if (isFocused) {
-                const cameraPos = camera.position.clone();
-                const farPoint = cameraPos.clone().add(cameraDir.clone().multiplyScalar(1000));
-                const start = playerCollider.start
-                    .clone()
-                    .add(playerCollider.end)
-                    .multiplyScalar(0.5);
-                return farPoint.sub(start).normalize();
+                // First person aiming: shoot straight ahead from the camera
+                return cameraDir.normalize();
             }
 
-            // If not focused, shoot in the direction the model is facing
-            const player = players.get(myPlayerId);
-            if (player) {
-                const dir = new THREE.Vector3(
-                    Math.sin(player.model.rotation.y),
-                    0,
-                    Math.cos(player.model.rotation.y),
-                );
-                return dir.normalize();
-            }
+            // Third person aiming: cast a ray from the player through the
+            // on-screen crosshair so AimBeam and targeting are aligned
+            const farPoint = camera.position
+                .clone()
+                .add(cameraDir.clone().multiplyScalar(FIREBLAST_RANGE));
 
-            // Fallback to camera direction
-            return cameraDir.normalize();
+            return farPoint.sub(playerCenter).normalize();
         }
 
         function hasLineOfSight(targetId) {
