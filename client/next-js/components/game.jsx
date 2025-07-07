@@ -471,8 +471,10 @@ export function Game({models, sounds, textures, matchId, character}) {
                 size / 2
             );
             grad.addColorStop(0, 'rgba(255,255,255,1)');
-            grad.addColorStop(0.3, 'rgba(255,255,255,0.9)');
-            grad.addColorStop(0.6, 'rgba(255,255,255,0.4)');
+            grad.addColorStop(0.25, 'rgba(255,255,255,0.95)');
+            grad.addColorStop(0.5, 'rgba(255,255,255,0.5)');
+            grad.addColorStop(0.75, 'rgba(255,255,255,0.2)');
+
             grad.addColorStop(1, 'rgba(255,255,255,0)');
 
             ctx.fillStyle = grad;
@@ -482,7 +484,7 @@ export function Game({models, sounds, textures, matchId, character}) {
 
             ctx.fillStyle = 'rgba(255,255,255,0.8)';
             ctx.beginPath();
-            ctx.ellipse(size * 0.4, size * 0.4, size * 0.25, size * 0.1, -Math.PI / 4, 0, Math.PI * 2);
+            ctx.arc(size / 2, size / 2, size * 0.15, 0, Math.PI * 2);
             ctx.fill();
 
             return new THREE.CanvasTexture(canvas);
