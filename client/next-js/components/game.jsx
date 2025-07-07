@@ -907,7 +907,8 @@ export function Game({models, sounds, textures, matchId, character}) {
         const DARKBALL_DAMAGE = 30;
         const LIFEDRAIN_DAMAGE = 30;
         const FROSTNOVA_DAMAGE = 20;
-        const FROSTNOVA_RANGE = MELEE_RANGE_ATTACK;
+        // Double radius for a more powerful frost nova
+        const FROSTNOVA_RANGE = MELEE_RANGE_ATTACK * 2;
         const FROSTNOVA_RING_DURATION = 500; // ms, faster nova
         const LIGHTWAVE_RING_DURATION = 1000; // ms
         const LIGHTWAVE_RANGE = MELEE_RANGE_ATTACK;
@@ -926,16 +927,7 @@ export function Game({models, sounds, textures, matchId, character}) {
         // Use the same range as fireblast for consistency
         const SPHERE_MAX_DISTANCE = FIREBLAST_RANGE / 2;
 
-        // Number of sprites used for the fireball tail
-        const FIREBALL_TAIL_SEGMENTS = 8;
-
-        const SPELL_TAIL_COLORS = {
-            fireball: 0xff6600,
-            iceball: 0x88ddff,
-            pyroblast: 0xff6600,
-            shadowbolt: 0xb84dff,
-            chaosbolt: 0xb84dff,
-        };
+        // Tail effects removed for all sphere projectiles
 
         const STEPS_PER_FRAME = 30;
 
@@ -2080,18 +2072,7 @@ export function Game({models, sounds, textures, matchId, character}) {
         }
 
 
-        function createSphereTail(color, spellScale = 1) {
-            const tailSprites = [];
-            const tailPositions = [];
-            for (let i = 0; i < FIREBALL_TAIL_SEGMENTS; i++) {
-                const baseScale = 0.15 * (1 - i / FIREBALL_TAIL_SEGMENTS);
-                const sprite = makeGlowSprite(color, baseScale * spellScale);
-                sprite.visible = false;
-                scene.add(sprite);
-                tailSprites.push(sprite);
-            }
-            return { tailSprites, tailPositions };
-        }
+
 
 
         function castSphere(model, sphereMesh, type, damage) {
@@ -2328,9 +2309,6 @@ export function Game({models, sounds, textures, matchId, character}) {
 
         const removeSphere = (sphere, index) => {
             scene.remove(sphere.mesh); // Remove the fireball from the scene
-            if (sphere.tailSprites) {
-                sphere.tailSprites.forEach((s) => scene.remove(s));
-            }
             spheres.splice(index, 1); // Remove it from the array
             sphere.mesh = null;
         };
@@ -2370,23 +2348,7 @@ export function Game({models, sounds, textures, matchId, character}) {
                     continue;
                 }
 
-                if (sphere.tailSprites) {
-                    sphere.tailPositions.unshift(sphere.collider.center.clone());
-                    if (sphere.tailPositions.length > FIREBALL_TAIL_SEGMENTS) {
-                        sphere.tailPositions.pop();
-                    }
-                    sphere.tailSprites.forEach((s, i) => {
-                        const pos = sphere.tailPositions[i];
-                        if (pos) {
-                            s.visible = true;
-                            s.position.copy(pos);
-                            s.lookAt(camera.position);
-                            s.material.opacity = 1 - i / FIREBALL_TAIL_SEGMENTS;
-                        } else {
-                            s.visible = false;
-                        }
-                    });
-                }
+                // tails removed
             }
 
             // spheresCollisions(); // Handle collisions between spheres
@@ -3782,19 +3744,9 @@ export function Game({models, sounds, textures, matchId, character}) {
 
             mesh.position.set(data.position.x, data.position.y, data.position.z);
 
-            let tailSprites = null;
-            let tailPositions = null;
-            const tailColor = SPELL_TAIL_COLORS[data.type];
-            if (tailColor !== undefined) {
-                const spellScale = SPELL_SCALES[data.type] || 1;
-                ({ tailSprites, tailPositions } = createSphereTail(tailColor, spellScale));
-            }
-
             scene.add(mesh);
             projectiles.set(data.id, {
                 mesh,
-                tailSprites,
-                tailPositions,
                 type: data.type,
             });
         }
@@ -3803,9 +3755,6 @@ export function Game({models, sounds, textures, matchId, character}) {
             const proj = projectiles.get(id);
             if (proj) {
                 scene.remove(proj.mesh);
-                if (proj.tailSprites) {
-                    proj.tailSprites.forEach(s => scene.remove(s));
-                }
                 projectiles.delete(id);
             }
         }
@@ -3832,23 +3781,7 @@ export function Game({models, sounds, textures, matchId, character}) {
 
         function updateProjectiles(deltaTime) {
             projectiles.forEach(p => {
-                if (p.tailSprites) {
-                    p.tailPositions.unshift(p.mesh.position.clone());
-                    if (p.tailPositions.length > FIREBALL_TAIL_SEGMENTS) {
-                        p.tailPositions.pop();
-                    }
-                    p.tailSprites.forEach((s, i) => {
-                        const pos = p.tailPositions[i];
-                        if (pos) {
-                            s.visible = true;
-                            s.position.copy(pos);
-                            s.lookAt(camera.position);
-                            s.material.opacity = 1 - i / FIREBALL_TAIL_SEGMENTS;
-                        } else {
-                            s.visible = false;
-                        }
-                    });
-                }
+                // tails removed
             });
         }
 
