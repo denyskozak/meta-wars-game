@@ -1457,6 +1457,17 @@ export function Game({models, sounds, textures, matchId, character}) {
             }
 
             const onCastEnd = () => {
+                const { mixer, actions } = players.get(myPlayerId);
+                controlAction({
+                    action: actions['castEnd'],
+                    actionName: 'castEnd',
+                    mixer,
+                    loop: THREE.LoopOnce,
+                    fadeIn: 0.1,
+                    reset: true,
+                    clampWhenFinished: true,
+                });
+
                 isCasting = false;
                 movementSpeedModifier = 1;
                 sounds.spellCast.pause();
@@ -2177,6 +2188,17 @@ export function Game({models, sounds, textures, matchId, character}) {
             }
 
             const onCastEnd = () => {
+                const { mixer, actions } = players.get(myPlayerId);
+                controlAction({
+                    action: actions['castEnd'],
+                    actionName: 'castEnd',
+                    mixer,
+                    loop: THREE.LoopOnce,
+                    fadeIn: 0.1,
+                    reset: true,
+                    clampWhenFinished: true,
+                });
+
                 soundCast.pause();
                 isCasting = false;
                 hideAimBeam();
@@ -2198,18 +2220,6 @@ export function Game({models, sounds, textures, matchId, character}) {
             });
             soundCast.volume = 0.5;
             soundCast.play();
-            setTimeout(() => {
-                const actionName = 'castEnd';
-                controlAction({
-                    action: actions['castEnd'],
-                    actionName,
-                    mixer: mixer,
-                    loop: THREE.LoopOnce,
-                    fadeIn: 0.1,
-                    reset: true,
-                    clampWhenFinished: true,
-                });
-            }, duration * 0.5);
             dispatchEvent('start-cast', { duration, onEnd: onCastEnd, icon: SPELL_META[spellType]?.icon, name: spellType });
         }
 
