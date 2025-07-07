@@ -218,6 +218,7 @@ function createMatch({name, maxPlayers = 6, ownerId}) {
         runes: generateRunes(matchId),
         xpRunes: generateXpRunes(matchId),
         projectiles: [],
+        resorve: [], // players that can return to the match
     };
     matches.set(matchId, match);
     playerMatchMap.set(ownerId, matchId);
@@ -850,18 +851,29 @@ ws.on('connection', (socket) => {
                 break;
             case 'JOIN_MATCH':
                 const matchToJoin = matches.get(message.matchId);
-                if (!matchToJoin || matchToJoin.isFull) {
+                if (!matchToJoin) {
                     socket.send(JSON.stringify({type: 'MATCH_JOIN_FAILED', reason: 'Match not found or full'}));
                     break;
                 }
 
-                const newPlayer = createPlayer(message.address, '', '');
-                matchToJoin.players.set(id, newPlayer);
+                let existingIdx = matchToJoin.resorve.findIndex(p => p.address === message.address);
+                let joiningPlayer = null;
+                if (existingIdx !== -1) {
+                    joiningPlayer = matchToJoin.resorve.splice(existingIdx, 1)[0];
+                } else {
+                    if (matchToJoin.isFull) {
+                        socket.send(JSON.stringify({type: 'MATCH_JOIN_FAILED', reason: 'Match not found or full'}));
+                        break;
+                    }
+                    joiningPlayer = createPlayer(message.address, '', '');
+                }
+
+                matchToJoin.players.set(id, joiningPlayer);
                 broadcastToMatch(matchToJoin.id, {
                     type: 'PLAYER_RESPAWN',
                     playerId: id,
-                    position: newPlayer.position,
-                    rotation: { y: newPlayer.rotation.y },
+                    position: joiningPlayer.position,
+                    rotation: { y: joiningPlayer.rotation.y },
                 });
                 playerMatchMap.set(id, message.matchId);
                 if (matchToJoin.players.size >= matchToJoin.maxPlayers) {
@@ -900,11 +912,15 @@ ws.on('connection', (socket) => {
             case 'LEAVE_MATCH':
                 const matchToLeave = matches.get(message.matchId);
                 if (matchToLeave) {
+                    const leavingPlayer = matchToLeave.players.get(id);
+                    if (leavingPlayer) {
+                        matchToLeave.resorve.push(leavingPlayer);
+                    }
                     matchToLeave.players.delete(id);
                     matchToLeave.playersReady--;
                     playerMatchMap.delete(id);
 
-                    if (matchToLeave.players.size === 0) {
+                    if (matchToLeave.players.size === 0 && matchToLeave.resorve.length === 0) {
                         if (matchToLeave.finished && matchToLeave.summary) {
                             finishedMatches.set(matchToLeave.id, matchToLeave.summary);
                         }
@@ -1301,11 +1317,15 @@ ws.on('connection', (socket) => {
         if (matchId) {
             const match = matches.get(matchId);
             if (match) {
+                const leavingPlayer = match.players.get(id);
+                if (leavingPlayer) {
+                    match.resorve.push(leavingPlayer);
+                }
                 match.players.delete(id);
                 match.playersReady--;
                 match.isFull = false;
 
-                if (match.players.size === 0) {
+                if (match.players.size === 0 && match.resorve.length === 0) {
                     if (match.finished && match.summary) {
                         finishedMatches.set(match.id, match.summary);
                     }

@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useLayoutEffect, useState } from "react";
+import React, { useEffect, useLayoutEffect, useState } from "react";
 import { useCurrentAccount } from "@mysten/dapp-kit";
 import * as THREE from "three";
 import { EXRLoader } from "three/examples/jsm/loaders/EXRLoader.js";
@@ -45,7 +45,76 @@ export default function GamePage() {
   });
   const {
     state: { character },
-  } = useInterface() as { state: { character: Character | null } };
+    dispatch,
+  } = useInterface() as {
+    state: { character: Character | null };
+    dispatch: React.Dispatch<any>;
+  };
+
+  const [showReconnect, setShowReconnect] = useState(false);
+  const [joinError, setJoinError] = useState<string | null>(null);
+  const [joined, setJoined] = useState(false);
+
+  useEffect(() => {
+    const handleMessage = (event: MessageEvent) => {
+      const message = JSON.parse(event.data);
+      const addr = account?.address;
+
+      switch (message.type) {
+        case "GET_MATCH": {
+          const match = message.match;
+          if (!addr) break;
+
+          const inPlayers = (match.players as Array<[string, any]>).find(
+            ([, p]) => p.address === addr,
+          );
+          if (inPlayers) {
+            dispatch({
+              type: "SET_CHARACTER",
+              payload: {
+                name: inPlayers[1].classType,
+                classType: inPlayers[1].classType,
+                skin: inPlayers[1].character,
+              },
+            });
+            setJoined(true);
+            setShowReconnect(false);
+            break;
+          }
+
+          const reserve = match.resorve || [];
+          const maybe = reserve.find((p: any) => p.address === addr);
+          if (maybe) {
+            dispatch({
+              type: "SET_CHARACTER",
+              payload: {
+                name: maybe.classType,
+                classType: maybe.classType,
+                skin: maybe.character,
+              },
+            });
+            setShowReconnect(true);
+          } else if (match.isFull) {
+            setJoinError("Не можете войти");
+          }
+          break;
+        }
+        case "ME_JOINED_MATCH":
+          setJoined(true);
+          setShowReconnect(false);
+          break;
+        case "MATCH_JOIN_FAILED":
+          setJoinError("Не можете войти");
+          break;
+      }
+    };
+
+    socket.addEventListener("message", handleMessage);
+    sendToSocket({ type: "GET_MATCH", matchId: params?.id });
+    return () => {
+      socket.removeEventListener("message", handleMessage);
+    };
+  }, [account?.address, params?.id]);
 
   const charSkin = character?.name
     ? CLASS_MODELS[character.name as keyof typeof CLASS_MODELS] || "vampir"
@@ -183,13 +252,37 @@ export default function GamePage() {
         });
       },
     );
-  }, []);
+  }, [charSkin]);
 
   if (
     Object.keys(preloadedData.models).length < models.length ||
     Object.keys(preloadedData.textures).length < 5
   ) {
     return <Loading text="Loading assets..." />;
+  }
+
+  if (joinError) {
+    return (
+      <div className="h-full flex items-center justify-center text-red-500">
+        {joinError}
+      </div>
+    );
+  }
+
+  if (!joined) {
+    if (showReconnect) {
+      return (
+        <div className="h-full flex items-center justify-center">
+          <button
+            className="px-4 py-2 bg-blue-500 text-white rounded"
+            onClick={() => sendToSocket({ type: "JOIN_MATCH", matchId: params?.id })}
+          >
+            Reconnect
+          </button>
+        </div>
+      );
+    }
+    return <Loading text="Connecting..." />;
   }
 
   return (
