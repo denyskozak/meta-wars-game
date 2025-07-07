@@ -1354,7 +1354,7 @@ export function Game({models, sounds, textures, matchId, character}) {
             if (event.button === 0) {
                 console.log("isFocused: ", isFocused);
                 console.log("1: ", document.pointerLockElement !== containerRef.current);
-                if (!isFocused && document.pointerLockElement !== containerRef.current) {
+                if (!isFocused && document.pointerLockElement === containerRef.current) {
                     isCameraDragging = true;
                 }
                 const id = getTargetPlayer();
@@ -1386,10 +1386,10 @@ export function Game({models, sounds, textures, matchId, character}) {
 
         document.body.addEventListener("mousemove", (event) => {
             const locked = document.pointerLockElement === containerRef.current;
-            if (!locked && !isCameraDragging) return;
-            console.log("mousemove: ", locked, isCameraDragging);
-            const movementX = locked ? event.movementX : event.clientX - (prevMouseX ?? event.clientX);
-            const movementY = locked ? event.movementY : event.clientY - (prevMouseY ?? event.clientY);
+
+            if (!isFocused && !locked) return;
+            const movementX = isFocused ? event.movementX : event.clientX - (prevMouseX ?? event.clientX);
+            const movementY = isFocused ? event.movementY : event.clientY - (prevMouseY ?? event.clientY);
 
             prevMouseX = event.clientX;
             prevMouseY = event.clientY;
@@ -1521,7 +1521,10 @@ export function Game({models, sounds, textures, matchId, character}) {
                    0,
                    Math.cos(player.model.rotation.y),
                );
-               return dir.normalize();
+               const lookVector = new THREE.Vector3(0, 0, 1);
+               lookVector.applyQuaternion(player.model.quaternion);
+               lookVector.normalize();
+               return lookVector;
            }
 
            // Fallback to camera direction
@@ -1550,12 +1553,17 @@ export function Game({models, sounds, textures, matchId, character}) {
                 .add(playerCollider.end)
                 .multiplyScalar(0.5);
             const dir = getAimDirection();
+
             const raycaster = new THREE.Raycaster(origin, dir, 0, FIREBLAST_RANGE);
+
             let closest = null;
             let minDist = Infinity;
+
             players.forEach((p, id) => {
+
                 if (id === myPlayerId) return;
                 const intersects = raycaster.intersectObject(p.model, true);
+
                 if (intersects.length > 0) {
                     const dist = intersects[0].distance;
                     if (dist < minDist && hasLineOfSight(id)) {
