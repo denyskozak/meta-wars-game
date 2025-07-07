@@ -3680,7 +3680,7 @@ export function Game({models, sounds, textures, matchId, character}) {
             removeProjectile(data.id);
             let mesh;
             if (data.type === 'fireball') {
-                mesh = fireballMesh.clone();
+                mesh = makeGlowSprite(0xffaa33, 0.8);
             } else if (data.type === 'shadowbolt') {
                 mesh = shadowboltMesh.clone();
             } else if (data.type === 'pyroblast') {
@@ -3688,7 +3688,7 @@ export function Game({models, sounds, textures, matchId, character}) {
             } else if (data.type === 'chaosbolt') {
                 mesh = chaosBoltMesh.clone();
             } else if (data.type === 'iceball') {
-                mesh = iceballMesh.clone();
+                mesh = makeGlowSprite(0x88ddff, 0.8);
             } else {
                 mesh = new THREE.Mesh(fireballGeometry, iceballMaterial.clone());
             }
