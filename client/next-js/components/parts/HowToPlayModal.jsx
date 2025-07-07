@@ -61,7 +61,7 @@ export const HowToPlayModal = () => {
               </div>
             </ModalBody>
             <ModalFooter>
-              <Button color="primary" onPress={dontShowAgain}>Don't show again</Button>
+              <Button color="primary" onPress={dontShowAgain}>Don&#39;t show again</Button>
               <Button color="danger" variant="light" onPress={close}>
                 Close (Enter or Space)
               </Button>

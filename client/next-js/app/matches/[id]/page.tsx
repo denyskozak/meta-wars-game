@@ -70,12 +70,10 @@ export default function MatchesPage() {
     return { ...base, mana: base.mana || MAX_MANA };
   }, [selectedClassPreview]);
 
-  const [match, setMatch] = useState<Match | null>(null);
-  const [players, setPlayers] = useState<
+  const [, setMatch] = useState<Match | null>(null);
+  const [, setPlayers] = useState<
     { id: number; address: string; classType: string }[]
   >([]);
-  const [classType, setClassType] = useState("");
-  const [joined, setJoined] = useState(false);
   const classOptions = {
     warrior: {
       label: "Warrior",
@@ -332,7 +330,6 @@ export default function MatchesPage() {
       },
     });
 
-    setClassType(cls);
 
     sendToSocket({ type: "SET_CHARACTER", classType: cls, character: charModel });
 
@@ -406,62 +403,30 @@ export default function MatchesPage() {
       <div className="h-full">
         <Navbar />
         <div className="flex max-w-[650px] m-auto flex-col items-center mt-4 gap-4">
-          {classType ? (
-            <>
-              <h2 className="text-xl font-semibold">
-                Lobby: {match?.name || params?.id}
-              </h2>
-              <Table aria-label="Players">
-                <TableHeader>
-                  <TableColumn>Address</TableColumn>
-                  <TableColumn>Class</TableColumn>
-                </TableHeader>
-                <TableBody>
-                  {players.map((p) => (
-                    <TableRow key={p.id}>
-                      <TableCell>{p.address}</TableCell>
-                      <TableCell>
-                        {p.classType}
-                        <Image
-                          alt={classOptions[p.classType].label || ""}
-                          height={34}
-                          src={classOptions[p.classType].icon || ""}
-                          title={classOptions[p.classType].label || ""}
-                          width={34}
-                        />
-                      </TableCell>
-                    </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
-
-            </>
-          ) : (
-            <div className="flex flex-col text-center">
-              <span className="mb-1 text-large">Choose a Class:</span>
-              <div className="flex flex-row flex-wrap justify-center">
-                {Object.entries(classOptions).map(([value, opt]) => (
+          <div className="flex flex-col text-center">
+            <span className="mb-1 text-large">Choose a Class:</span>
+            <div className="flex flex-row flex-wrap justify-center">
+              {Object.entries(classOptions).map(([value, opt]) => (
                   <button
-                    key={value}
-                    className="flex flex-col items-center justify-center p-2"
-                    onClick={() => handleClassPreview(value)}
+                      key={value}
+                      className="flex flex-col items-center justify-center p-2"
+                      onClick={() => handleClassPreview(value)}
                   >
                     <Image
-                      alt={opt.label}
-                      className="transition-transform hover:scale-110 focus:scale-110"
-                      height={180}
-                      src={opt.icon}
-                      width={180}
+                        alt={opt.label}
+                        className="transition-transform hover:scale-110 focus:scale-110"
+                        height={180}
+                        src={opt.icon}
+                        width={180}
                     />
                     <span className="text-xs mt-1">{opt.label}</span>
                     <span className="text-[10px] text-gray-300">
                       {opt.type}
                     </span>
                   </button>
-                ))}
-              </div>
+              ))}
             </div>
-          )}
+          </div>
         </div>
       </div>
     </>

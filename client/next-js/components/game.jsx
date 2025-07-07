@@ -225,7 +225,7 @@ export function Game({models, sounds, textures, matchId, character}) {
         const container = containerRef.current;
         if (!container) return;
         const handleMouseDown = (event) => {
-            if (event.button === 2 && container.contains(event.target)) {
+            if (container.contains(event.target)) {
                 container.requestPointerLock();
             }
         };
@@ -276,9 +276,7 @@ export function Game({models, sounds, textures, matchId, character}) {
             skillPoints = 1;
         let prevLevel = 1;
         let learnedSkills = {};
-        let actions = [];
         let playerMixers = [];
-        let settings;
 
         let meleeRangeIndicator = null;
         const MELEE_INDICATOR_OPACITY = 0.2; // transparency for the auto attack indicator
@@ -1019,6 +1017,7 @@ export function Game({models, sounds, textures, matchId, character}) {
         }
 
         function showAimBeam() {
+            console.log("showAimBeam: ", aimBeam, isFocused);
             if (aimBeam || isFocused) return;
             aimBeam = createAimBeam();
             scene.add(aimBeam);
@@ -1388,7 +1387,7 @@ export function Game({models, sounds, textures, matchId, character}) {
         document.body.addEventListener("mousemove", (event) => {
             const locked = document.pointerLockElement === containerRef.current;
             if (!locked && !isCameraDragging) return;
-
+            console.log("mousemove: ", locked, isCameraDragging);
             const movementX = locked ? event.movementX : event.clientX - (prevMouseX ?? event.clientX);
             const movementY = locked ? event.movementY : event.clientY - (prevMouseY ?? event.clientY);
 
@@ -1504,23 +1503,29 @@ export function Game({models, sounds, textures, matchId, character}) {
             const cameraDir = new THREE.Vector3();
             camera.getWorldDirection(cameraDir);
 
-            const playerCenter = playerCollider.start
-                .clone()
-                .add(playerCollider.end)
-                .multiplyScalar(0.5);
+           if (isFocused) {
+               const cameraPos = camera.position.clone();
+               const farPoint = cameraPos.clone().add(cameraDir.clone().multiplyScalar(1000));
+               const start = playerCollider.start
+                   .clone()
+                   .add(playerCollider.end)
+                   .multiplyScalar(0.5);
+               return farPoint.sub(start).normalize();
+           }
 
-            if (isFocused) {
-                // First person aiming: shoot straight ahead from the camera
-                return cameraDir.normalize();
-            }
+           // If not focused, shoot in the direction the model is facing
+           const player = players.get(myPlayerId);
+           if (player) {
+               const dir = new THREE.Vector3(
+                   Math.sin(player.model.rotation.y),
+                   0,
+                   Math.cos(player.model.rotation.y),
+               );
+               return dir.normalize();
+           }
 
-            // Third person aiming: cast a ray from the player through the
-            // on-screen crosshair so AimBeam and targeting are aligned
-            const farPoint = camera.position
-                .clone()
-                .add(cameraDir.clone().multiplyScalar(FIREBLAST_RANGE));
-
-            return farPoint.sub(playerCenter).normalize();
+           // Fallback to camera direction
+           return cameraDir.normalize();
         }
 
         function hasLineOfSight(targetId) {
