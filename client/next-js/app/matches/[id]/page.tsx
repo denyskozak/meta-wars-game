@@ -333,7 +333,7 @@ export default function MatchesPage() {
 
     sendToSocket({ type: "SET_CHARACTER", classType: cls, character: charModel });
 
-    onClose();
+    // onClose();
   };
 
   return (

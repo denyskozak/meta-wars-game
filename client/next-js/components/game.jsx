@@ -137,11 +137,11 @@ const SPELL_META = {
 
 const SPELL_SCALES = {
     // fireball enlarged for better visuals
-    fireball: 2,
-    iceball: 2,
-    shadowbolt: 2,
-    pyroblast: 4,
-    chaosBolt: 4,
+    fireball: 1,
+    iceball: 1,
+    shadowbolt: 1,
+    pyroblast: 3,
+    chaosBolt: 3,
 };
 
 const USER_DEFAULT_POSITION = [
@@ -1298,16 +1298,12 @@ export function Game({models, sounds, textures, matchId, character}) {
             const locked = document.pointerLockElement === containerRef.current;
 
             if (!isFocused && !locked) return;
-            const movementX = isFocused ? event.movementX : event.clientX - (prevMouseX ?? event.clientX);
-            const movementY = isFocused ? event.movementY : event.clientY - (prevMouseY ?? event.clientY);
 
-            prevMouseX = event.clientX;
-            prevMouseY = event.clientY;
 
-            yaw -= movementX / 500;
+            yaw -= event.movementX / 500;
             pitch = Math.max(
                 -Math.PI / 2,
-                Math.min(Math.PI / 2, pitch + movementY / 500),
+                Math.min(Math.PI / 2, pitch + event.movementY  / 500),
             );
         });
         // const renderCursor = () => {
@@ -1426,11 +1422,7 @@ export function Game({models, sounds, textures, matchId, character}) {
            // If not focused, shoot in the direction the model is facing
            const player = players.get(myPlayerId);
            if (player) {
-               const dir = new THREE.Vector3(
-                   Math.sin(player.model.rotation.y),
-                   0,
-                   Math.cos(player.model.rotation.y),
-               );
+
                const lookVector = new THREE.Vector3(0, 0, 1);
                lookVector.applyQuaternion(player.model.quaternion);
                lookVector.normalize();
@@ -1490,24 +1482,12 @@ export function Game({models, sounds, textures, matchId, character}) {
 
             const id = getTargetPlayer();
 
-            if (isFocused) {
-                if (id && players.has(id) && hasLineOfSight(id)) {
-                    const start = playerCollider.start
-                        .clone()
-                        .add(playerCollider.end)
-                        .multiplyScalar(0.5);
-                    const targetPos = players.get(id).model.position.clone();
-                    const dist = start.distanceTo(targetPos);
-                    if (dist <= FIREBLAST_RANGE) {
-                        targetImage.src = assetUrl('/icons/target-green.svg');
-                    } else {
-                        targetImage.src = assetUrl('/icons/target.svg');
-                    }
+            if (isFocused && players.has(id) && hasLineOfSight(id)) {
+                if (id) {
+                    targetImage.src = assetUrl('/icons/target-green.svg');
                 } else {
                     targetImage.src = assetUrl('/icons/target.svg');
                 }
-            } else {
-                targetImage.src = assetUrl('/icons/target.svg');
             }
 
             if (id && players.has(id) && hasLineOfSight(id)) {
@@ -2349,15 +2329,34 @@ export function Game({models, sounds, textures, matchId, character}) {
                 if (document.pointerLockElement !== containerRef.current) {
                     y = model.rotation.y;
                 } else {
-                    const cameraDirection = new THREE.Vector3();
 
-                    camera.getWorldDirection(cameraDirection);
+                    if (!isCameraDragging) {
+                        const cameraDirection = new THREE.Vector3();
 
-                    // Calculate the direction the player is moving (opposite to camera's forward)
-                    y = Math.atan2(
-                        cameraDirection.x,
-                        cameraDirection.z,
-                    );
+                        camera.getWorldDirection(cameraDirection);
+
+                        // Calculate the direction the player is moving (opposite to camera's forward)
+                        y = Math.atan2(
+                            cameraDirection.x,
+                            cameraDirection.z,
+                        );
+                    } else {
+                        const lookVector = new THREE.Vector3(0, 0, 1);
+                        const player = players.get(myPlayerId);
+                        if (player) {
+                            lookVector.applyQuaternion(player.model.quaternion);
+                            lookVector.normalize();
+
+                            y = Math.atan2(
+                                lookVector.x,
+                                lookVector.z,
+                            );
+                        }
+
+                    }
+
+
+
                 }
 
 
@@ -3143,14 +3142,11 @@ export function Game({models, sounds, textures, matchId, character}) {
                 // model.position.y += 0.5; // Adjust the height to keep the model slightly above ground
                 // Lower the model slightly so the feet touch the ground
                 model.position.y -= 0.7;
-                // Rotate the model to match the camera direction
-                const locked = document.pointerLockElement === containerRef.current;
-                // Rotate the character model with the camera only when the
-                // pointer is locked and the player is not dragging the camera.
-                if (locked && !isCameraDragging) {
+
+                if (!isCameraDragging) {
                     model.rotation.y = yaw + Math.PI;
                 }
-                // Get the camera's forward direction
+
 
                 if (isShieldActive) {
                     bubbleMesh.visible = true;

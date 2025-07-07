@@ -9,6 +9,7 @@ export const initInterfaceState = {
     scoreboardVisible: false,
     statsVisible: false,
     menuVisible: false,
+    joinedMatch: null,
     buffs: [],
     debuffs: [],
 };
@@ -42,6 +43,9 @@ export const interfaceReducer = (state, action) => {
         }
         case 'SET_DEBUFFS': {
             return {...state, debuffs: action.payload};
+        }
+        case 'SET_JOINED_MATCH': {
+            return {...state, joinedMatch: action.payload};
         }
         default:
             return {...state};
