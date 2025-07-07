@@ -918,6 +918,7 @@ export function Game({models, sounds, textures, matchId, character}) {
         const FEAR_SPIN_SPEED = 1.5;
         const SLOW_SPIN_SPEED = 1;
         const BLADESTORM_DAMAGE = 10;
+        const EXPLOSION_DURATION = 300; // ms
 
         // Медленнее пускаем сферы как настоящие заклинания
         const MIN_SPHERE_IMPULSE = 3;
@@ -989,6 +990,7 @@ export function Game({models, sounds, textures, matchId, character}) {
         let isHealActive = false;
         const frostNovaRings = [];
         const lightWaveRings = [];
+        const projectileExplosions = [];
 
         // Crosshair elements
         const target = document.getElementById("target");
@@ -3097,6 +3099,28 @@ export function Game({models, sounds, textures, matchId, character}) {
             lightWaveRings.push({ mesh, start: performance.now(), duration });
         }
 
+        function spawnProjectileExplosion(playerId, color, duration = EXPLOSION_DURATION) {
+            const player = players.get(playerId)?.model;
+            if (!player) return;
+
+            const position = new THREE.Vector3();
+            player.getWorldPosition(position);
+            position.y += 1;
+
+            const geometry = new THREE.SphereGeometry(0.2, 16, 16);
+            const material = new THREE.MeshBasicMaterial({
+                color,
+                transparent: true,
+                opacity: 0.8,
+                blending: THREE.AdditiveBlending,
+                depthWrite: false,
+            });
+            const mesh = new THREE.Mesh(geometry, material);
+            mesh.position.copy(position);
+            scene.add(mesh);
+            projectileExplosions.push({ mesh, start: performance.now(), duration });
+        }
+
         function spawnSprintTrail(playerId, duration = 6000) {
             if (playerId !== myPlayerId) return;
             const existing = activeSprintTrails.get(playerId);
@@ -3416,6 +3440,18 @@ export function Game({models, sounds, textures, matchId, character}) {
                         if (progress >= 1) {
                             scene.remove(effect.mesh);
                             lightWaveRings.splice(i, 1);
+                        }
+                    }
+
+                    for (let i = projectileExplosions.length - 1; i >= 0; i--) {
+                        const effect = projectileExplosions[i];
+                        const elapsed = performance.now() - effect.start;
+                        const progress = elapsed / effect.duration;
+                        effect.mesh.scale.setScalar(0.5 + progress * 0.8);
+                        effect.mesh.material.opacity = 0.8 * (1 - progress);
+                        if (progress >= 1) {
+                            scene.remove(effect.mesh);
+                            projectileExplosions.splice(i, 1);
                         }
                     }
 
@@ -4205,6 +4241,10 @@ export function Game({models, sounds, textures, matchId, character}) {
                             sounds.damage.volume = 0.5;
                             sounds.damage.currentTime = 0;
                             sounds.damage.play();
+                        }
+                        if (message.spellType === 'fireball' || message.spellType === 'iceball') {
+                            const color = message.spellType === 'fireball' ? 0xff6600 : 0x66ccff;
+                            spawnProjectileExplosion(message.targetId, color);
                         }
                     }
                     break;
