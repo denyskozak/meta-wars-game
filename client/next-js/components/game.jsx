@@ -465,14 +465,15 @@ export function Game({models, sounds, textures, matchId, character}) {
             const grad = ctx.createRadialGradient(
                 size / 2,
                 size / 2,
-                size * 0.25,
+                0,
                 size / 2,
                 size / 2,
                 size / 2
             );
-            grad.addColorStop(0, '#ffffff');
-            grad.addColorStop(0.7, '#dddddd');
-            grad.addColorStop(1, '#bbbbbb');
+            grad.addColorStop(0, 'rgba(255,255,255,1)');
+            grad.addColorStop(0.3, 'rgba(255,255,255,0.9)');
+            grad.addColorStop(0.6, 'rgba(255,255,255,0.4)');
+            grad.addColorStop(1, 'rgba(255,255,255,0)');
 
             ctx.fillStyle = grad;
             ctx.beginPath();
@@ -481,7 +482,7 @@ export function Game({models, sounds, textures, matchId, character}) {
 
             ctx.fillStyle = 'rgba(255,255,255,0.8)';
             ctx.beginPath();
-            ctx.ellipse(size * 0.35, size * 0.35, size * 0.2, size * 0.08, -Math.PI / 4, 0, Math.PI * 2);
+            ctx.ellipse(size * 0.4, size * 0.4, size * 0.25, size * 0.1, -Math.PI / 4, 0, Math.PI * 2);
             ctx.fill();
 
             return new THREE.CanvasTexture(canvas);
@@ -491,8 +492,9 @@ export function Game({models, sounds, textures, matchId, character}) {
             const material = new THREE.SpriteMaterial({
                 map: projectileTexture,
                 color,
-                transparent: false,
+                transparent: true,
                 depthWrite: false,
+                blending: THREE.AdditiveBlending,
             });
             const sprite = new THREE.Sprite(material);
             sprite.scale.set(size, size, 1);
