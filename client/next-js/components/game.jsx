@@ -3235,7 +3235,9 @@ export function Game({models, sounds, textures, matchId, character}) {
                 model.position.y -= 0.7;
                 // Rotate the model to match the camera direction
                 const locked = document.pointerLockElement === containerRef.current;
-                if (locked || !isCameraDragging) {
+                // Rotate the character model with the camera only when the
+                // pointer is locked and the player is not dragging the camera.
+                if (locked && !isCameraDragging) {
                     model.rotation.y = yaw + Math.PI;
                 }
                 // Get the camera's forward direction
