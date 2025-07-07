@@ -3007,13 +3007,17 @@ export function Game({models, sounds, textures, matchId, character}) {
             lightWaveRings.push({ mesh, start: performance.now(), duration });
         }
 
-        function spawnProjectileExplosion(playerId, color, duration = EXPLOSION_DURATION) {
-            const player = players.get(playerId)?.model;
-            if (!player) return;
-
-            const position = new THREE.Vector3();
-            player.getWorldPosition(position);
-            position.y += 1;
+        function spawnProjectileExplosion(playerId, color, impactPosition, duration = EXPLOSION_DURATION) {
+            let position;
+            if (impactPosition && typeof impactPosition.x === 'number') {
+                position = new THREE.Vector3(impactPosition.x, impactPosition.y, impactPosition.z);
+            } else {
+                const player = players.get(playerId)?.model;
+                if (!player) return;
+                position = new THREE.Vector3();
+                player.getWorldPosition(position);
+                position.y += 1;
+            }
 
             const geometry = new THREE.SphereGeometry(0.2, 16, 16);
             const material = new THREE.MeshBasicMaterial({
@@ -3879,7 +3883,19 @@ export function Game({models, sounds, textures, matchId, character}) {
                             freezeHands(message.id, 1000);
                             castSphereOtherUser(message.payload);
                             break;
+                        case "fireball-hit":
+                            spawnProjectileExplosion(
+                                message.payload.targetId,
+                                0xff6600,
+                                message.payload.position
+                            );
+                            break;
                         case "iceball-hit":
+                            spawnProjectileExplosion(
+                                message.payload.targetId,
+                                0x66ccff,
+                                message.payload.position
+                            );
                             if (message.payload.targetId === myPlayerId) {
                                 applySlowEffect(myPlayerId, 3000);
                             }
@@ -4152,10 +4168,6 @@ export function Game({models, sounds, textures, matchId, character}) {
                             sounds.damage.volume = 0.5;
                             sounds.damage.currentTime = 0;
                             sounds.damage.play();
-                        }
-                        if (message.spellType === 'fireball' || message.spellType === 'iceball') {
-                            const color = message.spellType === 'fireball' ? 0xff6600 : 0x66ccff;
-                            spawnProjectileExplosion(message.targetId, color);
                         }
                     }
                     break;
