@@ -456,6 +456,50 @@ export function Game({models, sounds, textures, matchId, character}) {
             return sprite;
         }
 
+        const projectileTexture = (() => {
+            const size = 64;
+            const canvas = document.createElement('canvas');
+            canvas.width = canvas.height = size;
+            const ctx = canvas.getContext('2d');
+
+            const grad = ctx.createRadialGradient(
+                size / 2,
+                size / 2,
+                size * 0.25,
+                size / 2,
+                size / 2,
+                size / 2
+            );
+            grad.addColorStop(0, '#ffffff');
+            grad.addColorStop(0.7, '#dddddd');
+            grad.addColorStop(1, '#bbbbbb');
+
+            ctx.fillStyle = grad;
+            ctx.beginPath();
+            ctx.arc(size / 2, size / 2, size / 2, 0, Math.PI * 2);
+            ctx.fill();
+
+            ctx.fillStyle = 'rgba(255,255,255,0.8)';
+            ctx.beginPath();
+            ctx.ellipse(size * 0.35, size * 0.35, size * 0.2, size * 0.08, -Math.PI / 4, 0, Math.PI * 2);
+            ctx.fill();
+
+            return new THREE.CanvasTexture(canvas);
+        })();
+
+        function makeProjectileSprite(color = 0xffffff, size = 1) {
+            const material = new THREE.SpriteMaterial({
+                map: projectileTexture,
+                color,
+                transparent: false,
+                depthWrite: false,
+            });
+            const sprite = new THREE.Sprite(material);
+            sprite.scale.set(size, size, 1);
+            sprite.renderOrder = 999;
+            return sprite;
+        }
+
         const starTexture = (() => {
             const size = 64;
             const canvas = document.createElement('canvas');
@@ -3686,7 +3730,7 @@ export function Game({models, sounds, textures, matchId, character}) {
             removeProjectile(data.id);
             let mesh;
             if (data.type === 'fireball') {
-                mesh = makeGlowSprite(0xffaa33, 0.8);
+                mesh = makeProjectileSprite(0xffaa33, SPELL_SCALES.fireball);
             } else if (data.type === 'shadowbolt') {
                 mesh = shadowboltMesh.clone();
             } else if (data.type === 'pyroblast') {
@@ -3694,7 +3738,7 @@ export function Game({models, sounds, textures, matchId, character}) {
             } else if (data.type === 'chaosbolt') {
                 mesh = chaosBoltMesh.clone();
             } else if (data.type === 'iceball') {
-                mesh = makeGlowSprite(0x88ddff, 0.8);
+                mesh = makeProjectileSprite(0x88ddff, SPELL_SCALES.iceball);
             } else {
                 mesh = new THREE.Mesh(fireballGeometry, iceballMaterial.clone());
             }
