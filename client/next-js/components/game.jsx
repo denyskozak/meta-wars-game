@@ -225,7 +225,7 @@ export function Game({models, sounds, textures, matchId, character}) {
         const container = containerRef.current;
         if (!container) return;
         const handleMouseDown = (event) => {
-            if (container.contains(event.target)) {
+            if (event.button === 2 && container.contains(event.target)) {
                 container.requestPointerLock();
             }
         };
@@ -995,6 +995,8 @@ export function Game({models, sounds, textures, matchId, character}) {
         const targetImage = document.getElementById("targetImage");
         let isFocused = false;
         let isCameraDragging = false;
+        let prevMouseX = null;
+        let prevMouseY = null;
 
         const AIM_BEAM_OPACITY = 0.5;
         const AIM_BEAM_LENGTH = SPHERE_MAX_DISTANCE * 1.5;
@@ -1372,6 +1374,8 @@ export function Game({models, sounds, textures, matchId, character}) {
 
         document.addEventListener("mouseup", () => {
             isCameraDragging = false;
+            prevMouseX = null;
+            prevMouseY = null;
         });
 
 
@@ -1383,10 +1387,16 @@ export function Game({models, sounds, textures, matchId, character}) {
             const locked = document.pointerLockElement === containerRef.current;
             if (!locked && !isCameraDragging) return;
 
-            yaw -= event.movementX / 500;
+            const movementX = locked ? event.movementX : event.clientX - (prevMouseX ?? event.clientX);
+            const movementY = locked ? event.movementY : event.clientY - (prevMouseY ?? event.clientY);
+
+            prevMouseX = event.clientX;
+            prevMouseY = event.clientY;
+
+            yaw -= movementX / 500;
             pitch = Math.max(
                 -Math.PI / 2,
-                Math.min(Math.PI / 2, pitch + event.movementY / 500),
+                Math.min(Math.PI / 2, pitch + movementY / 500),
             );
         });
         // const renderCursor = () => {
