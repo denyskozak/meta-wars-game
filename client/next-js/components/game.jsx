@@ -283,6 +283,8 @@ export function Game({models, sounds, textures, matchId, character}) {
         const MELEE_INDICATOR_OPACITY = 0.2; // transparency for the auto attack indicator
         const TARGET_INDICATOR_OPACITY = 0.4; // transparency for target highlight
         let targetIndicator = null;
+        let highlightIndicator = null;
+        let highlightedPlayerId = null;
 
         const createTargetIndicator = () => {
             const geometry = new THREE.RingGeometry(0.55, 0.7, 32);
@@ -309,6 +311,24 @@ export function Game({models, sounds, textures, matchId, character}) {
                 const player = players.get(targetedPlayerId).model;
                 targetIndicator = createTargetIndicator();
                 player.add(targetIndicator);
+            }
+        };
+
+        const createHighlightIndicator = () => {
+            const sprite = makeGlowSprite(0xff0000, 0.6);
+            sprite.position.y = 2.3;
+            return sprite;
+        };
+
+        const updateHighlightIndicator = () => {
+            if (highlightIndicator) {
+                highlightIndicator.parent?.remove(highlightIndicator);
+                highlightIndicator = null;
+            }
+            if (highlightedPlayerId && players.has(highlightedPlayerId)) {
+                const player = players.get(highlightedPlayerId).model;
+                highlightIndicator = createHighlightIndicator();
+                player.add(highlightIndicator);
             }
         };
 
@@ -1491,13 +1511,13 @@ export function Game({models, sounds, textures, matchId, character}) {
             }
 
             if (id && players.has(id) && hasLineOfSight(id)) {
-                if (targetedPlayerId !== id) {
-                    targetedPlayerId = id;
-                    dispatchTargetUpdate();
+                if (highlightedPlayerId !== id) {
+                    highlightedPlayerId = id;
+                    updateHighlightIndicator();
                 }
-            } else if (targetedPlayerId !== null) {
-                targetedPlayerId = null;
-                dispatchTargetUpdate();
+            } else if (highlightedPlayerId !== null) {
+                highlightedPlayerId = null;
+                updateHighlightIndicator();
             }
         }
 
@@ -3752,6 +3772,10 @@ export function Game({models, sounds, textures, matchId, character}) {
                 if (id === targetedPlayerId) {
                     targetedPlayerId = null;
                     dispatchTargetUpdate();
+                }
+                if (id === highlightedPlayerId) {
+                    highlightedPlayerId = null;
+                    updateHighlightIndicator();
                 }
             }
         }
