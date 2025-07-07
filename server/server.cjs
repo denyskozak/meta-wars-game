@@ -920,7 +920,7 @@ ws.on('connection', (socket) => {
                     matchToLeave.playersReady--;
                     playerMatchMap.delete(id);
 
-                    if (matchToLeave.players.size === 0 && matchToLeave.resorve.length === 0) {
+                    if (matchToLeave.players.size === 0) {
                         if (matchToLeave.finished && matchToLeave.summary) {
                             finishedMatches.set(matchToLeave.id, matchToLeave.summary);
                         }
@@ -1325,7 +1325,7 @@ ws.on('connection', (socket) => {
                 match.playersReady--;
                 match.isFull = false;
 
-                if (match.players.size === 0 && match.resorve.length === 0) {
+                if (match.players.size === 0) {
                     if (match.finished && match.summary) {
                         finishedMatches.set(match.id, match.summary);
                     }
