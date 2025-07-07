@@ -799,11 +799,11 @@ export function Game({models, sounds, textures, matchId, character}) {
         const FIREBLAST_RANGE = 20;
         const FIREBLAST_DAMAGE = 33;
 
-        const FIREBALL_DAMAGE = 40;
+        const FIREBALL_DAMAGE = 44; // increased by 10%
         const PYROBLAST_DAMAGE = FIREBALL_DAMAGE * 1.4;
         const CHAOSBOLT_DAMAGE = FIREBALL_DAMAGE * 2;
-        const ICEBALL_DAMAGE = 35;
-        const DARKBALL_DAMAGE = 30;
+        const ICEBALL_DAMAGE = 39; // increased by 10%
+        const DARKBALL_DAMAGE = 33; // increased by 10%
         const LIFEDRAIN_DAMAGE = 30;
         const FROSTNOVA_DAMAGE = 20;
         // Double radius for a more powerful frost nova
@@ -2072,11 +2072,13 @@ export function Game({models, sounds, textures, matchId, character}) {
 
                 soundCast.pause();
                 isCasting = false;
+                movementSpeedModifier = 1;
                 hideAimBeam();
                 execute();
             };
 
             isCasting = true;
+            movementSpeedModifier = 0.3;
             showAimBeam();
 
             const actionName = 'casting';
