@@ -324,12 +324,11 @@ export default function MatchesPage() {
     dispatch({
       type: "SET_CHARACTER",
       payload: {
-        name: cls.toLowerCase(),
-        classType: cls.toLowerCase(),
-        skin: charModel,
+        name: cls,
+        classType: cls,
+        skin: charModel
       },
     });
-
 
     sendToSocket({ type: "SET_CHARACTER", classType: cls, character: charModel });
 

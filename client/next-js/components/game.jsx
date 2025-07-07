@@ -680,15 +680,6 @@ export function Game({models, sounds, textures, matchId, character}) {
             1000,
         );
         camera.rotation.order = "YXZ";
-        let cameraLogInterval = setInterval(() => {
-            if (!camera) return;
-            console.log(
-                `Camera position: x=${camera.position.x.toFixed(2)}, y=${camera.position.y.toFixed(2)}, z=${camera.position.z.toFixed(2)}, FOV: ${camera.fov.toFixed(2)}`,
-            );
-            console.log(
-                `Camera rotation: x=${camera.rotation.x.toFixed(2)}, y=${camera.rotation.y.toFixed(2)}, z=${camera.rotation.z.toFixed(2)}}`,
-            );
-        }, 5000);
 
         let globalSkillCooldown = false; // Tracks if the global cooldown is active
         let isCasting = false;
@@ -905,8 +896,6 @@ export function Game({models, sounds, textures, matchId, character}) {
         const targetImage = document.getElementById("targetImage");
         let isFocused = false;
         let isCameraDragging = false;
-        let prevMouseX = null;
-        let prevMouseY = null;
 
         const AIM_BEAM_OPACITY = 0.5;
         const AIM_BEAM_LENGTH = SPHERE_MAX_DISTANCE * 1.5;
@@ -927,7 +916,6 @@ export function Game({models, sounds, textures, matchId, character}) {
         }
 
         function showAimBeam() {
-            console.log("showAimBeam: ", aimBeam, isFocused);
             if (aimBeam || isFocused) return;
             aimBeam = createAimBeam();
             scene.add(aimBeam);
@@ -1262,8 +1250,6 @@ export function Game({models, sounds, textures, matchId, character}) {
             }
 
             if (event.button === 0) {
-                console.log("isFocused: ", isFocused);
-                console.log("1: ", document.pointerLockElement !== containerRef.current);
                 if (!isFocused && document.pointerLockElement === containerRef.current) {
                     isCameraDragging = true;
                 }
@@ -1285,8 +1271,6 @@ export function Game({models, sounds, textures, matchId, character}) {
 
         document.addEventListener("mouseup", () => {
             isCameraDragging = false;
-            prevMouseX = null;
-            prevMouseY = null;
         });
 
 
@@ -1457,17 +1441,14 @@ export function Game({models, sounds, textures, matchId, character}) {
             const dir = getAimDirection();
 
             const raycaster = new THREE.Raycaster(origin, dir, 0, FIREBLAST_RANGE);
-
             let closest = null;
             let minDist = Infinity;
-
             players.forEach((p, id) => {
-
                 if (id === myPlayerId) return;
-                const intersects = raycaster.intersectObject(p.model, true);
-
-                if (intersects.length > 0) {
-                    const dist = intersects[0].distance;
+                const box = new THREE.Box3().setFromObject(p.model);
+                const hit = raycaster.ray.intersectBox(box, new THREE.Vector3());
+                if (hit) {
+                    const dist = origin.distanceTo(hit);
                     if (dist < minDist && hasLineOfSight(id)) {
                         minDist = dist;
                         closest = id;
@@ -1480,24 +1461,25 @@ export function Game({models, sounds, textures, matchId, character}) {
         function highlightCrosshair() {
             if (!targetImage) return;
 
+            if (!isFocused) {
+                targetImage.src = '/icons/target.svg';
+                return;
+            }
             const id = getTargetPlayer();
-
-            if (isFocused && players.has(id) && hasLineOfSight(id)) {
-                if (id) {
+            if (id && players.has(id) && hasLineOfSight(id)) {
+                const start = playerCollider.start
+                    .clone()
+                    .add(playerCollider.end)
+                    .multiplyScalar(0.5);
+                const targetPos = players.get(id).model.position.clone();
+                const dist = start.distanceTo(targetPos);
+                if (dist <= FIREBLAST_RANGE) {
                     targetImage.src = assetUrl('/icons/target-green.svg');
                 } else {
                     targetImage.src = assetUrl('/icons/target.svg');
                 }
-            }
-
-            if (id && players.has(id) && hasLineOfSight(id)) {
-                if (highlightedPlayerId !== id) {
-                    highlightedPlayerId = id;
-                    updateHighlightIndicator();
-                }
-            } else if (highlightedPlayerId !== null) {
-                highlightedPlayerId = null;
-                updateHighlightIndicator();
+            } else {
+                targetImage.src = assetUrl('/icons/target.svg');
             }
         }
 
@@ -2819,7 +2801,6 @@ export function Game({models, sounds, textures, matchId, character}) {
             effect.scale.set(0.5, 0.5, 0.5);
             scene.add(effect);
             activeImmolation.set(playerId, effect);
-            console.log("activeImmolation: after update ", activeImmolation);
             setTimeout(() => {
                 effect.parent?.remove(effect);
                 activeImmolation.delete(playerId);
@@ -4339,7 +4320,6 @@ export function Game({models, sounds, textures, matchId, character}) {
                         removePlayer(id);
                     }
 
-                    console.log("MATCH_READY: ", message);
                     myPlayerId = message.myPlayerId;
                     message.players.forEach(([playerId, playerOptions]) => {
                         const cls = playerOptions?.classType || "";

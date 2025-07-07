@@ -36,7 +36,6 @@ loader.setMeshoptDecoder(MeshoptDecoder);
 export default function GamePage() {
   const account = useCurrentAccount();
   const params = useParams();
-  const { socket, sendToSocket } = useWS(params?.id);
 
   const [preloadedData, setPreloadedData] = useState({
     models: {},
@@ -51,73 +50,82 @@ export default function GamePage() {
     dispatch: React.Dispatch<any>;
   };
 
-  const [showReconnect, setShowReconnect] = useState(false);
-  const [joinError, setJoinError] = useState<string | null>(null);
-  const [joined, setJoined] = useState(false);
+  // const [showReconnect, setShowReconnect] = useState(false);
+  // const [joinError, setJoinError] = useState<string | null>(null);
+  // const [joined, setJoined] = useState(false);
 
-  useEffect(() => {
-    const handleMessage = (event: MessageEvent) => {
-      const message = JSON.parse(event.data);
-      const addr = account?.address;
+  // useEffect(() => {
+  //   const handleMessage = (event: MessageEvent) => {
+  //     const message = JSON.parse(event.data);
+  //     const addr = account?.address;
+  //
+  //     switch (message.type) {
+  //       case "GET_MATCH": {
+  //         const match = message.match;
+  //         if (!addr) break;
+  //
+  //         const inPlayers = (match.players as Array<[string, any]>).find(
+  //           ([, p]) => p.address === addr,
+  //         );
+  //         console.log("inPlayers: ", inPlayers);
+  //         if (inPlayers) {
+  //           dispatch({
+  //             type: "SET_CHARACTER",
+  //             payload: {
+  //               name: inPlayers[1].classType,
+  //               classType: inPlayers[1].classType,
+  //               skin: inPlayers[1].character,
+  //             },
+  //           });
+  //           console.log("1: ", {
+  //             type: "SET_CHARACTER",
+  //             payload: {
+  //               name: inPlayers[1].classType,
+  //               classType: inPlayers[1].classType,
+  //               skin: inPlayers[1].character,
+  //             },
+  //           });
+  //           setJoined(true);
+  //           setShowReconnect(false);
+  //           break;
+  //         }
+  //
+  //         const reserve = match.resorve || [];
+  //         const maybe = reserve.find((p: any) => p.address === addr);
+  //         if (maybe) {
+  //           dispatch({
+  //             type: "SET_CHARACTER",
+  //             payload: {
+  //               name: maybe.classType,
+  //               classType: maybe.classType,
+  //               skin: maybe.character,
+  //             },
+  //           });
+  //           setShowReconnect(true);
+  //         } else if (match.isFull) {
+  //           setJoinError("Не можете войти");
+  //         }
+  //         break;
+  //       }
+  //       case "ME_JOINED_MATCH":
+  //         setJoined(true);
+  //         setShowReconnect(false);
+  //         break;
+  //       case "MATCH_JOIN_FAILED":
+  //         setJoinError("Не можете войти");
+  //         break;
+  //     }
+  //   };
+  //
+  //   socket.addEventListener("message", handleMessage);
+  //   sendToSocket({ type: "GET_MATCH", matchId: params?.id });
+  //   return () => {
+  //     socket.removeEventListener("message", handleMessage);
+  //   };
+  // }, [account?.address, params?.id]);
 
-      switch (message.type) {
-        case "GET_MATCH": {
-          const match = message.match;
-          if (!addr) break;
-
-          const inPlayers = (match.players as Array<[string, any]>).find(
-            ([, p]) => p.address === addr,
-          );
-          if (inPlayers) {
-            dispatch({
-              type: "SET_CHARACTER",
-              payload: {
-                name: inPlayers[1].classType,
-                classType: inPlayers[1].classType,
-                skin: inPlayers[1].character,
-              },
-            });
-            setJoined(true);
-            setShowReconnect(false);
-            break;
-          }
-
-          const reserve = match.resorve || [];
-          const maybe = reserve.find((p: any) => p.address === addr);
-          if (maybe) {
-            dispatch({
-              type: "SET_CHARACTER",
-              payload: {
-                name: maybe.classType,
-                classType: maybe.classType,
-                skin: maybe.character,
-              },
-            });
-            setShowReconnect(true);
-          } else if (match.isFull) {
-            setJoinError("Не можете войти");
-          }
-          break;
-        }
-        case "ME_JOINED_MATCH":
-          setJoined(true);
-          setShowReconnect(false);
-          break;
-        case "MATCH_JOIN_FAILED":
-          setJoinError("Не можете войти");
-          break;
-      }
-    };
-
-    socket.addEventListener("message", handleMessage);
-    sendToSocket({ type: "GET_MATCH", matchId: params?.id });
-    return () => {
-      socket.removeEventListener("message", handleMessage);
-    };
-  }, [account?.address, params?.id]);
-
-  const charSkin = character?.name
-    ? CLASS_MODELS[character.name as keyof typeof CLASS_MODELS] || "vampir"
+  const charSkin = character?.classType
+    ? CLASS_MODELS[character.classType as keyof typeof CLASS_MODELS] || "vampir"
     : "vampir";
 
   const models = [
@@ -261,29 +269,29 @@ export default function GamePage() {
     return <Loading text="Loading assets..." />;
   }
 
-  if (joinError) {
-    return (
-      <div className="h-full flex items-center justify-center text-red-500">
-        {joinError}
-      </div>
-    );
-  }
+  // if (joinError) {
+  //   return (
+  //     <div className="h-full flex items-center justify-center text-red-500">
+  //       {joinError}
+  //     </div>
+  //   );
+  // }
 
-  if (!joined) {
-    if (showReconnect) {
-      return (
-        <div className="h-full flex items-center justify-center">
-          <button
-            className="px-4 py-2 bg-blue-500 text-white rounded"
-            onClick={() => sendToSocket({ type: "JOIN_MATCH", matchId: params?.id })}
-          >
-            Reconnect
-          </button>
-        </div>
-      );
-    }
-    return <Loading text="Connecting..." />;
-  }
+  // if (!joined) {
+  //   if (showReconnect) {
+  //     return (
+  //       <div className="h-full flex items-center justify-center">
+  //         <button
+  //           className="px-4 py-2 bg-blue-500 text-white rounded"
+  //           onClick={() => sendToSocket({ type: "JOIN_MATCH", matchId: params?.id })}
+  //         >
+  //           Reconnect
+  //         </button>
+  //       </div>
+  //     );
+  //   }
+  //   return <Loading text="Connecting..." />;
+  // }
 
   return (
     <>
