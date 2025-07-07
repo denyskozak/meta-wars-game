@@ -613,10 +613,18 @@ ws.on('connection', (socket) => {
                     const r = PROJECTILE_RADIUS + 0.6;
                     if (d2 < r * r) {
                         applyDamage(match, pid, p.ownerId, p.damage, p.type);
-                        if (p.type === 'iceball') {
+                        if (p.type === 'iceball' || p.type === 'fireball') {
                             broadcastToMatch(match.id, {
                                 type: 'CAST_SPELL',
-                                payload: { type: 'iceball-hit', targetId: pid },
+                                payload: {
+                                    type: `${p.type}-hit`,
+                                    targetId: pid,
+                                    position: {
+                                        x: p.position.x,
+                                        y: p.position.y,
+                                        z: p.position.z,
+                                    },
+                                },
                                 id: p.ownerId,
                             });
                         }
