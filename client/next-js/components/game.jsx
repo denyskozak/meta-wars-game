@@ -137,11 +137,11 @@ const SPELL_META = {
 
 const SPELL_SCALES = {
     // fireball enlarged for better visuals
-    fireball: 1,
-    iceball: 1,
-    shadowbolt: 1,
-    pyroblast: 3,
-    chaosBolt: 3,
+    fireball: 0.5,
+    iceball: 0.5,
+    shadowbolt: 0.5,
+    pyroblast: 1,
+    chaosBolt: 1,
 };
 
 const USER_DEFAULT_POSITION = [
@@ -3734,7 +3734,7 @@ export function Game({models, sounds, textures, matchId, character}) {
             removeProjectile(data.id);
             let mesh;
             if (data.type === 'fireball') {
-                mesh = makeProjectileSprite(0xffaa33, SPELL_SCALES.fireball);
+                mesh = makeProjectileSprite(0xff4500, SPELL_SCALES.fireball);
             } else if (data.type === 'shadowbolt') {
                 mesh = shadowboltMesh.clone();
             } else if (data.type === 'pyroblast') {
