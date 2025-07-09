@@ -28,7 +28,6 @@ import { ButtonWithSound as Button } from "@/components/button-with-sound";
 import { siteConfig } from "@/config/site";
 import { ThemeSwitch } from "@/components/theme-switch";
 import {
-  GithubIcon,
   DiscordIcon,
   SearchIcon,
   UnmuteIcon,
@@ -88,7 +87,7 @@ export const Navbar = () => {
       <NavbarContent className="basis-1/5 sm:basis-full" justify="start">
         <NavbarBrand as="li" className="gap-3 max-w-fit">
           <NextLink className="flex justify-start items-center gap-4" href="/">
-            <Image alt="Logo" height={48}  width={48} src="/logo_big.png" />
+            <Image alt="Logo" height={48} src="/logo_big.png" width={48} />
             <p className="font-bold text-inherit text-center">
               Meta Wars
               <br />
@@ -166,7 +165,7 @@ export const Navbar = () => {
           {/*  {address ? "Profile" : "Sign in"}*/}
           {/*</Button>*/}
           <Button
-            className="border-2 border-black shadow-lg overflow-hidden group animate-pulse-scale"
+            className="border-2 border-black shadow-lg overflow-hidden group"
             size="lg"
             onPress={() => router.push("/play")}
           >
@@ -179,7 +178,6 @@ export const Navbar = () => {
       </NavbarContent>
 
       <NavbarContent className="sm:hidden basis-1 pl-4" justify="end">
-
         <ThemeSwitch />
         <NavbarMenuToggle />
       </NavbarContent>

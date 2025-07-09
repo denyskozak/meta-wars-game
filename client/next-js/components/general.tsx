@@ -96,7 +96,7 @@ export default function General() {
         {/*</div>*/}
 
         <Button
-          className="absolute bottom-[10vh] border-2 w-[188] h-[48] border-black shadow-lg overflow-hidden group hover:-translate-y-1 hover:shadow-xl animate-pulse-scale"
+          className="absolute bottom-[10vh] border-2 w-[188] h-[48] border-black shadow-lg overflow-hidden group hover:-translate-y-1 hover:shadow-xl"
           size="lg"
           onPress={() => router.push("/play")}
         >
