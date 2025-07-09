@@ -166,7 +166,7 @@ export const Navbar = () => {
           {/*  {address ? "Profile" : "Sign in"}*/}
           {/*</Button>*/}
           <Button
-            className="border-2 border-black shadow-lg overflow-hidden group "
+            className="border-2 border-black shadow-lg overflow-hidden group animate-pulse-scale"
             size="lg"
             onPress={() => router.push("/play")}
           >
