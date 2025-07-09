@@ -701,23 +701,13 @@ export function Game({models, sounds, textures, matchId, character}) {
             vertexShader: fireballMaterial.vertexShader,
             fragmentShader: darkballFragmentShader,
         });
-        const shadowboltMesh = new THREE.Mesh(
-            fireballGeometry,
-            darkballMaterial
-        );
-        shadowboltMesh.scale.set(
-            SPELL_SCALES.shadowbolt,
-            SPELL_SCALES.shadowbolt,
+        const shadowboltMesh = makeProjectileSprite(
+            0x8a2be2,
             SPELL_SCALES.shadowbolt,
         );
 
-        const chaosBoltMesh = new THREE.Mesh(
-            fireballGeometry,
-            darkballMaterial.clone()
-        );
-        chaosBoltMesh.scale.set(
-            SPELL_SCALES.chaosBolt,
-            SPELL_SCALES.chaosBolt,
+        const chaosBoltMesh = makeProjectileSprite(
+            0x8a2be2,
             SPELL_SCALES.chaosBolt,
         );
 
@@ -3789,11 +3779,11 @@ export function Game({models, sounds, textures, matchId, character}) {
                 mesh = makeProjectileSprite(0xffaa33, SPELL_SCALES.fireball);
 
             } else if (data.type === 'shadowbolt') {
-                mesh = shadowboltMesh.clone();
+                mesh = makeProjectileSprite(0x8a2be2, SPELL_SCALES.shadowbolt);
             } else if (data.type === 'pyroblast') {
                 mesh = pyroblastMesh.clone();
             } else if (data.type === 'chaosbolt') {
-                mesh = chaosBoltMesh.clone();
+                mesh = makeProjectileSprite(0x8a2be2, SPELL_SCALES.chaosBolt);
             } else if (data.type === 'iceball') {
                 mesh = makeProjectileSprite(0x88ddff, SPELL_SCALES.iceball);
             } else {
