@@ -2,7 +2,7 @@ const WebSocket = require('ws');
 const http = require('http');
 // const { mintChest } = require('./sui.cjs');
 // const { mintCoins, mintItemWithOptions } = require('./sui.cjs');
-const { createProfile } = require('./sui.cjs');
+// const { createProfile } = require('./sui.cjs');
 
 // Basic CPU profiling using the Node.js inspector module
 const inspector = require('inspector');
@@ -46,6 +46,9 @@ const CLASS_STATS = require('../client/next-js/consts/classStats.json');
 const ADRENALINE_RUSH_ICON = '/icons/classes/rogue/adrenalinerush.jpg';
 const RAGE_ICON = '/icons/classes/warrior/rage.jpg';
 const BERSERK_ICON = '/icons/classes/warrior/berserk.jpg';
+
+// Simple in-memory storage for player profiles
+const profiles = {};
 
 const SPHERE_SPELLS = new Set([
     'fireball',
@@ -803,22 +806,12 @@ ws.on('connection', (socket) => {
 
             case 'CREATE_PROFILE':
                 if (message.address && message.nickname) {
-                    createProfile(message.address, message.nickname)
-                        .then(() => {
-                            socket.send(JSON.stringify({
-                                type: 'PROFILE_CREATED',
-                                nickname: message.nickname,
-                                success: true,
-                            }));
-                        })
-                        .catch(err => {
-                            console.error('createProfile failed:', err);
-                            socket.send(JSON.stringify({
-                                type: 'PROFILE_CREATED',
-                                nickname: message.nickname,
-                                success: false,
-                            }));
-                        });
+                    profiles[message.address] = { nickname: message.nickname };
+                    socket.send(JSON.stringify({
+                        type: 'PROFILE_CREATED',
+                        nickname: message.nickname,
+                        success: true,
+                    }));
                 }
                 break;
 
