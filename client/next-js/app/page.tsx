@@ -28,15 +28,14 @@ export default function Home() {
 
       <div className="relative justify-center align-middle items-center flex flex-col w-full h-[calc(100%-98px)]">
         <MagicCanvas />
-        <div ref={logoRef} className="flex justify-center">
           <Image
+            ref={logoRef}
             alt="Big Logo"
             className="mt-[86] object-cover z-[2]"
-            height={200}
+            height={300}
             src="/big-logo.webp"
             width={400}
           />
-        </div>
 
         <Image
           alt="Turtle Art"
