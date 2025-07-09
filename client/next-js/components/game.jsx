@@ -896,6 +896,7 @@ export function Game({models, sounds, textures, matchId, character}) {
         const SLOW_SPIN_SPEED = 1;
         const BLADESTORM_DAMAGE = 10;
         const EXPLOSION_DURATION = 300; // ms
+        const PROJECTILE_TRAIL_DURATION = 400; // ms
 
         // Медленнее пускаем сферы как настоящие заклинания
         const MIN_SPHERE_IMPULSE = 3;
@@ -968,6 +969,7 @@ export function Game({models, sounds, textures, matchId, character}) {
         const frostNovaRings = [];
         const lightWaveRings = [];
         const projectileExplosions = [];
+        const projectileTrails = [];
 
         // Crosshair elements
         const target = document.getElementById("target");
@@ -3112,6 +3114,22 @@ export function Game({models, sounds, textures, matchId, character}) {
             projectileExplosions.push({ mesh, start: performance.now(), duration });
         }
 
+        function spawnProjectileTrail(position, color, scale = 0.4, duration = PROJECTILE_TRAIL_DURATION) {
+            const material = new THREE.SpriteMaterial({
+                map: projectileTexture,
+                color,
+                transparent: true,
+                depthWrite: false,
+                blending: THREE.AdditiveBlending,
+            });
+            const sprite = new THREE.Sprite(material);
+            sprite.scale.set(scale, scale, 1);
+            sprite.position.copy(position);
+            sprite.renderOrder = 998;
+            scene.add(sprite);
+            projectileTrails.push({ mesh: sprite, start: performance.now(), duration, initialScale: scale });
+        }
+
         function spawnSprintTrail(playerId, duration = 6000) {
             if (playerId !== myPlayerId) return;
             const existing = activeSprintTrails.get(playerId);
@@ -3442,6 +3460,18 @@ export function Game({models, sounds, textures, matchId, character}) {
                         if (progress >= 1) {
                             scene.remove(effect.mesh);
                             projectileExplosions.splice(i, 1);
+                        }
+                    }
+
+                    for (let i = projectileTrails.length - 1; i >= 0; i--) {
+                        const seg = projectileTrails[i];
+                        const elapsed = performance.now() - seg.start;
+                        const progress = elapsed / seg.duration;
+                        seg.mesh.scale.setScalar(seg.initialScale * (1 - progress));
+                        seg.mesh.material.opacity = 0.8 * (1 - progress);
+                        if (progress >= 1) {
+                            scene.remove(seg.mesh);
+                            projectileTrails.splice(i, 1);
                         }
                     }
 
@@ -3780,17 +3810,23 @@ export function Game({models, sounds, textures, matchId, character}) {
         function createProjectile(data) {
             removeProjectile(data.id);
             let mesh;
+            let color = 0xffffff;
             if (data.type === 'fireball') {
-                mesh = makeProjectileSprite(0xffaa33, SPELL_SCALES.fireball);
+                color = 0xffaa33;
+                mesh = makeProjectileSprite(color, SPELL_SCALES.fireball);
 
             } else if (data.type === 'shadowbolt') {
+                color = 0x8a2be2;
                 mesh = shadowboltMesh.clone();
             } else if (data.type === 'pyroblast') {
+                color = 0xffaa33;
                 mesh = pyroblastMesh.clone();
             } else if (data.type === 'chaosbolt') {
+                color = 0x8a2be2;
                 mesh = chaosBoltMesh.clone();
             } else if (data.type === 'iceball') {
-                mesh = makeProjectileSprite(0x88ddff, SPELL_SCALES.iceball);
+                color = 0x88ddff;
+                mesh = makeProjectileSprite(color, SPELL_SCALES.iceball);
             } else {
                 mesh = new THREE.Mesh(fireballGeometry, iceballMaterial.clone());
             }
@@ -3801,6 +3837,9 @@ export function Game({models, sounds, textures, matchId, character}) {
             projectiles.set(data.id, {
                 mesh,
                 type: data.type,
+                color,
+                prevPos: mesh.position.clone(),
+                trailTimer: 0,
             });
         }
 
@@ -3819,6 +3858,7 @@ export function Game({models, sounds, textures, matchId, character}) {
                     ids.add(p.id);
                     if (projectiles.has(p.id)) {
                         const proj = projectiles.get(p.id);
+                        proj.prevPos.copy(proj.mesh.position);
                         proj.mesh.position.set(p.position.x, p.position.y, p.position.z);
                     } else {
                         createProjectile(p);
@@ -3834,7 +3874,14 @@ export function Game({models, sounds, textures, matchId, character}) {
 
         function updateProjectiles(deltaTime) {
             projectiles.forEach(p => {
-                // tails removed
+                p.trailTimer = (p.trailTimer || 0) + deltaTime;
+                if (p.prevPos && p.trailTimer > 0.05) {
+                    spawnProjectileTrail(p.prevPos.clone(), p.color);
+                    p.trailTimer = 0;
+                }
+                if (p.prevPos) {
+                    p.prevPos.copy(p.mesh.position);
+                }
             });
         }
 
