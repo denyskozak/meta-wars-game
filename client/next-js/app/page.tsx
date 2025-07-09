@@ -9,7 +9,7 @@ import { Navbar } from "@/components/navbar";
 import MagicCanvas from "@/components/magic-canvas";
 
 export default function Home() {
-  const logoRef = useRef<HTMLDivElement | null>(null);
+  const logoRef = useRef<HTMLImageElement | null>(null);
 
   useEffect(() => {
     if (!logoRef.current) return;
