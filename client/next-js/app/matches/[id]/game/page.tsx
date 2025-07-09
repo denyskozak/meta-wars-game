@@ -28,10 +28,13 @@ const dracoLoader = new DRACOLoader();
 
 dracoLoader.setDecoderPath("/libs/draco/");
 
-const loader = new GLTFLoader().setPath(assetUrl("/models/"));
+const remoteLoader = new GLTFLoader().setPath(assetUrl("/models/"));
+const localLoader = new GLTFLoader().setPath("/models/");
 
-loader.setDRACOLoader(dracoLoader);
-loader.setMeshoptDecoder(MeshoptDecoder);
+remoteLoader.setDRACOLoader(dracoLoader);
+remoteLoader.setMeshoptDecoder(MeshoptDecoder);
+localLoader.setDRACOLoader(dracoLoader);
+localLoader.setMeshoptDecoder(MeshoptDecoder);
 
 export default function GamePage() {
   const account = useCurrentAccount();
@@ -129,7 +132,7 @@ export default function GamePage() {
     : "vampir";
 
   const models = [
-    { id: "zone", path: "zone-fantasy-1.glb" },
+    { id: "zone", path: "zone-fantasy-1.glb", local: true },
     { id: "bolvar", path: "skins/bolvar.glb" },
     { id: "vampir", path: "skins/vampir.glb" },
     { id: "mad", path: "skins/mad.glb" },
@@ -153,23 +156,23 @@ export default function GamePage() {
     function preloadModels(modelPaths: any[]) {
       const loadedModels: any = {};
 
-      const promises = modelPaths.map(
-        (model) =>
-          new Promise<void>((resolve, reject) => {
-            loader.load(
-              model.path,
-              (gltf) => {
-                loadedModels[model.id] = gltf.scene;
-                if (gltf.animations) {
-                  loadedModels[`${model.id}_animations`] = gltf.animations;
-                }
-                resolve();
-              },
-              undefined,
-              (error) => reject(error),
-            );
-          }),
-      );
+      const promises = modelPaths.map((model) => {
+        const useLoader = model.local ? localLoader : remoteLoader;
+        return new Promise<void>((resolve, reject) => {
+          useLoader.load(
+            model.path,
+            (gltf) => {
+              loadedModels[model.id] = gltf.scene;
+              if (gltf.animations) {
+                loadedModels[`${model.id}_animations`] = gltf.animations;
+              }
+              resolve();
+            },
+            undefined,
+            (error) => reject(error),
+          );
+        });
+      });
 
       return Promise.all(promises).then(() => loadedModels);
     }
