@@ -3490,6 +3490,8 @@ export function Game({models, sounds, textures, matchId, character}) {
 
                 teleportPlayerIfOob();
 
+                updateNameLabels();
+
                 sendPositionUpdate();
 
                 renderer.render(scene, camera);
@@ -3580,18 +3582,13 @@ export function Game({models, sounds, textures, matchId, character}) {
                         }
                     }
                 });
-                // Create a DOM element for the player's name
-                // const nameDiv = document.createElement('div');
-                // nameDiv.className = 'name-label';
-                // nameDiv.textContent = name;
-                // nameDiv.style.color = 'white';
-                // nameDiv.style.fontSize = '12px';
-                // nameDiv.style.textAlign = 'center';
-                //
-                // // Attach the name label to the player
-                // const nameLabel = new CSS2DObject(nameDiv);
-                // nameLabel.position.set(0, 2, 0); // Adjust position above the player model
-                // player.add(nameLabel);
+
+                const nameDiv = document.createElement('div');
+                nameDiv.className = 'name-label';
+                nameDiv.textContent = name;
+                const nameLabel = new CSS2DObject(nameDiv);
+                nameLabel.position.set(0, 2.5, 0);
+                player.add(nameLabel);
 
                 const mixer = new THREE.AnimationMixer(player);
                 mixer.timeScale = 40;
@@ -3621,6 +3618,8 @@ export function Game({models, sounds, textures, matchId, character}) {
                 const stats = CLASS_STATS[classType] || { hp: MAX_HP, armor: 0, mana: MAX_MANA };
                 players.set(id, {
                     model: player,
+                    name,
+                    nameLabel,
                     mixer: mixer,
                     position: {x: 0, y: 0, z: 0},
                     rotation: {y: 0},
@@ -3705,6 +3704,15 @@ export function Game({models, sounds, textures, matchId, character}) {
             const { model, position, rotation } = p;
             model.position.set(position.x, position.y, position.z);
             model.rotation.y = rotation?.y;
+        }
+
+        function updateNameLabels() {
+            players.forEach((p, id) => {
+                if (id === myPlayerId) return;
+                if (!p.nameLabel) return;
+                const visible = hasLineOfSight(id);
+                p.nameLabel.element.style.display = visible ? 'block' : 'none';
+            });
         }
 
         function createRune(data) {
@@ -3840,6 +3848,10 @@ export function Game({models, sounds, textures, matchId, character}) {
             if (players.has(id)) {
                 const data = players.get(id);
                 if (data.model) scene.remove(data.model);
+                if (data.nameLabel) {
+                    data.model.remove(data.nameLabel);
+                    data.nameLabel.element?.remove();
+                }
                 players.delete(id);
                 if (id === myPlayerId && meleeRangeIndicator) {
                     meleeRangeIndicator.parent?.remove(meleeRangeIndicator);
