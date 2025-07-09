@@ -280,9 +280,7 @@ export function Game({models, sounds, textures, matchId, character}) {
         let playerMixers = [];
 
         let meleeRangeIndicator = null;
-        let projectileRangeIndicator = null;
         const MELEE_INDICATOR_OPACITY = 0.2; // transparency for the auto attack indicator
-        const PROJECTILE_INDICATOR_OPACITY = 0.2; // transparency for the projectile range indicator
         const TARGET_INDICATOR_OPACITY = 0.4; // transparency for target highlight
         let targetIndicator = null;
         let highlightIndicator = null;
@@ -355,24 +353,6 @@ export function Game({models, sounds, textures, matchId, character}) {
             return mesh;
         };
 
-        const createProjectileIndicator = () => {
-            const geometry = new THREE.CircleGeometry(
-                SPHERE_MAX_DISTANCE,
-                64,
-            );
-            const material = new THREE.MeshBasicMaterial({
-                color: 0xffff00,
-                transparent: true,
-                opacity: PROJECTILE_INDICATOR_OPACITY,
-                side: THREE.DoubleSide,
-                depthWrite: false,
-                blending: THREE.AdditiveBlending,
-            });
-            const mesh = new THREE.Mesh(geometry, material);
-            mesh.rotation.x = Math.PI / 2;
-            mesh.position.y = 0.05;
-            return mesh;
-        };
 
         let movementSpeedModifier = 1; // Normal speed
 
@@ -2465,8 +2445,7 @@ export function Game({models, sounds, textures, matchId, character}) {
                             mat.transparent = true;
                             mat.opacity = 0;
                             const targetOpacity =
-                                (meleeRangeIndicator && obj === meleeRangeIndicator) ||
-                                (projectileRangeIndicator && obj === projectileRangeIndicator)
+                                meleeRangeIndicator && obj === meleeRangeIndicator
                                     ? MELEE_INDICATOR_OPACITY
                                     : 1;
                             gsap.to(mat, {
@@ -3840,10 +3819,6 @@ export function Game({models, sounds, textures, matchId, character}) {
                 if (id === myPlayerId && meleeRangeIndicator) {
                     meleeRangeIndicator.parent?.remove(meleeRangeIndicator);
                     meleeRangeIndicator = null;
-                }
-                if (id === myPlayerId && projectileRangeIndicator) {
-                    projectileRangeIndicator.parent?.remove(projectileRangeIndicator);
-                    projectileRangeIndicator = null;
                 }
                 if (id === targetedPlayerId) {
                     targetedPlayerId = null;
