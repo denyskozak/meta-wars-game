@@ -31,8 +31,8 @@ import {
   GithubIcon,
   DiscordIcon,
   SearchIcon,
-  PlayIcon,
-  PauseIcon,
+  UnmuteIcon,
+  MuteIcon,
 } from "@/components/icons";
 import { useBackgroundMusic } from "@/components/background-music";
 
@@ -129,15 +129,15 @@ export const Navbar = () => {
           {/*  <GithubIcon className="text-default-500" />*/}
           {/*</Link>*/}
           <button
-            aria-label={playing ? "Pause music" : "Play music"}
+            aria-label={playing ? "Mute music" : "Unmute music"}
             className="px-px transition-opacity hover:opacity-80 cursor-pointer"
             type="button"
             onClick={toggle}
           >
             {playing ? (
-              <PauseIcon className="text-default-500" />
+              <MuteIcon className="text-default-500" />
             ) : (
-              <PlayIcon className="text-default-500" />
+              <UnmuteIcon className="text-default-500" />
             )}
           </button>
           {/*<ThemeSwitch />*/}
