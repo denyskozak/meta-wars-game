@@ -1,26 +1,42 @@
 "use client";
 
 import Image from "next/image";
-import React from "react";
+import React, { useEffect, useRef } from "react";
+import gsap from "gsap";
 
 import General from "@/components/general";
 import { Navbar } from "@/components/navbar";
 import MagicCanvas from "@/components/magic-canvas";
 
 export default function Home() {
+  const logoRef = useRef<HTMLDivElement | null>(null);
+
+  useEffect(() => {
+    if (!logoRef.current) return;
+    const tl = gsap.timeline({ repeat: -1, yoyo: true });
+
+    tl.to(logoRef.current, { y: -20, duration: 2, ease: "sine.inOut" });
+
+    return () => {
+      tl.kill();
+    };
+  }, []);
+
   return (
     <div className="h-full">
       <Navbar />
 
       <div className="relative justify-center align-middle items-center flex flex-col w-full h-[calc(100%-98px)]">
-          <MagicCanvas />
+        <MagicCanvas />
+        <div ref={logoRef} className="flex justify-center">
           <Image
-          alt="Big Logo"
-          className="mt-[86] object-cover z-[2]"
-          height={200}
-          src="/big-logo.webp"
-          width={400}
-        />
+            alt="Big Logo"
+            className="mt-[86] object-cover z-[2]"
+            height={200}
+            src="/big-logo.webp"
+            width={400}
+          />
+        </div>
 
         <Image
           alt="Turtle Art"
