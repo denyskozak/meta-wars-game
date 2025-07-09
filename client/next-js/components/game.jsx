@@ -3734,7 +3734,8 @@ export function Game({models, sounds, textures, matchId, character}) {
             removeProjectile(data.id);
             let mesh;
             if (data.type === 'fireball') {
-                mesh = makeProjectileSprite(0xff4500, SPELL_SCALES.fireball);
+                mesh = makeProjectileSprite(0xffaa33, SPELL_SCALES.fireball);
+
             } else if (data.type === 'shadowbolt') {
                 mesh = shadowboltMesh.clone();
             } else if (data.type === 'pyroblast') {
