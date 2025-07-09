@@ -44,8 +44,8 @@ export const Loading = ({ text, hideProgress = false }: LoadingProps) => {
         width={3840}
       />
       <div className="absolute z-[5] top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 flex flex-col items-center gap-4">
-        <div className="w-12 h-12 border-4 border-white border-t-transparent rounded-full animate-spin" />
-        <span className="text-xxl font-semibold text-white">{text}</span>
+          <span className="text-xxl font-semibold text-white">{text}</span>
+          <div className="w-6 h-6 border-4 border-white border-t-transparent rounded-full animate-spin" />
       </div>
       <div className="absolute bottom-12 left-1/2 -translate-x-1/2 z-[5] flex flex-col items-center gap-2">
         <img

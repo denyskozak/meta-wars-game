@@ -140,8 +140,8 @@ const SPELL_SCALES = {
     fireball: 0.5,
     iceball: 0.5,
     shadowbolt: 0.5,
-    pyroblast: 1,
-    chaosBolt: 1,
+    pyroblast: 2,
+    chaosBolt: 2,
 };
 
 const USER_DEFAULT_POSITION = [
