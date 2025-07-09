@@ -396,9 +396,6 @@ export function Game({models, sounds, textures, matchId, character}) {
                 if (meleeRangeIndicator) {
                     meleeRangeIndicator.scale.setScalar(1 / currentScale);
                 }
-                if (projectileRangeIndicator) {
-                    projectileRangeIndicator.scale.setScalar(1 / currentScale);
-                }
             }
         };
 
@@ -419,7 +416,6 @@ export function Game({models, sounds, textures, matchId, character}) {
             playerData.model = newModel;
             const cls = playerData.classType;
             const meleeAllowed = ['paladin', 'warrior', 'rogue'];
-            const projectileAllowed = ['mage', 'warlock'];
             if (meleeAllowed.includes(cls)) {
                 if (!meleeRangeIndicator) {
                     meleeRangeIndicator = createMeleeIndicator();
@@ -429,16 +425,6 @@ export function Game({models, sounds, textures, matchId, character}) {
             } else if (meleeRangeIndicator) {
                 meleeRangeIndicator.parent?.remove(meleeRangeIndicator);
                 meleeRangeIndicator = null;
-            }
-            if (projectileAllowed.includes(cls)) {
-                if (!projectileRangeIndicator) {
-                    projectileRangeIndicator = createProjectileIndicator();
-                }
-                newModel.add(projectileRangeIndicator);
-                projectileRangeIndicator.scale.setScalar(1 / currentScale);
-            } else if (projectileRangeIndicator) {
-                projectileRangeIndicator.parent?.remove(projectileRangeIndicator);
-                projectileRangeIndicator = null;
             }
         };
 
@@ -982,20 +968,23 @@ export function Game({models, sounds, textures, matchId, character}) {
 
         const AIM_BEAM_OPACITY = 0.5;
         const AIM_BEAM_LENGTH = SPHERE_MAX_DISTANCE * 1.5;
-        const AIM_BEAM_LINEWIDTH = 15;
+        const AIM_BEAM_RADIUS = 0.05;
         let aimBeam = null;
 
         function createAimBeam() {
-            const material = new THREE.LineBasicMaterial({
+            const material = new THREE.MeshBasicMaterial({
                 color: 0xffff00,
                 transparent: true,
                 opacity: AIM_BEAM_OPACITY,
                 depthWrite: false,
-                linewidth: AIM_BEAM_LINEWIDTH,
             });
-            const geometry = new THREE.BufferGeometry();
-            geometry.setFromPoints([new THREE.Vector3(), new THREE.Vector3()]);
-            return new THREE.Line(geometry, material);
+            const geometry = new THREE.CylinderGeometry(
+                AIM_BEAM_RADIUS,
+                AIM_BEAM_RADIUS,
+                1,
+                8
+            );
+            return new THREE.Mesh(geometry, material);
         }
 
         function showAimBeam() {
@@ -1014,14 +1003,14 @@ export function Game({models, sounds, textures, matchId, character}) {
                 .multiplyScalar(0.5)
                 .addScaledVector(dir, SPHERE_SPAWN_OFFSET);
             const end = start.clone().addScaledVector(dir, AIM_BEAM_LENGTH);
-            const positions = aimBeam.geometry.attributes.position.array;
-            positions[0] = start.x;
-            positions[1] = start.y;
-            positions[2] = start.z;
-            positions[3] = end.x;
-            positions[4] = end.y;
-            positions[5] = end.z;
-            aimBeam.geometry.attributes.position.needsUpdate = true;
+            const diff = end.clone().sub(start);
+            const len = diff.length();
+            aimBeam.position.copy(start).addScaledVector(diff, 0.5);
+            aimBeam.scale.set(1, len, 1);
+            aimBeam.quaternion.setFromUnitVectors(
+                new THREE.Vector3(0, 1, 0),
+                diff.clone().normalize()
+            );
         }
 
         function hideAimBeam() {
@@ -3583,12 +3572,15 @@ export function Game({models, sounds, textures, matchId, character}) {
                     }
                 });
 
-                const nameDiv = document.createElement('div');
-                nameDiv.className = 'name-label';
-                nameDiv.textContent = name;
-                const nameLabel = new CSS2DObject(nameDiv);
-                nameLabel.position.set(0, 2.5, 0);
-                player.add(nameLabel);
+                let nameLabel = null;
+                if (id !== myPlayerId) {
+                    const nameDiv = document.createElement('div');
+                    nameDiv.className = 'name-label';
+                    nameDiv.textContent = name;
+                    nameLabel = new CSS2DObject(nameDiv);
+                    nameLabel.position.set(0, 2.5, 0);
+                    player.add(nameLabel);
+                }
 
                 const mixer = new THREE.AnimationMixer(player);
                 mixer.timeScale = 40;
@@ -3606,14 +3598,6 @@ export function Game({models, sounds, textures, matchId, character}) {
                     meleeRangeIndicator = createMeleeIndicator();
                     meleeRangeIndicator.scale.setScalar(1 / currentScale);
                     player.add(meleeRangeIndicator);
-                }
-                if (
-                    id === myPlayerId &&
-                    ['mage', 'warlock'].includes(classType)
-                ) {
-                    projectileRangeIndicator = createProjectileIndicator();
-                    projectileRangeIndicator.scale.setScalar(1 / currentScale);
-                    player.add(projectileRangeIndicator);
                 }
                 const stats = CLASS_STATS[classType] || { hp: MAX_HP, armor: 0, mana: MAX_MANA };
                 players.set(id, {
