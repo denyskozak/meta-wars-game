@@ -1038,11 +1038,27 @@ export function Game({models, sounds, textures, matchId, character}) {
             const playerPosition = new THREE.Vector3();
             playerCollider.getCenter(playerPosition);
 
-            const offset = new THREE.Vector3(
+            const baseOffset = new THREE.Vector3(
                 Math.sin(yaw) * Math.cos(pitch),
                 Math.sin(pitch),
                 Math.cos(yaw) * Math.cos(pitch),
             ).multiplyScalar(1.2);
+
+            // Compute offsets for "over the shoulder" camera placement.
+            // Shift the camera slightly left relative to the player's facing
+            // direction and a bit upwards for a better view.
+            const leftOffset = new THREE.Vector3(
+                Math.sin(yaw - Math.PI / 2),
+                0,
+                Math.cos(yaw - Math.PI / 2),
+            ).multiplyScalar(0.5);
+
+            const verticalOffset = new THREE.Vector3(0, 0.3, 0);
+
+            const offset = baseOffset
+                .clone()
+                .add(leftOffset)
+                .add(verticalOffset);
 
             const desiredPos = playerPosition.clone().add(offset);
 
