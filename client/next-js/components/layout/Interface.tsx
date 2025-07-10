@@ -236,6 +236,22 @@ export const Interface = () => {
       )}
 
       <div
+        id="crosshairDot"
+        style={{
+          position: "absolute",
+          top: "50%",
+          left: "50%",
+          width: "8px",
+          height: "8px",
+          transform: "translate(-50%, -50%)",
+          backgroundColor: "red",
+          borderRadius: "50%",
+          pointerEvents: "none",
+          zIndex: 999,
+        }}
+      />
+
+      <div
         id="target"
         style={{
           position: "absolute",

@@ -1044,6 +1044,15 @@ export function Game({models, sounds, textures, matchId, character}) {
                 Math.cos(yaw) * Math.cos(pitch),
             ).multiplyScalar(1.2);
 
+            const right = new THREE.Vector3(
+                Math.sin(yaw - Math.PI / 2),
+                0,
+                Math.cos(yaw - Math.PI / 2),
+            ).multiplyScalar(0.4);
+
+            offset.add(right);
+            offset.y += 0.3;
+
             const desiredPos = playerPosition.clone().add(offset);
 
             const ray = new THREE.Ray(playerPosition, offset.clone().normalize());
@@ -1428,32 +1437,17 @@ export function Game({models, sounds, textures, matchId, character}) {
             dispatchEvent('start-cast', {duration: 2000, onEnd: onCastEnd, name: 'heal', icon: ''})
         }
 
-       function getAimDirection() {
+        function getAimDirection() {
             const cameraDir = new THREE.Vector3();
             camera.getWorldDirection(cameraDir);
 
-           if (isFocused) {
-               const cameraPos = camera.position.clone();
-               const farPoint = cameraPos.clone().add(cameraDir.clone().multiplyScalar(1000));
-               const start = playerCollider.start
-                   .clone()
-                   .add(playerCollider.end)
-                   .multiplyScalar(0.5);
-               return farPoint.sub(start).normalize();
-           }
-
-           // If not focused, shoot in the direction the model is facing
-           const player = players.get(myPlayerId);
-           if (player) {
-
-               const lookVector = new THREE.Vector3(0, 0, 1);
-               lookVector.applyQuaternion(player.model.quaternion);
-               lookVector.normalize();
-               return lookVector;
-           }
-
-           // Fallback to camera direction
-           return cameraDir.normalize();
+            const cameraPos = camera.position.clone();
+            const farPoint = cameraPos.clone().add(cameraDir.clone().multiplyScalar(1000));
+            const start = playerCollider.start
+                .clone()
+                .add(playerCollider.end)
+                .multiplyScalar(0.5);
+            return farPoint.sub(start).normalize();
         }
 
         function hasLineOfSight(targetId) {
