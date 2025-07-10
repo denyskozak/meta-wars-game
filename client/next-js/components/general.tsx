@@ -96,11 +96,13 @@ export default function General() {
         {/*</div>*/}
 
         <Button
-          className="absolute bottom-[10vh] border-2 w-[188] h-[48] border-black shadow-lg overflow-hidden group hover:-translate-y-1 hover:shadow-xl "
+          className="absolute bottom-[10vh] border-2 w-[188] h-[48] border-black shadow-lg overflow-hidden group hover:-translate-y-1 hover:shadow-xl animate-pulse-scale"
           size="lg"
           onPress={() => router.push("/play")}
         >
+
           <span className="absolute inset-0 bg-gradient-to-r from-[#1E3A8A] via-[#38BDF8] to-[#FBBF24] opacity-100 group-hover:opacity-100 blur-md" />
+
           <span className="relative z-10">Launch Game</span>
         </Button>
       </section>
