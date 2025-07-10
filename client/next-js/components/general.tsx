@@ -100,7 +100,9 @@ export default function General() {
           size="lg"
           onPress={() => router.push("/play")}
         >
-          <span className="absolute inset-0 bg-gradient-to-r from-pink-500 via-red-500 to-yellow-500 animate-pulse opacity-100 group-hover:opacity-100 blur-md" />
+
+          <span className="absolute inset-0 bg-gradient-to-r from-[#1E3A8A] via-[#38BDF8] to-[#FBBF24] opacity-100 group-hover:opacity-100 blur-md" />
+
           <span className="relative z-10">Launch Game</span>
         </Button>
       </section>
