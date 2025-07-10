@@ -165,11 +165,11 @@ export const Navbar = () => {
           {/*  {address ? "Profile" : "Sign in"}*/}
           {/*</Button>*/}
           <Button
-            className="border-2 border-black shadow-lg overflow-hidden group animate-pulse-scale"
+            className="border-2 border-black shadow-lg overflow-hidden group"
             size="lg"
             onPress={() => router.push("/play")}
           >
-            <span className="absolute inset-0 bg-gradient-to-r from-[#1E3A8A] via-[#38BDF8] to-[#FBBF24] opacity-100 group-hover:opacity-100 blur-md" />
+            <span className="absolute inset-0 bg-gradient-to-r from-[#1E3A8A] via-[#38BDF8] to-[#FBBF24] animate-pulse opacity-100 group-hover:opacity-100 blur-md" />
             <span className="relative z-10">
               {account ? "Play" : "Launch Game"}
             </span>
