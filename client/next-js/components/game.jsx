@@ -910,6 +910,10 @@ export function Game({models, sounds, textures, matchId, character}) {
         const minFOV = 10;
         const maxFOV = 100;
 
+        // Shoulder camera parameters
+        const CAMERA_OFFSET = { x: 1.5, y: 1.0, z: -3.5 };
+        const LOOK_AT_OFFSET_Y = 1.5;
+
         // Shield skill vars
         const SHIELD_MANA_COST = SPELL_COST['shield'];
         const SHIELD_DURATION = 3; // Shield duration in seconds
@@ -1039,30 +1043,11 @@ export function Game({models, sounds, textures, matchId, character}) {
             playerCollider.getCenter(playerPosition);
 
             const offset = new THREE.Vector3(
-                Math.sin(yaw) * Math.cos(pitch),
-                Math.sin(pitch),
-                Math.cos(yaw) * Math.cos(pitch),
-            ).multiplyScalar(1.2);
-
-            const player = players.get(myPlayerId);
-            if (player) {
-                const rotY = player.model.rotation.y;
-                const right = new THREE.Vector3(
-                    Math.sin(rotY + Math.PI / 2),
-                    0,
-                    Math.cos(rotY + Math.PI / 2),
-                ).multiplyScalar(0.4);
-                offset.add(right);
-            } else {
-                const right = new THREE.Vector3(
-                    Math.sin(yaw - Math.PI / 2),
-                    0,
-                    Math.cos(yaw - Math.PI / 2),
-                ).multiplyScalar(0.4);
-                offset.add(right);
-            }
-
-            offset.y += 0.3;
+                CAMERA_OFFSET.x,
+                CAMERA_OFFSET.y,
+                CAMERA_OFFSET.z,
+            );
+            offset.applyEuler(new THREE.Euler(pitch, yaw, 0, 'YXZ'));
 
             const desiredPos = playerPosition.clone().add(offset);
 
@@ -1075,7 +1060,9 @@ export function Game({models, sounds, textures, matchId, character}) {
                 camera.position.copy(desiredPos);
             }
 
-            cameraTarget.position.copy(playerPosition);
+            cameraTarget.position.copy(
+                playerPosition.clone().add(new THREE.Vector3(0, LOOK_AT_OFFSET_Y, 0)),
+            );
             camera.lookAt(cameraTarget.position);
         }
 
@@ -1449,16 +1436,9 @@ export function Game({models, sounds, textures, matchId, character}) {
         }
 
         function getAimDirection() {
-            const cameraDir = new THREE.Vector3();
-            camera.getWorldDirection(cameraDir);
-
-            const cameraPos = camera.position.clone();
-            const farPoint = cameraPos.clone().add(cameraDir.clone().multiplyScalar(1000));
-            const start = playerCollider.start
-                .clone()
-                .add(playerCollider.end)
-                .multiplyScalar(0.5);
-            return farPoint.sub(start).normalize();
+            const dir = new THREE.Vector3();
+            camera.getWorldDirection(dir);
+            return dir.normalize();
         }
 
         function hasLineOfSight(targetId) {
