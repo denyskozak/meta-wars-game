@@ -1044,13 +1044,24 @@ export function Game({models, sounds, textures, matchId, character}) {
                 Math.cos(yaw) * Math.cos(pitch),
             ).multiplyScalar(1.2);
 
-            const right = new THREE.Vector3(
-                Math.sin(yaw - Math.PI / 2),
-                0,
-                Math.cos(yaw - Math.PI / 2),
-            ).multiplyScalar(0.4);
+            const player = players.get(myPlayerId);
+            if (player) {
+                const rotY = player.model.rotation.y;
+                const right = new THREE.Vector3(
+                    Math.sin(rotY + Math.PI / 2),
+                    0,
+                    Math.cos(rotY + Math.PI / 2),
+                ).multiplyScalar(0.4);
+                offset.add(right);
+            } else {
+                const right = new THREE.Vector3(
+                    Math.sin(yaw - Math.PI / 2),
+                    0,
+                    Math.cos(yaw - Math.PI / 2),
+                ).multiplyScalar(0.4);
+                offset.add(right);
+            }
 
-            offset.add(right);
             offset.y += 0.3;
 
             const desiredPos = playerPosition.clone().add(offset);
