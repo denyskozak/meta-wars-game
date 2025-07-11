@@ -1055,12 +1055,22 @@ export function Game({models, sounds, textures, matchId, character}) {
             const playerPosition = new THREE.Vector3();
             playerCollider.getCenter(playerPosition);
 
-            const offset = new THREE.Vector3(
-                CAMERA_OFFSET.x,
-                CAMERA_OFFSET.y,
-                CAMERA_OFFSET.z,
-            );
-            offset.applyEuler(new THREE.Euler(pitch, yaw, 0, 'YXZ'));
+            // Base third-person offset directly behind the player
+            const baseOffset = new THREE.Vector3(
+                Math.sin(yaw) * Math.cos(pitch),
+                Math.sin(pitch),
+                Math.cos(yaw) * Math.cos(pitch),
+            ).multiplyScalar(1.2 + CAMERA_OFFSET.z);
+
+            // Right/up offsets relative to the current yaw only
+            const right = new THREE.Vector3(
+                Math.sin(yaw - Math.PI / 2),
+                0,
+                Math.cos(yaw - Math.PI / 2),
+            ).multiplyScalar(CAMERA_OFFSET.x);
+            const up = new THREE.Vector3(0, CAMERA_OFFSET.y, 0);
+
+            const offset = baseOffset.add(right).add(up);
 
             const desiredPos = playerPosition.clone().add(offset);
 
