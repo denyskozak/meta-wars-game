@@ -712,7 +712,7 @@ export function Game({models, sounds, textures, matchId, character}) {
             shadowbolt: 0,
             corruption: 10000,
             lifetap: 10000,
-            dragon-breath: 3000,
+            'dragon-breath': 3000,
             fireblast: 6000,
             chaosbolt: 6000,
             lifedrain: 0,
