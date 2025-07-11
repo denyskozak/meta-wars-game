@@ -244,7 +244,7 @@ export const Interface = () => {
           width: "25px",
           height: "25px",
           transform: "translate(-50%, -50%)",
-          display: "none", // Hidden by default
+          display: "block",
           pointerEvents: "none",
           zIndex: 1000,
         }}
