@@ -1,34 +1,52 @@
-import { useCurrentAccount, useSuiClientQuery } from "@mysten/dapp-kit";
+import { useCurrentAccount } from "@mysten/dapp-kit";
+import { useEffect, useState, useCallback } from "react";
 
-import { PACKAGE_ID } from "@/consts";
+import { useWS } from "./useWS";
 
 export const useProfile = () => {
   const account = useCurrentAccount();
+  const address = account?.address;
+  const { socket, sendToSocket } = useWS();
 
-  const { data, refetch } = useSuiClientQuery(
-    "getOwnedObjects",
-    {
-      owner: account?.address as string,
-      filter: { StructType: `${PACKAGE_ID}::profile::Profile` },
-      options: { showContent: true },
-    },
-    { gcTime: 10000, enabled: !!account },
-  );
+  const [profile, setProfile] = useState<any | null>(null);
 
-  const profileObj =
-    Array.isArray(data?.data) && data.data.length > 0 ? data.data[0] : null;
+  const refetch = useCallback(() => {
+    if (!address) return;
+    sendToSocket({ type: "GET_PROFILE", address });
+  }, [address, sendToSocket]);
 
-  let nickname: string | null = null;
+  useEffect(() => {
+    const handleMessage = (event: MessageEvent) => {
+      let message: any = {};
+      try {
+        message = JSON.parse(event.data);
+      } catch (e) {
+        return;
+      }
 
-  if (profileObj) {
-    const fields = (profileObj as any).data?.content?.fields || {};
-    const nickBytes = fields.nickname || [];
+      if (message.type === "PROFILE" && message.address === address) {
+        setProfile(message.profile || null);
+      }
+    };
 
-    nickname =
-      typeof nickBytes === "string"
-        ? nickBytes
-        : new TextDecoder().decode(Uint8Array.from(nickBytes));
-  }
+    const handleOpen = () => {
+      refetch();
+    };
 
-  return { profile: profileObj, nickname, refetch };
+    socket.addEventListener("message", handleMessage);
+    if (socket.readyState === WebSocket.OPEN) {
+      refetch();
+    } else {
+      socket.addEventListener("open", handleOpen);
+    }
+
+    return () => {
+      socket.removeEventListener("message", handleMessage);
+      socket.removeEventListener("open", handleOpen);
+    };
+  }, [address, socket, refetch]);
+
+  const nickname = profile?.nickname || null;
+
+  return { profile, nickname, refetch };
 };

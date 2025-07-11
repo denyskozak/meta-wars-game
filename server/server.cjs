@@ -804,6 +804,17 @@ ws.on('connection', (socket) => {
                 }));
                 break;
 
+            case 'GET_PROFILE':
+                if (message.address) {
+                    const profile = profiles[message.address] || null;
+                    socket.send(JSON.stringify({
+                        type: 'PROFILE',
+                        address: message.address,
+                        profile,
+                    }));
+                }
+                break;
+
             case 'CREATE_PROFILE':
                 if (message.address && message.nickname) {
                     profiles[message.address] = { nickname: message.nickname };
