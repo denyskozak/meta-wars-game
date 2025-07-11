@@ -1,22 +1,7 @@
 "use client";
 import { useEffect, useMemo, useState, useRef } from "react";
 import Image from "next/image";
-import {
-  Table,
-  TableHeader,
-  TableColumn,
-  TableBody,
-  TableRow,
-  TableCell,
-} from "@heroui/react";
-import {
-  Modal,
-  ModalContent,
-  ModalHeader,
-  ModalBody,
-  ModalFooter,
-} from "@heroui/modal";
-import { Kbd } from "@heroui/kbd";
+
 import { ButtonWithSound as Button } from "@/components/button-with-sound";
 import { useParams, useRouter } from "next/navigation";
 
@@ -42,6 +27,7 @@ export default function MatchesPage() {
   const { socket, sendToSocket } = useWS(params?.id);
   const { dispatch } = useInterface() as InterfaceContextValue;
 
+  const [step, setStep] = useState(1);
   const [selectedClassPreview, setSelectedClassPreview] = useState<
     string | null
   >(null);
@@ -61,6 +47,7 @@ export default function MatchesPage() {
     setSelectedClassPreview(cls);
     const skins = CLASS_SKINS[cls as keyof typeof CLASS_SKINS] || [];
     setSelectedSkin(skins[0] || null);
+    setStep(2);
   };
 
   const selectedStats = useMemo(() => {
@@ -322,7 +309,6 @@ export default function MatchesPage() {
   const handleClassSelect = (
     cls: string,
     skin: string | null,
-    onClose: () => void,
   ) => {
     const charModel = skin || CLASS_MODELS[cls] || "vampir";
 
@@ -336,8 +322,6 @@ export default function MatchesPage() {
     });
 
     sendToSocket({ type: "SET_CHARACTER", classType: cls, character: charModel });
-
-    // onClose();
   };
 
   return (
@@ -345,117 +329,110 @@ export default function MatchesPage() {
       <audio ref={previewAudioRef} hidden src="/button_click.ogg">
         <track kind="captions" />
       </audio>
-      <Modal
-        isOpen={Boolean(selectedClassPreview)}
-        onOpenChange={(open) => {
-          if (!open) {
-            setSelectedClassPreview(null);
-            setSelectedSkin(null);
-          }
-        }}
-      >
-        <ModalContent>
-          {(onClose) =>
-            selectedClassPreview && (
-              <>
-                <ModalHeader className="flex flex-col items-center gap-2">
-                  <Image
-                    alt={classOptions[selectedClassPreview].label}
-                    height={120}
-                    src={classOptions[selectedClassPreview].icon}
-                    width={120}
-                  />
-                  <h3 className="text-xl font-bold text-yellow-300">
-                    {classOptions[selectedClassPreview].label}
-                  </h3>
-                </ModalHeader>
-                <ModalBody className="text-white">
-                  <p className="text-sm text-center mt-1">
-                    {classOptions[selectedClassPreview].description}
-                  </p>
-                  {selectedStats && (
-                    <div className="mt-4 w-full">
-                      <h4 className="text-yellow-400 text-sm font-semibold mb-1">
-                        Stats
-                      </h4>
-                      <ul className="text-xs pl-4 list-disc">
-                        <li>HP: {selectedStats.hp}</li>
-                        <li>Mana: {selectedStats.mana}</li>
-                        <li>Armor: {selectedStats.armor}</li>
-                      </ul>
-                    </div>
-                  )}
-                    {selectedClassPreview && (
-                      <div className="mt-4 w-full flex items-center gap-2">
-                        <label htmlFor="skin-select" className="text-sm">Skin:</label>
-                        <select
-                          id="skin-select"
-                          className="text-black text-sm flex-1"
-                          value={selectedSkin || ''}
-                          onChange={(e) => setSelectedSkin(e.target.value)}
-                      >
-                    {(CLASS_SKINS[selectedClassPreview as keyof typeof CLASS_SKINS] || []).map((s) => (
-                      <option key={s} value={s}>
-                        {s}
-                      </option>
-                    ))}
-                  </select>
-                </div>
-              )}
-              {selectedSkin && (
-                <div className="mt-2 w-full h-48">
-                  <SkinViewer skin={selectedSkin} />
+      <div className="h-full">
+        <Navbar />
+        <div className="flex max-w-[650px] m-auto flex-col items-center mt-4 gap-4">
+          {step === 1 && (
+            <div className="flex flex-col text-center">
+              <span className="mb-1 text-large">Choose a Class:</span>
+              <div className="flex flex-row flex-wrap justify-center">
+                {Object.entries(classOptions).map(([value, opt]) => (
+                  <button
+                    key={value}
+                    className="flex flex-col items-center justify-center p-2"
+                    onClick={() => handleClassPreview(value)}
+                  >
+                    <Image
+                      alt={opt.label}
+                      className="transition-transform hover:scale-110 focus:scale-110"
+                      height={180}
+                      src={opt.icon}
+                      width={180}
+                    />
+                    <span className="text-xs mt-1">{opt.label}</span>
+                    <span className="text-[10px] text-gray-300">{opt.type}</span>
+                  </button>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {step === 2 && selectedClassPreview && (
+            <div className="flex flex-col items-center text-white w-full">
+              <Image
+                alt={classOptions[selectedClassPreview].label}
+                height={120}
+                src={classOptions[selectedClassPreview].icon}
+                width={120}
+              />
+              <h3 className="text-xl font-bold text-yellow-300 mt-2">
+                {classOptions[selectedClassPreview].label}
+              </h3>
+              <p className="text-sm text-center mt-1">
+                {classOptions[selectedClassPreview].description}
+              </p>
+              {selectedStats && (
+                <div className="mt-4 w-full">
+                  <h4 className="text-yellow-400 text-sm font-semibold mb-1">
+                    Stats
+                  </h4>
+                  <ul className="text-xs pl-4 list-disc">
+                    <li>HP: {selectedStats.hp}</li>
+                    <li>Mana: {selectedStats.mana}</li>
+                    <li>Armor: {selectedStats.armor}</li>
+                  </ul>
                 </div>
               )}
               <SkillsList
                 className="mt-4 w-full"
                 skills={classOptions[selectedClassPreview].skills}
               />
-                </ModalBody>
-                <ModalFooter className="flex gap-2">
-                  <Button color="secondary" onPress={onClose}>
-                    Cancel
-                  </Button>
-                  <Button
-                    color="primary"
-                    onPress={() => handleClassSelect(selectedClassPreview, selectedSkin, onClose)}
-                  >
-                    Select
-                  </Button>
-                </ModalFooter>
-              </>
-            )
-          }
-        </ModalContent>
-      </Modal>
-
-      <div className="h-full">
-        <Navbar />
-        <div className="flex max-w-[650px] m-auto flex-col items-center mt-4 gap-4">
-          <div className="flex flex-col text-center">
-            <span className="mb-1 text-large">Choose a Class:</span>
-            <div className="flex flex-row flex-wrap justify-center">
-              {Object.entries(classOptions).map(([value, opt]) => (
-                  <button
-                      key={value}
-                      className="flex flex-col items-center justify-center p-2"
-                      onClick={() => handleClassPreview(value)}
-                  >
-                    <Image
-                        alt={opt.label}
-                        className="transition-transform hover:scale-110 focus:scale-110"
-                        height={180}
-                        src={opt.icon}
-                        width={180}
-                    />
-                    <span className="text-xs mt-1">{opt.label}</span>
-                    <span className="text-[10px] text-gray-300">
-                      {opt.type}
-                    </span>
-                  </button>
-              ))}
+              <div className="flex gap-2 mt-4">
+                <Button variant="light" onPress={() => setStep(1)}>
+                  Back
+                </Button>
+                <Button color="primary" onPress={() => setStep(3)}>
+                  Next
+                </Button>
+              </div>
             </div>
-          </div>
+          )}
+
+          {step === 3 && selectedClassPreview && (
+            <div className="flex flex-col items-center w-full text-white">
+              <div className="w-full flex items-center gap-2">
+                <label htmlFor="skin-select" className="text-sm">Skin:</label>
+                <select
+                  id="skin-select"
+                  className="text-black text-sm flex-1"
+                  value={selectedSkin || ''}
+                  onChange={(e) => setSelectedSkin(e.target.value)}
+                >
+                  {(CLASS_SKINS[selectedClassPreview as keyof typeof CLASS_SKINS] || []).map((s) => (
+                    <option key={s} value={s}>
+                      {s}
+                    </option>
+                  ))}
+                </select>
+              </div>
+              {selectedSkin && (
+                <div className="mt-2 w-full h-48">
+                  <SkinViewer skin={selectedSkin} />
+                </div>
+              )}
+              <div className="flex gap-2 mt-4">
+                <Button variant="light" onPress={() => setStep(2)}>
+                  Back
+                </Button>
+                <Button
+                  color="primary"
+                  onPress={() => handleClassSelect(selectedClassPreview, selectedSkin)}
+                >
+                  Select
+                </Button>
+              </div>
+            </div>
+          )}
         </div>
       </div>
     </>
