@@ -25,13 +25,14 @@ import { useWS } from "@/hooks/useWS";
 import { Navbar } from "@/components/navbar";
 import { useInterface } from "@/context/inteface";
 import { InterfaceContextValue, MatchDetail, PlayerData } from "@/types";
-import { CLASS_MODELS, CLASS_STATS, MAX_HP, MAX_MANA } from "@/consts";
+import { CLASS_MODELS, CLASS_SKINS, CLASS_STATS, MAX_HP, MAX_MANA } from "@/consts";
 import * as mageSkills from "@/skills/mage";
 import * as warlockSkills from "@/skills/warlock";
 import * as paladinSkills from "@/skills/paladin";
 import * as rogueSkills from "@/skills/rogue";
 import * as warriorSkills from "@/skills/warrior";
 import { SkillsList } from "@/components/skills-list";
+import SkinViewer from "@/components/skin-viewer";
 
 type Match = MatchDetail;
 
@@ -44,6 +45,7 @@ export default function MatchesPage() {
   const [selectedClassPreview, setSelectedClassPreview] = useState<
     string | null
   >(null);
+  const [selectedSkin, setSelectedSkin] = useState<string | null>(null);
   const previewAudioRef = useRef<HTMLAudioElement | null>(null);
 
   const handleClassPreview = (cls: string) => {
@@ -57,6 +59,8 @@ export default function MatchesPage() {
       }
     }
     setSelectedClassPreview(cls);
+    const skins = CLASS_SKINS[cls as keyof typeof CLASS_SKINS] || [];
+    setSelectedSkin(skins[0] || null);
   };
 
   const selectedStats = useMemo(() => {
@@ -317,9 +321,10 @@ export default function MatchesPage() {
 
   const handleClassSelect = (
     cls: string,
+    skin: string | null,
     onClose: () => void,
   ) => {
-    const charModel = CLASS_MODELS[cls] || "vampir";
+    const charModel = skin || CLASS_MODELS[cls] || "vampir";
 
     dispatch({
       type: "SET_CHARACTER",
@@ -343,7 +348,10 @@ export default function MatchesPage() {
       <Modal
         isOpen={Boolean(selectedClassPreview)}
         onOpenChange={(open) => {
-          if (!open) setSelectedClassPreview(null);
+          if (!open) {
+            setSelectedClassPreview(null);
+            setSelectedSkin(null);
+          }
         }}
       >
         <ModalContent>
@@ -377,10 +385,31 @@ export default function MatchesPage() {
                       </ul>
                     </div>
                   )}
-                  <SkillsList
-                    className="mt-4 w-full"
-                    skills={classOptions[selectedClassPreview].skills}
-                  />
+                  {selectedClassPreview && (
+                    <div className="mt-4 w-full flex items-center gap-2">
+                      <label className="text-sm">Skin:</label>
+                      <select
+                        className="text-black text-sm flex-1"
+                        value={selectedSkin || ''}
+                        onChange={(e) => setSelectedSkin(e.target.value)}
+                      >
+                    {(CLASS_SKINS[selectedClassPreview as keyof typeof CLASS_SKINS] || []).map((s) => (
+                      <option key={s} value={s}>
+                        {s}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+              )}
+              {selectedSkin && (
+                <div className="mt-2 w-full h-48">
+                  <SkinViewer skin={selectedSkin} />
+                </div>
+              )}
+              <SkillsList
+                className="mt-4 w-full"
+                skills={classOptions[selectedClassPreview].skills}
+              />
                 </ModalBody>
                 <ModalFooter className="flex gap-2">
                   <Button color="secondary" onPress={onClose}>
@@ -388,7 +417,7 @@ export default function MatchesPage() {
                   </Button>
                   <Button
                     color="primary"
-                    onPress={() => handleClassSelect(selectedClassPreview, onClose)}
+                    onPress={() => handleClassSelect(selectedClassPreview, selectedSkin, onClose)}
                   >
                     Select
                   </Button>

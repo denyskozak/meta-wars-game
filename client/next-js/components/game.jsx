@@ -5,6 +5,7 @@ import {
     MAX_MANA,
     CLASS_MODELS,
     CLASS_STATS,
+    SKIN_ANIMATIONS,
     MELEE_RANGE_ATTACK,
     MELEE_INDICATOR_RANGE,
     MELEE_ANGLE,
@@ -406,6 +407,8 @@ export function Game({models, sounds, textures, matchId, character}) {
                 meleeRangeIndicator.parent?.remove(meleeRangeIndicator);
                 meleeRangeIndicator = null;
             }
+            const anims = models[`${newModelName}_animations`] || animations;
+            playerData.actions = buildActions(playerData.mixer, anims, newModelName);
         };
 
         window.addEventListener('DEV_SCALE_CHANGE', handleScaleChange);
@@ -3520,7 +3523,8 @@ export function Game({models, sounds, textures, matchId, character}) {
         }
 
         // Function to create a new player in the scene
-        function buildActions(mixer, animations) {
+        function buildActions(mixer, animations, skin = 'brand') {
+            const map = SKIN_ANIMATIONS[skin] || SKIN_ANIMATIONS['brand'];
             const get = (...names) => {
                 const lowerNames = names.map(n => n.toLowerCase());
                 const clip = animations.find(c => lowerNames.includes(c.name.toLowerCase()));
@@ -3528,14 +3532,14 @@ export function Game({models, sounds, textures, matchId, character}) {
             };
 
             const actions = {
-                idle: get('brand_idle1.anm'),
-                walk: get('brand_run.anm'),
-                run: get('brand_run.anm' ),
-                jump: get('brand_spell4.anm'),
-                casting: get('brand_channel_windup.anm'),
-                castEnd: get('brand_spell1.anm'),
+                idle: get(map.idle),
+                walk: get(map.walk),
+                run: get(map.run),
+                jump: get(map.jump),
+                casting: get(map.casting),
+                castEnd: get(map.castEnd),
                 cast: get('cast'),
-                dying: get('brand_death.anm'),
+                dying: get(map.dying),
                 hitReaction: get('hit_reaction'),
                 attack: get('attack'),
                 attack360: get('attack_360'),
@@ -3586,7 +3590,7 @@ export function Game({models, sounds, textures, matchId, character}) {
                 // const idle = mixer.clipAction(animations[2]).play();
                 // const walk = mixer.clipAction(animations[6]);
                 console.log("animations: ", animations);
-                const actions = buildActions(mixer, animations);
+                const actions = buildActions(mixer, animations, characterModel);
 
 
                 scene.add(player);

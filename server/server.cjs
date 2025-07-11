@@ -261,11 +261,11 @@ function broadcastMatchesToWaitingClients() {
 }
 
 const CLASS_MODELS = {
-    paladin: 'bolvar',
-    mage: 'vampir',
-    warlock: 'vampir',
-    rogue: 'vampir',
-    warrior: 'bolvar',
+    paladin: 'kayn',
+    mage: 'brand',
+    warlock: 'karthus',
+    rogue: 'fizz',
+    warrior: 'darius',
 };
 
 const CLASS_E_SKILL = {
