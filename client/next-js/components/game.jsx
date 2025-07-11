@@ -366,7 +366,7 @@ export function Game({models, sounds, textures, matchId, character}) {
         const devLoader = new GLTFLoader().setPath(assetUrl('/models/'));
         devLoader.setDRACOLoader(devDraco);
         devLoader.setMeshoptDecoder(MeshoptDecoder);
-        let currentScale = 0.4;
+        let currentScale = 0.00665;
 
         const handleScaleChange = (e) => {
             currentScale = e.detail.scale;
@@ -3528,14 +3528,14 @@ export function Game({models, sounds, textures, matchId, character}) {
             };
 
             const actions = {
-                idle: get('idle'),
-                walk: get('walk'),
-                run: get('run', 'walk'),
-                jump: get('jump'),
-                casting: get('casting'),
-                castEnd: get('cast_end', 'castEnd'),
+                idle: get('brand_idle1.anm'),
+                walk: get('brand_run.anm'),
+                run: get('brand_run.anm' ),
+                jump: get('brand_spell4.anm'),
+                casting: get('brand_channel_windup.anm'),
+                castEnd: get('brand_spell1.anm'),
                 cast: get('cast'),
-                dying: get('dying'),
+                dying: get('brand_death.anm'),
                 hitReaction: get('hit_reaction'),
                 attack: get('attack'),
                 attack360: get('attack_360'),

@@ -15,6 +15,7 @@ import { useWS } from "@/hooks/useWS";
 import { useInterface } from "@/context/inteface";
 import { Game } from "@/components/game";
 import { Loading } from "@/components/loading";
+import {DeveloperPanel} from "@/components/DeveloperPanel";
 
 interface Character {
   name?: string;
@@ -139,6 +140,7 @@ export default function GamePage() {
     {
       id: "character",
       path: `skins/${charSkin}.glb`,
+      local: true
     },
     { id: "heal-effect", path: "heal-effect.glb" },
     { id: "bottle_magic", path: "bottle_magic.glb" },
@@ -305,7 +307,7 @@ export default function GamePage() {
         sounds={preloadedData.sounds}
         textures={preloadedData.textures}
       />
-      {/*<DeveloperPanel models={preloadedData.models} />*/}
+      <DeveloperPanel models={preloadedData.models} />
     </>
   );
 }

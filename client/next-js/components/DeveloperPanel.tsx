@@ -13,7 +13,7 @@ interface DeveloperPanelProps {
 
 export const DeveloperPanel = ({ models = {} }: DeveloperPanelProps) => {
   const [modelList, setModelList] = useState<string[]>([]);
-  const [scale, setScale] = useState(0.5);
+  const [scale, setScale] = useState(0.00665);
   const [model, setModel] = useState("");
 
   useEffect(() => {
