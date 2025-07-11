@@ -37,7 +37,7 @@ const MANA_REGEN_AMOUNT = 1.3; // 30% faster mana regeneration
 const HP_REGEN_AMOUNT = 0.2;
 const SPELL_COST = require('../client/next-js/consts/spellCosts.json');
 const ICEBALL_ICON = '/icons/spell_frostbolt.jpg';
-const FROSTNOVA_ICON = '/icons/frostnova.jpg';
+const FIRE_RING_ICON = '/icons/frostnova.jpg';
 const FREEDOM_ICON = '/icons/classes/paladin/sealofvalor.jpg';
 const DIVINE_SPEED_ICON = '/icons/classes/paladin/speedoflight.jpg';
 const COMBO_ICON = '/icons/classes/rogue/combo_point.jpg';
@@ -1036,7 +1036,7 @@ ws.on('connection', (socket) => {
                         }
 
 
-                        if (['corruption', 'shield', 'fireblast', 'lightstrike', 'lightwave', 'stun', 'paladin-heal', 'frostnova', 'blink', 'hand-of-freedom', 'divine-speed', 'lifedrain', 'fear', 'blood-strike', 'eviscerate', 'kidney-strike', 'adrenaline-rush', 'sprint', 'shadow-leap', 'warbringer', 'savage-blow', 'hamstring', 'bladestorm', 'berserk', 'bloodthirst'].includes(message.payload.type)) {
+                        if (['corruption', 'shield', 'fireblast', 'lightstrike', 'lightwave', 'stun', 'paladin-heal', 'firering', 'blink', 'hand-of-freedom', 'divine-speed', 'lifedrain', 'fear', 'blood-strike', 'eviscerate', 'kidney-strike', 'adrenaline-rush', 'sprint', 'shadow-leap', 'warbringer', 'savage-blow', 'hamstring', 'bladestorm', 'berserk', 'bloodthirst'].includes(message.payload.type)) {
                             broadcastToMatch(match.id, {
                                 type: 'CAST_SPELL',
                                 payload: message.payload,
@@ -1265,19 +1265,8 @@ ws.on('connection', (socket) => {
                             }
                         }
                     }
-                    if (message.spellType === 'frostnova') {
-                        const target = match.players.get(id);
-                        if (target) {
-                            const immune = target.buffs?.some(b => (b.type === 'freedom' || b.type === 'berserk') && (b.expires === undefined || b.expires > Date.now()));
-                            if (!immune) {
-                                target.debuffs = target.debuffs || [];
-                                target.debuffs.push({
-                                    type: 'root',
-                                    expires: Date.now() + 3000,
-                                    icon: FROSTNOVA_ICON,
-                                });
-                            }
-                        }
+                    if (message.spellType === 'firering') {
+                        // no additional server-side effect for knockback
                     }
                 }
                 break;

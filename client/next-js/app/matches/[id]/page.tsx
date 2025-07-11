@@ -244,9 +244,9 @@ export default function MatchesPage() {
           description: "Launches a chilling bolt.",
         },
         {
-          ...mageSkills.frostnova,
-          name: "Frost Nova",
-          description: "Freezes enemies around you.",
+          ...mageSkills.firering,
+          name: "Fire Ring",
+          description: "Blasts enemies away in flames.",
         },
         {
           ...mageSkills.blink,
