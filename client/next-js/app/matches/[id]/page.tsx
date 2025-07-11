@@ -385,13 +385,14 @@ export default function MatchesPage() {
                       </ul>
                     </div>
                   )}
-                  {selectedClassPreview && (
-                    <div className="mt-4 w-full flex items-center gap-2">
-                      <label className="text-sm">Skin:</label>
-                      <select
-                        className="text-black text-sm flex-1"
-                        value={selectedSkin || ''}
-                        onChange={(e) => setSelectedSkin(e.target.value)}
+                    {selectedClassPreview && (
+                      <div className="mt-4 w-full flex items-center gap-2">
+                        <label htmlFor="skin-select" className="text-sm">Skin:</label>
+                        <select
+                          id="skin-select"
+                          className="text-black text-sm flex-1"
+                          value={selectedSkin || ''}
+                          onChange={(e) => setSelectedSkin(e.target.value)}
                       >
                     {(CLASS_SKINS[selectedClassPreview as keyof typeof CLASS_SKINS] || []).map((s) => (
                       <option key={s} value={s}>
