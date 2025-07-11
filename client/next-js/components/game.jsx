@@ -408,8 +408,18 @@ export function Game({models, sounds, textures, matchId, character}) {
             }
         };
 
+        const handleCameraOffsetChange = (e) => {
+            Object.assign(CAMERA_OFFSET, e.detail);
+        };
+
+        const handleLookAtOffsetChange = (e) => {
+            Object.assign(LOOK_AT_OFFSET, e.detail);
+        };
+
         window.addEventListener('DEV_SCALE_CHANGE', handleScaleChange);
         window.addEventListener('DEV_MODEL_CHANGE', handleModelChange);
+        window.addEventListener('DEV_CAMERA_OFFSET_CHANGE', handleCameraOffsetChange);
+        window.addEventListener('DEV_LOOKAT_OFFSET_CHANGE', handleLookAtOffsetChange);
 
         const activeShields = new Map(); // key = playerId
         const activeHandEffects = new Map(); // key = playerId -> { effectKey: {left, right} }
@@ -912,7 +922,9 @@ export function Game({models, sounds, textures, matchId, character}) {
 
         // Shoulder camera parameters
         const CAMERA_OFFSET = { x: 1.5, y: 1.0, z: -3.5 };
-        const LOOK_AT_OFFSET_Y = 1.5;
+        const LOOK_AT_OFFSET = { x: 0, y: 1.5, z: 0 };
+        window.CAMERA_OFFSET = CAMERA_OFFSET;
+        window.LOOK_AT_OFFSET = LOOK_AT_OFFSET;
 
         // Shield skill vars
         const SHIELD_MANA_COST = SPELL_COST['shield'];
@@ -1061,7 +1073,13 @@ export function Game({models, sounds, textures, matchId, character}) {
             }
 
             cameraTarget.position.copy(
-                playerPosition.clone().add(new THREE.Vector3(0, LOOK_AT_OFFSET_Y, 0)),
+                playerPosition.clone().add(
+                    new THREE.Vector3(
+                        LOOK_AT_OFFSET.x,
+                        LOOK_AT_OFFSET.y,
+                        LOOK_AT_OFFSET.z,
+                    ),
+                ),
             );
             camera.lookAt(cameraTarget.position);
         }
@@ -4441,6 +4459,8 @@ export function Game({models, sounds, textures, matchId, character}) {
         return () => {
             window.removeEventListener('DEV_SCALE_CHANGE', handleScaleChange);
             window.removeEventListener('DEV_MODEL_CHANGE', handleModelChange);
+            window.removeEventListener('DEV_CAMERA_OFFSET_CHANGE', handleCameraOffsetChange);
+            window.removeEventListener('DEV_LOOKAT_OFFSET_CHANGE', handleLookAtOffsetChange);
             socket.removeEventListener('message', handleMessage);
             if (countdownInterval) {
                 clearInterval(countdownInterval);
