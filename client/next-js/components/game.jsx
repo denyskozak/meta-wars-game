@@ -408,8 +408,18 @@ export function Game({models, sounds, textures, matchId, character}) {
             }
         };
 
+        const handleCameraOffsetChange = (e) => {
+            Object.assign(CAMERA_OFFSET, e.detail);
+        };
+
+        const handleLookAtOffsetChange = (e) => {
+            Object.assign(LOOK_AT_OFFSET, e.detail);
+        };
+
         window.addEventListener('DEV_SCALE_CHANGE', handleScaleChange);
         window.addEventListener('DEV_MODEL_CHANGE', handleModelChange);
+        window.addEventListener('DEV_CAMERA_OFFSET_CHANGE', handleCameraOffsetChange);
+        window.addEventListener('DEV_LOOKAT_OFFSET_CHANGE', handleLookAtOffsetChange);
 
         const activeShields = new Map(); // key = playerId
         const activeHandEffects = new Map(); // key = playerId -> { effectKey: {left, right} }
@@ -910,6 +920,13 @@ export function Game({models, sounds, textures, matchId, character}) {
         const minFOV = 10;
         const maxFOV = 100;
 
+        // Shoulder camera parameters
+        // Default offsets tuned for a Paragon-style shoulder camera
+        const CAMERA_OFFSET = { x: 2, y: 1.2, z: -4.5 };
+        const LOOK_AT_OFFSET = { x: 0, y: 1.6, z: 0 };
+        window.CAMERA_OFFSET = CAMERA_OFFSET;
+        window.LOOK_AT_OFFSET = LOOK_AT_OFFSET;
+
         // Shield skill vars
         const SHIELD_MANA_COST = SPELL_COST['shield'];
         const SHIELD_DURATION = 3; // Shield duration in seconds
@@ -1038,11 +1055,22 @@ export function Game({models, sounds, textures, matchId, character}) {
             const playerPosition = new THREE.Vector3();
             playerCollider.getCenter(playerPosition);
 
-            const offset = new THREE.Vector3(
+            // Base third-person offset directly behind the player
+            const baseOffset = new THREE.Vector3(
                 Math.sin(yaw) * Math.cos(pitch),
                 Math.sin(pitch),
                 Math.cos(yaw) * Math.cos(pitch),
-            ).multiplyScalar(1.2);
+            ).multiplyScalar(1.2 + CAMERA_OFFSET.z);
+
+            // Right/up offsets relative to the current yaw only
+            const right = new THREE.Vector3(
+                Math.sin(yaw - Math.PI / 2),
+                0,
+                Math.cos(yaw - Math.PI / 2),
+            ).multiplyScalar(CAMERA_OFFSET.x);
+            const up = new THREE.Vector3(0, CAMERA_OFFSET.y, 0);
+
+            const offset = baseOffset.add(right).add(up);
 
             const desiredPos = playerPosition.clone().add(offset);
 
@@ -1055,7 +1083,15 @@ export function Game({models, sounds, textures, matchId, character}) {
                 camera.position.copy(desiredPos);
             }
 
-            cameraTarget.position.copy(playerPosition);
+            cameraTarget.position.copy(
+                playerPosition.clone().add(
+                    new THREE.Vector3(
+                        LOOK_AT_OFFSET.x,
+                        LOOK_AT_OFFSET.y,
+                        LOOK_AT_OFFSET.z,
+                    ),
+                ),
+            );
             camera.lookAt(cameraTarget.position);
 
             // Slightly offset the camera relative to its own orientation
@@ -1438,32 +1474,10 @@ export function Game({models, sounds, textures, matchId, character}) {
             dispatchEvent('start-cast', {duration: 2000, onEnd: onCastEnd, name: 'heal', icon: ''})
         }
 
-       function getAimDirection() {
-            const cameraDir = new THREE.Vector3();
-            camera.getWorldDirection(cameraDir);
-
-           if (isFocused) {
-               const cameraPos = camera.position.clone();
-               const farPoint = cameraPos.clone().add(cameraDir.clone().multiplyScalar(1000));
-               const start = playerCollider.start
-                   .clone()
-                   .add(playerCollider.end)
-                   .multiplyScalar(0.5);
-               return farPoint.sub(start).normalize();
-           }
-
-           // If not focused, shoot in the direction the model is facing
-           const player = players.get(myPlayerId);
-           if (player) {
-
-               const lookVector = new THREE.Vector3(0, 0, 1);
-               lookVector.applyQuaternion(player.model.quaternion);
-               lookVector.normalize();
-               return lookVector;
-           }
-
-           // Fallback to camera direction
-           return cameraDir.normalize();
+        function getAimDirection() {
+            const dir = new THREE.Vector3();
+            camera.getWorldDirection(dir);
+            return dir.normalize();
         }
 
         function hasLineOfSight(targetId) {
@@ -4459,6 +4473,8 @@ export function Game({models, sounds, textures, matchId, character}) {
         return () => {
             window.removeEventListener('DEV_SCALE_CHANGE', handleScaleChange);
             window.removeEventListener('DEV_MODEL_CHANGE', handleModelChange);
+            window.removeEventListener('DEV_CAMERA_OFFSET_CHANGE', handleCameraOffsetChange);
+            window.removeEventListener('DEV_LOOKAT_OFFSET_CHANGE', handleLookAtOffsetChange);
             socket.removeEventListener('message', handleMessage);
             if (countdownInterval) {
                 clearInterval(countdownInterval);
