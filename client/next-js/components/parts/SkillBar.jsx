@@ -14,8 +14,6 @@ const DEFAULT_SKILLS = [
     mageSkills.iceball,
     mageSkills.frostnova,
     mageSkills.blink,
-    mageSkills.fireblast,
-    mageSkills.pyroblast,
 ];
 
 const WARLOCK_SKILLS = [

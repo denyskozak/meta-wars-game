@@ -55,7 +55,6 @@ const SPHERE_SPELLS = new Set([
     'shadowbolt',
     'chaosbolt',
     'iceball',
-    'pyroblast',
 ]);
 const PROJECTILE_RADIUS = 0.35;
 const PROJECTILE_MAX_DISTANCE = 10;
@@ -1036,7 +1035,7 @@ ws.on('connection', (socket) => {
                         }
 
 
-                        if (['corruption', 'shield', 'fireblast', 'lightstrike', 'lightwave', 'stun', 'paladin-heal', 'frostnova', 'blink', 'hand-of-freedom', 'divine-speed', 'lifedrain', 'fear', 'blood-strike', 'eviscerate', 'kidney-strike', 'adrenaline-rush', 'sprint', 'shadow-leap', 'warbringer', 'savage-blow', 'hamstring', 'bladestorm', 'berserk', 'bloodthirst'].includes(message.payload.type)) {
+                        if (['corruption', 'shield', 'lightstrike', 'lightwave', 'stun', 'paladin-heal', 'frostnova', 'blink', 'hand-of-freedom', 'divine-speed', 'lifedrain', 'fear', 'blood-strike', 'eviscerate', 'kidney-strike', 'adrenaline-rush', 'sprint', 'shadow-leap', 'warbringer', 'savage-blow', 'hamstring', 'bladestorm', 'berserk', 'bloodthirst'].includes(message.payload.type)) {
                             broadcastToMatch(match.id, {
                                 type: 'CAST_SPELL',
                                 payload: message.payload,

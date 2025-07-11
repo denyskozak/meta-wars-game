@@ -31,8 +31,6 @@ import {world} from "../worlds/main/data";
 // spell implementations
 import castFireball, { meta as fireballMeta } from '../skills/mage/fireball';
 import castIceball, { meta as iceballMeta } from '../skills/mage/iceball';
-import castFireblast, { meta as fireblastMeta } from '../skills/mage/fireblast';
-import castPyroblast, { meta as pyroblastMeta } from '../skills/mage/pyroblast';
 import castFrostNova, { meta as frostNovaMeta } from '../skills/mage/frostNova';
 import castBlink, { meta as blinkMeta } from '../skills/mage/blink';
 import castShadowbolt, { meta as shadowboltMeta } from '../skills/warlock/shadowbolt';
@@ -72,8 +70,6 @@ import { MeshoptDecoder } from "three/examples/jsm/libs/meshopt_decoder.module.j
 const SPELL_ICONS = {
     [fireballMeta.id]: fireballMeta.icon,
     [iceballMeta.id]: iceballMeta.icon,
-    [fireblastMeta.id]: fireblastMeta.icon,
-    [pyroblastMeta.id]: pyroblastMeta.icon,
     [shadowboltMeta.id]: shadowboltMeta.icon,
     [corruptionMeta.id]: corruptionMeta.icon,
     [lifeTapMeta.id]: lifeTapMeta.icon,
@@ -105,8 +101,6 @@ const SPELL_ICONS = {
 const SPELL_META = {
     [fireballMeta.id]: fireballMeta,
     [iceballMeta.id]: iceballMeta,
-    [fireblastMeta.id]: fireblastMeta,
-    [pyroblastMeta.id]: pyroblastMeta,
     [shadowboltMeta.id]: shadowboltMeta,
     [corruptionMeta.id]: corruptionMeta,
     [lifeTapMeta.id]: lifeTapMeta,
@@ -140,7 +134,6 @@ const SPELL_SCALES = {
     fireball: 0.5,
     iceball: 0.5,
     shadowbolt: 0.5,
-    pyroblast: 2,
     chaosBolt: 2,
 };
 
@@ -639,10 +632,6 @@ export function Game({models, sounds, textures, matchId, character}) {
             SPELL_SCALES.fireball,
         );
 
-        const pyroblastMesh = makeProjectileSprite(
-            0xffaa33,
-            SPELL_SCALES.pyroblast,
-        );
 
         const darkballFragmentShader = fireballMaterial.fragmentShader.replace(
             'gl_FragColor = vec4(col, alpha);',
@@ -724,12 +713,10 @@ export function Game({models, sounds, textures, matchId, character}) {
             corruption: 10000,
             lifetap: 10000,
             iceball: 3000,
-            fireblast: 6000,
             chaosbolt: 6000,
             lifedrain: 0,
             fear: 45000,
             'ice-shield': 30000,
-            pyroblast: 15000,
             blink: 10000,
             heal: 0,
             lightstrike: 2000,
@@ -816,7 +803,6 @@ export function Game({models, sounds, textures, matchId, character}) {
         }
 
         preloadMesh(fireballMesh, 0xffaa33);
-        preloadMesh(pyroblastMesh, 0xffaa33);
         preloadMesh(chaosBoltMesh, 0x8a2be2);
         preloadMesh(shadowboltMesh, 0x8a2be2);
         preloadMesh(iceballMesh, 0x88ddff);
@@ -831,10 +817,8 @@ export function Game({models, sounds, textures, matchId, character}) {
 
 
         const FIREBLAST_RANGE = 20;
-        const FIREBLAST_DAMAGE = 33;
 
         const FIREBALL_DAMAGE = 44; // increased by 10%
-        const PYROBLAST_DAMAGE = FIREBALL_DAMAGE * 1.4;
         const CHAOSBOLT_DAMAGE = FIREBALL_DAMAGE * 2;
         const ICEBALL_DAMAGE = 39; // increased by 10%
         const DARKBALL_DAMAGE = 33; // increased by 10%
@@ -859,7 +843,7 @@ export function Game({models, sounds, textures, matchId, character}) {
         const MAX_SPHERE_IMPULSE = 4;
 
         // Maximum distance any sphere can travel
-        // Use the same range as fireblast for consistency
+        // Use the same range constant for consistency
         const SPHERE_MAX_DISTANCE = FIREBLAST_RANGE / 2;
 
         // Tail effects removed for all sphere projectiles
@@ -1107,8 +1091,7 @@ export function Game({models, sounds, textures, matchId, character}) {
         }
         function handleDigit3() {
             const className = character?.name?.toLowerCase();
-            if (className === 'mage') castSpell('fireblast');
-            else if (className === 'paladin') castSpell('hand-of-freedom');
+            if (className === 'paladin') castSpell('hand-of-freedom');
             else if (className === 'warlock') castSpell('fear');
             else if (className === 'rogue') castSpell('sprint');
             else if (className === 'warrior') castSpell('bloodthirst');
@@ -1116,8 +1099,7 @@ export function Game({models, sounds, textures, matchId, character}) {
         }
         function handleDigit2() {
             const className = character?.name?.toLowerCase();
-            if (className === 'mage') castSpell('pyroblast');
-            else if (className === 'paladin') castSpell('divine-speed');
+            if (className === 'paladin') castSpell('divine-speed');
             else if (className === 'warlock') castSpell('lifedrain');
             else if (className === 'rogue') castSpell('adrenaline-rush');
             else if (className === 'warrior') castSpell('berserk');
@@ -1629,21 +1611,6 @@ export function Game({models, sounds, textures, matchId, character}) {
                         sounds,
                     });
                     break;
-                case "fireblast":
-                    castFireblast({
-                        playerId,
-                        globalSkillCooldown,
-                        isCasting,
-                        mana,
-                        getTargetPlayer,
-                        dispatch,
-                        sendToSocket,
-                        activateGlobalCooldown,
-                        startSkillCooldown,
-                        FIREBLAST_DAMAGE,
-                        sounds,
-                    });
-                    break;
                 case "iceball":
                     castIceball({
                         playerId,
@@ -1653,17 +1620,6 @@ export function Game({models, sounds, textures, matchId, character}) {
                         iceballMesh,
                         sounds,
                         damage: ICEBALL_DAMAGE,
-                    });
-                    break;
-                case "pyroblast":
-                    castPyroblast({
-                        playerId,
-                        castSpellImpl,
-                        igniteHands,
-                        castSphere,
-                        pyroblastMesh,
-                        sounds,
-                        damage: PYROBLAST_DAMAGE,
                     });
                     break;
                 case "frostnova":
@@ -2289,9 +2245,6 @@ export function Game({models, sounds, textures, matchId, character}) {
 
            for (let sphere of spheres) {
                 sphere.mesh?.position.copy(sphere.collider?.center); // TODO fix
-                if (sphere.type === 'pyroblast') {
-                    sphere.mesh.lookAt(camera.position);
-                }
                 sphere.mesh?.children.forEach(c => {
                     if (c.isSprite && c.material?.rotation !== undefined) {
                         c.material.rotation += deltaTime * 5;
@@ -3765,9 +3718,6 @@ export function Game({models, sounds, textures, matchId, character}) {
 
                 mesh = makeProjectileSprite(0x8a2be2, SPELL_SCALES.shadowbolt);
 
-            } else if (data.type === 'pyroblast') {
-                color = 0xffaa33;
-                mesh = pyroblastMesh.clone();
             } else if (data.type === 'chaosbolt') {
                 mesh = makeProjectileSprite(0x8a2be2, SPELL_SCALES.chaosBolt);
             } else if (data.type === 'iceball') {
@@ -3996,11 +3946,6 @@ export function Game({models, sounds, textures, matchId, character}) {
                         case "shield":
                             castShieldOtherUser(message.payload, message.id)
                             break;
-                        case "fireblast":
-                            if (message.payload.targetId === myPlayerId) {
-                                takeDamage(message.payload.damage, message.id, 'fireblast');
-                            }
-                            break;
                         case "corruption":
                             if (message.payload.targetId === myPlayerId) {
                                 dispatch({
@@ -4029,10 +3974,6 @@ export function Game({models, sounds, textures, matchId, character}) {
                             }
                             break;
                         case "chaosbolt":
-                            igniteHands(message.id, 1000);
-                            castSphereOtherUser(message.payload);
-                            break;
-                        case "pyroblast":
                             igniteHands(message.id, 1000);
                             castSphereOtherUser(message.payload);
                             break;

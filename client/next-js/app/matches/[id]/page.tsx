@@ -253,16 +253,6 @@ export default function MatchesPage() {
           name: "Blink",
           description: "Teleport a short distance.",
         },
-        {
-          ...mageSkills.fireblast,
-          name: "Fireblast",
-          description: "Instant burst of flame.",
-        },
-        {
-          ...mageSkills.pyroblast,
-          name: "Pyroblast",
-          description: "Massive fireball.",
-        },
       ],
     },
   };
