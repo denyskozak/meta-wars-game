@@ -249,13 +249,7 @@ export const Interface = () => {
           zIndex: 1000,
         }}
       >
-        <Image
-          alt="Target"
-          height={25}
-          id="targetImage"
-          src={assetUrl("/icons/target.svg")}
-          width={25}
-        />
+        <div id="targetImage" className="crosshair not-targeted" />
       </div>
 
       <div className="self-damage-container" id="selfDamage" />

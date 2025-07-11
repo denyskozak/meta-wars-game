@@ -109,3 +109,38 @@
     transform: translate(-50%, -50%) scale(1.3);
     transition: transform 0.2s ease-out;
 }
+
+.crosshair {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    border: 2px solid #fff;
+    border-radius: 50%;
+    box-sizing: border-box;
+    transition: transform 0.2s ease-out, border-color 0.2s ease-out, background-color 0.2s ease-out;
+}
+
+.crosshair::after {
+    content: "";
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 4px;
+    height: 4px;
+    background-color: #fff;
+    border-radius: 50%;
+    transform: translate(-50%, -50%);
+}
+
+.crosshair.not-targeted {
+    transform: scale(1.3);
+}
+
+.crosshair.targeted {
+    transform: scale(0.8);
+    border-color: #f00;
+}
+
+.crosshair.targeted::after {
+    background-color: #f00;
+}
