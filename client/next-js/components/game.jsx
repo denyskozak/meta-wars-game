@@ -30,7 +30,7 @@ import {world} from "../worlds/main/data";
 
 // spell implementations
 import castFireball, { meta as fireballMeta } from '../skills/mage/fireball';
-import castIceball, { meta as iceballMeta } from '../skills/mage/iceball';
+import castDragonBreath, { meta as dragonBreathMeta } from '../skills/mage/dragonBreath';
 import castFireblast, { meta as fireblastMeta } from '../skills/mage/fireblast';
 import castPyroblast, { meta as pyroblastMeta } from '../skills/mage/pyroblast';
 import castFrostNova, { meta as frostNovaMeta } from '../skills/mage/frostNova';
@@ -71,7 +71,7 @@ import { MeshoptDecoder } from "three/examples/jsm/libs/meshopt_decoder.module.j
 
 const SPELL_ICONS = {
     [fireballMeta.id]: fireballMeta.icon,
-    [iceballMeta.id]: iceballMeta.icon,
+    [dragonBreathMeta.id]: dragonBreathMeta.icon,
     [fireblastMeta.id]: fireblastMeta.icon,
     [pyroblastMeta.id]: pyroblastMeta.icon,
     [shadowboltMeta.id]: shadowboltMeta.icon,
@@ -104,7 +104,7 @@ const SPELL_ICONS = {
 
 const SPELL_META = {
     [fireballMeta.id]: fireballMeta,
-    [iceballMeta.id]: iceballMeta,
+    [dragonBreathMeta.id]: dragonBreathMeta,
     [fireblastMeta.id]: fireblastMeta,
     [pyroblastMeta.id]: pyroblastMeta,
     [shadowboltMeta.id]: shadowboltMeta,
@@ -138,7 +138,7 @@ const SPELL_META = {
 const SPELL_SCALES = {
     // fireball enlarged for better visuals
     fireball: 0.5,
-    iceball: 0.5,
+    dragonBreath: 0.5,
     shadowbolt: 0.5,
     pyroblast: 2,
     chaosBolt: 2,
@@ -672,20 +672,6 @@ export function Game({models, sounds, textures, matchId, character}) {
             SPELL_SCALES.chaosBolt,
         );
 
-        // Iceball uses the same shader and textures as fireball with a blue tint
-        const iceballMaterial = fireballMaterial.clone();
-        iceballMaterial.uniforms.color1.value = new THREE.Vector3(30, 80, 140);
-        iceballMaterial.uniforms.color2.value = new THREE.Vector3(200, 220, 255);
-
-        const iceballMesh = new THREE.Mesh(
-            fireballGeometry,
-            iceballMaterial
-        );
-        iceballMesh.scale.set(
-            SPELL_SCALES.iceball,
-            SPELL_SCALES.iceball,
-            SPELL_SCALES.iceball,
-        );
 
 
         const labelRenderer = new CSS2DRenderer();
@@ -723,7 +709,7 @@ export function Game({models, sounds, textures, matchId, character}) {
             shadowbolt: 0,
             corruption: 10000,
             lifetap: 10000,
-            iceball: 3000,
+            dragon-breath: 3000,
             fireblast: 6000,
             chaosbolt: 6000,
             lifedrain: 0,
@@ -819,7 +805,6 @@ export function Game({models, sounds, textures, matchId, character}) {
         preloadMesh(pyroblastMesh, 0xffaa33);
         preloadMesh(chaosBoltMesh, 0x8a2be2);
         preloadMesh(shadowboltMesh, 0x8a2be2);
-        preloadMesh(iceballMesh, 0x88ddff);
 
         const stats = new Stats();
 
@@ -836,7 +821,9 @@ export function Game({models, sounds, textures, matchId, character}) {
         const FIREBALL_DAMAGE = 44; // increased by 10%
         const PYROBLAST_DAMAGE = FIREBALL_DAMAGE * 1.4;
         const CHAOSBOLT_DAMAGE = FIREBALL_DAMAGE * 2;
-        const ICEBALL_DAMAGE = 39; // increased by 10%
+        const DRAGON_BREATH_DAMAGE = 80;
+        const DRAGON_BREATH_RANGE = MELEE_RANGE_ATTACK * 3;
+        const DRAGON_BREATH_ANGLE = (140 * Math.PI) / 180;
         const DARKBALL_DAMAGE = 33; // increased by 10%
         const LIFEDRAIN_DAMAGE = 30;
         const FROSTNOVA_DAMAGE = 20;
@@ -926,6 +913,7 @@ export function Game({models, sounds, textures, matchId, character}) {
         const lightWaveRings = [];
         const projectileExplosions = [];
         const projectileTrails = [];
+        const dragonBreathEffects = [];
 
         // Crosshair elements
         const target = document.getElementById("target");
@@ -1095,7 +1083,7 @@ export function Game({models, sounds, textures, matchId, character}) {
             else if (className === 'paladin') castSpell('stun');
             else if (className === 'rogue') castSpell('eviscerate');
             else if (className === 'warrior') castSpell('warbringer');
-            else castSpell('iceball');
+            else castSpell('dragon-breath');
         }
         function handleKeyF() {
             const className = character?.name?.toLowerCase();
@@ -1644,15 +1632,15 @@ export function Game({models, sounds, textures, matchId, character}) {
                         sounds,
                     });
                     break;
-                case "iceball":
-                    castIceball({
-                        playerId,
-                        castSpellImpl,
-                        freezeHands,
-                        castSphere,
-                        iceballMesh,
+                case "dragon-breath":
+                    castDragonBreath({
+                        globalSkillCooldown,
+                        isCasting,
+                        mana,
+                        sendToSocket,
+                        activateGlobalCooldown,
+                        startSkillCooldown,
                         sounds,
-                        damage: ICEBALL_DAMAGE,
                     });
                     break;
                 case "pyroblast":
@@ -2745,16 +2733,6 @@ export function Game({models, sounds, textures, matchId, character}) {
             }, duration);
         }
 
-        function freezeHands(playerId, duration = 1000) {
-            applyHandEffect(playerId, 'ice', () => {
-                const left = new THREE.Mesh(fireballGeometry, iceballMaterial.clone());
-                const right = new THREE.Mesh(fireballGeometry, iceballMaterial.clone());
-                left.scale.set(100, 100, 100);
-                right.scale.set(100, 100, 100);
-                return {left, right};
-            }, duration);
-        }
-
         function darkHands(playerId, duration = 1000) {
             applyHandEffect(playerId, 'shadow', () => {
                 const left = new THREE.Mesh(fireballGeometry, darkballMaterial.clone());
@@ -3037,6 +3015,24 @@ export function Game({models, sounds, textures, matchId, character}) {
 
             scene.add(mesh);
             lightWaveRings.push({ mesh, start: performance.now(), duration });
+        }
+
+        function spawnDragonBreath(playerId, duration = 500) {
+            const player = players.get(playerId)?.model;
+            if (!player) return;
+
+            const group = new THREE.Group();
+            const half = DRAGON_BREATH_ANGLE / 2;
+            const count = 8;
+            for (let i = 0; i < count; i++) {
+                const sprite = makeGlowSprite(0xffaa33, 1.2);
+                const angle = -half + (i / (count - 1)) * DRAGON_BREATH_ANGLE;
+                sprite.position.set(Math.sin(angle) * DRAGON_BREATH_RANGE, 0.5, Math.cos(angle) * DRAGON_BREATH_RANGE);
+                group.add(sprite);
+            }
+            group.rotation.y = player.rotation.y;
+            player.add(group);
+            dragonBreathEffects.push({ group, start: performance.now(), duration });
         }
 
         function spawnProjectileExplosion(playerId, color, impactPosition, duration = EXPLOSION_DURATION) {
@@ -3399,6 +3395,17 @@ export function Game({models, sounds, textures, matchId, character}) {
                         if (progress >= 1) {
                             scene.remove(effect.mesh);
                             lightWaveRings.splice(i, 1);
+                        }
+                    }
+
+                    for (let i = dragonBreathEffects.length - 1; i >= 0; i--) {
+                        const effect = dragonBreathEffects[i];
+                        const elapsed = performance.now() - effect.start;
+                        const progress = elapsed / effect.duration;
+                        effect.group.children.forEach(s => s.material.opacity = 0.9 * (1 - progress));
+                        if (progress >= 1) {
+                            scene.remove(effect.group);
+                            dragonBreathEffects.splice(i, 1);
                         }
                     }
 
@@ -3770,11 +3777,8 @@ export function Game({models, sounds, textures, matchId, character}) {
                 mesh = pyroblastMesh.clone();
             } else if (data.type === 'chaosbolt') {
                 mesh = makeProjectileSprite(0x8a2be2, SPELL_SCALES.chaosBolt);
-            } else if (data.type === 'iceball') {
-                color = 0x88ddff;
-                mesh = makeProjectileSprite(color, SPELL_SCALES.iceball);
             } else {
-                mesh = new THREE.Mesh(fireballGeometry, iceballMaterial.clone());
+                mesh = new THREE.Mesh(fireballGeometry, fireballMaterial.clone());
             }
 
             mesh.position.set(data.position.x, data.position.y, data.position.z);
@@ -3972,9 +3976,21 @@ export function Game({models, sounds, textures, matchId, character}) {
                             igniteHands(message.id, 1000);
                             castSphereOtherUser(message.payload);
                             break;
-                        case "iceball":
-                            freezeHands(message.id, 1000);
-                            castSphereOtherUser(message.payload);
+                        case "dragon-breath":
+                            spawnDragonBreath(message.id);
+                            if (message.id !== myPlayerId) {
+                                const caster = players.get(message.id);
+                                const me = players.get(myPlayerId);
+                                if (caster && me) {
+                                    const origin = caster.model.position.clone();
+                                    const forward = new THREE.Vector3(0, 0, 1).applyQuaternion(caster.model.quaternion);
+                                    const toMe = me.model.position.clone().sub(origin);
+                                    const distance = toMe.length();
+                                    if (distance < DRAGON_BREATH_RANGE && forward.angleTo(toMe.normalize()) < DRAGON_BREATH_ANGLE / 2) {
+                                        takeDamage(DRAGON_BREATH_DAMAGE, message.id, 'dragon-breath');
+                                    }
+                                }
+                            }
                             break;
                         case "fireball-hit":
                             spawnProjectileExplosion(
@@ -3982,16 +3998,6 @@ export function Game({models, sounds, textures, matchId, character}) {
                                 0xff6600,
                                 message.payload.position
                             );
-                            break;
-                        case "iceball-hit":
-                            spawnProjectileExplosion(
-                                message.payload.targetId,
-                                0x66ccff,
-                                message.payload.position
-                            );
-                            if (message.payload.targetId === myPlayerId) {
-                                applySlowEffect(myPlayerId, 3000);
-                            }
                             break;
                         case "shield":
                             castShieldOtherUser(message.payload, message.id)

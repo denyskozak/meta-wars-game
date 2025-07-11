@@ -239,9 +239,9 @@ export default function MatchesPage() {
           description: "Hurls a fiery ball.",
         },
         {
-          ...mageSkills.iceball,
-          name: "Iceball",
-          description: "Launches a chilling bolt.",
+          ...mageSkills.dragonBreath,
+          name: "Dragon Breath",
+          description: "Unleash fiery breath in a cone.",
         },
         {
           ...mageSkills.frostnova,

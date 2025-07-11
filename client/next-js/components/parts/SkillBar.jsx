@@ -11,7 +11,7 @@ import * as warriorSkills from '../../skills/warrior';
 
 const DEFAULT_SKILLS = [
     mageSkills.fireball,
-    mageSkills.iceball,
+    mageSkills.dragonBreath,
     mageSkills.frostnova,
     mageSkills.blink,
     mageSkills.fireblast,

@@ -36,7 +36,6 @@ const MANA_REGEN_AMOUNT = 1.3; // 30% faster mana regeneration
 // Reduced to slow down passive healing
 const HP_REGEN_AMOUNT = 0.2;
 const SPELL_COST = require('../client/next-js/consts/spellCosts.json');
-const ICEBALL_ICON = '/icons/spell_frostbolt.jpg';
 const FROSTNOVA_ICON = '/icons/frostnova.jpg';
 const FREEDOM_ICON = '/icons/classes/paladin/sealofvalor.jpg';
 const DIVINE_SPEED_ICON = '/icons/classes/paladin/speedoflight.jpg';
@@ -54,7 +53,6 @@ const SPHERE_SPELLS = new Set([
     'fireball',
     'shadowbolt',
     'chaosbolt',
-    'iceball',
     'pyroblast',
 ]);
 const PROJECTILE_RADIUS = 0.35;
@@ -64,12 +62,16 @@ const {
     MELEE_RANGE,
     withinMeleeRange,
     withinMeleeCone,
+    withinCone,
 } = require('./melee.cjs');
 
 const LIGHTSTRIKE_DAMAGE = 41; // increased by 20%
 const BLADESTORM_DAMAGE = 40;
 const BLOOD_STRIKE_DAMAGE = 35; // 15% reduction
 const BLOOD_STRIKE_RANGE = MELEE_RANGE * 0.8; // 20% smaller radius
+const DRAGON_BREATH_DAMAGE = 80;
+const DRAGON_BREATH_RANGE = MELEE_RANGE * 3;
+const DRAGON_BREATH_ANGLE = (140 * Math.PI) / 180;
 
 function updateLevel(player) {
     const prevLevel = player.level || 1;
@@ -616,7 +618,7 @@ ws.on('connection', (socket) => {
                     const r = PROJECTILE_RADIUS + 0.6;
                     if (d2 < r * r) {
                         applyDamage(match, pid, p.ownerId, p.damage, p.type);
-                        if (p.type === 'iceball' || p.type === 'fireball') {
+                        if (p.type === 'fireball') {
                             broadcastToMatch(match.id, {
                                 type: 'CAST_SPELL',
                                 payload: {
@@ -1036,7 +1038,7 @@ ws.on('connection', (socket) => {
                         }
 
 
-                        if (['corruption', 'shield', 'fireblast', 'lightstrike', 'lightwave', 'stun', 'paladin-heal', 'frostnova', 'blink', 'hand-of-freedom', 'divine-speed', 'lifedrain', 'fear', 'blood-strike', 'eviscerate', 'kidney-strike', 'adrenaline-rush', 'sprint', 'shadow-leap', 'warbringer', 'savage-blow', 'hamstring', 'bladestorm', 'berserk', 'bloodthirst'].includes(message.payload.type)) {
+                        if (['corruption', 'shield', 'fireblast', 'lightstrike', 'lightwave', 'stun', 'paladin-heal', 'frostnova', 'blink', 'hand-of-freedom', 'divine-speed', 'lifedrain', 'fear', 'blood-strike', 'eviscerate', 'kidney-strike', 'adrenaline-rush', 'sprint', 'shadow-leap', 'warbringer', 'savage-blow', 'hamstring', 'bladestorm', 'berserk', 'bloodthirst', 'dragon-breath'].includes(message.payload.type)) {
                             broadcastToMatch(match.id, {
                                 type: 'CAST_SPELL',
                                 payload: message.payload,
@@ -1121,6 +1123,14 @@ ws.on('connection', (socket) => {
                                 if (tid === id) return;
                                 if (withinMeleeCone(player, p)) {
                                     applyDamage(match, tid, id, LIGHTSTRIKE_DAMAGE, 'lightstrike');
+                                }
+                            });
+                        }
+                        if (message.payload.type === 'dragon-breath') {
+                            match.players.forEach((p, tid) => {
+                                if (tid === id) return;
+                                if (withinCone(player, p, DRAGON_BREATH_RANGE, DRAGON_BREATH_ANGLE)) {
+                                    applyDamage(match, tid, id, DRAGON_BREATH_DAMAGE, 'dragon-breath');
                                 }
                             });
                         }
@@ -1244,27 +1254,6 @@ ws.on('connection', (socket) => {
                         break;
                     }
                     applyDamage(match, id, message.damageDealerId, message.damage, message.spellType);
-                    if (message.spellType === 'iceball') {
-                        const target = match.players.get(id);
-                        if (target) {
-                            const immune = target.buffs?.some(b => (b.type === 'freedom' || b.type === 'berserk') && (b.expires === undefined || b.expires > Date.now()));
-                            if (!immune) {
-                                target.debuffs = target.debuffs || [];
-                                target.debuffs = target.debuffs.filter(d => d.type !== 'slow');
-                                target.debuffs.push({
-                                    type: 'slow',
-                                    percent: 0.4,
-                                    expires: Date.now() + 3000,
-                                    icon: ICEBALL_ICON,
-                                });
-                                broadcastToMatch(match.id, {
-                                    type: 'CAST_SPELL',
-                                    payload: { type: 'iceball-hit', targetId: id },
-                                    id: message.damageDealerId,
-                                });
-                            }
-                        }
-                    }
                     if (message.spellType === 'frostnova') {
                         const target = match.players.get(id);
                         if (target) {
