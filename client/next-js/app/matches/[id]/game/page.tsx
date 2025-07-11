@@ -232,8 +232,8 @@ export default function GamePage() {
     const sounds = {
       fireball: new Audio(assetUrl("/sounds/fireball.ogg")),
       fireballCast: new Audio(assetUrl("/sounds/fireball-cast.ogg")),
-      iceball: new Audio(assetUrl("/sounds/iceball.ogg")),
-      iceballCast: new Audio(assetUrl("/sounds/iceball-cast.ogg")),
+      dragonBreath: new Audio(assetUrl("/sounds/fireball.ogg")),
+      dragonBreathCast: new Audio(assetUrl("/sounds/fireball-cast.ogg")),
       heal: new Audio(assetUrl("/sounds/heal.ogg")),
       spellCast: new Audio(assetUrl("/sounds/spell-cast.ogg")),
       background: new Audio(assetUrl("/sounds/Elwynn.mp3")),

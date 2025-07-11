@@ -33,9 +33,27 @@ function withinMeleeCone(a, b) {
     return angle < MELEE_HALF_ANGLE;
 }
 
+function withinCone(a, b, range, angleRad) {
+    if (!a || !b) return false;
+    const dx = b.position.x - a.position.x;
+    const dy = b.position.y - a.position.y;
+    const dz = b.position.z - a.position.z;
+    const dist = Math.sqrt(dx*dx + dy*dy + dz*dz);
+    if (dist > range) return false;
+    const forward = {
+        x: Math.sin(a.rotation?.y || 0),
+        y: 0,
+        z: Math.cos(a.rotation?.y || 0),
+    };
+    const dot = forward.x*dx + forward.y*dy + forward.z*dz;
+    const angle = Math.acos(dot / dist);
+    return angle < angleRad / 2;
+}
+
 module.exports = {
     MELEE_RANGE,
     MELEE_ANGLE,
     withinMeleeRange,
     withinMeleeCone,
+    withinCone,
 };
