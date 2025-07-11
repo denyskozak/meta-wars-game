@@ -1511,24 +1511,17 @@ export function Game({models, sounds, textures, matchId, character}) {
             if (!targetImage) return;
 
             if (!isFocused) {
-                targetImage.src = '/icons/target.svg';
+                targetImage.classList.remove('targeted');
+                targetImage.classList.add('not-targeted');
                 return;
             }
             const id = getTargetPlayer();
             if (id && players.has(id) && hasLineOfSight(id)) {
-                const start = playerCollider.start
-                    .clone()
-                    .add(playerCollider.end)
-                    .multiplyScalar(0.5);
-                const targetPos = players.get(id).model.position.clone();
-                const dist = start.distanceTo(targetPos);
-                if (dist <= FIREBLAST_RANGE) {
-                    targetImage.src = assetUrl('/icons/target-green.svg');
-                } else {
-                    targetImage.src = assetUrl('/icons/target.svg');
-                }
+                targetImage.classList.add('targeted');
+                targetImage.classList.remove('not-targeted');
             } else {
-                targetImage.src = assetUrl('/icons/target.svg');
+                targetImage.classList.remove('targeted');
+                targetImage.classList.add('not-targeted');
             }
         }
 
