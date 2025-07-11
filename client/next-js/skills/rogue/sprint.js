@@ -3,7 +3,7 @@ import { SPELL_COST } from '../../consts';
 
 export const meta = {
   id: 'sprint',
-  key: '3',
+  key: 'Q',
   icon: assetUrl('/icons/classes/rogue/sprint.jpg'),
   autoFocus: false,
 };

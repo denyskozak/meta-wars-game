@@ -75,7 +75,7 @@ export function SkinViewer({ skin }: SkinViewerProps) {
 
     loader.setDRACOLoader(draco);
     loader.setMeshoptDecoder(MeshoptDecoder);
-    loader.setPath(assetUrl("/models/skins/"));
+    loader.setPath("/models/skins/");
     loaderRef.current = loader;
 
     const handleResize = () => {

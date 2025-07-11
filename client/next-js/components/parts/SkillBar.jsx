@@ -14,16 +14,16 @@ const DEFAULT_SKILLS = [
     mageSkills.dragonBreath,
     mageSkills.frostnova,
     mageSkills.blink,
-    mageSkills.fireblast,
-    mageSkills.pyroblast,
+    // mageSkills.fireblast, TODO remove this skill
+    // mageSkills.pyroblast, TODO remove this skill
 ];
 
 const WARLOCK_SKILLS = [
     warlockSkills.shadowbolt,
     warlockSkills.corruption,
     warlockSkills.lifetap,
-    warlockSkills.chaosbolt,
-    warlockSkills.fear,
+    // warlockSkills.chaosbolt, TODO remove this skill
+    // warlockSkills.fear, TODO remove this skill
     warlockSkills.lifedrain,
 ];
 
@@ -31,18 +31,18 @@ const PALADIN_SKILLS = [
     paladinSkills.lightstrike,
     paladinSkills.stun,
     paladinSkills.paladinHeal,
-    paladinSkills.lightwave,
-    paladinSkills.handOfFreedom,
+    // paladinSkills.lightwave, TODO remove this skill
+    // paladinSkills.handOfFreedom, TODO remove this skill
     paladinSkills.divineSpeed,
 ];
 
 const ROGUE_SKILLS = [
     rogueSkills.bloodStrike,
     rogueSkills.eviscerate,
-    rogueSkills.shadowLeap,
+    // rogueSkills.shadowLeap, TODO remove this skill
     rogueSkills.kidneyStrike,
     rogueSkills.sprint,
-    rogueSkills.adrenalineRush,
+    // rogueSkills.adrenalineRush, TODO remove this skill
 ];
 
 const WARRIOR_SKILLS = [
@@ -50,8 +50,8 @@ const WARRIOR_SKILLS = [
     warriorSkills.savageBlow,
     warriorSkills.hamstring,
     warriorSkills.bladestorm,
-    warriorSkills.berserk,
-    warriorSkills.bloodthirst,
+    // warriorSkills.berserk, TODO remove this skill
+    // warriorSkills.bloodthirst, TODO remove this skill
 ];
 
 export const SkillBar = ({ mana = 0, level = 1, skillPoints = 0, learnedSkills = {} }) => {
