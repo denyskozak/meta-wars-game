@@ -1057,6 +1057,16 @@ export function Game({models, sounds, textures, matchId, character}) {
 
             cameraTarget.position.copy(playerPosition);
             camera.lookAt(cameraTarget.position);
+
+            // Slightly offset the camera relative to its own orientation
+            const forward = new THREE.Vector3();
+            camera.getWorldDirection(forward);
+            const rightVector = new THREE.Vector3().crossVectors(forward, camera.up).normalize();
+            camera.position
+                .addScaledVector(rightVector, 0.1) // small shift to the right
+                .addScaledVector(camera.up, 0.05); // small shift upward
+
+            camera.lookAt(cameraTarget.position); // maintain focus on the target
         }
 
         // Event listener for mouse wheel scroll (for zooming in and out)
