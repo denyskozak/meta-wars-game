@@ -921,8 +921,9 @@ export function Game({models, sounds, textures, matchId, character}) {
         const maxFOV = 100;
 
         // Shoulder camera parameters
-        const CAMERA_OFFSET = { x: 1.5, y: 1.0, z: -3.5 };
-        const LOOK_AT_OFFSET = { x: 0, y: 1.5, z: 0 };
+        // Default offsets tuned for a Paragon-style shoulder camera
+        const CAMERA_OFFSET = { x: 2, y: 1.2, z: -4.5 };
+        const LOOK_AT_OFFSET = { x: 0, y: 1.6, z: 0 };
         window.CAMERA_OFFSET = CAMERA_OFFSET;
         window.LOOK_AT_OFFSET = LOOK_AT_OFFSET;
 
