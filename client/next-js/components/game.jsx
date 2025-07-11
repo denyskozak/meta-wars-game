@@ -930,7 +930,7 @@ export function Game({models, sounds, textures, matchId, character}) {
         // Crosshair elements
         const target = document.getElementById("target");
         const targetImage = document.getElementById("targetImage");
-        let isFocused = false;
+        let isFocused = true;
         let isCameraDragging = false;
 
         const AIM_BEAM_OPACITY = 0.5;
@@ -955,7 +955,7 @@ export function Game({models, sounds, textures, matchId, character}) {
         }
 
         function showAimBeam() {
-            if (aimBeam || isFocused) return;
+            if (aimBeam) return;
             aimBeam = createAimBeam();
             scene.add(aimBeam);
             updateAimBeam();
@@ -1006,8 +1006,8 @@ export function Game({models, sounds, textures, matchId, character}) {
         // Variables for camera rotation control
         // Set initial yaw and pitch so the camera faces approximately
         // the same direction as the logged rotation
-        let yaw = 1.30;       // default yaw angle in radians
-        let pitch = -0.36;    // default pitch angle in radians
+        let yaw = -Math.PI / 4;       // fixed yaw angle (45 deg)
+        let pitch = -Math.PI / 4;    // fixed pitch angle (45 deg down)
         // Speed in radians per second for keyboard based rotation
         const ROTATION_SPEED = 2.5;
 
@@ -1038,35 +1038,24 @@ export function Game({models, sounds, textures, matchId, character}) {
             const playerPosition = new THREE.Vector3();
             playerCollider.getCenter(playerPosition);
 
-            const offset = new THREE.Vector3(
-                Math.sin(yaw) * Math.cos(pitch),
-                Math.sin(pitch),
-                Math.cos(yaw) * Math.cos(pitch),
-            ).multiplyScalar(1.2);
+            const model = players.get(myPlayerId)?.model;
+            const rotY = model ? model.rotation.y + Math.PI : Math.PI;
+
+            const baseOffset = new THREE.Vector3(0, 5, -5);
+            const offset = baseOffset.clone().applyAxisAngle(new THREE.Vector3(0, 1, 0), rotY);
 
             const desiredPos = playerPosition.clone().add(offset);
 
             const ray = new THREE.Ray(playerPosition, offset.clone().normalize());
             const hit = worldOctree.rayIntersect(ray);
 
+            let finalPos = desiredPos;
             if (hit && hit.distance < offset.length()) {
-                camera.position.copy(ray.at(hit.distance - 0.1, new THREE.Vector3()));
-            } else {
-                camera.position.copy(desiredPos);
+                finalPos = ray.at(hit.distance - 0.1, new THREE.Vector3());
             }
 
-            cameraTarget.position.copy(playerPosition);
-            camera.lookAt(cameraTarget.position);
-
-            // Slightly offset the camera relative to its own orientation
-            const forward = new THREE.Vector3();
-            camera.getWorldDirection(forward);
-            const rightVector = new THREE.Vector3().crossVectors(forward, camera.up).normalize();
-            camera.position
-                .addScaledVector(rightVector, 0.1) // small shift to the right
-                .addScaledVector(camera.up, 0.05); // small shift upward
-
-            camera.lookAt(cameraTarget.position); // maintain focus on the target
+            camera.position.lerp(finalPos, 0.1);
+            camera.lookAt(playerPosition);
         }
 
         // Event listener for mouse wheel scroll (for zooming in and out)
@@ -1277,29 +1266,12 @@ export function Game({models, sounds, textures, matchId, character}) {
             }
         });
 
-        const handleRightClick = () => {
-            isFocused = !isFocused;
-
-            if (isFocused) {
-                target.style.display = "block"; // Показываем перекрестие
-                showModel(false);
-            } else {
-                target.style.display = "none"; // Показываем перекрестие
-                showModel(true);
-            }
-            highlightCrosshair();
-        };
-
         // handle mouse events
         document.addEventListener("mousedown", (event) => {
             if (!controlsEnabled || debuffsRef.current.some(d => d.type === 'stun')) return;
 
-            if (event.button === 2) {
-                handleRightClick();
-            }
-
             if (event.button === 0) {
-                if (!isFocused && document.pointerLockElement === containerRef.current) {
+                if (document.pointerLockElement === containerRef.current) {
                     isCameraDragging = true;
                 }
                 const id = getTargetPlayer();
@@ -1327,18 +1299,7 @@ export function Game({models, sounds, textures, matchId, character}) {
             event.preventDefault(); // Prevent the context menu from showing
         });
 
-        document.body.addEventListener("mousemove", (event) => {
-            const locked = document.pointerLockElement === containerRef.current;
-
-            if (!isFocused && !locked) return;
-
-
-            yaw -= event.movementX / 500;
-            pitch = Math.max(
-                -Math.PI / 2,
-                Math.min(Math.PI / 2, pitch + event.movementY  / 500),
-            );
-        });
+        // Camera orientation is fixed relative to the player
         // const renderCursor = () => {
         //     if (!model) return;
         //     raycaster.setFromCamera(mouse, camera);
@@ -1378,9 +1339,7 @@ export function Game({models, sounds, textures, matchId, character}) {
             const HEAL_AMOUNT = 20; // Amount of HP restored
             const HEAL_MANA_COST = SPELL_COST['heal'];
 
-            if (!isFocused) {
-                handleRightClick();
-            }
+
 
             if (globalSkillCooldown || isCasting || isSkillOnCooldown('heal')) {
                 return;
@@ -1509,12 +1468,6 @@ export function Game({models, sounds, textures, matchId, character}) {
 
         function highlightCrosshair() {
             if (!targetImage) return;
-
-            if (!isFocused) {
-                targetImage.classList.remove('targeted');
-                targetImage.classList.add('not-targeted');
-                return;
-            }
             const id = getTargetPlayer();
             if (id && players.has(id) && hasLineOfSight(id)) {
                 targetImage.classList.add('targeted');
@@ -1532,9 +1485,6 @@ export function Game({models, sounds, textures, matchId, character}) {
             }
             dispatchEvent('skill-use', { skill: spellType });
             const meta = SPELL_META[spellType];
-            if (!isFocused && meta?.autoFocus !== false) {
-                handleRightClick();
-            }
 
             if (isSkillOnCooldown(spellType)) {
                 if (sounds?.cooldown) {
@@ -3188,9 +3138,7 @@ export function Game({models, sounds, textures, matchId, character}) {
                 // Lower the model slightly so the feet touch the ground
                 model.position.y -= 0.7;
 
-                if (!isCameraDragging) {
-                    model.rotation.y = yaw + Math.PI;
-                }
+
 
 
                 if (isShieldActive) {
