@@ -287,7 +287,7 @@ export function Game({models, sounds, textures, matchId, character}) {
         let highlightedPlayerId = null;
 
         const createTargetIndicator = () => {
-            const geometry = new THREE.RingGeometry(0.55, 0.7, 32);
+            const geometry = new THREE.RingGeometry(0.275, 0.35, 32);
             const material = new THREE.MeshBasicMaterial({
                 color: 0x00ff00,
                 transparent: true,
@@ -315,7 +315,7 @@ export function Game({models, sounds, textures, matchId, character}) {
         };
 
         const createHighlightIndicator = () => {
-            const sprite = makeGlowSprite(0xff0000, 0.6);
+            const sprite = makeGlowSprite(0xff0000, 0.3);
             sprite.position.y = 2.3;
             return sprite;
         };
@@ -850,6 +850,7 @@ export function Game({models, sounds, textures, matchId, character}) {
         const STUN_SPIN_SPEED = 2;
         const FEAR_SPIN_SPEED = 1.5;
         const SLOW_SPIN_SPEED = 1;
+        const TARGET_INDICATOR_ROT_SPEED = 2;
         const BLADESTORM_DAMAGE = 10;
         const EXPLOSION_DURATION = 300; // ms
         const PROJECTILE_TRAIL_DURATION = 400; // ms
@@ -3457,6 +3458,10 @@ export function Game({models, sounds, textures, matchId, character}) {
                     xpRunes.forEach(r => {
                         r.rotation.y += delta * 0.1;
                     });
+
+                    if (targetIndicator) {
+                        targetIndicator.rotation.y += delta * TARGET_INDICATOR_ROT_SPEED;
+                    }
 
                     // renderCursor();
                     updateCameraPosition();
