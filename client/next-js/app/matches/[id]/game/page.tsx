@@ -128,7 +128,9 @@ export default function GamePage() {
   //   };
   // }, [account?.address, params?.id]);
 
-  const charSkin = character?.classType
+  const charSkin = character?.skin
+    ? character.skin
+    : character?.classType
     ? CLASS_MODELS[character.classType as keyof typeof CLASS_MODELS] || "vampir"
     : "vampir";
 
@@ -137,6 +139,13 @@ export default function GamePage() {
     { id: "bolvar", path: "skins/bolvar.glb" },
     { id: "vampir", path: "skins/vampir.glb" },
     { id: "mad", path: "skins/mad.glb" },
+    { id: "brand", path: "skins/brand.glb" },
+    { id: "aurelion", path: "skins/aurelion.glb" },
+    { id: "annie", path: "skins/annie.glb" },
+    { id: "fizz", path: "skins/fizz.glb" },
+    { id: "karthus", path: "skins/karthus.glb" },
+    { id: "darius", path: "skins/darius.glb" },
+    { id: "kayn", path: "skins/kayn.glb" },
     {
       id: "character",
       path: `skins/${charSkin}.glb`,

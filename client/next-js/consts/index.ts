@@ -14,5 +14,7 @@ export const MAX_MANA = 130;
 export const XP_PER_LEVEL = 1000;
 export { default as SPELL_COST } from "./spellCosts.json";
 export { default as CLASS_MODELS } from "./classModels.json";
+export { default as CLASS_SKINS } from "./classSkins.json";
+export * from "./skinAnimations";
 export { default as CLASS_STATS } from "./classStats.json";
 export * from "./melee";
