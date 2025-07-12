@@ -248,9 +248,9 @@ export default function MatchesPage() {
           description: "Unleash fiery breath in a cone.",
         },
         {
-          ...mageSkills.frostnova,
-          name: "Frost Nova",
-          description: "Freezes enemies around you.",
+          ...mageSkills.firering,
+          name: "Fire Ring",
+          description: "Blasts enemies away in flames.",
         },
         {
           ...mageSkills.blink,
