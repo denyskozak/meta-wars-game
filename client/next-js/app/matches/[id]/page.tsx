@@ -1,23 +1,28 @@
 "use client";
 import { useEffect, useMemo, useState, useRef } from "react";
 import Image from "next/image";
+import { useParams, useRouter } from "next/navigation";
+import { Slider } from "@heroui/slider";
 
 import { ButtonWithSound as Button } from "@/components/button-with-sound";
-import { useParams, useRouter } from "next/navigation";
-
 import { assetUrl } from "@/utilities/assets";
 import { useWS } from "@/hooks/useWS";
 import { Navbar } from "@/components/navbar";
 import { useInterface } from "@/context/inteface";
 import { InterfaceContextValue, MatchDetail, PlayerData } from "@/types";
-import { CLASS_MODELS, CLASS_SKINS, CLASS_STATS, MAX_HP, MAX_MANA } from "@/consts";
+import {
+  CLASS_MODELS,
+  CLASS_SKINS,
+  CLASS_STATS,
+  MAX_HP,
+  MAX_MANA,
+} from "@/consts";
 import * as mageSkills from "@/skills/mage";
 import * as warlockSkills from "@/skills/warlock";
 import * as paladinSkills from "@/skills/paladin";
 import * as rogueSkills from "@/skills/rogue";
 import * as warriorSkills from "@/skills/warrior";
 import { SkillsList } from "@/components/skills-list";
-import SkinViewer from "@/components/skin-viewer";
 
 type Match = MatchDetail;
 
@@ -32,6 +37,7 @@ export default function MatchesPage() {
     string | null
   >(null);
   const [selectedSkin, setSelectedSkin] = useState<string | null>(null);
+  const [skinIndex, setSkinIndex] = useState(0);
   const previewAudioRef = useRef<HTMLAudioElement | null>(null);
 
   const handleClassPreview = (cls: string) => {
@@ -46,7 +52,9 @@ export default function MatchesPage() {
     }
     setSelectedClassPreview(cls);
     const skins = CLASS_SKINS[cls as keyof typeof CLASS_SKINS] || [];
+
     setSelectedSkin(skins[0] || null);
+    setSkinIndex(0);
     setStep(2);
   };
 
@@ -293,9 +301,9 @@ export default function MatchesPage() {
         case "PLAYER_LEFT":
           setPlayers((prev) => prev.filter((p) => p.id !== message.playerId));
           break;
-        case 'CHARACTER_READY':
+        case "CHARACTER_READY":
           router.push(`/matches/${params?.id}/game`);
-          break
+          break;
       }
     };
 
@@ -306,10 +314,7 @@ export default function MatchesPage() {
     };
   }, []);
 
-  const handleClassSelect = (
-    cls: string,
-    skin: string | null,
-  ) => {
+  const handleClassSelect = (cls: string, skin: string | null) => {
     const charModel = skin || CLASS_MODELS[cls] || "vampir";
 
     dispatch({
@@ -317,11 +322,15 @@ export default function MatchesPage() {
       payload: {
         name: cls,
         classType: cls,
-        skin: charModel
+        skin: charModel,
       },
     });
 
-    sendToSocket({ type: "SET_CHARACTER", classType: cls, character: charModel });
+    sendToSocket({
+      type: "SET_CHARACTER",
+      classType: cls,
+      character: charModel,
+    });
   };
 
   return (
@@ -350,7 +359,9 @@ export default function MatchesPage() {
                       width={180}
                     />
                     <span className="text-xs mt-1">{opt.label}</span>
-                    <span className="text-[10px] text-gray-300">{opt.type}</span>
+                    <span className="text-[10px] text-gray-300">
+                      {opt.type}
+                    </span>
                   </button>
                 ))}
               </div>
@@ -400,33 +411,46 @@ export default function MatchesPage() {
 
           {step === 3 && selectedClassPreview && (
             <div className="flex flex-col items-center w-full text-white">
-              <div className="w-full flex items-center gap-2">
-                <label htmlFor="skin-select" className="text-sm">Skin:</label>
-                <select
-                  id="skin-select"
-                  className="text-black text-sm flex-1"
-                  value={selectedSkin || ''}
-                  onChange={(e) => setSelectedSkin(e.target.value)}
-                >
-                  {(CLASS_SKINS[selectedClassPreview as keyof typeof CLASS_SKINS] || []).map((s) => (
-                    <option key={s} value={s}>
-                      {s}
-                    </option>
-                  ))}
-                </select>
-              </div>
               {selectedSkin && (
-                <div className="mt-2 w-full h-48">
-                  <SkinViewer skin={selectedSkin} />
-                </div>
+                <Image
+                  alt={selectedSkin}
+                  height={120}
+                  src={`/images/skins/${selectedSkin}.webp`}
+                  width={120}
+                />
               )}
+              <Slider
+                className="w-full max-w-sm mt-4"
+                maxValue={
+                  (
+                    CLASS_SKINS[
+                      selectedClassPreview as keyof typeof CLASS_SKINS
+                    ] || []
+                  ).length - 1
+                }
+                minValue={0}
+                step={1}
+                value={skinIndex}
+                onChange={(value) => {
+                  const skins =
+                    CLASS_SKINS[
+                      selectedClassPreview as keyof typeof CLASS_SKINS
+                    ] || [];
+                  const idx = Array.isArray(value) ? value[0] : value;
+
+                  setSkinIndex(idx as number);
+                  setSelectedSkin(skins[idx as number] || null);
+                }}
+              />
               <div className="flex gap-2 mt-4">
                 <Button variant="light" onPress={() => setStep(2)}>
                   Back
                 </Button>
                 <Button
                   color="primary"
-                  onPress={() => handleClassSelect(selectedClassPreview, selectedSkin)}
+                  onPress={() =>
+                    handleClassSelect(selectedClassPreview, selectedSkin)
+                  }
                 >
                   Select
                 </Button>

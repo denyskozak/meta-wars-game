@@ -20,20 +20,22 @@ function createDefaultMap(prefix: string): AnimationMap {
     jump: `${prefix}_spell4.anm`,
     casting: `${prefix}_channel_windup.anm`,
     castEnd: `${prefix}_spell1.anm`,
-    cast: 'cast',
+    cast: "cast",
     dying: `${prefix}_death.anm`,
-    hitReaction: 'hit_reaction',
-    attack: 'attack',
-    attack360: 'attack_360',
+    hitReaction: "hit_reaction",
+    attack: "attack",
+    attack360: "attack_360",
   };
 }
 
 export const SKIN_ANIMATIONS: Record<string, AnimationMap> = {
-  brand: createDefaultMap('brand'),
-  aurelion: createDefaultMap('aurelion'),
-  annie: createDefaultMap('annie'),
-  fizz: createDefaultMap('fizz'),
-  karthus: createDefaultMap('karthus'),
-  darius: createDefaultMap('darius'),
-  kayn: createDefaultMap('kayn'),
+  brand: createDefaultMap("brand"),
+  aurelion: createDefaultMap("aurelion"),
+  annie: createDefaultMap("annie"),
+  fizz: createDefaultMap("fizz"),
+  karthus: createDefaultMap("karthus"),
+  darius: createDefaultMap("darius"),
+  akali: createDefaultMap("akali"),
+  kayle: createDefaultMap("kayle"),
+  kayn: createDefaultMap("kayn"),
 };
