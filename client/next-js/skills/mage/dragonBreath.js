@@ -4,7 +4,7 @@ import { SPELL_COST } from '../../consts';
 export const meta = {
   id: 'dragon-breath',
   key: 'R',
-  icon: assetUrl('/icons/classes/mage/fireball.png'),
+  icon: '/images/skills/dragon.jpg',
   autoFocus: false,
 };
 

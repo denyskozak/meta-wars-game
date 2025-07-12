@@ -4,7 +4,7 @@ import { assetUrl } from "../../utilities/assets";
 export const meta = {
   id: "firering",
   key: "Q",
-  icon: assetUrl('/icons/classes/mage/frostnova.jpg'),
+  icon: '/images/skills/fireaoe.jpg',
   autoFocus: false,
 };
 

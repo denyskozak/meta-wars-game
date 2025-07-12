@@ -785,6 +785,11 @@ export function Game({models, sounds, textures, matchId, character}) {
         // directionalLight.shadow.bias = -0.00006;
         // scene.add(directionalLight);
 
+        const moonLight = new THREE.DirectionalLight(0x88aaff, 0.8);
+        moonLight.position.set(10, 20, -10);     // направление «луны»
+        moonLight.castShadow = true;             // тени от объектов
+        scene.add(moonLight);
+
         const renderer = new THREE.WebGLRenderer({antialias: true});
 
         renderer.setPixelRatio(Math.min(window.devicePixelRatio, 1.5));
@@ -3940,6 +3945,7 @@ export function Game({models, sounds, textures, matchId, character}) {
                             castSphereOtherUser(message.payload);
                             break;
                         case "dragon-breath":
+                            console.log("spawnDragonBreath: ", spawnDragonBreath);
                             spawnDragonBreath(message.id);
                             if (message.id !== myPlayerId) {
                                 const caster = players.get(message.id);
