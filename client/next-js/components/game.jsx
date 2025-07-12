@@ -1091,29 +1091,11 @@ export function Game({models, sounds, textures, matchId, character}) {
         }
         function handleKeyF() {
             const className = character?.name?.toLowerCase();
-            if (className === 'warlock') castSpell('chaosbolt');
-            else if (className === 'paladin') castSpell('lightwave');
+            if (className === 'warlock') castSpell('lifedrain');
+            else if (className === 'paladin') castSpell('divine-speed');
             else if (className === 'rogue') castSpell('kidney-strike');
             else if (className === 'warrior') castSpell('hamstring');
             else castSpell('blink');
-        }
-        function handleDigit3() {
-            const className = character?.name?.toLowerCase();
-            if (className === 'mage') castSpell('fireblast');
-            else if (className === 'paladin') castSpell('hand-of-freedom');
-            else if (className === 'warlock') castSpell('fear');
-            else if (className === 'rogue') castSpell('sprint');
-            else if (className === 'warrior') castSpell('bloodthirst');
-
-        }
-        function handleDigit2() {
-            const className = character?.name?.toLowerCase();
-            if (className === 'mage') castSpell('pyroblast');
-            else if (className === 'paladin') castSpell('divine-speed');
-            else if (className === 'warlock') castSpell('lifedrain');
-            else if (className === 'rogue') castSpell('adrenaline-rush');
-            else if (className === 'warrior') castSpell('berserk');
-
         }
         function handleKeyJ() {
             const currentPosition = new THREE.Vector3();
@@ -1156,7 +1138,7 @@ export function Game({models, sounds, textures, matchId, character}) {
             const className = character?.name?.toLowerCase();
             if (className === 'warlock') castSpell('lifetap');
             else if (className === 'paladin') castSpell('paladin-heal');
-            else if (className === 'rogue') castSpell('shadow-leap');
+            else if (className === 'rogue') castSpell('sprint');
             else if (className === 'warrior') castSpell('bladestorm');
             else castSpell('frostnova');
         }
@@ -1172,8 +1154,6 @@ export function Game({models, sounds, textures, matchId, character}) {
             KeyE: handleKeyE,
             KeyR: handleKeyR,
             KeyF: handleKeyF,
-            Digit3: handleDigit3,
-            Digit2: handleDigit2,
             KeyJ: handleKeyJ,
             KeyT: handleKeyT,
             KeyC: handleKeyC,
@@ -1185,8 +1165,6 @@ export function Game({models, sounds, textures, matchId, character}) {
             'KeyE',
             'KeyR',
             'KeyF',
-            'Digit3',
-            'Digit2',
             'KeyQ',
         ]);
 
