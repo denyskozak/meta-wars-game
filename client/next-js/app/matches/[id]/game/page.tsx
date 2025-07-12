@@ -146,6 +146,8 @@ export default function GamePage() {
         {id: "karthus", path: "skins/karthus.glb", local: true},
         {id: "darius", path: "skins/darius.glb", local: true},
         {id: "kayn", path: "skins/kayn.glb", local: true},
+        {id: "akali", path: "skins/akali.glb", local: true},
+        {id: "kayle", path: "skins/kayle.glb", local: true},
         {
             id: "character",
             path: `skins/${charSkin}.glb`,

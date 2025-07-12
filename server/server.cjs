@@ -261,7 +261,7 @@ function broadcastMatchesToWaitingClients() {
 }
 
 const CLASS_MODELS = {
-    paladin: 'kayn',
+    paladin: 'kayle',
     mage: 'brand',
     warlock: 'karthus',
     rogue: 'fizz',
