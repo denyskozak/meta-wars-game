@@ -2,13 +2,13 @@ import { SPELL_COST } from "../../consts";
 import { assetUrl } from "../../utilities/assets";
 
 export const meta = {
-  id: "frostnova",
+  id: "firering",
   key: "Q",
   icon: assetUrl('/icons/classes/mage/frostnova.jpg'),
   autoFocus: false,
 };
 
-export default function castFrostNova({
+export default function castFireRing({
   playerId,
   globalSkillCooldown,
   isCasting,
@@ -19,7 +19,7 @@ export default function castFrostNova({
   sounds,
 }) {
   if (globalSkillCooldown || isCasting) return;
-  if (mana < SPELL_COST["frostnova"]) {
+  if (mana < SPELL_COST["firering"]) {
     if (sounds?.noMana) {
       sounds.noMana.currentTime = 0;
       sounds.noMana.volume = 0.5;
@@ -28,7 +28,7 @@ export default function castFrostNova({
 
     return;
   }
-  sendToSocket({ type: "CAST_SPELL", payload: { type: "frostnova" } });
+  sendToSocket({ type: "CAST_SPELL", payload: { type: "firering" } });
   activateGlobalCooldown();
-  startSkillCooldown("frostnova");
+  startSkillCooldown("firering");
 }

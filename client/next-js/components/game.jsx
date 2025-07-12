@@ -34,7 +34,7 @@ import castFireball, { meta as fireballMeta } from '../skills/mage/fireball';
 import castDragonBreath, { meta as dragonBreathMeta } from '../skills/mage/dragonBreath';
 import castFireblast, { meta as fireblastMeta } from '../skills/mage/fireblast';
 import castPyroblast, { meta as pyroblastMeta } from '../skills/mage/pyroblast';
-import castFrostNova, { meta as frostNovaMeta } from '../skills/mage/frostNova';
+import castFireRing, { meta as fireRingMeta } from '../skills/mage/fireRing';
 import castBlink, { meta as blinkMeta } from '../skills/mage/blink';
 import castShadowbolt, { meta as shadowboltMeta } from '../skills/warlock/shadowbolt';
 import castCorruption, { meta as corruptionMeta } from '../skills/warlock/corruption';
@@ -99,7 +99,7 @@ const SPELL_ICONS = {
     [bladestormMeta.id]: bladestormMeta.icon,
     [berserkMeta.id]: berserkMeta.icon,
     [bloodthirstMeta.id]: bloodthirstMeta.icon,
-    [frostNovaMeta.id]: frostNovaMeta.icon,
+    [fireRingMeta.id]: fireRingMeta.icon,
     [blinkMeta.id]: blinkMeta.icon,
 };
 
@@ -132,7 +132,7 @@ const SPELL_META = {
     [bladestormMeta.id]: bladestormMeta,
     [berserkMeta.id]: berserkMeta,
     [bloodthirstMeta.id]: bloodthirstMeta,
-    [frostNovaMeta.id]: frostNovaMeta,
+    [fireRingMeta.id]: fireRingMeta,
     [blinkMeta.id]: blinkMeta,
 };
 
@@ -725,7 +725,7 @@ export function Game({models, sounds, textures, matchId, character}) {
             stun: 50000,
             'paladin-heal': 20000,
             lightwave: 5000,
-            frostnova: 15000,
+            firering: 15000,
             'hand-of-freedom': 15000,
             'divine-speed': 20000,
             'blood-strike': 1000,
@@ -829,10 +829,10 @@ export function Game({models, sounds, textures, matchId, character}) {
         const DRAGON_BREATH_ANGLE = (140 * Math.PI) / 180;
         const DARKBALL_DAMAGE = 33; // increased by 10%
         const LIFEDRAIN_DAMAGE = 30;
-        const FROSTNOVA_DAMAGE = 20;
-        // Double radius for a more powerful frost nova
-        const FROSTNOVA_RANGE = MELEE_RANGE_ATTACK * 2;
-        const FROSTNOVA_RING_DURATION = 500; // ms, faster nova
+        const FIRE_RING_DAMAGE = 20;
+        const FIRE_RING_RANGE = MELEE_RANGE_ATTACK * 2;
+        const FIRE_RING_DURATION = 500; // ms
+        const KNOCKBACK_STRENGTH = 6;
         const LIGHTWAVE_RING_DURATION = 1000; // ms
         const LIGHTWAVE_RANGE = MELEE_RANGE_ATTACK;
         const LIGHTSTRIKE_DAMAGE = 35; // reduced by 15%
@@ -913,7 +913,7 @@ export function Game({models, sounds, textures, matchId, character}) {
         let isShieldActive = false;
         let isChatActive = false;
         let isHealActive = false;
-        const frostNovaRings = [];
+        const fireRings = [];
         const lightWaveRings = [];
         const projectileExplosions = [];
         const projectileTrails = [];
@@ -1140,7 +1140,7 @@ export function Game({models, sounds, textures, matchId, character}) {
             else if (className === 'paladin') castSpell('paladin-heal');
             else if (className === 'rogue') castSpell('sprint');
             else if (className === 'warrior') castSpell('bladestorm');
-            else castSpell('frostnova');
+            else castSpell('firering');
         }
         function handleEscape() {
             dispatch({type: 'SET_MENU_VISIBLE', payload: !menuVisibleRef.current});
@@ -1636,8 +1636,8 @@ export function Game({models, sounds, textures, matchId, character}) {
                         damage: PYROBLAST_DAMAGE,
                     });
                     break;
-                case "frostnova":
-                    castFrostNova({
+                case "firering":
+                    castFireRing({
                         playerId,
                         globalSkillCooldown,
                         isCasting,
@@ -1647,7 +1647,7 @@ export function Game({models, sounds, textures, matchId, character}) {
                         startSkillCooldown,
                         sounds,
                     });
-                    spawnFrostNovaRing(playerId);
+                    spawnFireRing(playerId);
                     break;
                 case "blink":
                     castBlink({
@@ -2923,7 +2923,7 @@ export function Game({models, sounds, textures, matchId, character}) {
             activeFearEffects.set(playerId, { group, timeout });
         }
 
-        function spawnFrostNovaRing(playerId, duration = FROSTNOVA_RING_DURATION) {
+        function spawnFireRing(playerId, duration = FIRE_RING_DURATION) {
             const player = players.get(playerId)?.model;
             if (!player) return;
 
@@ -2932,35 +2932,14 @@ export function Game({models, sounds, textures, matchId, character}) {
             position.y += 0.1;
 
             const geometry = new THREE.RingGeometry(0.5, 1.0, 64);
-            const material = new THREE.ShaderMaterial({
-                uniforms: {
-                    time: { value: 0 },
-                    tex: { value: textures.ice },
-                },
+            const material = new THREE.MeshBasicMaterial({
+                map: glowTexture,
+                color: 0xffaa33,
                 transparent: true,
+                opacity: 0.9,
                 side: THREE.DoubleSide,
                 blending: THREE.AdditiveBlending,
-                vertexShader: `
-                    varying vec2 vUv;
-                    void main(){
-                        vUv = uv;
-                        gl_Position = projectionMatrix * modelViewMatrix * vec4(position,1.0);
-                    }
-                `,
-                fragmentShader: `
-                    uniform float time;
-                    uniform sampler2D tex;
-                    varying vec2 vUv;
-                    void main(){
-                        vec2 uv = vUv - 0.5;
-                        float angle = atan(uv.y, uv.x) + time * 2.0;
-                        float radius = length(uv);
-                        uv = vec2(cos(angle), sin(angle)) * radius + 0.5;
-                        vec4 col = texture2D(tex, uv);
-                        float alpha = smoothstep(0.1, 0.2, radius) * (1.0 - smoothstep(0.7, 0.9, radius));
-                        gl_FragColor = vec4(col.rgb, col.a * alpha);
-                    }
-                `,
+                depthWrite: false,
             });
             const mesh = new THREE.Mesh(geometry, material);
             mesh.rotation.x = -Math.PI / 2;
@@ -2969,7 +2948,7 @@ export function Game({models, sounds, textures, matchId, character}) {
             mesh.scale.setScalar(0);
 
             scene.add(mesh);
-            frostNovaRings.push({ mesh, start: performance.now(), duration });
+            fireRings.push({ mesh, start: performance.now(), duration });
         }
 
         function spawnLightWaveRing(playerId, duration = LIGHTWAVE_RING_DURATION) {
@@ -3351,19 +3330,16 @@ export function Game({models, sounds, textures, matchId, character}) {
                         obj.mesh.rotation.z += delta * SLOW_SPIN_SPEED;
                     });
 
-                    for (let i = frostNovaRings.length - 1; i >= 0; i--) {
-                        const effect = frostNovaRings[i];
+                    for (let i = fireRings.length - 1; i >= 0; i--) {
+                        const effect = fireRings[i];
                         const elapsed = performance.now() - effect.start;
                         const progress = elapsed / effect.duration;
                         // expand from the player out to the melee range
-                        effect.mesh.scale.setScalar(FROSTNOVA_RANGE * progress);
+                        effect.mesh.scale.setScalar(FIRE_RING_RANGE * progress);
                         effect.mesh.material.opacity = 0.8 * (1 - progress);
-                        if (effect.mesh.material.uniforms?.time) {
-                            effect.mesh.material.uniforms.time.value += delta;
-                        }
                         if (progress >= 1) {
                             scene.remove(effect.mesh);
-                            frostNovaRings.splice(i, 1);
+                            fireRings.splice(i, 1);
                         }
                     }
 
@@ -4029,16 +4005,19 @@ export function Game({models, sounds, textures, matchId, character}) {
                             igniteHands(message.id, 1000);
                             castSphereOtherUser(message.payload);
                             break;
-                        case "frostnova":
-                            spawnFrostNovaRing(message.id);
+                        case "firering":
+                            spawnFireRing(message.id);
                             if (message.id !== myPlayerId) {
                                 const caster = players.get(message.id);
-                                if (caster) {
-                                    const myPos = players.get(myPlayerId)?.model.position.clone();
+                                const me = players.get(myPlayerId);
+                                if (caster && me) {
+                                    const myPos = me.model.position.clone();
                                     const casterPos = caster.model.position.clone();
-                                    if (myPos && casterPos && myPos.distanceTo(casterPos) < FROSTNOVA_RANGE) {
-                                        applyRootEffect(myPlayerId, 3000);
-                                        takeDamage(FROSTNOVA_DAMAGE, message.id, 'frostnova');
+                                    if (myPos && casterPos && myPos.distanceTo(casterPos) < FIRE_RING_RANGE) {
+                                        const dir = myPos.clone().sub(casterPos).setY(0).normalize();
+                                        playerVelocity.x += dir.x * KNOCKBACK_STRENGTH;
+                                        playerVelocity.z += dir.z * KNOCKBACK_STRENGTH;
+                                        takeDamage(FIRE_RING_DAMAGE, message.id, 'firering');
                                     }
                                 }
                             }
