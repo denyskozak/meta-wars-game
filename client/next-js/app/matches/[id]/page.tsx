@@ -185,14 +185,14 @@ export default function MatchesPage() {
           description: "Finishing move with high damage.",
         },
         {
-          ...rogueSkills.shadowLeap,
-          name: "Shadow Leap",
-          description: "Leap through shadows to target.",
-        },
-        {
           ...rogueSkills.kidneyStrike,
           name: "Kidney Strike",
           description: "Stuns the enemy from behind.",
+        },
+        {
+          ...rogueSkills.adrenalineRush,
+          name: "Adrenaline Rush",
+          description: "Greatly boosts attack speed.",
         },
         {
           ...rogueSkills.sprint,
@@ -200,9 +200,9 @@ export default function MatchesPage() {
           description: "Increase movement speed.",
         },
         {
-          ...rogueSkills.adrenalineRush,
-          name: "Adrenaline Rush",
-          description: "Greatly boosts attack speed.",
+          ...rogueSkills.shadowLeap,
+          name: "Shadow Leap",
+          description: "Leap through shadows to target.",
         },
       ],
     },
@@ -233,14 +233,14 @@ export default function MatchesPage() {
           description: "Unleash chaotic energy.",
         },
         {
-          ...warlockSkills.fear,
-          name: "Fear",
-          description: "Terrifies the target.",
-        },
-        {
           ...warlockSkills.lifedrain,
           name: "Lifedrain",
           description: "Drain health from target.",
+        },
+        {
+          ...warlockSkills.fear,
+          name: "Fear",
+          description: "Terrifies the target.",
         },
       ],
     },
@@ -261,16 +261,6 @@ export default function MatchesPage() {
           description: "Unleash fiery breath in a cone.",
         },
         {
-          ...mageSkills.firering,
-          name: "Fire Ring",
-          description: "Blasts enemies away in flames.",
-        },
-        {
-          ...mageSkills.blink,
-          name: "Blink",
-          description: "Teleport a short distance.",
-        },
-        {
           ...mageSkills.fireblast,
           name: "Fireblast",
           description: "Instant burst of flame.",
@@ -279,6 +269,16 @@ export default function MatchesPage() {
           ...mageSkills.pyroblast,
           name: "Pyroblast",
           description: "Massive fireball.",
+        },
+        {
+          ...mageSkills.firering,
+          name: "Fire Ring",
+          description: "Blasts enemies away in flames.",
+        },
+        {
+          ...mageSkills.blink,
+          name: "Blink",
+          description: "Teleport a short distance.",
         },
       ],
     },
@@ -432,8 +432,8 @@ export default function MatchesPage() {
               {selectedSkin && (
                 <Image
                   alt={selectedSkin}
-                  height={500}
                   className="w-[200] h-[350]"
+                  height={500}
                   src={`/images/skins/${selectedSkin}.webp`}
                   width={200}
                 />
