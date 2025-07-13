@@ -188,6 +188,41 @@ const spawns = [
     },
 ];
 
+const FLASHLIGHT_POINTS = [
+    {
+        position: { x: -5.1408368130489235, y: -4.4568565292403095, z: -2.979375995683337 },
+        direction: { x: -0.4502119198840347, y: -0.42955505455702575, z: 0.7828101189297709 },
+    },
+    {
+        position: { x: -6.842160039213642, y: -4.3095398975062675, z: 1.7689433923809024 },
+        direction: { x: -0.19398289787402545, y: -0.3653418384829708, z: 0.9104372446172655 },
+    },
+    {
+        position: { x: 5.103792710188843, y: -4.374560910167638, z: -0.5960711658921486 },
+        direction: { x: 0.8115688874613092, y: -0.44931639865088924, z: -0.3734577818284259 },
+    },
+    {
+        position: { x: 13.842740098763008, y: -4.35683354101714, z: -0.1762214176925535 },
+        direction: { x: 0.8965296912795448, y: -0.3764857472461553, z: 0.23343734657228327 },
+    },
+    {
+        position: { x: 13.30818642695792, y: -4.447945869504579, z: -3.0413979140347007 },
+        direction: { x: -0.015272841273016981, y: -0.5629906739810934, z: -0.8263221171732992 },
+    },
+    {
+        position: { x: 14.16385225238336, y: -4.306117111315048, z: -6.919929447788394 },
+        direction: { x: 0.5736901756419367, y: -0.6099519865457458, z: -0.5466609154501739 },
+    },
+    {
+        position: { x: 10.100726859124114, y: -4.532862355237318, z: -17.407155284417463 },
+        direction: { x: -0.5150010106625101, y: -0.45110224421916667, z: 0.7288900632310916 },
+    },
+    {
+        position: { x: 2.584119581040061, y: -4.542257254786189, z: -23.051874939332993 },
+        direction: { x: 0.39722844945766966, y: -0.8593514006943183, z: -0.32206323768193285 },
+    },
+];
+
 function getRandomElement(array) {
     if (!Array.isArray(array) || array.length === 0) {
         throw new Error("Invalid array: must be a non-empty array.");
@@ -792,6 +827,22 @@ export function Game({models, sounds, textures, matchId, character}) {
 
         const hemi = new THREE.HemisphereLight(0x111133, 0x000000, 0.6); // слабый «ночной» свет
         scene.add(hemi);
+
+        // add stationary flashlights for debugging
+        FLASHLIGHT_POINTS.forEach((p) => {
+            const spot = new THREE.SpotLight(0xffffff, 1, 15, Math.PI / 6, 0.5, 1);
+            spot.position.set(p.position.x, p.position.y, p.position.z);
+            const target = new THREE.Object3D();
+            target.position.set(
+                p.position.x + p.direction.x,
+                p.position.y + p.direction.y,
+                p.position.z + p.direction.z,
+            );
+            scene.add(target);
+            spot.target = target;
+            spot.castShadow = true;
+            scene.add(spot);
+        });
 
         const renderer = new THREE.WebGLRenderer({antialias: true});
 
