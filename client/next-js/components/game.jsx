@@ -188,6 +188,17 @@ const spawns = [
     },
 ];
 
+const FLASHLIGHT_POINTS = [
+    { position: { x: -5.1408368130489235, y: -4.4568565292403095, z: -2.979375995683337 } },
+    { position: { x: -6.842160039213642, y: -4.3095398975062675, z: 1.7689433923809024 } },
+    { position: { x: 5.103792710188843, y: -4.374560910167638, z: -0.5960711658921486 } },
+    { position: { x: 13.842740098763008, y: -4.35683354101714, z: -0.1762214176925535 } },
+    { position: { x: 13.30818642695792, y: -4.447945869504579, z: -3.0413979140347007 } },
+    { position: { x: 14.16385225238336, y: -4.306117111315048, z: -6.919929447788394 } },
+    { position: { x: 10.100726859124114, y: -4.532862355237318, z: -17.407155284417463 } },
+    { position: { x: 2.584119581040061, y: -4.542257254786189, z: -23.051874939332993 } },
+];
+
 function getRandomElement(array) {
     if (!Array.isArray(array) || array.length === 0) {
         throw new Error("Invalid array: must be a non-empty array.");
@@ -792,6 +803,14 @@ export function Game({models, sounds, textures, matchId, character}) {
 
         const hemi = new THREE.HemisphereLight(0x111133, 0x000000, 0.6); // слабый «ночной» свет
         scene.add(hemi);
+
+        // add stationary point lights for debugging
+        FLASHLIGHT_POINTS.forEach((p) => {
+            const light = new THREE.PointLight(0xffffff, 1, 15);
+            light.position.set(p.position.x, p.position.y, p.position.z);
+            light.castShadow = true;
+            scene.add(light);
+        });
 
         const renderer = new THREE.WebGLRenderer({antialias: true});
 
