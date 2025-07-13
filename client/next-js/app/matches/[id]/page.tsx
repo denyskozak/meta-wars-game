@@ -2,12 +2,12 @@
 import { useEffect, useMemo, useState, useRef } from "react";
 import Image from "next/image";
 import { useParams, useRouter } from "next/navigation";
-import { Slider } from "@heroui/slider";
 
 import { ButtonWithSound as Button } from "@/components/button-with-sound";
 import { assetUrl } from "@/utilities/assets";
 import { useWS } from "@/hooks/useWS";
 import { Navbar } from "@/components/navbar";
+import { ArrowLeftIcon, ArrowRightIcon } from "@/components/icons";
 import { useInterface } from "@/context/inteface";
 import { InterfaceContextValue, MatchDetail, PlayerData } from "@/types";
 import {
@@ -39,6 +39,24 @@ export default function MatchesPage() {
   const [selectedSkin, setSelectedSkin] = useState<string | null>(null);
   const [skinIndex, setSkinIndex] = useState(0);
   const previewAudioRef = useRef<HTMLAudioElement | null>(null);
+
+  const handlePrevSkin = () => {
+    const skins =
+      CLASS_SKINS[selectedClassPreview as keyof typeof CLASS_SKINS] || [];
+    const idx = Math.max(0, skinIndex - 1);
+
+    setSkinIndex(idx);
+    setSelectedSkin(skins[idx] || null);
+  };
+
+  const handleNextSkin = () => {
+    const skins =
+      CLASS_SKINS[selectedClassPreview as keyof typeof CLASS_SKINS] || [];
+    const idx = Math.min(skins.length - 1, skinIndex + 1);
+
+    setSkinIndex(idx);
+    setSelectedSkin(skins[idx] || null);
+  };
 
   const handleClassPreview = (cls: string) => {
     if (previewAudioRef.current) {
@@ -419,29 +437,31 @@ export default function MatchesPage() {
                   width={120}
                 />
               )}
-              <Slider
-                className="w-full max-w-sm mt-4"
-                maxValue={
-                  (
-                    CLASS_SKINS[
-                      selectedClassPreview as keyof typeof CLASS_SKINS
-                    ] || []
-                  ).length - 1
-                }
-                minValue={0}
-                step={1}
-                value={skinIndex}
-                onChange={(value) => {
-                  const skins =
-                    CLASS_SKINS[
-                      selectedClassPreview as keyof typeof CLASS_SKINS
-                    ] || [];
-                  const idx = Array.isArray(value) ? value[0] : value;
-
-                  setSkinIndex(idx as number);
-                  setSelectedSkin(skins[idx as number] || null);
-                }}
-              />
+              <div className="flex items-center gap-4 mt-4">
+                <Button
+                  isDisabled={skinIndex === 0}
+                  variant="light"
+                  onPress={handlePrevSkin}
+                >
+                  <ArrowLeftIcon size={20} />
+                </Button>
+                <span className="font-bold text-lg">{selectedSkin}</span>
+                <Button
+                  isDisabled={
+                    skinIndex ===
+                    (
+                      CLASS_SKINS[
+                        selectedClassPreview as keyof typeof CLASS_SKINS
+                      ] || []
+                    ).length -
+                      1
+                  }
+                  variant="light"
+                  onPress={handleNextSkin}
+                >
+                  <ArrowRightIcon size={20} />
+                </Button>
+              </div>
               <div className="flex gap-2 mt-4">
                 <Button variant="light" onPress={() => setStep(2)}>
                   Back
