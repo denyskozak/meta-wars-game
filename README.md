@@ -62,3 +62,15 @@ function withinMeleeCone(a, b) {
 ```
 
 Melee skills on the server use these functions to validate hits, ensuring the gameplay matches the melee indicator shown on the client.
+
+## Animation Map Generation
+
+Each skin GLB model contains a different set of animation clip names. A helper script is provided to scan the models and generate a JSON file with all available animation names.
+
+Run the script from the repository root:
+
+```bash
+python3 scripts/generate_animation_map.py
+```
+
+This will create `client/next-js/consts/skinAnimationMap.json` with all animation names and `client/next-js/consts/skinSkillMap.json` mapping each animation key to the proper clip for every skin. Both can be imported via the constants module.

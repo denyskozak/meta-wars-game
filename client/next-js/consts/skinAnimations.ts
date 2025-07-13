@@ -39,3 +39,6 @@ export const SKIN_ANIMATIONS: Record<string, AnimationMap> = {
   kayle: createDefaultMap("kayle"),
   kayn: createDefaultMap("kayn"),
 };
+
+export { default as SKIN_ANIMATION_NAMES } from "./skinAnimationMap.json";
+export { default as SKIN_SKILL_ANIMATIONS } from "./skinSkillMap.json";
