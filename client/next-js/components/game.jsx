@@ -801,16 +801,17 @@ export function Game({models, sounds, textures, matchId, character}) {
         // moonLight.castShadow = true;             // тени от объектов
         // scene.add(moonLight);
 
-        const hemi = new THREE.HemisphereLight(0x111133, 0x000000, 0.6); // слабый «ночной» свет
-        scene.add(hemi);
-
+        // const hemi = new THREE.HemisphereLight(0x111133, 0x000000, 0.6); // слабый «ночной» свет
+        // scene.add(hemi);
+        const ambientLight = new THREE.AmbientLight(0xffffff, 2);
+        scene.add(ambientLight);
         // add stationary point lights for debugging
-        FLASHLIGHT_POINTS.forEach((p) => {
-            const light = new THREE.PointLight(0xffffff, 1, 15);
-            light.position.set(p.position.x, p.position.y, p.position.z);
-            light.castShadow = true;
-            scene.add(light);
-        });
+        // FLASHLIGHT_POINTS.forEach((p) => {
+        //     const light = new THREE.PointLight(0xffffff, 2, 20);
+        //     light.position.set(p.position.x, p.position.y, p.position.z);
+        //     light.castShadow = true;
+        //     scene.add(light);
+        // });
 
         const renderer = new THREE.WebGLRenderer({antialias: true});
 

@@ -73,23 +73,23 @@ export const DeveloperPanel = ({ models = {} }: DeveloperPanelProps) => {
         />
         <span className="ml-2">{scale}</span>
       </div>
-      <div>
-        <label className="mr-2" htmlFor="dev-model-select">
-          Model
-        </label>
-        <select
-          id="dev-model-select"
-          value={model}
-          onChange={(e) => setModel(e.target.value)}
-        >
-          <option value="">select</option>
-          {modelList.map((m) => (
-            <option key={m} value={m}>
-              {m}
-            </option>
-          ))}
-        </select>
-      </div>
+      {/*<div>*/}
+      {/*  <label className="mr-2" htmlFor="dev-model-select">*/}
+      {/*    Model*/}
+      {/*  </label>*/}
+      {/*  <select*/}
+      {/*    id="dev-model-select"*/}
+      {/*    value={model}*/}
+      {/*    onChange={(e) => setModel(e.target.value)}*/}
+      {/*  >*/}
+      {/*    <option value="">select</option>*/}
+      {/*    {modelList.map((m) => (*/}
+      {/*      <option key={m} value={m}>*/}
+      {/*        {m}*/}
+      {/*      </option>*/}
+      {/*    ))}*/}
+      {/*  </select>*/}
+      {/*</div>*/}
     </div>
   );
 };

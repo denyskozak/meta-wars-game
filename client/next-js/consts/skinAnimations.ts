@@ -28,6 +28,7 @@ export const SKIN_ANIMATIONS: Record<string, AnimationMap> = {
   akali: createDefaultMap("akali"),
   kayle: createDefaultMap("kayle"),
   kayn: createDefaultMap("kayn"),
+  galio: createDefaultMap("galio"),
 };
 
 
