@@ -835,7 +835,7 @@ export function Game({models, sounds, textures, matchId, character}) {
         const DARKBALL_DAMAGE = 33; // increased by 10%
         const LIFEDRAIN_DAMAGE = 30;
         const FIRE_RING_DAMAGE = 20;
-        const FIRE_RING_RANGE = MELEE_RANGE_ATTACK * 2;
+        const FIRE_RING_RANGE = MELEE_RANGE_ATTACK * 2.5; // increased by 25%
         const FIRE_RING_DURATION = 500; // ms
         const KNOCKBACK_STRENGTH = 6;
         const LIGHTWAVE_RING_DURATION = 1000; // ms
@@ -1629,6 +1629,7 @@ export function Game({models, sounds, textures, matchId, character}) {
                         startSkillCooldown,
                         sounds,
                     });
+                    spawnDragonBreath(playerId);
                     break;
                 case "pyroblast":
                     castPyroblast({
@@ -2936,7 +2937,7 @@ export function Game({models, sounds, textures, matchId, character}) {
             player.getWorldPosition(position);
             position.y += 0.1;
 
-            const geometry = new THREE.RingGeometry(0.5, 1.0, 64);
+            const geometry = new THREE.RingGeometry(0.625, 1.25, 64); // 25% larger ring
             const material = new THREE.MeshBasicMaterial({
                 map: glowTexture,
                 color: 0xffaa33,
