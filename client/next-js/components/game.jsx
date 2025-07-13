@@ -790,7 +790,7 @@ export function Game({models, sounds, textures, matchId, character}) {
         // moonLight.castShadow = true;             // тени от объектов
         // scene.add(moonLight);
 
-        const hemi = new THREE.HemisphereLight(0x111133, 0x000000, 0.4); // слабый «ночной» свет
+        const hemi = new THREE.HemisphereLight(0x111133, 0x000000, 0.6); // слабый «ночной» свет
         scene.add(hemi);
 
         const renderer = new THREE.WebGLRenderer({antialias: true});

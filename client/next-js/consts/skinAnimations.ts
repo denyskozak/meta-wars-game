@@ -1,3 +1,5 @@
+import { default as SKIN_SKILL_ANIMATIONS } from "./skinSkillMap.json";
+
 export interface AnimationMap {
   idle: string;
   walk: string;
@@ -12,20 +14,8 @@ export interface AnimationMap {
   attack360: string;
 }
 
-function createDefaultMap(prefix: string): AnimationMap {
-  return {
-    idle: `${prefix}_idle1.anm`,
-    walk: `${prefix}_run.anm`,
-    run: `${prefix}_run.anm`,
-    jump: `${prefix}_spell4.anm`,
-    casting: `${prefix}_channel_windup.anm`,
-    castEnd: `${prefix}_spell1.anm`,
-    cast: "cast",
-    dying: `${prefix}_death.anm`,
-    hitReaction: "hit_reaction",
-    attack: "attack",
-    attack360: "attack_360",
-  };
+function createDefaultMap(skin: string): AnimationMap {
+  return SKIN_SKILL_ANIMATIONS[skin];
 }
 
 export const SKIN_ANIMATIONS: Record<string, AnimationMap> = {
@@ -40,5 +30,4 @@ export const SKIN_ANIMATIONS: Record<string, AnimationMap> = {
   kayn: createDefaultMap("kayn"),
 };
 
-export { default as SKIN_ANIMATION_NAMES } from "./skinAnimationMap.json";
-export { default as SKIN_SKILL_ANIMATIONS } from "./skinSkillMap.json";
+

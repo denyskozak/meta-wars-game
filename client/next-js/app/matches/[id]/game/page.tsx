@@ -131,13 +131,12 @@ export default function GamePage() {
     const charSkin = character?.skin
         ? character.skin
         : character?.classType
-            ? CLASS_MODELS[character.classType as keyof typeof CLASS_MODELS] || "vampir"
-            : "vampir";
+            ? CLASS_MODELS[character.classType as keyof typeof CLASS_MODELS] || "brand"
+            : "brand";
 
     const models = [
         {id: "zone", path: "zone-fantasy-1.glb", local: true},
         {id: "bolvar", path: "skins/bolvar.glb"},
-        {id: "vampir", path: "skins/vampir.glb"},
         {id: "mad", path: "skins/mad.glb"},
         {id: "brand", path: "skins/brand.glb", local: true},
         {id: "aurelion", path: "skins/aurelion.glb", local: true},

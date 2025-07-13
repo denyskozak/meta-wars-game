@@ -432,9 +432,10 @@ export default function MatchesPage() {
               {selectedSkin && (
                 <Image
                   alt={selectedSkin}
-                  height={120}
+                  height={500}
+                  className="w-[200] h-[350]"
                   src={`/images/skins/${selectedSkin}.webp`}
-                  width={120}
+                  width={200}
                 />
               )}
               <div className="flex items-center gap-4 mt-4">
