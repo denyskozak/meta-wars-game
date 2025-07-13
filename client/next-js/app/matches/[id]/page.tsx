@@ -7,6 +7,7 @@ import { ButtonWithSound as Button } from "@/components/button-with-sound";
 import { assetUrl } from "@/utilities/assets";
 import { useWS } from "@/hooks/useWS";
 import { Navbar } from "@/components/navbar";
+import { ArrowLeftIcon, ArrowRightIcon } from "@/components/icons";
 import { useInterface } from "@/context/inteface";
 import { InterfaceContextValue, MatchDetail, PlayerData } from "@/types";
 import {
@@ -442,7 +443,7 @@ export default function MatchesPage() {
                   variant="light"
                   onPress={handlePrevSkin}
                 >
-                  ←
+                  <ArrowLeftIcon size={20} />
                 </Button>
                 <span className="font-bold text-lg">{selectedSkin}</span>
                 <Button
@@ -458,7 +459,7 @@ export default function MatchesPage() {
                   variant="light"
                   onPress={handleNextSkin}
                 >
-                  →
+                  <ArrowRightIcon size={20} />
                 </Button>
               </div>
               <div className="flex gap-2 mt-4">
