@@ -13,17 +13,17 @@
     "attack360": "attack_360"
   },
   "kayn": {
-    "idle": "kayn_idle1.anm",
-    "walk": "kayn_run.anm",
-    "run": "kayn_run.anm",
-    "jump": "kayn_spell4.anm",
-    "casting": "kayn_channel_windup.anm",
-    "castEnd": "kayn_spell1.anm",
-    "cast": "kayn_spell2_assassin_cast.anm",
-    "dying": "kayn_death.anm",
-    "hitReaction": "hit_reaction",
-    "attack": "kayn_attack1.anm",
-    "attack360": "attack_360"
+    "idle": "Kayn_Idle1_loop",
+    "walk": "Kayn_Spell3_Run",
+    "run": "Kayn_Spell3_Run",
+    "jump": "Kayn_Spell3_Idle",
+    "casting": "",
+    "castEnd": "",
+    "cast": "",
+    "dying": "kayn_death",
+    "hitReaction": "",
+    "attack": "Kayn_Attack2",
+    "attack360": "Kayn_Spell1_Circle"
   },
   "fizz": {
     "idle": "fizz_idle1.anm",
