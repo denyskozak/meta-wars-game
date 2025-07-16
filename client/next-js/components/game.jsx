@@ -775,35 +775,34 @@ export function Game({models, sounds, textures, matchId, character}) {
             }, cooldownDuration);
         }
 
-        // const fillLight1 = new THREE.HemisphereLight(0x8dc1de, 0x00668d, 1.5);
+        // Lighting setup
+        const fillLight1 = new THREE.HemisphereLight(0x8dc1de, 0x00668d, 1.5);
+        fillLight1.position.set(2, 1, 1);
+        scene.add(fillLight1);
 
-        // fillLight1.position.set(2, 1, 1);
-        // scene.add(fillLight1);
+        const directionalLight = new THREE.DirectionalLight(0xffffff, 2.5);
+        directionalLight.position.set(-5, 25, -1);
+        directionalLight.castShadow = true;
+        directionalLight.shadow.camera.near = 0.01;
+        directionalLight.shadow.camera.far = 500;
+        directionalLight.shadow.camera.right = 30;
+        directionalLight.shadow.camera.left = -30;
+        directionalLight.shadow.camera.top = 30;
+        directionalLight.shadow.camera.bottom = -30;
+        directionalLight.shadow.mapSize.width = 1024;
+        directionalLight.shadow.mapSize.height = 1024;
+        directionalLight.shadow.radius = 4;
+        directionalLight.shadow.bias = -0.00006;
+        scene.add(directionalLight);
 
-        // const directionalLight = new THREE.DirectionalLight(0xffffff, 2.5);
+        const moonLight = new THREE.DirectionalLight(0x88aaff, 0.8);
+        moonLight.position.set(10, 20, -10);     // направление «луны»
+        moonLight.castShadow = true;             // тени от объектов
+        scene.add(moonLight);
 
-        // directionalLight.position.set(-5, 25, -1);
-        // directionalLight.castShadow = true;
-        // directionalLight.shadow.camera.near = 0.01;
-        // directionalLight.shadow.camera.far = 500;
-        // directionalLight.shadow.camera.right = 30;
-        // directionalLight.shadow.camera.left = -30;
-        // directionalLight.shadow.camera.top = 30;
-        // directionalLight.shadow.camera.bottom = -30;
-        // directionalLight.shadow.mapSize.width = 1024;
-        // directionalLight.shadow.mapSize.height = 1024;
-        // directionalLight.shadow.radius = 4;
-        // directionalLight.shadow.bias = -0.00006;
-        // scene.add(directionalLight);
-
-        // const moonLight = new THREE.DirectionalLight(0x88aaff, 0.8);
-        // moonLight.position.set(10, 20, -10);     // направление «луны»
-        // moonLight.castShadow = true;             // тени от объектов
-        // scene.add(moonLight);
-
-        // const hemi = new THREE.HemisphereLight(0x111133, 0x000000, 0.6); // слабый «ночной» свет
-        // scene.add(hemi);
-        const ambientLight = new THREE.AmbientLight(0xffffff, 2);
+        const hemi = new THREE.HemisphereLight(0x111133, 0x000000, 0.6); // слабый «ночной» свет
+        scene.add(hemi);
+        const ambientLight = new THREE.AmbientLight(0xffffff, 0.3);
         scene.add(ambientLight);
         // add stationary point lights for debugging
         // FLASHLIGHT_POINTS.forEach((p) => {
