@@ -31,7 +31,7 @@ import {world} from "../worlds/main/data";
 
 // spell implementations
 import castFireball, { meta as fireballMeta } from '../skills/mage/fireball';
-import castDragonBreath, { meta as dragonBreathMeta } from '../skills/mage/dragonBreath';
+import castFireBarrier, { meta as fireBarrierMeta } from '../skills/mage/fireBarrier';
 import castFireblast, { meta as fireblastMeta } from '../skills/mage/fireblast';
 import castPyroblast, { meta as pyroblastMeta } from '../skills/mage/pyroblast';
 import castFireRing, { meta as fireRingMeta } from '../skills/mage/fireRing';
@@ -72,7 +72,7 @@ import { MeshoptDecoder } from "three/examples/jsm/libs/meshopt_decoder.module.j
 
 const SPELL_ICONS = {
     [fireballMeta.id]: fireballMeta.icon,
-    [dragonBreathMeta.id]: dragonBreathMeta.icon,
+    [fireBarrierMeta.id]: fireBarrierMeta.icon,
     [fireblastMeta.id]: fireblastMeta.icon,
     [pyroblastMeta.id]: pyroblastMeta.icon,
     [shadowboltMeta.id]: shadowboltMeta.icon,
@@ -105,7 +105,7 @@ const SPELL_ICONS = {
 
 const SPELL_META = {
     [fireballMeta.id]: fireballMeta,
-    [dragonBreathMeta.id]: dragonBreathMeta,
+    [fireBarrierMeta.id]: fireBarrierMeta,
     [fireblastMeta.id]: fireblastMeta,
     [pyroblastMeta.id]: pyroblastMeta,
     [shadowboltMeta.id]: shadowboltMeta,
@@ -139,7 +139,6 @@ const SPELL_META = {
 const SPELL_SCALES = {
     // fireball enlarged for better visuals
     fireball: 0.5,
-    dragonBreath: 0.5,
     shadowbolt: 0.5,
     pyroblast: 2,
     chaosBolt: 2,
@@ -437,6 +436,7 @@ export function Game({models, sounds, textures, matchId, character}) {
         const activeSlowEffects = new Map(); // key = playerId -> {mesh, timeout}
         const activeSprintTrails = new Map(); // key = playerId -> {mesh, start, duration, timeout}
         const activeBladestorms = new Map(); // key = playerId -> {start, duration, sound}
+        const activeFireBarriers = new Map(); // key = playerId -> {mesh, start, duration}
         const fearTexture = new THREE.TextureLoader().load(assetUrl('/icons/classes/warlock/possession.jpg'));
 
         const glowTexture = (() => {
@@ -726,7 +726,7 @@ export function Game({models, sounds, textures, matchId, character}) {
             shadowbolt: 0,
             corruption: 10000,
             lifetap: 10000,
-            'dragon-breath': 3000,
+            'fire-barrier': 30000,
             fireblast: 6000,
             chaosbolt: 6000,
             lifedrain: 0,
@@ -854,9 +854,6 @@ export function Game({models, sounds, textures, matchId, character}) {
         const FIREBALL_DAMAGE = 44; // increased by 10%
         const PYROBLAST_DAMAGE = FIREBALL_DAMAGE * 1.4;
         const CHAOSBOLT_DAMAGE = FIREBALL_DAMAGE * 2;
-        const DRAGON_BREATH_DAMAGE = 80;
-        const DRAGON_BREATH_RANGE = MELEE_RANGE_ATTACK * 3;
-        const DRAGON_BREATH_ANGLE = (140 * Math.PI) / 180;
         const DARKBALL_DAMAGE = 33; // increased by 10%
         const LIFEDRAIN_DAMAGE = 30;
         const FIRE_RING_DAMAGE = 20;
@@ -947,7 +944,6 @@ export function Game({models, sounds, textures, matchId, character}) {
         const lightWaveRings = [];
         const projectileExplosions = [];
         const projectileTrails = [];
-        const dragonBreathEffects = [];
 
         // Crosshair elements
         const target = document.getElementById("target");
@@ -1117,7 +1113,7 @@ export function Game({models, sounds, textures, matchId, character}) {
             else if (className === 'paladin') castSpell('stun');
             else if (className === 'rogue') castSpell('eviscerate');
             else if (className === 'warrior') castSpell('warbringer');
-            else castSpell('dragon-breath');
+            else castSpell('fire-barrier');
         }
         function handleKeyF() {
             const className = character?.name?.toLowerCase();
@@ -1644,8 +1640,8 @@ export function Game({models, sounds, textures, matchId, character}) {
                         sounds,
                     });
                     break;
-                case "dragon-breath":
-                    castDragonBreath({
+                case "fire-barrier":
+                    castFireBarrier({
                         globalSkillCooldown,
                         isCasting,
                         mana,
@@ -1654,7 +1650,7 @@ export function Game({models, sounds, textures, matchId, character}) {
                         startSkillCooldown,
                         sounds,
                     });
-                    spawnDragonBreath(playerId);
+                    spawnFireBarrier(playerId);
                     break;
                 case "pyroblast":
                     castPyroblast({
@@ -3011,23 +3007,26 @@ export function Game({models, sounds, textures, matchId, character}) {
             lightWaveRings.push({ mesh, start: performance.now(), duration });
         }
 
-        function spawnDragonBreath(playerId, duration = 500) {
+        function spawnFireBarrier(playerId, duration = 5000) {
             const player = players.get(playerId)?.model;
             if (!player) return;
 
-            const group = new THREE.Group();
-            const half = DRAGON_BREATH_ANGLE / 2;
-            const count = 8;
-            for (let i = 0; i < count; i++) {
-                const sprite = makeGlowSprite(0xffaa33, 1.2);
-                const angle = -half + (i / (count - 1)) * DRAGON_BREATH_ANGLE;
-                sprite.position.set(Math.sin(angle) * DRAGON_BREATH_RANGE, 0.5, Math.cos(angle) * DRAGON_BREATH_RANGE);
-                group.add(sprite);
-            }
-            group.rotation.y = player.rotation.y;
-            player.add(group);
-            dragonBreathEffects.push({ group, start: performance.now(), duration });
+            const geometry = new THREE.SphereGeometry(1.1, 32, 32);
+            const material = new THREE.MeshBasicMaterial({
+                map: fireTexture,
+                color: 0xff5522,
+                transparent: true,
+                opacity: 0.7,
+                blending: THREE.AdditiveBlending,
+                depthWrite: false,
+                side: THREE.DoubleSide,
+            });
+            const mesh = new THREE.Mesh(geometry, material);
+            mesh.scale.set(0.6, 0.9, 0.6);
+            player.add(mesh);
+            activeFireBarriers.set(playerId, { mesh, start: performance.now(), duration });
         }
+
 
         function spawnProjectileExplosion(playerId, color, impactPosition, duration = EXPLOSION_DURATION) {
             let position;
@@ -3389,16 +3388,6 @@ export function Game({models, sounds, textures, matchId, character}) {
                         }
                     }
 
-                    for (let i = dragonBreathEffects.length - 1; i >= 0; i--) {
-                        const effect = dragonBreathEffects[i];
-                        const elapsed = performance.now() - effect.start;
-                        const progress = elapsed / effect.duration;
-                        effect.group.children.forEach(s => s.material.opacity = 0.9 * (1 - progress));
-                        if (progress >= 1) {
-                            scene.remove(effect.group);
-                            dragonBreathEffects.splice(i, 1);
-                        }
-                    }
 
                     for (let i = projectileExplosions.length - 1; i >= 0; i--) {
                         const effect = projectileExplosions[i];
@@ -3444,6 +3433,16 @@ export function Game({models, sounds, textures, matchId, character}) {
                             activeBladestorms.delete(id);
                             obj.sound?.pause();
                             if (id === myPlayerId) isCasting = false;
+                        }
+                    });
+
+                    activeFireBarriers.forEach((obj, id) => {
+                        const elapsed = performance.now() - obj.start;
+                        const progress = elapsed / obj.duration;
+                        obj.mesh.material.opacity = 0.7 * (1 - progress);
+                        if (progress >= 1) {
+                            obj.mesh.parent?.remove(obj.mesh);
+                            activeFireBarriers.delete(id);
                         }
                     });
 
@@ -3977,22 +3976,8 @@ export function Game({models, sounds, textures, matchId, character}) {
                             igniteHands(message.id, 1000);
                             castSphereOtherUser(message.payload);
                             break;
-                        case "dragon-breath":
-                            console.log("spawnDragonBreath: ", spawnDragonBreath);
-                            spawnDragonBreath(message.id);
-                            if (message.id !== myPlayerId) {
-                                const caster = players.get(message.id);
-                                const me = players.get(myPlayerId);
-                                if (caster && me) {
-                                    const origin = caster.model.position.clone();
-                                    const forward = new THREE.Vector3(0, 0, 1).applyQuaternion(caster.model.quaternion);
-                                    const toMe = me.model.position.clone().sub(origin);
-                                    const distance = toMe.length();
-                                    if (distance < DRAGON_BREATH_RANGE && forward.angleTo(toMe.normalize()) < DRAGON_BREATH_ANGLE / 2) {
-                                        takeDamage(DRAGON_BREATH_DAMAGE, message.id, 'dragon-breath');
-                                    }
-                                }
-                            }
+                        case "fire-barrier":
+                            spawnFireBarrier(message.id);
                             break;
                         case "fireball-hit":
                             spawnProjectileExplosion(
