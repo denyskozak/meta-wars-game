@@ -136,21 +136,22 @@ export default function GamePage() {
 
     const models = [
         {id: "zone", path: "zone-fantasy-1.glb", local: true},
-        {id: "bolvar", path: "skins/bolvar.glb"},
-        {id: "mad", path: "skins/mad.glb"},
-        {id: "brand", path: "skins/brand.glb", local: true},
-        {id: "aurelion", path: "skins/aurelion.glb", local: true},
-        {id: "annie", path: "skins/annie.glb", local: true},
-        {id: "fizz", path: "skins/fizz.glb", local: true},
-        {id: "karthus", path: "skins/karthus.glb", local: true},
-        {id: "darius", path: "skins/darius.glb", local: true},
-        {id: "kayn", path: "skins/kayn.glb", local: true},
-        {id: "akali", path: "skins/akali.glb", local: true},
-        {id: "galio", path: "skins/galio.glb", local: true},
+        {id: "bolvar", path: "skins/bolvar.glb", scale: 0.00665},
+        {id: "mad", path: "skins/mad.glb", scale: 0.00665},
+        {id: "brand", path: "skins/brand.glb", local: true, scale: 0.00665},
+        {id: "aurelion", path: "skins/aurelion.glb", local: true, scale: 0.00665},
+        {id: "annie", path: "skins/annie.glb", local: true, scale: 0.00665},
+        {id: "fizz", path: "skins/fizz.glb", local: true, scale: 0.00665},
+        {id: "karthus", path: "skins/karthus.glb", local: true, scale: 0.00665},
+        {id: "darius", path: "skins/darius.glb", local: true, scale: 0.00665},
+        {id: "kayn", path: "skins/kayn.glb", local: true, scale: 0.00665},
+        {id: "akali", path: "skins/akali.glb", local: true, scale: 0.00665},
+        {id: "galio", path: "skins/galio.glb", local: true, scale: 0.00665},
         {
             id: "character",
             path: `skins/${charSkin}.glb`,
-            local: true
+            local: true,
+            scale: 0.00665
         },
         {id: "heal-effect", path: "heal-effect.glb"},
         {id: "bottle_magic", path: "bottle_magic.glb"},
@@ -175,6 +176,7 @@ export default function GamePage() {
                         model.path,
                         (gltf) => {
                             loadedModels[model.id] = gltf.scene;
+                            loadedModels[model.id].userData.scale = model.scale ?? 0.00665;
                             if (gltf.animations) {
                                 loadedModels[`${model.id}_animations`] = gltf.animations;
                             }
