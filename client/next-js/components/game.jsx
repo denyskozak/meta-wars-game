@@ -421,7 +421,11 @@ export function Game({models, sounds, textures, matchId, character}) {
                 meleeRangeIndicator = null;
             }
             const anims = models[`${newModelName}_animations`] || animations;
-            playerData.actions = buildActions(playerData.mixer, anims, newModelName);
+            playerData.actions = buildActions(
+                playerData.mixer,
+                anims,
+                newModelName,
+            );
         };
 
         window.addEventListener('DEV_SCALE_CHANGE', handleScaleChange);
@@ -1934,14 +1938,21 @@ export function Game({models, sounds, textures, matchId, character}) {
 
             lightSword(myPlayerId, 500);
 
+            const attack = actions['attack'];
+            const originalScale = attack.timeScale;
+            attack.timeScale = originalScale * 0.6;
+
             controlAction({
-                action: actions['attack'],
+                action: attack,
                 actionName: 'attack',
                 mixer,
                 loop: THREE.LoopOnce,
                 fadeIn: 0.1,
                 reset: true,
                 clampWhenFinished: true,
+                onEnd: () => {
+                    attack.timeScale = originalScale;
+                },
             });
 
             sendToSocket({ type: 'CAST_SPELL', payload: { type: 'lightstrike' } });
@@ -1980,14 +1991,21 @@ export function Game({models, sounds, textures, matchId, character}) {
 
             lightSword(myPlayerId, 500);
 
+            const attack = actions['attack'];
+            const originalScale = attack.timeScale;
+            attack.timeScale = originalScale * 0.6;
+
             controlAction({
-                action: actions['attack'],
+                action: attack,
                 actionName: 'attack',
                 mixer,
                 loop: THREE.LoopOnce,
                 fadeIn: 0.1,
                 reset: true,
                 clampWhenFinished: true,
+                onEnd: () => {
+                    attack.timeScale = originalScale;
+                },
             });
 
             if (sounds.mortalStrike) {
@@ -3108,8 +3126,12 @@ export function Game({models, sounds, textures, matchId, character}) {
             if (!playerData) return;
             const { mixer, actions } = playerData;
 
+            const spin = actions['attack360'] || actions['attack'];
+            const originalScale = spin.timeScale;
+            spin.timeScale = originalScale * 0.6;
+
             controlAction({
-                action: actions['attack360'] || actions['attack'],
+                action: spin,
                 actionName: 'attack360',
                 mixer,
                 loop: THREE.LoopRepeat,
@@ -3133,6 +3155,7 @@ export function Game({models, sounds, textures, matchId, character}) {
 
             setTimeout(() => {
                 mixer.stopAllAction();
+                spin.timeScale = originalScale;
                 actions['idle'].play();
             }, duration)
         }
@@ -3581,7 +3604,11 @@ export function Game({models, sounds, textures, matchId, character}) {
                 // const walk = mixer.clipAction(animations[6]);
                 console.log("animations: ", animations);
                 console.log("characterModel: ", characterModel);
-                const actions = buildActions(mixer, animations, characterModel);
+                const actions = buildActions(
+                    mixer,
+                    animations,
+                    characterModel,
+                );
 
 
                 scene.add(player);
