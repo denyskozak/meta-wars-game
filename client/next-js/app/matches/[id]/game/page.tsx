@@ -144,7 +144,7 @@ export default function GamePage() {
         {id: "fizz", path: "skins/fizz.glb", local: true, scale: 0.00665},
         {id: "karthus", path: "skins/karthus.glb", local: true, scale: 0.00665},
         {id: "darius", path: "skins/darius.glb", local: true, scale: 0.34},
-        {id: "kayn", path: "skins/kayn.glb", local: true, scale: 0.00665},
+        {id: "kayn", path: "skins/kayn.glb", local: true, scale: 0.005},
         {id: "akali", path: "skins/akali.glb", local: true, scale: 0.00665},
         {id: "galio", path: "skins/galio.glb", local: true, scale: 0.00665},
         {
