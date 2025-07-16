@@ -45,7 +45,7 @@ export const Loading = ({ text, hideProgress = false }: LoadingProps) => {
       />
       <Image
         alt="Logo"
-        className="absolute top-4 left-4 z-[5]"
+        className="absolute top-4 left-4 z-[5] animate-logo-spin"
         height={48}
         src="/logo_big.png"
         width={48}

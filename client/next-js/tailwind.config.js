@@ -18,9 +18,14 @@ module.exports = {
           '0%, 100%': { transform: 'scale(1)' },
           '50%': { transform: 'scale(1.05)' },
         },
+        'logo-spin': {
+          '0%': { transform: 'rotate(0deg)' },
+          '100%': { transform: 'rotate(360deg)' },
+        },
       },
       animation: {
         'pulse-scale': 'pulse-scale 2s infinite',
+        'logo-spin': 'logo-spin 4s linear infinite',
       },
     },
   },
