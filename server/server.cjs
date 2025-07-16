@@ -69,9 +69,7 @@ const LIGHTSTRIKE_DAMAGE = 41; // increased by 20%
 const BLADESTORM_DAMAGE = 40;
 const BLOOD_STRIKE_DAMAGE = 35; // 15% reduction
 const BLOOD_STRIKE_RANGE = MELEE_RANGE * 0.8; // 20% smaller radius
-const DRAGON_BREATH_DAMAGE = 80;
-const DRAGON_BREATH_RANGE = MELEE_RANGE * 3;
-const DRAGON_BREATH_ANGLE = (140 * Math.PI) / 180;
+const FIRE_BARRIER_ABSORB = 100;
 
 function updateLevel(player) {
     const prevLevel = player.level || 1;
@@ -492,6 +490,19 @@ function applyDamage(match, victimId, dealerId, damage, spellType) {
 
     const reduction = victim.armor / 200; // 100 armor = 50% damage reduction
     totalDamage = totalDamage * Math.max(0, 1 - reduction);
+
+    if (victim.buffs.length) {
+        const now = Date.now();
+        victim.buffs.forEach(buff => {
+            if (buff.type === 'fire-barrier' && (buff.expires === undefined || buff.expires > now)) {
+                const absorb = Math.min(buff.remaining || 0, totalDamage);
+                totalDamage -= absorb;
+                buff.remaining = (buff.remaining || 0) - absorb;
+            }
+        });
+        victim.buffs = victim.buffs.filter(b => !(b.type === 'fire-barrier' && b.remaining <= 0));
+    }
+
     totalDamage = Math.round(totalDamage);
     victim.hp = Math.max(0, victim.hp - totalDamage);
     if (victim.hp <= 0) {
@@ -1052,7 +1063,7 @@ ws.on('connection', (socket) => {
                         }
 
 
-                        if (['corruption', 'shield', 'fireblast', 'lightstrike', 'lightwave', 'stun', 'paladin-heal', 'firering', 'blink', 'hand-of-freedom', 'divine-speed', 'lifedrain', 'fear', 'blood-strike', 'eviscerate', 'kidney-strike', 'adrenaline-rush', 'sprint', 'shadow-leap', 'warbringer', 'savage-blow', 'hamstring', 'bladestorm', 'berserk', 'bloodthirst', 'dragon-breath'].includes(message.payload.type)) {
+                        if (['corruption', 'shield', 'fireblast', 'lightstrike', 'lightwave', 'stun', 'paladin-heal', 'firering', 'blink', 'hand-of-freedom', 'divine-speed', 'lifedrain', 'fear', 'blood-strike', 'eviscerate', 'kidney-strike', 'adrenaline-rush', 'sprint', 'shadow-leap', 'warbringer', 'savage-blow', 'hamstring', 'bladestorm', 'berserk', 'bloodthirst', 'fire-barrier'].includes(message.payload.type)) {
                             broadcastToMatch(match.id, {
                                 type: 'CAST_SPELL',
                                 payload: message.payload,
@@ -1140,12 +1151,12 @@ ws.on('connection', (socket) => {
                                 }
                             });
                         }
-                        if (message.payload.type === 'dragon-breath') {
-                            match.players.forEach((p, tid) => {
-                                if (tid === id) return;
-                                if (withinCone(player, p, DRAGON_BREATH_RANGE, DRAGON_BREATH_ANGLE)) {
-                                    applyDamage(match, tid, id, DRAGON_BREATH_DAMAGE, 'dragon-breath');
-                                }
+                        if (message.payload.type === 'fire-barrier') {
+                            player.buffs.push({
+                                type: 'fire-barrier',
+                                remaining: FIRE_BARRIER_ABSORB,
+                                expires: Date.now() + 5000,
+                                icon: FIRE_RING_ICON,
                             });
                         }
                         if (message.payload.type === 'eviscerate') {

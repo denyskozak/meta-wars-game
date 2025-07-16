@@ -256,9 +256,9 @@ export default function MatchesPage() {
           description: "Hurls a fiery ball.",
         },
         {
-          ...mageSkills.dragonBreath,
-          name: "Dragon Breath",
-          description: "Unleash fiery breath in a cone.",
+          ...mageSkills.fireBarrier,
+          name: "Fire Barrier",
+          description: "Absorbs incoming damage with flames.",
         },
         {
           ...mageSkills.fireblast,
