@@ -398,10 +398,13 @@ export function Game({models, sounds, textures, matchId, character}) {
             if (!models[newModelName]) return;
             const playerData = players.get(myPlayerId);
             const oldModel = playerData.model;
-            const newModel = models[newModelName].clone();
+            const base = models[newModelName];
+            const defaultScale = base.userData?.scale ?? 0.00665;
+            const newModel = base.clone();
             newModel.position.copy(oldModel.position);
             newModel.rotation.copy(oldModel.rotation);
-            newModel.scale.set(currentScale, currentScale, currentScale);
+            newModel.scale.set(defaultScale, defaultScale, defaultScale);
+            currentScale = defaultScale;
             newModel.traverse((obj) => { if (obj.isMesh) obj.castShadow = true; });
             scene.remove(oldModel);
             scene.add(newModel);
@@ -3537,10 +3540,14 @@ export function Game({models, sounds, textures, matchId, character}) {
         function createPlayer(id, name = "", address = "", classType = "", characterModel = "vampir") {
             const baseModel = models[characterModel] || models['character'];
             if (baseModel) {
+                const defaultScale = baseModel.userData?.scale ?? 0.00665;
                 const player = SkeletonUtils.clone(baseModel);
                 player.position.set(...USER_DEFAULT_POSITION);
 
-                player.scale.set(currentScale, currentScale, currentScale);
+                player.scale.set(defaultScale, defaultScale, defaultScale);
+                if (id === myPlayerId) {
+                    currentScale = defaultScale;
+                }
                 player.rotation.set(0, 0, 0);
 
                 player.traverse((object) => {
