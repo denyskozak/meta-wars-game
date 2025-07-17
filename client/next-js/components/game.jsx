@@ -783,9 +783,9 @@ export function Game({models, sounds, textures, matchId, character}) {
         }
 
         // Lighting setup
-        const fillLight1 = new THREE.HemisphereLight(0x8dc1de, 0x00668d, 2);
-        fillLight1.position.set(2, 20, 1);
-        scene.add(fillLight1);
+        // const fillLight1 = new THREE.HemisphereLight(0x8dc1de, 0x00668d, 2);
+        // fillLight1.position.set(2, 20, 1);
+        // scene.add(fillLight1);
 
         const light = new THREE.AmbientLight(0xffffff, 2);
         scene.add(light);
