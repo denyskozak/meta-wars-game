@@ -170,7 +170,11 @@ export const Interface = () => {
                   ? "Energy"
                   : "Mana"
               }
-              color="primary"
+              color={
+                character.classType === "rogue" || character.classType === "warrior"
+                  ? "warning"
+                  : "primary"
+              }
               id="manaBar"
               value={Math.round((selfStats.mana / selfStats.maxMana) * 100)}
             />
@@ -220,7 +224,11 @@ export const Interface = () => {
                   : "Target Mana"
               }
               className="w-40"
-              color="primary"
+              color={
+                target.classType === "rogue" || target.classType === "warrior"
+                  ? "warning"
+                  : "primary"
+              }
               id="targetManaBar"
               value={Math.round((target.mana / target.maxMana) * 100)}
             />

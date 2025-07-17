@@ -8,8 +8,8 @@ The server and client share the same melee attack constants defined in `client/n
 
 ```json
 {
-  "MELEE_RANGE": 1.7,
-  "MELEE_ANGLE_DEG": 118.8
+  "MELEE_RANGE": 1.2,
+  "MELEE_ANGLE_DEG": 150
 }
 ```
 

@@ -4190,7 +4190,7 @@ export function Game({models, sounds, textures, matchId, character}) {
                                     const toMe = me.model.position.clone().sub(origin);
                                     const distance = toMe.length();
                                     if (distance < MELEE_RANGE_ATTACK && forward.angleTo(toMe.normalize()) < MELEE_ANGLE) {
-                                        applySlowEffect(myPlayerId, 5000, 0.3);
+                                        applySlowEffect(myPlayerId, 3000, 0.3);
                                     }
                                 }
                             }
@@ -4365,6 +4365,15 @@ export function Game({models, sounds, textures, matchId, character}) {
                                 rotation: message.rotation,
                             };
                             respawnPlayer(pos);
+                        }
+                    }
+                    break;
+                case "PULL_PLAYER":
+                    if (players.has(message.playerId)) {
+                        const p = players.get(message.playerId);
+                        p.position = message.position;
+                        if (message.playerId === myPlayerId) {
+                            teleportTo(message.position);
                         }
                     }
                     break;
