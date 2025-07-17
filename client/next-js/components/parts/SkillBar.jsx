@@ -40,7 +40,7 @@ const ROGUE_SKILLS = [
 const WARRIOR_SKILLS = [
     warriorSkills.warbringer,
     warriorSkills.savageBlow,
-    warriorSkills.hamstring,
+    warriorSkills.hook,
     warriorSkills.bladestorm,
 ];
 

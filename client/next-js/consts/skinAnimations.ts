@@ -12,6 +12,7 @@ export interface AnimationMap {
   hitReaction: string;
   attack: string;
   attack360: string;
+  hook?: string;
 }
 
 function createDefaultMap(skin: string): AnimationMap {

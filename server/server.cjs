@@ -1063,7 +1063,7 @@ ws.on('connection', (socket) => {
                         }
 
 
-                        if (['corruption', 'shield', 'fireblast', 'lightstrike', 'lightwave', 'stun', 'paladin-heal', 'firering', 'blink', 'hand-of-freedom', 'divine-speed', 'lifedrain', 'fear', 'blood-strike', 'eviscerate', 'kidney-strike', 'adrenaline-rush', 'sprint', 'shadow-leap', 'warbringer', 'savage-blow', 'hamstring', 'bladestorm', 'berserk', 'bloodthirst', 'fire-barrier'].includes(message.payload.type)) {
+                        if (['corruption', 'shield', 'fireblast', 'lightstrike', 'lightwave', 'stun', 'paladin-heal', 'firering', 'blink', 'hand-of-freedom', 'divine-speed', 'lifedrain', 'fear', 'blood-strike', 'eviscerate', 'kidney-strike', 'adrenaline-rush', 'sprint', 'shadow-leap', 'warbringer', 'savage-blow', 'hook', 'bladestorm', 'berserk', 'bloodthirst', 'fire-barrier'].includes(message.payload.type)) {
                             broadcastToMatch(match.id, {
                                 type: 'CAST_SPELL',
                                 payload: message.payload,

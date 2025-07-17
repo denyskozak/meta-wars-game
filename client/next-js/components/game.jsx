@@ -56,7 +56,7 @@ import castSprint, { meta as sprintMeta } from '../skills/rogue/sprint';
 import castShadowLeap, { meta as shadowLeapMeta } from '../skills/rogue/shadowLeap';
 import castWarbringer, { meta as warbringerMeta } from '../skills/warrior/warbringer';
 import { meta as savageBlowMeta } from '../skills/warrior/savageBlow';
-import castHamstring, { meta as hamstringMeta } from '../skills/warrior/hamstring';
+import castHook, { meta as hookMeta } from '../skills/warrior/hook';
 import castBladestorm, { meta as bladestormMeta } from '../skills/warrior/bladestorm';
 import castBerserk, { meta as berserkMeta } from '../skills/warrior/berserk';
 import castBloodthirst, { meta as bloodthirstMeta } from '../skills/warrior/bloodthirst';
@@ -95,7 +95,7 @@ const SPELL_ICONS = {
     [shadowLeapMeta.id]: shadowLeapMeta.icon,
     [warbringerMeta.id]: warbringerMeta.icon,
     [savageBlowMeta.id]: savageBlowMeta.icon,
-    [hamstringMeta.id]: hamstringMeta.icon,
+    [hookMeta.id]: hookMeta.icon,
     [bladestormMeta.id]: bladestormMeta.icon,
     [berserkMeta.id]: berserkMeta.icon,
     [bloodthirstMeta.id]: bloodthirstMeta.icon,
@@ -128,7 +128,7 @@ const SPELL_META = {
     [shadowLeapMeta.id]: shadowLeapMeta,
     [warbringerMeta.id]: warbringerMeta,
     [savageBlowMeta.id]: savageBlowMeta,
-    [hamstringMeta.id]: hamstringMeta,
+    [hookMeta.id]: hookMeta,
     [bladestormMeta.id]: bladestormMeta,
     [berserkMeta.id]: berserkMeta,
     [bloodthirstMeta.id]: bloodthirstMeta,
@@ -754,7 +754,7 @@ export function Game({models, sounds, textures, matchId, character}) {
             'shadow-leap': 12000,
             'warbringer': 10000,
             'savage-blow': 0,
-            'hamstring': 10000,
+            'hook': 10000,
             'bladestorm': 40000,
             'berserk': 45000,
             'bloodthirst': 30000,
@@ -1128,7 +1128,7 @@ export function Game({models, sounds, textures, matchId, character}) {
             if (className === 'warlock') castSpell('lifedrain');
             else if (className === 'paladin') castSpell('divine-speed');
             else if (className === 'rogue') castSpell('kidney-strike');
-            else if (className === 'warrior') castSpell('hamstring');
+            else if (className === 'warrior') castSpell('hook');
             else castSpell('blink');
         }
         function handleKeyJ() {
@@ -1865,8 +1865,8 @@ export function Game({models, sounds, textures, matchId, character}) {
                 case "savage-blow":
                     performSavageBlow();
                     break;
-                case "hamstring":
-                    castHamstring({
+                case "hook":
+                    castHook({
                         playerId,
                         globalSkillCooldown,
                         isCasting,
@@ -3556,6 +3556,7 @@ export function Game({models, sounds, textures, matchId, character}) {
                 hitReaction: get(map.hitReaction),
                 attack: get(map.attack),
                 attack360: get(map.attack360),
+                hook: get(map.hook),
             };
 
             // Speed up attack animations
@@ -4169,7 +4170,7 @@ export function Game({models, sounds, textures, matchId, character}) {
                                 }
                             }
                             break;
-                        case "hamstring":
+                        case "hook":
                             if (message.id !== myPlayerId) {
                                 const caster = players.get(message.id);
                                 const me = players.get(myPlayerId);
