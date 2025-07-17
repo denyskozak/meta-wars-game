@@ -12,6 +12,7 @@ export interface AnimationMap {
   hitReaction: string;
   attack: string;
   attack360: string;
+  dance: string;
   hook?: string;
 }
 
@@ -31,5 +32,3 @@ export const SKIN_ANIMATIONS: Record<string, AnimationMap> = {
   kayn: createDefaultMap("kayn"),
   galio: createDefaultMap("galio"),
 };
-
-

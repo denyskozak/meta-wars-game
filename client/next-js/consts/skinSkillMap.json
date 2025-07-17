@@ -10,7 +10,8 @@
     "dying": "annie_2012_death.anm",
     "hitReaction": "hit_reaction",
     "attack": "annie_2012_attack1.anm",
-    "attack360": "attack_360"
+    "attack360": "attack_360",
+    "dance": "annie_2012_dance_loop.anm"
   },
   "kayn": {
     "idle": "Kayn_Idle1_loop",
@@ -22,8 +23,9 @@
     "cast": "",
     "dying": "kayn_death",
     "hitReaction": "",
-    "attack": "Kayn_Attack1",
+    "attack": "Kayn_Attack2",
     "attack360": "Kayn_Spell1_Circle",
+    "dance": "kayn_dance.anm"
     "hook": "Kayn_Attack2"
   },
   "fizz": {
@@ -37,7 +39,8 @@
     "dying": "fizz_death.anm",
     "hitReaction": "hit_reaction",
     "attack": "fizz_attack1.anm",
-    "attack360": "attack_360"
+    "attack360": "attack_360",
+    "dance": "fizz_dance.anm"
   },
   "karthus": {
     "idle": "karthus_idle1.anm",
@@ -50,7 +53,8 @@
     "dying": "karthus_death.anm",
     "hitReaction": "hit_reaction",
     "attack": "karthus_attack1.anm",
-    "attack360": "attack_360"
+    "attack360": "attack_360",
+    "dance": "karthus_dance_loop.anm"
   },
   "brand": {
     "idle": "brand_idle1.anm",
@@ -63,7 +67,8 @@
     "dying": "brand_death.anm",
     "hitReaction": "hit_reaction",
     "attack": "brand_attack1.anm",
-    "attack360": "attack_360"
+    "attack360": "attack_360",
+    "dance": "brand_dance.anm"
   },
   "darius": {
     "idle": "darius_idle1.anm",
@@ -77,7 +82,8 @@
     "hitReaction": "hit_reaction",
     "attack": "darius_attack1.anm",
     "attack360": "darius_spell1.anm",
-    "hook": "darius_spell3.anm"
+    "hook": "darius_spell3.anm",
+    "dance": "darius_dance.anm"
   },
   "aurelion": {
     "idle": "aurelionsol_idle1.anm",
@@ -90,7 +96,8 @@
     "dying": "aurelionsol_death.anm",
     "hitReaction": "hit_reaction",
     "attack": "aurelionsol_attack1.anm",
-    "attack360": "attack_360"
+    "attack360": "attack_360",
+    "dance": "aurelionsol_danceloop.anm"
   },
   "akali": {
     "idle": "akali_idle1.anm",
@@ -103,7 +110,8 @@
     "dying": "akali_death.anm",
     "hitReaction": "hit_reaction",
     "attack": "akali_base_attack1_to_run2",
-    "attack360": "attack_360"
+    "attack360": "attack_360",
+    "dance": "Dance"
   },
   "galio": {
     "idle": "galio_idle1.anm",
@@ -116,6 +124,7 @@
     "dying": "galio_death.anm",
     "hitReaction": "hit_reaction",
     "attack": "galio_attack01.anm",
-    "attack360": "attack_360"
+    "attack360": "attack_360",
+    "dance": "galio_dance_loop.anm"
   }
 }
