@@ -993,6 +993,11 @@ ws.on('connection', (socket) => {
                 if (match) {
                     const player = match.players.get(id);
                     player.animationAction = message.actionName;
+                    broadcastToMatch(match.id, {
+                        type: 'UPDATE_ANIMATION',
+                        playerId: id,
+                        actionName: message.actionName,
+                    }, id);
                 }
                 break;
             case 'UPDATE_POSITION':
@@ -1136,10 +1141,32 @@ ws.on('connection', (socket) => {
                             });
                         }
                         if (message.payload.type === 'savage-blow') {
+                            const hasRage = player.buffs?.some(b => b.type === 'rage' && (b.expires === undefined || b.expires > Date.now()));
+                            const damage = hasRage ? LIGHTSTRIKE_DAMAGE * 1.3 : LIGHTSTRIKE_DAMAGE;
                             match.players.forEach((p, tid) => {
                                 if (tid === id) return;
                                 if (withinMeleeCone(player, p)) {
-                                    applyDamage(match, tid, id, LIGHTSTRIKE_DAMAGE, 'savage-blow');
+                                    applyDamage(match, tid, id, damage, 'savage-blow');
+                                }
+                            });
+                        }
+                        if (message.payload.type === 'hook') {
+                            match.players.forEach((p, tid) => {
+                                if (tid === id) return;
+                                if (withinMeleeCone(player, p)) {
+                                    const pos = { ...player.position };
+                                    p.position = pos;
+                                    p.debuffs = p.debuffs || [];
+                                    p.debuffs.push({
+                                        type: 'slow',
+                                        expires: Date.now() + 3000,
+                                        icon: '/icons/classes/warrior/hook.jpg',
+                                    });
+                                    broadcastToMatch(match.id, {
+                                        type: 'PULL_PLAYER',
+                                        playerId: tid,
+                                        position: pos,
+                                    });
                                 }
                             });
                         }
