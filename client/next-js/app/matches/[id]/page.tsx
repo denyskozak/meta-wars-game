@@ -109,9 +109,9 @@ export default function MatchesPage() {
           description: "Powerful melee attack.",
         },
         {
-          ...warriorSkills.hamstring,
-          name: "Hamstring",
-          description: "Slows the enemy.",
+          ...warriorSkills.hook,
+          name: "Hook",
+          description: "Pulls the enemy.",
         },
         {
           ...warriorSkills.bladestorm,

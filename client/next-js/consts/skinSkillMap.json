@@ -75,7 +75,8 @@
     "dying": "darius_death.anm",
     "hitReaction": "hit_reaction",
     "attack": "darius_attack1.anm",
-    "attack360": "darius_spell1.anm"
+    "attack360": "darius_spell1.anm",
+    "hook": "darius_spell3.anm"
   },
   "aurelion": {
     "idle": "aurelionsol_idle1.anm",
