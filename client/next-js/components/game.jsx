@@ -4292,8 +4292,13 @@ export function Game({models, sounds, textures, matchId, character}) {
                     break;
                 }
                 case "DAMAGE":
-                    if (message.targetId && (message.targetId === myPlayerId || message.dealerId === myPlayerId)) {
-                        showDamage(message.targetId, message.amount, message.spellType);
+                    if (
+                        message.targetId &&
+                        (message.targetId === myPlayerId || message.dealerId === myPlayerId)
+                    ) {
+                        if (message.targetId !== myPlayerId) {
+                            showDamage(message.targetId, message.amount, message.spellType);
+                        }
                         if (message.targetId === myPlayerId) {
                             showSelfDamage(message.amount);
                             sounds.damage.volume = 0.5;
