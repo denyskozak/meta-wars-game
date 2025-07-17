@@ -1143,6 +1143,21 @@ export function Game({models, sounds, textures, matchId, character}) {
                 `Looking direction: x=${lookDir.x}, y=${lookDir.y}, z=${lookDir.z}`,
             );
         }
+        function handleDanceStart() {
+            const { mixer, actions } = players.get(myPlayerId);
+            const actionName = 'dance';
+            controlAction({
+                action: actions[actionName],
+                actionName,
+                mixer,
+                loop: THREE.LoopRepeat,
+                fadeIn: 0.2,
+                reset: true,
+            });
+        }
+        function handleDanceStop() {
+            setAnimation('idle');
+        }
         function handleKeyT() {
             dispatch({type: 'SET_SCOREBOARD_VISIBLE', payload: true});
         }
@@ -1207,6 +1222,11 @@ export function Game({models, sounds, textures, matchId, character}) {
                 handleEscape();
                 return;
             }
+            if (event.altKey && event.code === "Digit3") {
+                handleDanceStart();
+                keyStates[event.code] = true;
+                return;
+            }
             if (event.code === "Enter") {
                 if (!isChatActive) {
                     chatInputElement.focus();
@@ -1248,6 +1268,10 @@ export function Game({models, sounds, textures, matchId, character}) {
             if (isChatActive) return;
 
             if (!controlsEnabled || debuffsRef.current.some(d => d.type === 'stun') || menuVisibleRef.current) return;
+
+            if (event.code === "Digit3" || event.code === "AltLeft" || event.code === "AltRight") {
+                handleDanceStop();
+            }
 
             keyStates[event.code] = false;
 
@@ -3556,6 +3580,7 @@ export function Game({models, sounds, textures, matchId, character}) {
                 hitReaction: get(map.hitReaction),
                 attack: get(map.attack),
                 attack360: get(map.attack360),
+                dance: get(map.dance),
                 hook: get(map.hook),
             };
 
