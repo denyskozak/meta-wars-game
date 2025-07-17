@@ -790,8 +790,8 @@ export function Game({models, sounds, textures, matchId, character}) {
         const light = new THREE.AmbientLight(0xffffff, 2);
         scene.add(light);
 
-        const directionalLight = new THREE.DirectionalLight(0xffffff, 8);
-        directionalLight.position.set(5, 10, 7.5);
+        const directionalLight = new THREE.DirectionalLight(0xffffff, 5);
+        directionalLight.position.set(5, 15, 7.5);
         directionalLight.castShadow = true;
         scene.add(directionalLight);
 
