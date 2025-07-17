@@ -783,13 +783,23 @@ export function Game({models, sounds, textures, matchId, character}) {
         }
 
         // Lighting setup
-        const fillLight1 = new THREE.HemisphereLight(0x8dc1de, 0x00668d, 2);
-        fillLight1.position.set(2, 20, 1);
-        scene.add(fillLight1);
+        // const fillLight1 = new THREE.HemisphereLight(0x8dc1de, 0x00668d, 2);
+        // fillLight1.position.set(2, 20, 1);
+        // scene.add(fillLight1);
 
         const light = new THREE.AmbientLight(0xffffff, 2);
         scene.add(light);
 
+        const directionalLight = new THREE.DirectionalLight(0xffffff, 5);
+        directionalLight.position.set(5, 15, 7.5);
+        directionalLight.castShadow = true;
+        scene.add(directionalLight);
+
+        //Set up shadow properties for the light
+        directionalLight.shadow.mapSize.width = 512; // default
+        directionalLight.shadow.mapSize.height = 512; // default
+        directionalLight.shadow.camera.near = 0.5; // default
+        directionalLight.shadow.camera.far = 500; // default
 
         // const directionalLight = new THREE.DirectionalLight(0xffffff, 2.5);
         // directionalLight.position.set(-5, 25, -1);
@@ -835,7 +845,7 @@ export function Game({models, sounds, textures, matchId, character}) {
         function preloadMesh(mesh, color = 0xffaa33) {
             const temp = mesh.clone();
             temp.visible = false;
-            const light = new THREE.PointLight(color, 1, 5);
+            const light = new THREE.PointLight(color, 2, 5);
             temp.add(light);
             scene.add(temp);
             renderer.compile(scene, camera);

@@ -26,6 +26,7 @@
     "attack": "Kayn_Attack2",
     "attack360": "Kayn_Spell1_Circle",
     "dance": "kayn_dance.anm"
+    "hook": "Kayn_Attack2"
   },
   "fizz": {
     "idle": "fizz_idle1.anm",
@@ -73,7 +74,7 @@
     "idle": "darius_idle1.anm",
     "walk": "darius_run.anm",
     "run": "darius_run.anm",
-    "jump": "darius_spell4.anm",
+    "jump": "darius_taunt.anm",
     "casting": "darius_channel_windup.anm",
     "castEnd": "darius_spell1.anm",
     "cast": "cast",
