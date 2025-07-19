@@ -367,6 +367,7 @@ export function Game({models, sounds, textures, matchId, character}) {
 
 
         let movementSpeedModifier = 1; // Normal speed
+        let speedBuffActive = false;
 
         const damageBar = document.getElementById("damage");
         const selfDamage = document.getElementById("selfDamage");
@@ -1107,13 +1108,16 @@ export function Game({models, sounds, textures, matchId, character}) {
         const chatInputElement = document.getElementById("chat-input");
 
         function handleKeyW() {
-            !isCasting && !isActionRunning(PRIORITY_ACTIONS) && setAnimation("walk");
+            !isCasting && !isActionRunning(PRIORITY_ACTIONS) &&
+                setAnimation(speedBuffActive ? "run" : "walk");
         }
         function handleKeyA() {
-            !isCasting && !isActionRunning(PRIORITY_ACTIONS) && setAnimation("walk");
+            !isCasting && !isActionRunning(PRIORITY_ACTIONS) &&
+                setAnimation(speedBuffActive ? "run" : "walk");
         }
         function handleKeyD() {
-            !isCasting && !isActionRunning(PRIORITY_ACTIONS) && setAnimation("walk");
+            !isCasting && !isActionRunning(PRIORITY_ACTIONS) &&
+                setAnimation(speedBuffActive ? "run" : "walk");
         }
         function handleKeyS() {
             !isCasting && !isActionRunning(PRIORITY_ACTIONS) && setAnimation("idle");
@@ -1790,6 +1794,7 @@ export function Game({models, sounds, textures, matchId, character}) {
                         sounds,
                     });
                     applySpeedEffect(playerId, 5000, 2);
+                    spawnSprintTrail(playerId, 5000);
                     break;
                 case "paladin-heal":
                     castPaladinHeal({
@@ -1847,6 +1852,8 @@ export function Game({models, sounds, textures, matchId, character}) {
                         startSkillCooldown,
                         sounds,
                     });
+                    applySpeedEffect(playerId, 8000);
+                    spawnSprintTrail(playerId, 8000);
                     break;
                 case "sprint":
                     castSprint({
@@ -2387,12 +2394,12 @@ export function Game({models, sounds, textures, matchId, character}) {
             // Rotate the camera horizontally using A and D instead of strafing
             if (keyStates["KeyA"]) {
                 playerVelocity.add(getSideVector().multiplyScalar(-speedDelta));
-                if (!isAnyActionRunning()) setAnimation("walk");
+                if (!isAnyActionRunning()) setAnimation(speedBuffActive ? "run" : "walk");
             }
 
             if (keyStates["KeyD"]) {
                 playerVelocity.add(getSideVector().multiplyScalar(speedDelta));
-                if (!isAnyActionRunning()) setAnimation("walk");
+                if (!isAnyActionRunning()) setAnimation(speedBuffActive ? "run" : "walk");
             }
 
             if (keyStates["KeyW"]) {
@@ -2438,7 +2445,7 @@ export function Game({models, sounds, textures, matchId, character}) {
                     Math.cos(y),
                 );
                 playerVelocity.add(forwardVector.multiplyScalar(speedDelta));
-                if (!isAnyActionRunning()) setAnimation("walk");
+                if (!isAnyActionRunning()) setAnimation(speedBuffActive ? "run" : "walk");
             }
 
             if (keyStates["KeyS"]) {
@@ -2449,7 +2456,7 @@ export function Game({models, sounds, textures, matchId, character}) {
                 );
 
                 playerVelocity.add(backwardVector.multiplyScalar(speedDelta));
-                if (!isAnyActionRunning()) setAnimation("walk");
+                if (!isAnyActionRunning()) setAnimation(speedBuffActive ? "run" : "walk");
             }
         }
 
@@ -2948,7 +2955,11 @@ export function Game({models, sounds, textures, matchId, character}) {
         function applySpeedEffect(playerId, duration = 5000, multiplier = 1.4) {
             if (playerId === myPlayerId) {
                 movementSpeedModifier = multiplier;
-                setTimeout(() => (movementSpeedModifier = 1), duration);
+                speedBuffActive = true;
+                setTimeout(() => {
+                    movementSpeedModifier = 1;
+                    speedBuffActive = false;
+                }, duration);
             }
         }
 
@@ -4134,6 +4145,7 @@ export function Game({models, sounds, textures, matchId, character}) {
                         case "divine-speed":
                             if (message.id === myPlayerId) {
                                 applySpeedEffect(myPlayerId, 5000, 2);
+                                spawnSprintTrail(myPlayerId, 5000);
                             }
                             break;
                         case "blood-strike":
@@ -4166,6 +4178,7 @@ export function Game({models, sounds, textures, matchId, character}) {
                         case "adrenaline-rush":
                             if (message.id === myPlayerId) {
                                 applySpeedEffect(myPlayerId, 8000);
+                                spawnSprintTrail(myPlayerId, 8000);
                             }
                             break;
                         case "sprint":
