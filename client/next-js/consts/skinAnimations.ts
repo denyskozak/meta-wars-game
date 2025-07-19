@@ -31,4 +31,5 @@ export const SKIN_ANIMATIONS: Record<string, AnimationMap> = {
   kayle: createDefaultMap("kayle"),
   kayn: createDefaultMap("kayn"),
   galio: createDefaultMap("galio"),
+  yassuo: createDefaultMap("yassuo"),
 };

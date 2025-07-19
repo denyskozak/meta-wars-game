@@ -147,6 +147,7 @@ export default function GamePage() {
         {id: "kayn", path: "skins/kayn.glb", local: true, scale: 0.005},
         {id: "akali", path: "skins/akali.glb", local: true, scale: 0.00665},
         {id: "galio", path: "skins/galio.glb", local: true, scale: 0.00665},
+        {id: "yassuo", path: "skins/yassuo.glb", local: true, scale: 0.00665},
         {
             id: "character",
             path: `skins/${charSkin}.glb`,

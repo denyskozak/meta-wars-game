@@ -390,5 +390,23 @@
     "galio_spell4_short_in.anm",
     "galio_spell4_short_out.anm",
     "galio_taunt.anm"
+  ],
+  "yassuo": [
+    "yassuo_attack1.anm",
+    "yassuo_attack2.anm",
+    "yassuo_channel.anm",
+    "yassuo_channel_windup.anm",
+    "yassuo_dance.anm",
+    "yassuo_death.anm",
+    "yassuo_idle1.anm",
+    "yassuo_joke.anm",
+    "yassuo_laugh.anm",
+    "yassuo_recall.anm",
+    "yassuo_recall_idle.anm",
+    "yassuo_run.anm",
+    "yassuo_spell1.anm",
+    "yassuo_spell2.anm",
+    "yassuo_spell4.anm",
+    "yassuo_taunt.anm"
   ]
 }
