@@ -64,7 +64,7 @@ import castBloodthirst, { meta as bloodthirstMeta } from '../skills/warrior/bloo
 
 import {Interface} from "@/components/layout/Interface";
 import * as iceShieldMesh from "three/examples/jsm/utils/SkeletonUtils";
-import {Loading} from "@/components/loading";
+import { MatchLoading } from "@/components/match-loading";
 import { Countdown } from "./parts/Countdown.jsx";
 import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader";
 import { DRACOLoader } from "three/examples/jsm/loaders/DRACOLoader";
@@ -229,6 +229,7 @@ export function Game({models, sounds, textures, matchId, character}) {
     const router = useRouter();
     const [isReadyToPlay, setIsReadyToPlay] = useState(false);
     const [countdown, setCountdown] = useState(0);
+    const [playersInfo, setPlayersInfo] = useState([]);
     // scoreboard visibility and data managed via interface context
     const account = useCurrentAccount();
     const address = account?.address;
@@ -4022,15 +4023,20 @@ export function Game({models, sounds, textures, matchId, character}) {
             switch (message.type) {
                 case "GET_MATCH":
                     if (message.match && Array.isArray(message.match.players)) {
+                        const list = [];
                         message.match.players.forEach(([pid, pdata]) => {
                             const id = Number(pid);
                             if (players.has(id)) {
-                                players.get(id).classType = pdata.classType;
-                                players.get(id).character = pdata.character;
+                                const p = players.get(id);
+                                p.classType = pdata.classType;
+                                p.character = pdata.character;
+                                p.nickname = pdata.nickname;
                             } else {
-                                players.set(id, { classType: pdata.classType, character: pdata.character });
+                                players.set(id, { classType: pdata.classType, character: pdata.character, nickname: pdata.nickname });
                             }
+                            list.push({ id, classType: pdata.classType, nickname: pdata.nickname });
                         });
+                        setPlayersInfo(list);
                     }
                     break;
                 case "CAST_SPELL":
@@ -4539,7 +4545,7 @@ export function Game({models, sounds, textures, matchId, character}) {
         <div ref={containerRef} id="game-container" className="w-full h-full">
             <Interface/>
             {countdown > 0 && <Countdown seconds={countdown} onComplete={() => setCountdown(0)} />}
-            {!isReadyToPlay && (<Loading hideProgress text="Wait Other Players ..."/>)}
+            {!isReadyToPlay && (<MatchLoading players={playersInfo} />)}
         </div>
     );
 }
