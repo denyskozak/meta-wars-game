@@ -25,7 +25,7 @@
     "hitReaction": "",
     "attack": "Kayn_Attack2",
     "attack360": "Kayn_Spell1_Circle",
-    "dance": "kayn_dance.anm"
+    "dance": "kayn_dance.anm",
     "hook": "Kayn_Attack2"
   },
   "fizz": {
