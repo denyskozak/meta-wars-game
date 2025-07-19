@@ -1990,6 +1990,7 @@ export function Game({models, sounds, textures, matchId, character}) {
                 clampWhenFinished: true,
                 onEnd: () => {
                     attack.timeScale = originalScale;
+                    setAnimation('idle');
                 },
             });
 
@@ -2043,6 +2044,7 @@ export function Game({models, sounds, textures, matchId, character}) {
                 clampWhenFinished: true,
                 onEnd: () => {
                     attack.timeScale = originalScale;
+                    setAnimation('idle');
                 },
             });
 
