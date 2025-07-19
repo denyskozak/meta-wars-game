@@ -319,6 +319,7 @@ function createPlayer(address, classType, character) {
         address,
         classType,
         character: charName,
+        nickname: profiles[address]?.nickname || address,
     };
 }
 
