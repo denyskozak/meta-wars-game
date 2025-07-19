@@ -126,5 +126,19 @@
     "attack": "galio_attack01.anm",
     "attack360": "attack_360",
     "dance": "galio_dance_loop.anm"
+  },
+  "yassuo": {
+    "idle": "yassuo_idle1.anm",
+    "walk": "yassuo_run.anm",
+    "run": "yassuo_run.anm",
+    "jump": "yassuo_spell4.anm",
+    "casting": "yassuo_channel_windup.anm",
+    "castEnd": "yassuo_spell1.anm",
+    "cast": "cast",
+    "dying": "yassuo_death.anm",
+    "hitReaction": "hit_reaction",
+    "attack": "yassuo_attack1.anm",
+    "attack360": "attack_360",
+    "dance": "yassuo_dance.anm"
   }
 }
