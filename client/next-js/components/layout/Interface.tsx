@@ -1,5 +1,6 @@
 import { Progress } from "@heroui/react";
 
+import { KeyboardHints } from "../parts/KeyboardHints.jsx";
 import { SkillBar } from "../parts/SkillBar.jsx";
 import { CastBar } from "../parts/CastBar.jsx";
 import { Chat } from "../parts/Chat.jsx";
@@ -17,9 +18,6 @@ import { CLASS_ICONS } from "@/consts/classes";
 
 import "./Interface.css";
 import Image from "next/image";
-
-import { assetUrl } from "@/utilities/assets";
-
 import React, { useEffect, useState } from "react";
 
 import { MAX_HP, MAX_MANA } from "../../consts";
@@ -171,7 +169,8 @@ export const Interface = () => {
                   : "Mana"
               }
               color={
-                character.classType === "rogue" || character.classType === "warrior"
+                character.classType === "rogue" ||
+                character.classType === "warrior"
                   ? "warning"
                   : "primary"
               }
@@ -257,7 +256,7 @@ export const Interface = () => {
           zIndex: 1000,
         }}
       >
-        <div id="targetImage" className="crosshair not-targeted" />
+        <div className="crosshair not-targeted" id="targetImage" />
       </div>
 
       <div className="self-damage-container" id="selfDamage" />
@@ -276,6 +275,7 @@ export const Interface = () => {
       <ExperienceBar />
       <LevelUp />
       <KillNotification />
+      <KeyboardHints />
       <Chat />
     </div>
   );
