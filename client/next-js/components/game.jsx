@@ -3587,7 +3587,7 @@ export function Game({models, sounds, textures, matchId, character}) {
         function buildActions(mixer, animations, skin = 'brand') {
             const map = SKIN_ANIMATIONS[skin] || SKIN_ANIMATIONS['brand'];
             const get = (...names) => {
-                const lowerNames = names.map(n => n.toLowerCase());
+                const lowerNames = names.map(n => n?.toLowerCase() || '');
                 const clip = animations.find(c => lowerNames.includes(c.name.toLowerCase()));
                 return clip ? mixer.clipAction(clip) : null;
             };

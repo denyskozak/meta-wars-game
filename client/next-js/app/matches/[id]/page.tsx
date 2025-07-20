@@ -435,8 +435,8 @@ export default function MatchesPage() {
                   alt={SKIN_NAMES[selectedSkin as keyof typeof SKIN_NAMES] ||
                     selectedSkin}
                   className="w-[200] h-[350]"
-                  height={500}
-                  src={`/images/skins/${selectedSkin}.webp`}
+                  height={450}
+                  src={`/images/skins/${selectedSkin}.jpg`}
                   width={200}
                 />
               )}
