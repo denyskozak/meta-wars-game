@@ -14,6 +14,7 @@ import { useParams, useRouter } from "next/navigation";
 import { ButtonWithSound as Button } from "@/components/button-with-sound";
 import { useWS } from "@/hooks/useWS";
 import { Navbar } from "@/components/navbar";
+import { SKIN_NAMES } from "@/consts";
 
 interface PlayerSummary {
   id: number;
@@ -83,7 +84,12 @@ export default function MatchSummaryPage() {
                   <TableCell>{p.reward}</TableCell>
                   <TableCell>{p.coins}</TableCell>
                   <TableCell>
-                    {p.item ? `${p.item.skin} ${p.item.class}` : "-"}
+                    {p.item
+                      ? `${
+                          SKIN_NAMES[p.item.skin as keyof typeof SKIN_NAMES] ||
+                          p.item.skin
+                        } ${p.item.class}`
+                      : "-"}
                   </TableCell>
                   <TableCell>{p.rankDelta}</TableCell>
                 </TableRow>

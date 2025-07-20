@@ -16,5 +16,6 @@ export { default as SPELL_COST } from "./spellCosts.json";
 export { default as CLASS_MODELS } from "./classModels.json";
 export { default as CLASS_SKINS } from "./classSkins.json";
 export * from "./skinAnimations";
+export { default as SKIN_NAMES } from "./skinNames";
 export { default as CLASS_STATS } from "./classStats.json";
 export * from "./melee";
