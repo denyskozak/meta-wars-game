@@ -4620,7 +4620,19 @@ export function Game({models, sounds, textures, matchId, character}) {
                         const cls = playerOptions?.classType || "";
                         const charModel = playerOptions?.character || CLASS_MODELS[cls] || 'vampir';
                         createPlayer(Number(playerId), String(playerId), String(playerId), cls, charModel);
+                        if (Number(playerId) === myPlayerId) {
+                            learnedSkills = playerOptions.learnedSkills || learnedSkills;
+                            skillPoints = playerOptions.skillPoints ?? skillPoints;
+                            hp = playerOptions.hp ?? hp;
+                            maxHp = playerOptions.maxHp ?? maxHp;
+                            armor = playerOptions.armor ?? armor;
+                            maxArmor = playerOptions.maxArmor ?? maxArmor;
+                            mana = playerOptions.mana ?? mana;
+                            maxMana = playerOptions.maxMana ?? maxMana;
+                        }
                     })
+                    updateHPBar();
+                    updateManaBar();
                     startCountdown();
                     break;
             }
