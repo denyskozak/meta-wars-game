@@ -14,6 +14,7 @@ import {
   CLASS_MODELS,
   CLASS_SKINS,
   CLASS_STATS,
+  SKIN_NAMES,
   MAX_HP,
   MAX_MANA,
 } from "@/consts";
@@ -431,7 +432,8 @@ export default function MatchesPage() {
             <div className="flex flex-col items-center w-full text-white">
               {selectedSkin && (
                 <Image
-                  alt={selectedSkin}
+                  alt={SKIN_NAMES[selectedSkin as keyof typeof SKIN_NAMES] ||
+                    selectedSkin}
                   className="w-[200] h-[350]"
                   height={500}
                   src={`/images/skins/${selectedSkin}.webp`}
@@ -446,7 +448,10 @@ export default function MatchesPage() {
                 >
                   <ArrowLeftIcon size={20} />
                 </Button>
-                <span className="font-bold text-lg">{selectedSkin}</span>
+                <span className="font-bold text-lg">
+                  {SKIN_NAMES[selectedSkin as keyof typeof SKIN_NAMES] ||
+                    selectedSkin}
+                </span>
                 <Button
                   isDisabled={
                     skinIndex ===
