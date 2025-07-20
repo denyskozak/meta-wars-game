@@ -4,31 +4,19 @@
   "corruption": 35,
   "lifetap": 0,
   "fire-barrier": 60,
-  "fireblast": 39,
-  "shield": 80,
   "blink": 0,
-  "heal": 35,
-  "pyroblast": 66,
-  "chaosbolt": 70,
   "lightstrike": 20,
   "stun": 0,
   "paladin-heal": 50,
-  "lightwave": 0,
   "firering": 33,
-  "hand-of-freedom": 50,
   "divine-speed": 50,
   "lifedrain": 30,
-  "fear": 40,
   "blood-strike": 20,
   "eviscerate": 35,
   "kidney-strike": 40,
-  "adrenaline-rush": 0,
   "sprint": 20,
-  "shadow-leap": 25
-  ,"warbringer": 30
-  ,"savage-blow": 20
-  ,"hook": 40
-  ,"bladestorm": 30
-  ,"berserk": 30
-  ,"bloodthirst": 0
+  "warbringer": 30,
+  "savage-blow": 20,
+  "hook": 40,
+  "bladestorm": 30
 }

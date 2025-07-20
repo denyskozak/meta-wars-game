@@ -119,16 +119,6 @@ export default function MatchesPage() {
           name: "Bladestorm",
           description: "Spin to hit all nearby foes.",
         },
-        {
-          ...warriorSkills.berserk,
-          name: "Berserk",
-          description: "Increase attack power.",
-        },
-        {
-          ...warriorSkills.bloodthirst,
-          name: "Bloodthirst",
-          description: "Attack that heals you.",
-        },
       ],
     },
     paladin: {
@@ -151,16 +141,6 @@ export default function MatchesPage() {
           ...paladinSkills.paladinHeal,
           name: "Heal",
           description: "Restore health to an ally.",
-        },
-        {
-          ...paladinSkills.lightwave,
-          name: "Lightwave",
-          description: "Wave of holy light.",
-        },
-        {
-          ...paladinSkills.handOfFreedom,
-          name: "Hand of Freedom",
-          description: "Removes movement effects.",
         },
         {
           ...paladinSkills.divineSpeed,
@@ -191,19 +171,9 @@ export default function MatchesPage() {
           description: "Stuns the enemy from behind.",
         },
         {
-          ...rogueSkills.adrenalineRush,
-          name: "Adrenaline Rush",
-          description: "Greatly boosts attack speed.",
-        },
-        {
           ...rogueSkills.sprint,
           name: "Sprint",
           description: "Increase movement speed.",
-        },
-        {
-          ...rogueSkills.shadowLeap,
-          name: "Shadow Leap",
-          description: "Leap through shadows to target.",
         },
       ],
     },
@@ -229,19 +199,9 @@ export default function MatchesPage() {
           description: "Convert health into mana.",
         },
         {
-          ...warlockSkills.chaosbolt,
-          name: "Chaosbolt",
-          description: "Unleash chaotic energy.",
-        },
-        {
           ...warlockSkills.lifedrain,
           name: "Lifedrain",
           description: "Drain health from target.",
-        },
-        {
-          ...warlockSkills.fear,
-          name: "Fear",
-          description: "Terrifies the target.",
         },
       ],
     },
@@ -260,16 +220,6 @@ export default function MatchesPage() {
           ...mageSkills.fireBarrier,
           name: "Fire Barrier",
           description: "Absorbs incoming damage with flames.",
-        },
-        {
-          ...mageSkills.fireblast,
-          name: "Fireblast",
-          description: "Instant burst of flame.",
-        },
-        {
-          ...mageSkills.pyroblast,
-          name: "Pyroblast",
-          description: "Massive fireball.",
         },
         {
           ...mageSkills.firering,

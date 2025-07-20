@@ -37,14 +37,11 @@ const MANA_REGEN_AMOUNT = 1.3; // 30% faster mana regeneration
 const HP_REGEN_AMOUNT = 0.2;
 const SPELL_COST = require('../client/next-js/consts/spellCosts.json');
 const FIRE_RING_ICON = '/icons/frostnova.jpg';
-const FREEDOM_ICON = '/icons/classes/paladin/sealofvalor.jpg';
 const DIVINE_SPEED_ICON = '/icons/classes/paladin/speedoflight.jpg';
 const COMBO_ICON = '/icons/classes/rogue/combo_point.jpg';
 const ROGUE_SPRINT_ICON = '/icons/classes/rogue/sprint.jpg';
 const CLASS_STATS = require('../client/next-js/consts/classStats.json');
-const ADRENALINE_RUSH_ICON = '/icons/classes/rogue/adrenalinerush.jpg';
 const RAGE_ICON = '/icons/classes/warrior/rage.jpg';
-const BERSERK_ICON = '/icons/classes/warrior/berserk.jpg';
 
 // Simple in-memory storage for player profiles
 const profiles = {};
@@ -52,8 +49,6 @@ const profiles = {};
 const SPHERE_SPELLS = new Set([
     'fireball',
     'shadowbolt',
-    'chaosbolt',
-    'pyroblast',
 ]);
 const PROJECTILE_RADIUS = 0.35;
 const PROJECTILE_MAX_DISTANCE = 10;
@@ -1069,7 +1064,7 @@ ws.on('connection', (socket) => {
                         }
 
 
-                        if (['corruption', 'shield', 'fireblast', 'lightstrike', 'lightwave', 'stun', 'paladin-heal', 'firering', 'blink', 'hand-of-freedom', 'divine-speed', 'lifedrain', 'fear', 'blood-strike', 'eviscerate', 'kidney-strike', 'adrenaline-rush', 'sprint', 'shadow-leap', 'warbringer', 'savage-blow', 'hook', 'bladestorm', 'berserk', 'bloodthirst', 'fire-barrier'].includes(message.payload.type)) {
+                        if (['corruption', 'lightstrike', 'stun', 'paladin-heal', 'firering', 'blink', 'divine-speed', 'lifedrain', 'blood-strike', 'eviscerate', 'kidney-strike', 'sprint', 'warbringer', 'savage-blow', 'hook', 'bladestorm', 'fire-barrier'].includes(message.payload.type)) {
                             broadcastToMatch(match.id, {
                                 type: 'CAST_SPELL',
                                 payload: message.payload,
@@ -1107,14 +1102,6 @@ ws.on('connection', (socket) => {
                             }
                         }
 
-                        if (message.payload.type === 'hand-of-freedom') {
-                            player.debuffs = player.debuffs?.filter(d => d.type !== 'slow' && d.type !== 'root') || [];
-                            player.buffs.push({
-                                type: 'freedom',
-                                expires: Date.now() + 5000,
-                                icon: FREEDOM_ICON,
-                            });
-                        }
                         if (message.payload.type === 'divine-speed') {
                             player.buffs.push({
                                 type: 'speed',
@@ -1202,12 +1189,6 @@ ws.on('connection', (socket) => {
                             player.comboPoints = 0;
                             player.buffs = player.buffs.filter(b => b.type !== 'combo');
                         }
-                        if (message.payload.type === 'shadow-leap') {
-                            player.comboPoints = Math.min(5, (player.comboPoints || 0) + 1);
-                            const comboBuff = player.buffs.find(b => b.type === 'combo');
-                            if (comboBuff) comboBuff.stacks = player.comboPoints;
-                            else player.buffs.push({ type: 'combo', stacks: player.comboPoints, icon: COMBO_ICON });
-                        }
                         if (message.payload.type === 'kidney-strike' && message.payload.targetId) {
                             const target = match.players.get(message.payload.targetId);
                             if (target && withinMeleeRange(player, target)) {
@@ -1221,13 +1202,6 @@ ws.on('connection', (socket) => {
                                 player.comboPoints = 0;
                                 player.buffs = player.buffs.filter(b => b.type !== 'combo');
                             }
-                        }
-                        if (message.payload.type === 'adrenaline-rush') {
-                            player.buffs.push({
-                                type: 'speed',
-                                expires: Date.now() + 8000,
-                                icon: ADRENALINE_RUSH_ICON,
-                            });
                         }
                         if (message.payload.type === 'sprint') {
                             player.debuffs = player.debuffs?.filter(d => d.type !== 'slow' && d.type !== 'root') || [];
@@ -1252,28 +1226,6 @@ ws.on('connection', (socket) => {
                                 payload: message.payload,
                                 id
                             }))
-                        }
-                        if (message.payload.type === 'berserk') {
-                            player.debuffs = player.debuffs?.filter(d => d.type !== 'slow' && d.type !== 'root') || [];
-                            player.buffs.push({
-                                type: 'berserk',
-                                expires: Date.now() + 6000,
-                                icon: BERSERK_ICON,
-                            });
-                        }
-                        if (message.payload.type === 'fear' && message.payload.targetId) {
-                            const target = match.players.get(message.payload.targetId);
-                            if (target) {
-                                const immune = target.buffs?.some(b => (b.type === 'freedom' || b.type === 'berserk') && (b.expires === undefined || b.expires > Date.now()));
-                                if (!immune) {
-                                    target.debuffs = target.debuffs || [];
-                                    target.debuffs.push({
-                                        type: 'root',
-                                        expires: Date.now() + 3000,
-                                        icon: '/icons/classes/warlock/possession.jpg'
-                                    });
-                                }
-                            }
                         }
                             if (message.payload.type === 'lifedrain' && message.payload.targetId) {
                                 const target = match.players.get(message.payload.targetId);
