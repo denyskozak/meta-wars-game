@@ -38,7 +38,7 @@
     "cast": "cast",
     "dying": "fizz_death.anm",
     "hitReaction": "hit_reaction",
-    "attack": "fizz_attack1.anm",
+    "attack": "fizz_attack3.anm",
     "attack360": "attack_360",
     "dance": "fizz_dance.anm"
   },

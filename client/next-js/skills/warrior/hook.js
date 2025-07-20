@@ -4,7 +4,7 @@ import { SPELL_COST } from '../../consts';
 export const meta = {
   id: 'hook',
   key: 'F',
-  icon: assetUrl('/icons/classes/warrior/hook.jpg'),
+  icon: assetUrl('/icons/classes/warrior/hamstring.jpg'),
   autoFocus: false,
 };
 
