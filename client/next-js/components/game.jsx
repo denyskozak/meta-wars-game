@@ -17,17 +17,31 @@ import { Fire } from "../three/Fire";
 import { createFireballMaterial } from "../three/FireballMaterial";
 import * as SkeletonUtils from "three/examples/jsm/utils/SkeletonUtils";
 import Stats from "three/examples/jsm/libs/stats.module";
-import {Octree} from "three/examples/jsm/math/Octree";
-import {OctreeHelper} from "three/examples/jsm/helpers/OctreeHelper";
+import * as BufferGeometryUtils from 'three/examples/jsm/utils/BufferGeometryUtils.js';
+
 import {Capsule} from "three/examples/jsm/math/Capsule";
 import {CSS2DRenderer, CSS2DObject} from "three/examples/jsm/renderers/CSS2DRenderer";
 import {useCurrentAccount} from "@mysten/dapp-kit";
 import {useRouter} from "next/navigation";
-
+import {
+    MeshBVH,
+    MeshBVHHelper,
+    StaticGeometryGenerator,
+    acceleratedRaycast,
+    computeBoundsTree,
+    disposeBoundsTree,
+    CONTAINED,
+    INTERSECTED,
+    NOT_INTERSECTED,
+} from 'three-mesh-bvh';
 import {useCoins} from "../hooks/useCoins";
 import {useInterface} from "../context/inteface";
 import {useWS} from "../hooks/useWS";
 import {world} from "../worlds/main/data";
+
+THREE.Mesh.prototype.raycast = acceleratedRaycast;
+THREE.BufferGeometry.prototype.computeBoundsTree = computeBoundsTree;
+THREE.BufferGeometry.prototype.disposeBoundsTree = disposeBoundsTree;
 
 // spell implementations
 import castFireball, { meta as fireballMeta } from '../skills/mage/fireball';
@@ -923,7 +937,83 @@ export function Game({models, sounds, textures, matchId, character}) {
         //
         // }
 
-        const worldOctree = new Octree();
+        const worldOctree = {
+            bvh: null,
+            collider: null,
+            fromGraphNode(node) {
+                node.updateWorldMatrix(true, true);
+                const geometries = [];
+                node.traverse(child => {
+                    if (child.isMesh) {
+                        const geom = child.geometry.clone();
+                        geom.applyMatrix4(child.matrixWorld);
+                        geometries.push(geom);
+                    }
+                });
+                const merged = BufferGeometryUtils.mergeGeometries(geometries, false);
+                merged.computeBoundsTree();
+                this.bvh = merged.boundsTree;
+                this.collider = new THREE.Mesh(merged);
+                this.collider.visible = false;
+            },
+            rayIntersect(ray) {
+                if (!this.bvh) return false;
+                const hit = this.bvh.raycastFirst(ray);
+                if (hit) {
+                    return { distance: hit.distance, point: hit.point };
+                }
+                return false;
+            },
+            capsuleIntersect(capsule) {
+                if (!this.bvh) return false;
+                const start = capsule.start.clone();
+                const tempBox = new THREE.Box3();
+                const tempSegment = new THREE.Line3();
+                const tempVector = new THREE.Vector3();
+                const tempVector2 = new THREE.Vector3();
+
+                tempSegment.copy(capsule);
+                tempBox.makeEmpty();
+                tempBox.expandByPoint(tempSegment.start);
+                tempBox.expandByPoint(tempSegment.end);
+                tempBox.min.addScalar(-capsule.radius);
+                tempBox.max.addScalar(capsule.radius);
+
+                this.bvh.shapecast({
+                    intersectsBounds: box => (box.intersectsBox(tempBox) ? INTERSECTED : NOT_INTERSECTED),
+                    intersectsTriangle: tri => {
+                        const triPoint = tempVector;
+                        const capsulePoint = tempVector2;
+                        const dist = tri.closestPointToSegment(tempSegment, triPoint, capsulePoint);
+                        if (dist < capsule.radius) {
+                            const depth = capsule.radius - dist;
+                            const dir = capsulePoint.sub(triPoint).normalize();
+                            tempSegment.start.addScaledVector(dir, depth);
+                            tempSegment.end.addScaledVector(dir, depth);
+                        }
+                    },
+                });
+
+                const deltaVector = tempSegment.start.clone().sub(start);
+                const depth = deltaVector.length();
+                if (!depth) return false;
+                capsule.start.copy(tempSegment.start);
+                capsule.end.copy(tempSegment.end);
+                return { normal: deltaVector.normalize(), depth };
+            },
+            sphereIntersect(sphere) {
+                if (!this.bvh) return false;
+                const target = { point: new THREE.Vector3(), distance: Infinity };
+                const hit = this.bvh.closestPointToPoint(sphere.center, target);
+                if (hit && target.distance < sphere.radius) {
+                    const normal = sphere.center.clone().sub(target.point).normalize();
+                    const depth = sphere.radius - target.distance;
+                    sphere.center.addScaledVector(normal, depth);
+                    return { normal, depth };
+                }
+                return false;
+            },
+        };
 
         const playerCollider = new Capsule(
             new THREE.Vector3(0, 0.35, 10),
@@ -2613,7 +2703,7 @@ export function Game({models, sounds, textures, matchId, character}) {
             }
         });
 
-        const helper = new OctreeHelper(worldOctree);
+        const helper = new MeshBVHHelper(worldOctree.collider);
 
         helper.visible = false;
         scene.add(helper);
