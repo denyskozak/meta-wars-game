@@ -1,6 +1,4 @@
 export { meta as lightstrike } from './lightStrike';
 export { meta as stun } from './stun';
 export { meta as paladinHeal } from './heal';
-export { meta as lightwave } from './lightWave';
-export { meta as handOfFreedom } from './handFreedom';
 export { meta as divineSpeed } from './divineSpeed';

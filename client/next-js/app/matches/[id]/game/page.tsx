@@ -262,7 +262,6 @@ export default function GamePage() {
             sinisterStrike: new Audio(assetUrl("/sounds/sinister-strike.ogg")),
             mortalStrike: new Audio(assetUrl("/sounds/mortal-strike.ogg")),
             charge: new Audio(assetUrl("/sounds/charge.ogg")),
-            shadowLeap: new Audio(assetUrl("/sounds/shadowleap.ogg")),
             bladestorm: new Audio(assetUrl("/sounds/bladestorm.ogg")),
             levelUp: new Audio(assetUrl("/sounds/level-up.ogg")),
         };

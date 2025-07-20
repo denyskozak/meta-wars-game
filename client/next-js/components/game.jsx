@@ -46,34 +46,26 @@ THREE.BufferGeometry.prototype.disposeBoundsTree = disposeBoundsTree;
 // spell implementations
 import castFireball, { meta as fireballMeta } from '../skills/mage/fireball';
 import castFireBarrier, { meta as fireBarrierMeta } from '../skills/mage/fireBarrier';
-import castFireblast, { meta as fireblastMeta } from '../skills/mage/fireblast';
-import castPyroblast, { meta as pyroblastMeta } from '../skills/mage/pyroblast';
+
 import castFireRing, { meta as fireRingMeta } from '../skills/mage/fireRing';
 import castBlink, { meta as blinkMeta } from '../skills/mage/blink';
 import castShadowbolt, { meta as shadowboltMeta } from '../skills/warlock/shadowbolt';
 import castCorruption, { meta as corruptionMeta } from '../skills/warlock/corruption';
 import castLifeTap, { meta as lifeTapMeta } from '../skills/warlock/lifeTap';
-import castChaosBolt, { meta as chaosBoltMeta } from '../skills/warlock/chaosBolt';
 import castLifeDrain, { meta as lifeDrainMeta } from '../skills/warlock/lifeDrain';
-import castFear, { meta as fearMeta } from '../skills/warlock/fear';
 import { meta as lightStrikeMeta } from '../skills/paladin/lightStrike';
 import castStun, { meta as stunMeta } from '../skills/paladin/stun';
 import castPaladinHeal, { meta as paladinHealMeta } from '../skills/paladin/heal';
-import { meta as lightWaveMeta } from '../skills/paladin/lightWave';
-import castHandOfFreedom, { meta as handOfFreedomMeta } from '../skills/paladin/handFreedom';
+
 import castDivineSpeed, { meta as divineSpeedMeta } from '../skills/paladin/divineSpeed';
 import castBloodStrike, { meta as bloodStrikeMeta } from '../skills/rogue/bloodStrike';
 import castEviscerate, { meta as eviscerateMeta } from '../skills/rogue/eviscerate';
 import castKidneyStrike, { meta as kidneyStrikeMeta } from '../skills/rogue/kidneyStrike';
-import castAdrenalineRush, { meta as adrenalineRushMeta } from '../skills/rogue/adrenalineRush';
 import castSprint, { meta as sprintMeta } from '../skills/rogue/sprint';
-import castShadowLeap, { meta as shadowLeapMeta } from '../skills/rogue/shadowLeap';
 import castWarbringer, { meta as warbringerMeta } from '../skills/warrior/warbringer';
 import { meta as savageBlowMeta } from '../skills/warrior/savageBlow';
 import castHook, { meta as hookMeta } from '../skills/warrior/hook';
 import castBladestorm, { meta as bladestormMeta } from '../skills/warrior/bladestorm';
-import castBerserk, { meta as berserkMeta } from '../skills/warrior/berserk';
-import castBloodthirst, { meta as bloodthirstMeta } from '../skills/warrior/bloodthirst';
 
 
 import {Interface} from "@/components/layout/Interface";
@@ -87,32 +79,22 @@ import { MeshoptDecoder } from "three/examples/jsm/libs/meshopt_decoder.module.j
 const SPELL_ICONS = {
     [fireballMeta.id]: fireballMeta.icon,
     [fireBarrierMeta.id]: fireBarrierMeta.icon,
-    [fireblastMeta.id]: fireblastMeta.icon,
-    [pyroblastMeta.id]: pyroblastMeta.icon,
     [shadowboltMeta.id]: shadowboltMeta.icon,
     [corruptionMeta.id]: corruptionMeta.icon,
     [lifeTapMeta.id]: lifeTapMeta.icon,
-    [chaosBoltMeta.id]: chaosBoltMeta.icon,
     [lifeDrainMeta.id]: lifeDrainMeta.icon,
-    [fearMeta.id]: fearMeta.icon,
     [lightStrikeMeta.id]: lightStrikeMeta.icon,
     [stunMeta.id]: stunMeta.icon,
     [paladinHealMeta.id]: paladinHealMeta.icon,
-    [lightWaveMeta.id]: lightWaveMeta.icon,
-    [handOfFreedomMeta.id]: handOfFreedomMeta.icon,
     [divineSpeedMeta.id]: divineSpeedMeta.icon,
     [bloodStrikeMeta.id]: bloodStrikeMeta.icon,
     [eviscerateMeta.id]: eviscerateMeta.icon,
     [kidneyStrikeMeta.id]: kidneyStrikeMeta.icon,
-    [adrenalineRushMeta.id]: adrenalineRushMeta.icon,
     [sprintMeta.id]: sprintMeta.icon,
-    [shadowLeapMeta.id]: shadowLeapMeta.icon,
     [warbringerMeta.id]: warbringerMeta.icon,
     [savageBlowMeta.id]: savageBlowMeta.icon,
     [hookMeta.id]: hookMeta.icon,
     [bladestormMeta.id]: bladestormMeta.icon,
-    [berserkMeta.id]: berserkMeta.icon,
-    [bloodthirstMeta.id]: bloodthirstMeta.icon,
     [fireRingMeta.id]: fireRingMeta.icon,
     [blinkMeta.id]: blinkMeta.icon,
 };
@@ -120,32 +102,22 @@ const SPELL_ICONS = {
 const SPELL_META = {
     [fireballMeta.id]: fireballMeta,
     [fireBarrierMeta.id]: fireBarrierMeta,
-    [fireblastMeta.id]: fireblastMeta,
-    [pyroblastMeta.id]: pyroblastMeta,
     [shadowboltMeta.id]: shadowboltMeta,
     [corruptionMeta.id]: corruptionMeta,
     [lifeTapMeta.id]: lifeTapMeta,
-    [chaosBoltMeta.id]: chaosBoltMeta,
     [lifeDrainMeta.id]: lifeDrainMeta,
-    [fearMeta.id]: fearMeta,
     [lightStrikeMeta.id]: lightStrikeMeta,
     [stunMeta.id]: stunMeta,
     [paladinHealMeta.id]: paladinHealMeta,
-    [lightWaveMeta.id]: lightWaveMeta,
-    [handOfFreedomMeta.id]: handOfFreedomMeta,
     [divineSpeedMeta.id]: divineSpeedMeta,
     [bloodStrikeMeta.id]: bloodStrikeMeta,
     [eviscerateMeta.id]: eviscerateMeta,
     [kidneyStrikeMeta.id]: kidneyStrikeMeta,
-    [adrenalineRushMeta.id]: adrenalineRushMeta,
     [sprintMeta.id]: sprintMeta,
-    [shadowLeapMeta.id]: shadowLeapMeta,
     [warbringerMeta.id]: warbringerMeta,
     [savageBlowMeta.id]: savageBlowMeta,
     [hookMeta.id]: hookMeta,
     [bladestormMeta.id]: bladestormMeta,
-    [berserkMeta.id]: berserkMeta,
-    [bloodthirstMeta.id]: bloodthirstMeta,
     [fireRingMeta.id]: fireRingMeta,
     [blinkMeta.id]: blinkMeta,
 };
@@ -154,8 +126,6 @@ const SPELL_SCALES = {
     // fireball enlarged for better visuals
     fireball: 0.5,
     shadowbolt: 0.5,
-    pyroblast: 2,
-    chaosBolt: 2,
 };
 
 const USER_DEFAULT_POSITION = [
@@ -452,12 +422,10 @@ export function Game({models, sounds, textures, matchId, character}) {
         const activeDamageEffects = new Map(); // key = playerId -> effect mesh
         const activeImmolation = new Map(); // key = playerId -> effect mesh
         const activeStunEffects = new Map(); // key = playerId -> {group, timeout}
-        const activeFearEffects = new Map(); // key = playerId -> {group, timeout}
         const activeSlowEffects = new Map(); // key = playerId -> {mesh, timeout}
         const activeSprintTrails = new Map(); // key = playerId -> {mesh, start, duration, timeout}
         const activeBladestorms = new Map(); // key = playerId -> {start, duration, sound}
         const activeFireBarriers = new Map(); // key = playerId -> {mesh, start, duration}
-        const fearTexture = new THREE.TextureLoader().load(assetUrl('/icons/classes/warlock/possession.jpg'));
 
         const glowTexture = (() => {
             const size = 64;
@@ -676,10 +644,6 @@ export function Game({models, sounds, textures, matchId, character}) {
             SPELL_SCALES.fireball,
         );
 
-        const pyroblastMesh = makeProjectileSprite(
-            0xffaa33,
-            SPELL_SCALES.pyroblast,
-        );
 
         const darkballFragmentShader = fireballMaterial.fragmentShader.replace(
             'gl_FragColor = vec4(col, alpha);',
@@ -747,33 +711,22 @@ export function Game({models, sounds, textures, matchId, character}) {
             corruption: 10000,
             lifetap: 10000,
             'fire-barrier': 30000,
-            fireblast: 6000,
-            chaosbolt: 6000,
             lifedrain: 0,
-            fear: 45000,
             'ice-shield': 30000,
-            pyroblast: 15000,
             blink: 10000,
-            heal: 0,
             lightstrike: 2000,
             stun: 50000,
             'paladin-heal': 20000,
-            lightwave: 5000,
             firering: 15000,
-            'hand-of-freedom': 15000,
             'divine-speed': 20000,
             'blood-strike': 1000,
             eviscerate: 10000,
             'kidney-strike': 15000,
-            'adrenaline-rush': 45000,
             sprint: 20000,
-            'shadow-leap': 12000,
             'warbringer': 10000,
             'savage-blow': 0,
             'hook': 10000,
             'bladestorm': 40000,
-            'berserk': 45000,
-            'bloodthirst': 30000,
         };
         const skillCooldownTimers = {};
 
@@ -869,8 +822,7 @@ export function Game({models, sounds, textures, matchId, character}) {
         }
 
         preloadMesh(fireballMesh, 0xffaa33);
-        preloadMesh(pyroblastMesh, 0xffaa33);
-        preloadMesh(chaosBoltMesh, 0x8a2be2);
+        preloadMesh(shadowboltMesh, 0x8a2be2);
         preloadMesh(shadowboltMesh, 0x8a2be2);
 
         const stats = new Stats();
@@ -883,11 +835,8 @@ export function Game({models, sounds, textures, matchId, character}) {
 
 
         const FIREBLAST_RANGE = 20;
-        const FIREBLAST_DAMAGE = 33;
 
         const FIREBALL_DAMAGE = 44; // increased by 10%
-        const PYROBLAST_DAMAGE = FIREBALL_DAMAGE * 1.4;
-        const CHAOSBOLT_DAMAGE = FIREBALL_DAMAGE * 2;
         const DARKBALL_DAMAGE = 33; // increased by 10%
         const LIFEDRAIN_DAMAGE = 30;
         const FIRE_RING_DAMAGE = 20;
@@ -911,7 +860,7 @@ export function Game({models, sounds, textures, matchId, character}) {
         const MAX_SPHERE_IMPULSE = 4;
 
         // Maximum distance any sphere can travel
-        // Use the same range as fireblast for consistency
+        // Use FIREBLAST_RANGE for consistency
         const SPHERE_MAX_DISTANCE = FIREBLAST_RANGE / 2;
 
         // Tail effects removed for all sphere projectiles
@@ -1729,28 +1678,6 @@ export function Game({models, sounds, textures, matchId, character}) {
                         sounds,
                     });
                     break;
-                case "chaosbolt":
-                    castChaosBolt({
-                        playerId,
-                        castSpellImpl,
-                        igniteHands: darkHands,
-                        castSphere,
-                        chaosBoltMesh,
-                        sounds,
-                        damage: CHAOSBOLT_DAMAGE,
-                    });
-                    break;
-                case "fear":
-                    castFear({
-                        playerId,
-                        castSpellImpl,
-                        mana,
-                        getTargetPlayer,
-                        dispatch,
-                        sendToSocket,
-                        sounds,
-                    });
-                    break;
                 case "lifedrain":
                     castLifeDrain({
                         playerId,
@@ -1759,21 +1686,6 @@ export function Game({models, sounds, textures, matchId, character}) {
                         getTargetPlayer,
                         dispatch,
                         sendToSocket,
-                        sounds,
-                    });
-                    break;
-                case "fireblast":
-                    castFireblast({
-                        playerId,
-                        globalSkillCooldown,
-                        isCasting,
-                        mana,
-                        getTargetPlayer,
-                        dispatch,
-                        sendToSocket,
-                        activateGlobalCooldown,
-                        startSkillCooldown,
-                        FIREBLAST_DAMAGE,
                         sounds,
                     });
                     break;
@@ -1788,17 +1700,6 @@ export function Game({models, sounds, textures, matchId, character}) {
                         sounds,
                     });
                     spawnFireBarrier(playerId);
-                    break;
-                case "pyroblast":
-                    castPyroblast({
-                        playerId,
-                        castSpellImpl,
-                        igniteHands,
-                        castSphere,
-                        pyroblastMesh,
-                        sounds,
-                        damage: PYROBLAST_DAMAGE,
-                    });
                     break;
                 case "firering":
                     castFireRing({
@@ -1830,17 +1731,6 @@ export function Game({models, sounds, textures, matchId, character}) {
                         rotationY: players.get(playerId)?.model.rotation.y,
                     });
                     break;
-                case "chaosbolt":
-                    castChaosBolt({
-                        playerId,
-                        castSpellImpl,
-                        igniteHands: darkHands,
-                        castSphere,
-                        chaosBoltMesh,
-                        sounds,
-                        damage: CHAOSBOLT_DAMAGE,
-                    });
-                    break;
                 case "lightstrike":
                     performLightStrike();
                     break;
@@ -1858,19 +1748,6 @@ export function Game({models, sounds, textures, matchId, character}) {
                         sounds,
                     });
                     if (target) applyStunEffect(target, 3000);
-                    break;
-                case "hand-of-freedom":
-                    castHandOfFreedom({
-                        playerId,
-                        globalSkillCooldown,
-                        isCasting,
-                        mana,
-                        sendToSocket,
-                        activateGlobalCooldown,
-                        startSkillCooldown,
-                        sounds,
-                    });
-                    applyFreedomEffect(playerId, 5000);
                     break;
                 case "divine-speed":
                     castDivineSpeed({
@@ -1932,19 +1809,6 @@ export function Game({models, sounds, textures, matchId, character}) {
                     });
                     if (targetKidney) applyStunEffect(targetKidney, 2000);
                     break;
-                case "adrenaline-rush":
-                    castAdrenalineRush({
-                        globalSkillCooldown,
-                        isCasting,
-                        mana,
-                        sendToSocket,
-                        activateGlobalCooldown,
-                        startSkillCooldown,
-                        sounds,
-                    });
-                    applySpeedEffect(playerId, 8000);
-                    spawnSprintTrail(playerId, 8000);
-                    break;
                 case "sprint":
                     castSprint({
                         globalSkillCooldown,
@@ -1957,25 +1821,6 @@ export function Game({models, sounds, textures, matchId, character}) {
                     });
                     applySpeedEffect(playerId, 4000, 2);
                     spawnSprintTrail(playerId, 4000);
-                    break;
-                case "shadow-leap":
-                    castShadowLeap({
-                        playerId,
-                        globalSkillCooldown,
-                        isCasting,
-                        mana,
-                        getTargetPlayer,
-                        dispatch,
-                        sendToSocket,
-                        activateGlobalCooldown,
-                        startSkillCooldown,
-                        sounds,
-                        players,
-                        teleportTo,
-                        playerCollider,
-                        worldOctree,
-                        FIREBLAST_RANGE,
-                    });
                     break;
                 case "warbringer":
                     castWarbringer({
@@ -2019,34 +1864,6 @@ export function Game({models, sounds, textures, matchId, character}) {
                         startSkillCooldown,
                         sounds,
                     });
-                    break;
-                case "berserk":
-                    castBerserk({
-                        playerId,
-                        globalSkillCooldown,
-                        isCasting,
-                        mana,
-                        sendToSocket,
-                        activateGlobalCooldown,
-                        startSkillCooldown,
-                        igniteHands,
-                        sounds,
-                    });
-                    applySpeedEffect(playerId, 6000, 1.5);
-                    applyFreedomEffect(playerId, 6000);
-                    spawnSprintTrail(playerId, 6000);
-                    break;
-                case "bloodthirst":
-                    castBloodthirst({
-                        globalSkillCooldown,
-                        isCasting,
-                        sendToSocket,
-                        activateGlobalCooldown,
-                        startSkillCooldown,
-                    });
-                    break;
-                case "lightwave":
-                    performLightWave();
                     break;
             }
         }
@@ -2096,29 +1913,6 @@ export function Game({models, sounds, textures, matchId, character}) {
             activateGlobalCooldown();
             startSkillCooldown('lightstrike');
         }
-
-        function performLightWave() {
-            const playerData = players.get(myPlayerId);
-            if (!playerData) return;
-            const { mixer, actions } = playerData;
-
-            spawnLightWaveRing(myPlayerId);
-
-            controlAction({
-                action: actions['attack360'] || actions['attack'],
-                actionName: 'attack360',
-                mixer,
-                loop: THREE.LoopOnce,
-                fadeIn: 0.1,
-                reset: true,
-                clampWhenFinished: true,
-            });
-
-            sendToSocket({ type: 'CAST_SPELL', payload: { type: 'lightwave' } });
-            activateGlobalCooldown();
-            startSkillCooldown('lightwave');
-        }
-
 
         function performSavageBlow() {
             const playerData = players.get(myPlayerId);
@@ -2442,9 +2236,6 @@ export function Game({models, sounds, textures, matchId, character}) {
 
            for (let sphere of spheres) {
                 sphere.mesh?.position.copy(sphere.collider?.center); // TODO fix
-                if (sphere.type === 'pyroblast') {
-                    sphere.mesh.lookAt(camera.position);
-                }
                 sphere.mesh?.children.forEach(c => {
                     if (c.isSprite && c.material?.rotation !== undefined) {
                         c.material.rotation += deltaTime * 5;
@@ -3079,38 +2870,6 @@ export function Game({models, sounds, textures, matchId, character}) {
             activeStunEffects.set(playerId, { group, timeout });
         }
 
-        function applyFearEffect(playerId, duration = 3000) {
-            const existing = activeFearEffects.get(playerId);
-            if (existing) {
-                existing.group.parent?.remove(existing.group);
-                clearTimeout(existing.timeout);
-            }
-
-            const group = new THREE.Group();
-            const count = 3;
-            for (let i = 0; i < count; i++) {
-                const material = new THREE.SpriteMaterial({
-                    map: fearTexture,
-                    transparent: true,
-                    depthWrite: false,
-                    blending: THREE.AdditiveBlending,
-                });
-                const sprite = new THREE.Sprite(material);
-                sprite.scale.set(1, 1, 1);
-                const angle = (i / count) * Math.PI * 2;
-                sprite.position.set(Math.cos(angle) * 0.8, 0, Math.sin(angle) * 0.8);
-                group.add(sprite);
-            }
-
-            scene.add(group);
-
-            const timeout = setTimeout(() => {
-                group.parent?.remove(group);
-                activeFearEffects.delete(playerId);
-            }, duration);
-
-            activeFearEffects.set(playerId, { group, timeout });
-        }
 
         function spawnFireRing(playerId, duration = FIRE_RING_DURATION) {
             const player = players.get(playerId)?.model;
@@ -3511,13 +3270,6 @@ export function Game({models, sounds, textures, matchId, character}) {
                        obj.group.rotation.y += delta * STUN_SPIN_SPEED;
                    });
 
-                   activeFearEffects.forEach((obj, id) => {
-                       const target = players.get(id)?.model;
-                       if (!target) return;
-                       target.getWorldPosition(obj.group.position);
-                       obj.group.position.y += 2;
-                       obj.group.rotation.y += delta * FEAR_SPIN_SPEED;
-                   });
 
                     activeSlowEffects.forEach((obj, id) => {
                         const target = players.get(id)?.model;
@@ -3943,11 +3695,6 @@ export function Game({models, sounds, textures, matchId, character}) {
 
                 mesh = makeProjectileSprite(0x8a2be2, SPELL_SCALES.shadowbolt);
 
-            } else if (data.type === 'pyroblast') {
-                color = 0xffaa33;
-                mesh = pyroblastMesh.clone();
-            } else if (data.type === 'chaosbolt') {
-                mesh = makeProjectileSprite(0x8a2be2, SPELL_SCALES.chaosBolt);
             } else {
                 mesh = new THREE.Mesh(fireballGeometry, fireballMaterial.clone());
             }
@@ -4165,11 +3912,6 @@ export function Game({models, sounds, textures, matchId, character}) {
                         case "shield":
                             castShieldOtherUser(message.payload, message.id)
                             break;
-                        case "fireblast":
-                            if (message.payload.targetId === myPlayerId) {
-                                takeDamage(message.payload.damage, message.id, 'fireblast');
-                            }
-                            break;
                         case "corruption":
                             if (message.payload.targetId === myPlayerId) {
                                 dispatch({
@@ -4180,14 +3922,6 @@ export function Game({models, sounds, textures, matchId, character}) {
                             break;
                         case "lifetap":
                             break;
-                        case "fear":
-                            if (message.payload.targetId === myPlayerId) {
-                                applyRootEffect(myPlayerId, 3000);
-                            }
-                            if (message.payload.targetId) {
-                                applyFearEffect(message.payload.targetId, 3000);
-                            }
-                            break;
                         case "lifedrain":
                             if (message.payload.targetId === myPlayerId) {
                                 takeDamage(LIFEDRAIN_DAMAGE, message.id, 'lifedrain');
@@ -4196,14 +3930,6 @@ export function Game({models, sounds, textures, matchId, character}) {
                                 hp = Math.min(MAX_HP, hp + LIFEDRAIN_DAMAGE);
                                 updateHPBar();
                             }
-                            break;
-                        case "chaosbolt":
-                            igniteHands(message.id, 1000);
-                            castSphereOtherUser(message.payload);
-                            break;
-                        case "pyroblast":
-                            igniteHands(message.id, 1000);
-                            castSphereOtherUser(message.payload);
                             break;
                         case "firering":
                             spawnFireRing(message.id);
@@ -4225,11 +3951,6 @@ export function Game({models, sounds, textures, matchId, character}) {
                         case "paladin-heal":
                             if (message.id === myPlayerId) {
                                 dispatch({ type: "SEND_CHAT_MESSAGE", payload: "You are healed!" });
-                            }
-                            break;
-                        case "hand-of-freedom":
-                            if (message.id === myPlayerId) {
-                                applyFreedomEffect(myPlayerId, 5000);
                             }
                             break;
                         case "divine-speed":
@@ -4265,23 +3986,10 @@ export function Game({models, sounds, textures, matchId, character}) {
                                 }
                             }
                             break;
-                        case "adrenaline-rush":
-                            if (message.id === myPlayerId) {
-                                applySpeedEffect(myPlayerId, 8000);
-                                spawnSprintTrail(myPlayerId, 8000);
-                            }
-                            break;
                         case "sprint":
                             if (message.id === myPlayerId) {
                                 applySpeedEffect(myPlayerId, 4000, 2);
                                 spawnSprintTrail(myPlayerId, 4000);
-                            }
-                            break;
-                        case "shadow-leap":
-                            if (sounds.shadowLeap) {
-                                sounds.shadowLeap.currentTime = 0;
-                                sounds.shadowLeap.volume = 0.5;
-                                sounds.shadowLeap.play();
                             }
                             break;
                         case "stun":
@@ -4335,29 +4043,6 @@ export function Game({models, sounds, textures, matchId, character}) {
                             startBladestorm(message.id);
                             if (message.id === myPlayerId) {
                                 applyFreedomEffect(myPlayerId, 5000);
-                            }
-                            break;
-                        case "berserk":
-                            igniteHands(message.id, 1000);
-                            if (message.id === myPlayerId) {
-                                applySpeedEffect(myPlayerId, 6000, 1.5);
-                                applyFreedomEffect(myPlayerId, 6000);
-                                spawnSprintTrail(myPlayerId, 6000);
-                            }
-                            break;
-                        case "bloodthirst":
-                            break;
-                        case "lightwave":
-                            if (message.id !== myPlayerId) {
-                                const caster = players.get(message.id);
-                                if (caster) {
-                                    spawnLightWaveRing(message.id);
-                                    const myPos = players.get(myPlayerId)?.model.position.clone();
-                                    const casterPos = caster.model.position.clone();
-                                    if (myPos && casterPos && myPos.distanceTo(casterPos) < MELEE_RANGE_ATTACK) {
-                                        takeDamage(LIGHTWAVE_DAMAGE, message.id, 'lightwave');
-                                    }
-                                }
                             }
                             break;
                         case "lightstrike":
