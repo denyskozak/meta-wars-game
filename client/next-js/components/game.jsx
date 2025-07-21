@@ -909,40 +909,117 @@ export function Game({models, sounds, textures, matchId, character}) {
             },
             capsuleIntersect(capsule) {
                 if (!this.bvh) return false;
-                const start = capsule.start.clone();
-                const tempBox = new THREE.Box3();
-                const tempSegment = new THREE.Line3();
-                const tempVector = new THREE.Vector3();
-                const tempVector2 = new THREE.Vector3();
 
-                tempSegment.copy(capsule);
+                const EPS = 1e-10;
+                const tempBox = new THREE.Box3();
+                const triangles = [];
+                const tempCapsule = new Capsule().copy(capsule);
+                const plane = new THREE.Plane();
+                const line1 = new THREE.Line3();
+                const line2 = new THREE.Line3();
+                const point1 = new THREE.Vector3();
+                const point2 = new THREE.Vector3();
+                const v1 = new THREE.Vector3();
+                const v2 = new THREE.Vector3();
+                const v3 = new THREE.Vector3();
+
+                const lineToLineClosestPoints = (l1, l2, t1 = null, t2 = null) => {
+                    const r = v1.copy(l1.end).sub(l1.start);
+                    const s = v2.copy(l2.end).sub(l2.start);
+                    const w = v3.copy(l2.start).sub(l1.start);
+
+                    const a = r.dot(s),
+                        b = r.dot(r),
+                        c = s.dot(s),
+                        d = s.dot(w),
+                        e = r.dot(w);
+
+                    let p1, p2;
+                    const divisor = b * c - a * a;
+
+                    if (Math.abs(divisor) < EPS) {
+                        const d1 = -d / c;
+                        const d2 = (a - d) / c;
+                        if (Math.abs(d1 - 0.5) < Math.abs(d2 - 0.5)) {
+                            p1 = 0;
+                            p2 = d1;
+                        } else {
+                            p1 = 1;
+                            p2 = d2;
+                        }
+                    } else {
+                        p1 = (d * a + e * c) / divisor;
+                        p2 = (p1 * a - d) / c;
+                    }
+
+                    p2 = Math.max(0, Math.min(1, p2));
+                    p1 = Math.max(0, Math.min(1, p1));
+
+                    if (t1) t1.copy(r).multiplyScalar(p1).add(l1.start);
+                    if (t2) t2.copy(s).multiplyScalar(p2).add(l2.start);
+                };
+
+                const triangleCapsuleIntersect = (caps, tri) => {
+                    tri.getPlane(plane);
+
+                    const d1 = plane.distanceToPoint(caps.start) - caps.radius;
+                    const d2 = plane.distanceToPoint(caps.end) - caps.radius;
+
+                    if ((d1 > 0 && d2 > 0) || (d1 < -caps.radius && d2 < -caps.radius)) return false;
+
+                    const delta = Math.abs(d1 / (Math.abs(d1) + Math.abs(d2)));
+                    const intersectPoint = v1.copy(caps.start).lerp(caps.end, delta);
+
+                    if (tri.containsPoint(intersectPoint)) {
+                        return { normal: plane.normal.clone(), depth: Math.abs(Math.min(d1, d2)) };
+                    }
+
+                    const r2 = caps.radius * caps.radius;
+                    line1.set(caps.start, caps.end);
+                    const lines = [ [tri.a, tri.b], [tri.b, tri.c], [tri.c, tri.a] ];
+                    for (let i = 0; i < lines.length; i++) {
+                        line2.set(lines[i][0], lines[i][1]);
+                        lineToLineClosestPoints(line1, line2, point1, point2);
+                        if (point1.distanceToSquared(point2) < r2) {
+                            return {
+                                normal: point1.clone().sub(point2).normalize(),
+                                depth: caps.radius - point1.distanceTo(point2),
+                            };
+                        }
+                    }
+
+                    return false;
+                };
+
                 tempBox.makeEmpty();
-                tempBox.expandByPoint(tempSegment.start);
-                tempBox.expandByPoint(tempSegment.end);
-                tempBox.min.addScalar(-capsule.radius);
-                tempBox.max.addScalar(capsule.radius);
+                tempBox.expandByPoint(tempCapsule.start);
+                tempBox.expandByPoint(tempCapsule.end);
+                tempBox.min.addScalar(-tempCapsule.radius);
+                tempBox.max.addScalar(tempCapsule.radius);
 
                 this.bvh.shapecast({
                     intersectsBounds: box => (box.intersectsBox(tempBox) ? INTERSECTED : NOT_INTERSECTED),
                     intersectsTriangle: tri => {
-                        const triPoint = tempVector;
-                        const capsulePoint = tempVector2;
-                        const dist = tri.closestPointToSegment(tempSegment, triPoint, capsulePoint);
-                        if (dist < capsule.radius) {
-                            const depth = capsule.radius - dist;
-                            const dir = capsulePoint.sub(triPoint).normalize();
-                            tempSegment.start.addScaledVector(dir, depth);
-                            tempSegment.end.addScaledVector(dir, depth);
-                        }
+                        triangles.push(tri.clone());
                     },
                 });
 
-                const deltaVector = tempSegment.start.clone().sub(start);
-                const depth = deltaVector.length();
-                if (!depth) return false;
-                capsule.start.copy(tempSegment.start);
-                capsule.end.copy(tempSegment.end);
-                return { normal: deltaVector.normalize(), depth };
+                let hit = false;
+                for (let i = 0; i < triangles.length; i++) {
+                    const res = triangleCapsuleIntersect(tempCapsule, triangles[i]);
+                    if (res) {
+                        hit = true;
+                        tempCapsule.translate(res.normal.clone().multiplyScalar(res.depth));
+                    }
+                }
+
+                if (!hit) return false;
+
+                const collisionVector = tempCapsule.getCenter(new THREE.Vector3()).sub(capsule.getCenter(new THREE.Vector3()));
+                const depth = collisionVector.length();
+
+                capsule.copy(tempCapsule);
+                return { normal: collisionVector.normalize(), depth };
             },
             sphereIntersect(sphere) {
                 if (!this.bvh) return false;
