@@ -2069,23 +2069,31 @@ export function Game({models, sounds, textures, matchId, character}) {
             dispatchEvent('start-cast', { duration, onEnd: onCastEnd, icon: SPELL_META[spellType]?.icon, name: spellType });
         }
 
-        function playerCollisions() {
-            const result = worldOctree.capsuleIntersect(playerCollider);
+        function playerCollisions(delta) {
+            // Use a copy of the player collider so the BVH query can adjust it
+            // without immediately modifying the original capsule.
+            const tempCapsule = playerCollider.clone();
+            const result = worldOctree.capsuleIntersect(tempCapsule);
 
             playerOnFloor = false;
 
             if (result) {
-                playerOnFloor = result.normal.y > 0;
+                const deltaVector = result.normal.clone().multiplyScalar(result.depth);
+
+                // Determine if the player is on the ground based on the vertical
+                // component of the collision offset compared to the velocity.
+                playerOnFloor = deltaVector.y > Math.abs(delta * playerVelocity.y * 0.25);
+
+                const offset = Math.max(0.0, deltaVector.length() - 1e-5);
+                deltaVector.normalize().multiplyScalar(offset);
+
+                // Move the actual collider by the computed offset.
+                playerCollider.translate(deltaVector);
 
                 if (!playerOnFloor) {
-                    playerVelocity.addScaledVector(
-                        result.normal,
-                        -result.normal.dot(playerVelocity),
-                    );
-                }
-
-                if (result.depth >= 1e-10) {
-                    playerCollider.translate(result.normal.multiplyScalar(result.depth));
+                    playerVelocity.addScaledVector(deltaVector, -deltaVector.dot(playerVelocity));
+                } else {
+                    playerVelocity.set(0, 0, 0);
                 }
             }
         }
@@ -2106,7 +2114,7 @@ export function Game({models, sounds, textures, matchId, character}) {
 
             playerCollider.translate(deltaPosition);
 
-            playerCollisions();
+            playerCollisions(deltaTime);
             // camera.position.copy(playerCollider.end);
         }
 
